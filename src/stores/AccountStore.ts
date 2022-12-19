@@ -55,7 +55,8 @@ class AccountStore {
   };
 
   loginWithFuelWallet = async () => {
-    const res = await window.FuelWeb3?.connect();
+    const config = { url: process.env.REACT_APP_PUBLIC_PROVIDER_URL };
+    const res = await window.FuelWeb3?.connect(config);
     if (!res) {
       this.rootStore.notificationStore.notify("User denied", {
         type: "error",
