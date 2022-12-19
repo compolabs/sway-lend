@@ -1,0 +1,65 @@
+
+.wallet-dialog > .rc-dialog-mask {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.wallet-dialog .rc-dialog-wrap {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+
+.wallet-dialog .rc-dialog {
+    width: 100%;
+    height: 100%;
+}
+
+@media (min-width: 560px) {
+    .wallet-dialog .rc-dialog {
+        width: 368px;
+        height: 560px;
+    }
+}
+
+
+.wallet-dialog .rc-dialog-content {
+    border-radius: 0;
+    background: #7075E9;;
+    border: 0;
+    box-shadow: 0px 8px 56px rgba(54, 56, 112, 0.16);
+    overflow: hidden;
+    padding: 0;
+}
+
+@media (min-width: 560px) {
+    .wallet-dialog .rc-dialog-content {
+        border-radius: 16px;
+        width: 368px;
+        height: 560px;
+    }
+}
+
+.wallet-dialog .rc-dialog-header {
+    border-bottom: 1px solid #F1F2FE;
+    padding: 0;
+    max-height: 56px;
+}
+
+.wallet-dialog .rc-dialog-body {
+    padding: 0;
+}
+
+.wallet-dialog .rc-dialog-title {
+    font-family: Roboto, sans-serif;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 24px;
+    color: #363870;
+}
+
+
+.wallet-dialog .rc-dialog-close {
+    opacity: 1;
+}

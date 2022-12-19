@@ -1,26 +1,35 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import styled from "@emotion/styled";
+import { observer } from "mobx-react-lite";
+import { Column } from "@components/Flex";
+import Header from "@components/Header/Header";
+import WalletModal from "./components/Wallet/WalletModal";
+import { useStores } from "@stores";
+import { Routes, Route } from "react-router-dom";
+import { ROUTES } from "@src/constants";
+import Faucet from "@screens/Faucet";
 
-function App() {
+const Root = styled(Column)`
+  width: 100%;
+  align-items: center;
+  background: ${({ theme }) => theme.colors.primary50};
+  min-height: 100vh;
+`;
+const App: React.FC = () => {
+  const { settingsStore } = useStores();
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Root>
+      <Header />
+      <Routes>
+        {/* Landing */}
+        <Route path={ROUTES.FAUCET} element={<Faucet />} />
+      </Routes>
+      <WalletModal
+        onClose={() => settingsStore.setWalletModalOpened(false)}
+        visible={settingsStore.walletModalOpened}
+      />
+    </Root>
   );
-}
+};
 
-export default App;
+export default observer(App);
