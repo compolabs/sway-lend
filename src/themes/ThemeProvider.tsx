@@ -11,12 +11,16 @@ export enum THEME_TYPE {
   DARK_THEME = "darkTheme",
 }
 
+interface IProps {
+  children: React.ReactNode;
+}
+
 export const themes = {
   darkTheme,
   lightTheme,
 };
 //todo fix
-const ThemeWrapper: React.FC = ({ children }: any) => {
+const ThemeWrapper: React.FC<IProps> = ({ children }) => {
   const { settingsStore } = useStores();
   const selectedTheme = useObserver(() => settingsStore.selectedTheme);
   return (

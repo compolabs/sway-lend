@@ -7,7 +7,11 @@ import centerEllipsis from "@src/utils/centerEllipsis";
 
 const ctx = React.createContext<WalletVM | null>(null);
 
-export const WalletVMProvider: React.FC = ({ children }) => {
+interface WalletVMProps {
+  children: React.ReactNode;
+}
+
+export const WalletVMProvider: React.FC<WalletVMProps> = ({ children }) => {
   const rootStore = useStores();
   const store = useMemo(() => new WalletVM(rootStore), [rootStore]);
   return <ctx.Provider value={store}>{children}</ctx.Provider>;

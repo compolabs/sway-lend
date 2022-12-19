@@ -8,6 +8,7 @@ interface IProps {
   config?: Config;
   fixed?: boolean;
   containerStyles?: CSSProperties;
+  children: React.ReactNode;
 }
 
 const Root = styled.div<{ fixed?: boolean }>`

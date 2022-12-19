@@ -8,7 +8,11 @@ import { Wallet } from "fuels";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
-export const FaucetVMProvider: React.FC = ({ children }) => {
+interface IProps {
+  children: React.ReactNode;
+}
+
+export const FaucetVMProvider: React.FC<IProps> = ({ children }) => {
   const rootStore = useStores();
   const store = useMemo(() => new FaucetVM(rootStore), [rootStore]);
   return <ctx.Provider value={store}>{children}</ctx.Provider>;

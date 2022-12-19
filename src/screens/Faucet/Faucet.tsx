@@ -3,7 +3,7 @@ import React from "react";
 import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
 import { Observer } from "mobx-react-lite";
-import { FaucetVMProvider, useFaucetVM } from "@screens/Faucet/FaucetVm";
+import { FaucetVMProvider } from "@screens/Faucet/FaucetVm";
 import Layout from "@components/Layout";
 import Card from "@src/components/Card";
 import FaucetBtn from "@screens/Faucet/FaucetBtn";
@@ -47,7 +47,7 @@ const Subtitle = styled(Text)`
   }
 `;
 const FaucetImpl: React.FC<IProps> = () => {
-  const vm = useFaucetVM();
+  // const vm = useFaucetVM();
   const { accountStore } = useStores();
   // const { width } = useWindowSize();
   return (
@@ -77,7 +77,7 @@ const FaucetImpl: React.FC<IProps> = () => {
                 </>
               ) : (
                 <Subtitle size="medium" fitContent>
-                  Connect wallet To mint
+                  Connect wallet to mint
                 </Subtitle>
               )}
               <SizedBox height={16} />
