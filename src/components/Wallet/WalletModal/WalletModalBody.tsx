@@ -6,6 +6,7 @@ import Scrollbar from "@components/Scrollbar";
 import { useWalletVM } from "@components/Wallet/WalletModal/WalletVM";
 import SizedBox from "@components/SizedBox";
 import Tabs from "@components/Tabs";
+import AssetsBalances from "./AssetBalances";
 
 interface IProps {}
 
@@ -60,7 +61,7 @@ const WalletModalBody: React.FC<IProps> = () => {
       <Scrollbar onScrollY={handleScroll}>
         <ListWrapper headerExpanded={vm.headerExpanded}>
           <SizedBox height={8} />
-          Wallet body
+          {activeTab === 0 && <AssetsBalances />}
           <SizedBox height={64} width={1} />
         </ListWrapper>
       </Scrollbar>

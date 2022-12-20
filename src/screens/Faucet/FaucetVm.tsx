@@ -2,7 +2,9 @@ import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
-import { FuelWeb3Provider } from "@fuel-wallet/sdk";
+import { TokenContractAbi__factory } from "@src/contracts";
+import { TOKENS_BY_SYMBOL } from "@src/constants";
+import { Wallet } from "fuels";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -24,6 +26,12 @@ class FaucetVM {
   tokenContract: any | null = null;
   setTokenContract = (v: any | null) => (this.tokenContract = v);
 
+  loading: boolean = false;
+  private _setLoading = (l: boolean) => (this.loading = l);
+
+  error: string | null = null;
+  setError = (l: string | null) => (this.error = l);
+
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
 
@@ -31,28 +39,29 @@ class FaucetVM {
   }
 
   mint = async () => {
-    //todo add mint call
+    //todo add mint call and wallet auth
     const { address } = this.rootStore.accountStore;
     if (address == null || window.FuelWeb3 == null) return;
-    // const wallet = Wallet.fromPrivateKey(
-    //   "02037c54d7f1b4d316d7e7f303c6e964f218057a26b0a4bc2ada1bd1ff6240a2",
-    //   "https://node-beta-1.fuel.network/graphql"
-    // );
-    // const contract = TokenContractAbi__factory.connect(
-    //   TOKENS_BY_SYMBOL.USDT.assetId,
-    //   wallet
-    // );
-    // console.log(contract);
-    console.log("getProvider", window.FuelWeb3.getProvider());
-    console.log(
-      "getWallet",
-      window.FuelWeb3.getWallet(
-        "fuel1lw8hf2fvwmmwwlkn3z2q8854lwshud4dazp6487wn6jkmuz0jfwqce9v0j"
-      )
+    //todo add signing from account store
+    const usdt = TOKENS_BY_SYMBOL.USDT;
+    const wallet = Wallet.fromAddress(address, window.FuelWeb3?.getProvider());
+    const tokenContract = TokenContractAbi__factory.connect(
+      usdt.assetId,
+      wallet
     );
-    const provider = new FuelWeb3Provider(window.FuelWeb3);
-    console.log(provider);
-    // const wallet = Wallet.fromAddress(address, provider);
-    // console.log(wallet);
+
+    this._setLoading(true);
+    try {
+      const v = await tokenContract.functions
+        .mint()
+        .txParams({ gasPrice: 1 })
+        .call();
+      console.log(v);
+    } catch (e) {
+      console.log(e);
+      this.setError("Something went wrong");
+    } finally {
+      this._setLoading(false);
+    }
   };
 }

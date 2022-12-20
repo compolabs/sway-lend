@@ -2,14 +2,12 @@ import styled from "@emotion/styled";
 import React from "react";
 import { Column } from "@components/Flex";
 import Text from "@components/Text";
-// import Divider from "@components/Divider";
 import copy from "copy-to-clipboard";
 import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
 import { Anchor } from "@components/Anchor";
 import Divider from "../Divider";
-
-// import { EXPLORER_URL } from "@src/constants";
+import { EXPLORER_URL } from "@src/constants";
 
 interface IProps {
   address: string;
@@ -52,7 +50,10 @@ const WalletActionsTooltip: React.FC<IProps> = ({ address }) => {
       <Text onClick={handleCopyAddress} className="menu-item">
         Copy address
       </Text>
-      <Anchor style={{ padding: "10px 0" }}>
+      <Anchor
+        style={{ padding: "10px 0" }}
+        href={`${EXPLORER_URL}/address/${address}`}
+      >
         <Text>View in Explorer</Text>
       </Anchor>
       <Divider className="divider" />
