@@ -9,6 +9,6 @@
   Fuel-Core version: 0.14.0
 */
 
-export type { TokenContractAbi } from "./TokenContractAbi";
+export type { TokenContractAbi } from './TokenContractAbi';
 
-export { TokenContractAbi__factory } from "./factories/TokenContractAbi__factory";
+export { TokenContractAbi__factory } from './factories/TokenContractAbi__factory';

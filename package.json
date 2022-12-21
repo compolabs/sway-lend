@@ -1,8 +1,8 @@
 {
-  "name": "fuel-lend",
+  "name": "swaylend",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://swaylend.com",
+  "homepage": "https://app.swaylend.com",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@emotion/react": "^11.10.5",
