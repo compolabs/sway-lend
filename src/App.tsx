@@ -5,7 +5,7 @@ import { Column } from "@components/Flex";
 import Header from "@components/Header/Header";
 import WalletModal from "./components/Wallet/WalletModal";
 import { useStores } from "@stores";
-import { Routes, Route } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
 
