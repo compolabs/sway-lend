@@ -2,6 +2,7 @@
   "name": "fuel-lend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://swaylend.com",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@emotion/react": "^11.10.5",
@@ -84,7 +85,8 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [
@@ -159,5 +161,8 @@
     "presets": [
       "react-app"
     ]
+  },
+  "devDependencies": {
+    "gh-pages": "^4.0.0"
   }
 }
