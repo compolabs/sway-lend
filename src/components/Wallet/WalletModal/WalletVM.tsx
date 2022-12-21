@@ -53,11 +53,13 @@ class WalletVM {
     return balancesAmount.plus(BN.ZERO).toFormat(2);
   }
 
-  handleLogOut = async () => {
-    const { accountStore, settingsStore } = this.rootStore;
-    settingsStore.setLoginModalOpened(false);
-    accountStore.setAddress(null);
-  };
+  handleLogOut = async () =>
+    Promise.all([
+      this.rootStore.settingsStore.setWalletModalOpened(false),
+      this.rootStore.accountStore.setAssetBalances(null),
+      this.rootStore.accountStore.setAddress(null),
+      this.rootStore.accountStore.setLoginType(null),
+    ]);
 
   get signInInfo() {
     const { address } = this.rootStore.accountStore;
