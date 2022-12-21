@@ -74,7 +74,7 @@ const WalletModalHeader: React.FC<IProps> = () => {
           {vm.signInInfo}
         </Text>
         <Text fitContent size="large" style={whiteText}>
-          $&nbsp;100
+          $&nbsp;{vm.totalInvestmentAmount}
         </Text>
         <SizedBox height={16} />
         <Actions>

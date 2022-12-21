@@ -4,6 +4,7 @@ import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
 import copy from "copy-to-clipboard";
 import centerEllipsis from "@src/utils/centerEllipsis";
+import BN from "@src/utils/BN";
 
 const ctx = React.createContext<WalletVM | null>(null);
 
@@ -43,8 +44,20 @@ class WalletVM {
     }
   };
 
-  handleLogOut = async () =>
-    Promise.all([this.rootStore.accountStore.setAddress(null)]);
+  get totalInvestmentAmount() {
+    const { balances } = this.rootStore.accountStore;
+    const balancesAmount = balances.reduce(
+      (acc, b) => acc.plus(b.usdEquivalent ?? 0),
+      BN.ZERO
+    );
+    return balancesAmount.plus(BN.ZERO).toFormat(2);
+  }
+
+  handleLogOut = async () => {
+    const { accountStore, settingsStore } = this.rootStore;
+    settingsStore.setLoginModalOpened(false);
+    accountStore.setAddress(null);
+  };
 
   get signInInfo() {
     const { address } = this.rootStore.accountStore;

@@ -4,13 +4,12 @@ import Button from "@components/Button";
 import { observer } from "mobx-react-lite";
 import { useFaucetVM } from "@screens/Faucet/FaucetVm";
 
-// import Loading from "@components/Loading";
-
 interface IProps {}
 
 const FaucetBtn: React.FC<IProps> = () => {
   const { accountStore, settingsStore } = useStores();
   const vm = useFaucetVM();
+
   switch (true) {
     case accountStore.address == null:
       return (
@@ -20,12 +19,12 @@ const FaucetBtn: React.FC<IProps> = () => {
       );
     //todo add logic for not big mint
 
-    // case mint:
-    //   return (
-    //     <Button onClick={vm.mint} fixed>
-    //       Get 10 USDT
-    //     </Button>
-    //   );
+    case vm.loading:
+      return (
+        <Button disabled fixed>
+          Loading
+        </Button>
+      );
     default:
       return (
         <Button onClick={vm.mint} fixed>
