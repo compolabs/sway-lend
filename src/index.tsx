@@ -1,6 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import "./index.css";
+import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter as Router } from "react-router-dom";
 import "normalize.css";
@@ -24,7 +24,10 @@ autorun(
   { delay: 1000 }
 );
 
-ReactDOM.render(
+const root = ReactDOM.createRoot(
+  document.getElementById("root") as HTMLElement
+);
+root.render(
   <React.StrictMode>
     <storesContext.Provider value={mobxStore}>
       <ThemeWrapper>
@@ -34,6 +37,5 @@ ReactDOM.render(
         <GlobalStyles />
       </ThemeWrapper>
     </storesContext.Provider>
-  </React.StrictMode>,
-  document.getElementById("root")
+  </React.StrictMode>
 );

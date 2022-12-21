@@ -28,7 +28,7 @@ const FaucetBtn: React.FC<IProps> = () => {
     default:
       return (
         <Button onClick={vm.mint} fixed>
-          Get 10 USDT
+          Get 10 {vm.tokenForMint.symbol}
         </Button>
       );
   }

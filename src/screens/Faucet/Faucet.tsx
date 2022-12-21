@@ -3,12 +3,15 @@ import React from "react";
 import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
 import { Observer } from "mobx-react-lite";
-import { FaucetVMProvider } from "@screens/Faucet/FaucetVm";
+import { FaucetVMProvider, useFaucetVM } from "@screens/Faucet/FaucetVm";
 import Layout from "@components/Layout";
 import Card from "@src/components/Card";
 import FaucetBtn from "@screens/Faucet/FaucetBtn";
 import { useStores } from "@stores";
 import centerEllipsis from "@src/utils/centerEllipsis";
+import TokenInput from "@components/TokenInput/TokenInput";
+import { TOKENS_BY_ASSET_ID } from "@src/constants";
+import { Row } from "@src/components/Flex";
 
 interface IProps {}
 
@@ -47,9 +50,8 @@ const Subtitle = styled(Text)`
   }
 `;
 const FaucetImpl: React.FC<IProps> = () => {
-  // const vm = useFaucetVM();
+  const vm = useFaucetVM();
   const { accountStore } = useStores();
-  // const { width } = useWindowSize();
   return (
     <Layout>
       <Observer>
@@ -59,22 +61,29 @@ const FaucetImpl: React.FC<IProps> = () => {
               Faucet for Fuel Network
             </Text>
             <SizedBox height={4} />
-            <Subtitle size="medium" fitContent>
-              You can mint test USDT tokens here.
-            </Subtitle>
 
             <SizedBox height={24} />
             <Card>
+              <Subtitle fitContent>Choose token to be minted</Subtitle>
               {accountStore.address != null ? (
-                <>
+                <Row>
                   <SizedBox height={4} />
                   <Subtitle size="medium" fitContent>
-                    {`Address for tokens is ${centerEllipsis(
+                    {`Target address is ${centerEllipsis(
                       accountStore.address,
                       10
                     )}`}
+                    <SizedBox height={16} />
+                    <TokenInput
+                      setAssetId={(v) =>
+                        vm.setTokenForMint(TOKENS_BY_ASSET_ID[v])
+                      }
+                      decimals={vm.tokenForMint.decimals}
+                      assetId={vm.tokenForMint.assetId}
+                      balances={vm.tokensForMint ?? []}
+                    />
                   </Subtitle>
-                </>
+                </Row>
               ) : (
                 <Subtitle size="medium" fitContent>
                   Connect wallet to mint

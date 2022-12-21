@@ -9,6 +9,8 @@ import { ReactComponent as Disconnect } from "@src/assets/icons/disconnect.svg";
 import { observer } from "mobx-react-lite";
 import { useWalletVM } from "@components/Wallet/WalletModal/WalletVM";
 import { themes } from "@src/themes/ThemeProvider";
+import { EXPLORER_URL } from "@src/constants";
+import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -50,6 +52,7 @@ const Action = styled.div`
 
 const WalletModalHeader: React.FC<IProps> = () => {
   const vm = useWalletVM();
+  const { accountStore } = useStores();
   const action = [
     {
       icon: <Copy className="img" />,
@@ -59,6 +62,11 @@ const WalletModalHeader: React.FC<IProps> = () => {
     {
       icon: <Link className="img" />,
       text: "View on Explorer",
+      onClick: () =>
+        window.open(
+          `${EXPLORER_URL}/address/${accountStore.address}`,
+          "_blank"
+        ),
     },
     {
       icon: <Disconnect className="img" />,

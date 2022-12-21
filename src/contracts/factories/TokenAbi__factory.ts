@@ -4,17 +4,15 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.26.0
-  Forc version: 0.31.3
-  Fuel-Core version: 0.14.0
+  Fuels version: 0.27.0
+  Forc version: 0.32.2
+  Fuel-Core version: 0.15.1
 */
 
 import { Interface, Contract } from "fuels";
 import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
-import type {
-  TokenContractAbi,
-  TokenContractAbiInterface,
-} from "../TokenContractAbi";
+import { TokenAbi } from "@src/contracts";
+import { TokenAbiInterface } from "@src/contracts/TokenAbi";
 
 const _abi = {
   types: [
@@ -356,21 +354,15 @@ const _abi = {
   messagesTypes: [],
 };
 
-export class TokenContractAbi__factory {
+export class TokenAbi__factory {
   static readonly abi = _abi;
-
-  static createInterface(): TokenContractAbiInterface {
-    return new Interface(_abi) as unknown as TokenContractAbiInterface;
+  static createInterface(): TokenAbiInterface {
+    return new Interface(_abi) as unknown as TokenAbiInterface;
   }
-
   static connect(
     id: string | AbstractAddress,
     walletOrProvider: BaseWalletLocked | Provider
-  ): TokenContractAbi {
-    return new Contract(
-      id,
-      _abi,
-      walletOrProvider
-    ) as unknown as TokenContractAbi;
+  ): TokenAbi {
+    return new Contract(id, _abi, walletOrProvider) as unknown as TokenAbi;
   }
 }

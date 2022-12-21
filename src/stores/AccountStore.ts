@@ -52,7 +52,6 @@ class AccountStore {
     const provider = new Provider(NODE_URL);
     const address = Address.fromString(this.address);
     const balances = await provider.getBalances(address);
-
     const assetBalances = TOKENS_LIST.map((asset) => {
       const t = balances.find(({ assetId }) => asset.assetId === assetId);
       const balance = t != null ? new BN(t.amount.toString()) : BN.ZERO;

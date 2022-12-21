@@ -2,9 +2,10 @@ import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
-import { TokenContractAbi__factory } from "@src/contracts";
-import { TOKENS_BY_SYMBOL } from "@src/constants";
+import { TokenAbi__factory } from "@src/contracts";
+import { IToken, TOKENS_BY_SYMBOL, TOKENS_LIST } from "@src/constants";
 import { Wallet } from "fuels";
+import Balance from "@src/entities/Balance";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -23,8 +24,12 @@ export const useFaucetVM = () => useVM(ctx);
 class FaucetVM {
   public rootStore: RootStore;
 
+  //todo add type
   tokenContract: any | null = null;
   setTokenContract = (v: any | null) => (this.tokenContract = v);
+
+  tokenForMint: IToken = TOKENS_BY_SYMBOL.USDT;
+  setTokenForMint = (v: IToken) => (this.tokenForMint = v);
 
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
@@ -38,15 +43,20 @@ class FaucetVM {
     makeAutoObservable(this);
   }
 
+  get tokensForMint() {
+    return TOKENS_LIST.map((v) => new Balance({ ...v })).filter(
+      ({ symbol }) => symbol !== "ETH"
+    );
+  }
+
   mint = async () => {
     //todo add mint call and wallet auth
     const { address } = this.rootStore.accountStore;
     if (address == null || window.FuelWeb3 == null) return;
     //todo add signing from account store
-    const usdt = TOKENS_BY_SYMBOL.USDT;
     const wallet = Wallet.fromAddress(address, window.FuelWeb3?.getProvider());
-    const tokenContract = TokenContractAbi__factory.connect(
-      usdt.assetId,
+    const tokenContract = TokenAbi__factory.connect(
+      this.tokenForMint.assetId,
       wallet
     );
 
