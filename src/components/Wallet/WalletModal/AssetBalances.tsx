@@ -51,7 +51,17 @@ const AssetsBalances: React.FC<IProps> = () => {
             Buy ETH to start trading.
           </Text>
           <SizedBox height={16} />
-          <Button size="medium">Buy Eth</Button>
+          <Button
+            size="medium"
+            onClick={() =>
+              window.open(
+                `https://faucet-beta-2.fuel.network/?address=${accountStore.address}`,
+                "blank"
+              )
+            }
+          >
+            Buy Eth
+          </Button>
           <SizedBox height={100} />
         </Column>
       )}
