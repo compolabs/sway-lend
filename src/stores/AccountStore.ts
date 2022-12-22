@@ -60,7 +60,7 @@ class AccountStore {
 
       const usdEquivalent =
         BN.formatUnits(t.amount?.toString(), asset.decimals).times(
-          asset.usdRate ?? 0
+          asset.defaultPrice ?? 0
         ) ?? BN.ZERO;
       return new Balance({ balance, usdEquivalent, ...asset });
     });

@@ -6,8 +6,7 @@ import { Column, Row } from "@components/Flex";
 import MobileMenu from "@components/Header/MobileMenu";
 import SizedBox from "@components/SizedBox";
 import { observer } from "mobx-react-lite";
-import { useLocation } from "react-router-dom";
-import logo from "@src/assets/icons/logo.svg";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Anchor } from "@components/Anchor";
 import Tooltip from "@components/Tooltip";
 import DarkMode from "@components/Header/DarkMode";
@@ -15,6 +14,7 @@ import isRoutesEquals from "@src/utils/isRoutesEquals";
 import LinkGroup from "../LinkGroup";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
+import { useTheme } from "@emotion/react";
 
 interface IProps {}
 
@@ -108,6 +108,7 @@ const Header: React.FC<IProps> = () => {
     document.body.classList.toggle("noscroll", state);
     setMobileMenuOpened(state);
   };
+  const navigate = useNavigate();
 
   const menuItems = [{ name: "Faucet", link: ROUTES.FAUCET }];
 
@@ -115,6 +116,7 @@ const Header: React.FC<IProps> = () => {
     { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
     { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
   ];
+  const theme = useTheme();
   return (
     <Root>
       <Mobile>
@@ -126,17 +128,16 @@ const Header: React.FC<IProps> = () => {
 
       <TopMenu>
         <Row alignItems="center" crossAxisSize="max">
-          {/*<a href="https://puzzleswap.org">*/}
-          <img className="logo" src={logo} alt="logo" />
-          {/*</a>*/}
+          <a href="https://app.swaylend.com">
+            <img className="logo" src={theme.images.icons.logo} alt="logo" />
+          </a>
           <Desktop>
             <SizedBox width={54} />
             {menuItems.map(({ name, link }) => (
               <MenuItem
                 key={name}
                 selected={isRoutesEquals(link, location.pathname)}
-                href={link}
-                target={link !== "https://puzzlemarket.org/" ? "_self" : ""}
+                onClick={() => navigate(link)}
               >
                 {name}
               </MenuItem>

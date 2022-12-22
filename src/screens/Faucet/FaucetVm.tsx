@@ -3,9 +3,15 @@ import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { TokenAbi__factory } from "@src/contracts";
-import { IToken, TOKENS_BY_SYMBOL, TOKENS_LIST } from "@src/constants";
+import {
+  IToken,
+  TOKENS_BY_ASSET_ID,
+  TOKENS_BY_SYMBOL,
+  TOKENS_LIST,
+} from "@src/constants";
 import { Wallet } from "fuels";
 import Balance from "@src/entities/Balance";
+import BN from "@src/utils/BN";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -43,10 +49,20 @@ class FaucetVM {
     makeAutoObservable(this);
   }
 
-  get tokensForMint() {
-    return TOKENS_LIST.map((v) => new Balance({ ...v })).filter(
-      ({ symbol }) => symbol !== "ETH"
-    );
+  get faucetTokens() {
+    return TOKENS_LIST.map((v) => new Balance({ ...v }));
+  }
+  get faucetTokens1() {
+    return TOKENS_LIST.map((b) => {
+      const balance = this.rootStore.accountStore.findBalanceByAssetId(
+        b.assetId
+      );
+      const balanceDollar = BN.ZERO;
+      const mintAmount = BN.ZERO;
+      const mintAmountDollar = BN.ZERO;
+      const bal = new Balance({ ...b });
+      return { ...bal, balance, balanceDollar, mintAmount, mintAmountDollar };
+    });
   }
 
   mint = async () => {

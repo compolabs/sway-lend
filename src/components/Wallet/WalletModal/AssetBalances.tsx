@@ -9,6 +9,7 @@ import { ReactComponent as NotFoundIcon } from "@src/assets/notFound.svg";
 import styled from "@emotion/styled";
 import { useStores } from "@stores";
 import Skeleton from "react-loading-skeleton";
+import { FAUCET_URL } from "@src/constants";
 
 interface IProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -36,7 +37,9 @@ const AssetsBalances: React.FC<IProps> = () => {
               logo={b.logo}
               topLeftInfo={b.name}
               topRightInfo={b.formatBalance}
-              bottomLeftInfo={b.usdRate != null ? "$ " + b.usdRate : ""}
+              bottomLeftInfo={
+                b.defaultPrice != null ? "$ " + b.defaultPrice : ""
+              }
               bottomRightInfo={b.formatUsdnEquivalent}
             />
           );
@@ -55,7 +58,7 @@ const AssetsBalances: React.FC<IProps> = () => {
             size="medium"
             onClick={() =>
               window.open(
-                `https://faucet-beta-2.fuel.network/?address=${accountStore.address}`,
+                `${FAUCET_URL}/?address=${accountStore.address}`,
                 "blank"
               )
             }

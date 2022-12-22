@@ -21,9 +21,10 @@ export const TOKENS_BY_ASSET_ID: Record<string, IToken> = TOKENS_LIST.reduce(
 
 export const NODE_URL = "https://node-beta-2.fuel.network/graphql";
 export const EXPLORER_URL = "https://fuellabs.github.io/block-explorer-v2";
+export const FAUCET_URL = "https://faucet-beta-2.fuel.network";
 
 export interface IToken {
-  usdRate?: number;
+  defaultPrice?: number;
   assetId: string;
   name: string;
   symbol: string;

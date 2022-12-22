@@ -2,7 +2,7 @@ import React from "react";
 import Dialog from "@components/Dialog";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import LoginType from "./LoginType";
-import fuel from "@src/assets/icons/logo.svg";
+import fuel from "@src/assets/icons/fuelLogo.svg";
 import { observer } from "mobx-react-lite";
 
 interface IProps {

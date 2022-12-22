@@ -4,6 +4,8 @@ import bnb from "@src/assets/tokens/BNB.svg";
 import btc from "@src/assets/tokens/bitcoin.svg";
 import busd from "@src/assets/tokens/BUSD.svg";
 import usdc from "@src/assets/tokens/usdc.svg";
+import uni from "@src/assets/tokens/uni.svg";
+import chainlink from "@src/assets/tokens/chainlink.svg";
 import unknown from "@src/assets/notFound.svg";
 
 const tokenLogos: Record<string, string> = {
@@ -13,6 +15,8 @@ const tokenLogos: Record<string, string> = {
   BTC: btc,
   BUSD: busd,
   USDC: usdc,
+  UNI: uni,
+  LINK: chainlink,
   UNKNOWN: unknown,
 };
 

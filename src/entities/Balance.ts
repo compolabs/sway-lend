@@ -15,7 +15,7 @@ class Balance implements IAssetBalance {
   public readonly decimals: number;
   private readonly _logo?: string;
   public readonly balance?: BN;
-  public readonly usdRate?: number;
+  public readonly defaultPrice?: number;
   public readonly usdEquivalent?: BN;
 
   constructor(props: IAssetBalance) {
@@ -25,7 +25,7 @@ class Balance implements IAssetBalance {
     this.decimals = props.decimals;
     this._logo = props.logo;
     this.balance = props.balance;
-    this.usdRate = props.usdRate;
+    this.defaultPrice = props.defaultPrice;
     this.usdEquivalent = props.usdEquivalent;
   }
 
