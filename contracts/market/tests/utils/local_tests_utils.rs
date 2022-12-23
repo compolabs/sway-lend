@@ -13,14 +13,18 @@ abigen!(
 pub mod market_abi_calls {
     use super::*;
 
-    pub async fn initialize(contract: &MarketContract, config: MarketConfiguration) -> Result<CallResponse<()>, Error> {
+    pub async fn initialize(
+        contract: &MarketContract,
+        config: MarketConfiguration,
+    ) -> Result<CallResponse<()>, Error> {
         contract.methods().initialize(config).call().await
     }
 
-    pub async fn configuration(contract: &MarketContract) -> MarketConfiguration {
-        contract.methods().configuration().call().await.unwrap().value
+    pub async fn configuration(
+        contract: &MarketContract,
+    ) -> Result<CallResponse<MarketConfiguration>, Error> {
+        contract.methods().configuration().simulate().await
     }
-
 }
 
 // pub mod oracle_abi_calls {
@@ -78,18 +82,18 @@ pub async fn init_wallet() -> WalletUnlocked {
     wallets.pop().unwrap()
 }
 
-// pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleContract {
-//     let id = Contract::deploy(
-//         "./out/debug/oracle.bin",
-//         &wallet,
-//         TxParameters::default(),
-//         StorageConfiguration::default(),
-//     )
-//     .await
-//     .unwrap();
+pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleContract {
+    let id = Contract::deploy(
+        "./tests/artefacts/oracle/oracle.bin",
+        &wallet,
+        TxParameters::default(),
+        StorageConfiguration::default(),
+    )
+    .await
+    .unwrap();
 
-//     OracleContract::new(id, wallet.clone())
-// }
+    OracleContract::new(id, wallet.clone())
+}
 
 pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketContract {
     let id = Contract::deploy(
