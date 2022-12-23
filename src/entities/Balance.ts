@@ -1,6 +1,5 @@
 import { IToken } from "@src/constants";
 import BN from "@src/utils/BN";
-import tokenLogos from "@src/constants/tokenLogos";
 
 export interface IAssetBalance extends Omit<IToken, "logo"> {
   balance?: BN;
@@ -13,7 +12,7 @@ class Balance implements IAssetBalance {
   public readonly name: string;
   public readonly symbol: string;
   public readonly decimals: number;
-  private readonly _logo?: string;
+  public readonly logo?: string;
   public readonly balance?: BN;
   public readonly defaultPrice?: number;
   public readonly usdEquivalent?: BN;
@@ -23,15 +22,15 @@ class Balance implements IAssetBalance {
     this.assetId = props.assetId;
     this.symbol = props.symbol;
     this.decimals = props.decimals;
-    this._logo = props.logo;
+    this.logo = props.logo;
     this.balance = props.balance;
     this.defaultPrice = props.defaultPrice;
     this.usdEquivalent = props.usdEquivalent;
   }
 
-  get logo() {
-    return this._logo ?? tokenLogos[this.symbol] ?? tokenLogos.UNKNOWN;
-  }
+  // get logo() {
+  //   return this._logo ?? tokenLogos[this.symbol] ?? tokenLogos.UNKNOWN;
+  // }
 
   get formatBalance() {
     if (this.balance == null) return "—";

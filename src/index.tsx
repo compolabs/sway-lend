@@ -9,6 +9,7 @@ import { loadState, saveState } from "@src/utils/localStorage";
 import { autorun } from "mobx";
 import "rc-notification/assets/index.css";
 import "react-perfect-scrollbar/dist/css/styles.css";
+import "react-loading-skeleton/dist/skeleton.css";
 import "rc-dialog/assets/index.css";
 import ThemeWrapper from "./themes/ThemeProvider";
 import GlobalStyles from "@src/themes/GlobalStyles";

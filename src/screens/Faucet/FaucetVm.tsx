@@ -3,14 +3,8 @@ import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { TokenAbi__factory } from "@src/contracts";
-import {
-  IToken,
-  TOKENS_BY_ASSET_ID,
-  TOKENS_BY_SYMBOL,
-  TOKENS_LIST,
-} from "@src/constants";
+import { IToken, TOKENS_BY_SYMBOL, TOKENS_LIST } from "@src/constants";
 import { Wallet } from "fuels";
-import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
 
 const ctx = React.createContext<FaucetVM | null>(null);
@@ -26,6 +20,17 @@ export const FaucetVMProvider: React.FC<IProps> = ({ children }) => {
 };
 
 export const useFaucetVM = () => useVM(ctx);
+
+const faucetAmounts: Record<string, number> = {
+  ETH: 0.5,
+  LINK: 1000,
+  UNI: 1000,
+  BNB: 5,
+  BTC: 1,
+  BUSD: 100,
+  USDC: 100,
+  UST: 100,
+};
 
 class FaucetVM {
   public rootStore: RootStore;
@@ -45,38 +50,42 @@ class FaucetVM {
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-
     makeAutoObservable(this);
   }
 
   get faucetTokens() {
-    return TOKENS_LIST.map((v) => new Balance({ ...v }));
-  }
-  get faucetTokens1() {
+    if (this.rootStore.accountStore.assetBalances == null) return [];
     return TOKENS_LIST.map((b) => {
       const balance = this.rootStore.accountStore.findBalanceByAssetId(
         b.assetId
       );
-      const balanceDollar = BN.ZERO;
-      const mintAmount = BN.ZERO;
-      const mintAmountDollar = BN.ZERO;
-      const bal = new Balance({ ...b });
-      return { ...bal, balance, balanceDollar, mintAmount, mintAmountDollar };
+      const mintAmount = new BN(faucetAmounts[b.symbol] ?? 0);
+      const mintAmountDollar = mintAmount.times(balance?.defaultPrice ?? 0);
+      const formatBalance = BN.formatUnits(
+        balance?.balance ?? BN.ZERO,
+        b.decimals
+      );
+      const balanceDollar = formatBalance.times(balance?.defaultPrice ?? 0);
+      return {
+        ...balance,
+        formatBalance,
+        balanceDollar,
+        mintAmount,
+        mintAmountDollar,
+      };
     });
   }
 
-  mint = async () => {
+  mint = async (assetId?: string) => {
     //todo add mint call and wallet auth
+    if (assetId == null) return;
+    this._setLoading(true);
     const { address } = this.rootStore.accountStore;
     if (address == null || window.FuelWeb3 == null) return;
     //todo add signing from account store
     const wallet = Wallet.fromAddress(address, window.FuelWeb3?.getProvider());
-    const tokenContract = TokenAbi__factory.connect(
-      this.tokenForMint.assetId,
-      wallet
-    );
+    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
-    this._setLoading(true);
     try {
       const v = await tokenContract.functions
         .mint()
