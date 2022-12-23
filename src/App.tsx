@@ -5,9 +5,10 @@ import { Column } from "@components/Flex";
 import Header from "@components/Header/Header";
 import WalletModal from "./components/Wallet/WalletModal";
 import { useStores } from "@stores";
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
+import Market from "./screens/Market";
 
 const Root = styled(Column)`
   width: 100%;
@@ -22,7 +23,9 @@ const App: React.FC = () => {
       <Header />
       <Routes>
         {/* Landing */}
+        <Route path={ROUTES.ROOT} element={<Market />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
+        <Route path="*" element={<Navigate to={ROUTES.ROOT} />} />
       </Routes>
       <WalletModal
         onClose={() => settingsStore.setWalletModalOpened(false)}

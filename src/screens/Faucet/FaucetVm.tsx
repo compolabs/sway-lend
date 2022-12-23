@@ -3,9 +3,15 @@ import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { TokenAbi__factory } from "@src/contracts";
-import { IToken, TOKENS_BY_SYMBOL, TOKENS_LIST } from "@src/constants";
+import {
+  IToken,
+  TOKENS_BY_ASSET_ID,
+  TOKENS_BY_SYMBOL,
+  TOKENS_LIST,
+} from "@src/constants";
 import { Wallet } from "fuels";
 import BN from "@src/utils/BN";
+import tokenLogos from "@src/constants/tokenLogos";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -67,6 +73,7 @@ class FaucetVM {
       );
       const balanceDollar = formatBalance.times(balance?.defaultPrice ?? 0);
       return {
+        ...TOKENS_BY_ASSET_ID[b.assetId],
         ...balance,
         formatBalance,
         balanceDollar,

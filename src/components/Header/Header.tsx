@@ -59,6 +59,7 @@ const TopMenu = styled.header`
 `;
 
 const MenuItem = styled(Anchor)<{ selected?: boolean }>`
+  cursor: pointer;
   display: flex;
   align-items: center;
   font-weight: 500;
@@ -110,7 +111,10 @@ const Header: React.FC<IProps> = () => {
   };
   const navigate = useNavigate();
 
-  const menuItems = [{ name: "Faucet", link: ROUTES.FAUCET }];
+  const menuItems = [
+    { name: "Market", link: ROUTES.ROOT },
+    { name: "Faucet", link: ROUTES.FAUCET },
+  ];
 
   const communityMenu = [
     { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
