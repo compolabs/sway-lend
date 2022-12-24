@@ -1,6 +1,6 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
-import { Provider, Address } from "fuels";
+import { Address, Provider } from "fuels";
 import { NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
@@ -24,9 +24,6 @@ class AccountStore {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
     }
-    // this.setAddress(
-    //   "fuel10m84z5x0qnzjtkmlpj37gplw2n2wp65cypg45758cp5s6vv5cvysqy5v9l"
-    // );
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
@@ -102,18 +99,11 @@ class AccountStore {
     }
   };
   disconnect = async () => {
-    switch (this.loginType) {
-      case LOGIN_TYPE.FUEL_WALLET:
-        await window.FuelWeb3?.disconnect();
-        break;
-      default:
-        return;
-    }
     this.setAddress(null);
   };
 
   loginWithFuelWallet = async () => {
-    const config = { url: process.env.REACT_APP_PUBLIC_PROVIDER_URL };
+    const config = { url: NODE_URL };
     const res = await window.FuelWeb3?.connect(config);
     if (!res) {
       this.rootStore.notificationStore.notify("User denied", {
@@ -126,6 +116,13 @@ class AccountStore {
       this.setAddress(accounts[0]);
     }
   };
+
+  // generateSeed = () => {
+  //   const mn = Mnemonic.generate();
+  //   const seed = Mnemonic.mnemonicToSeed(mn);
+  //   console.log(seed);
+  //   this.setSeed(seed);
+  // };
 }
 
 export default AccountStore;

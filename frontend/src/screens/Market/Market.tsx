@@ -1,18 +1,10 @@
 import styled from "@emotion/styled";
-import React, { useMemo, useState } from "react";
+import React from "react";
 import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
 import { Observer } from "mobx-react-lite";
-import { MarketVMProvider, useMarketVM } from "@screens/Market/MarketVm";
+import { MarketVMProvider } from "@screens/Market/MarketVm";
 import Layout from "@components/Layout";
-import Scrollbar from "@components/Scrollbar";
-import Table from "@components/Table";
-import { Column, Row } from "@src/components/Flex";
-import SquareTokenIcon from "@components/SquareTokenIcon";
-import Button from "@components/Button";
-import BN from "@src/utils/BN";
-import { useStores } from "@stores";
-import { FAUCET_URL } from "@src/constants";
 
 interface IProps {}
 
@@ -47,10 +39,6 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
 `;
 
 const MarketImpl: React.FC<IProps> = () => {
-  const vm = useMarketVM();
-  const { accountStore } = useStores();
-  const [tokens, setTokens] = useState<any>([]);
-
   return (
     <Layout>
       <Observer>
@@ -60,10 +48,6 @@ const MarketImpl: React.FC<IProps> = () => {
               Market for Fuel Network
             </Text>
             <SizedBox height={16} />
-
-            <Scrollbar
-              style={{ maxWidth: "calc(100vw - 32px)", borderRadius: 16 }}
-            ></Scrollbar>
           </Root>
         )}
       </Observer>

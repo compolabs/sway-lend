@@ -32,31 +32,40 @@ export type ErrorOutput = ErrorInput;
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
+export type ConfigInput = {
+  name: string;
+  symbol: string;
+  decimals: BigNumberish;
+};
+export type ConfigOutput = { name: string; symbol: string; decimals: number };
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 
 interface TokenAbiInterface extends Interface {
   functions: {
+    already_minted: FunctionFragment;
     burn_coins: FunctionFragment;
-    decimals: FunctionFragment;
+    config: FunctionFragment;
     get_balance: FunctionFragment;
     get_mint_amount: FunctionFragment;
     get_token_balance: FunctionFragment;
     initialize: FunctionFragment;
     mint: FunctionFragment;
     mint_coins: FunctionFragment;
-    name: FunctionFragment;
     set_mint_amount: FunctionFragment;
-    symbol: FunctionFragment;
     transfer_coins: FunctionFragment;
     transfer_token_to_output: FunctionFragment;
   };
 
   encodeFunctionData(
+    functionFragment: "already_minted",
+    values: [AddressInput]
+  ): Uint8Array;
+  encodeFunctionData(
     functionFragment: "burn_coins",
     values: [BigNumberish]
   ): Uint8Array;
-  encodeFunctionData(functionFragment: "decimals", values: []): Uint8Array;
+  encodeFunctionData(functionFragment: "config", values: []): Uint8Array;
   encodeFunctionData(functionFragment: "get_balance", values: []): Uint8Array;
   encodeFunctionData(
     functionFragment: "get_mint_amount",
@@ -68,19 +77,17 @@ interface TokenAbiInterface extends Interface {
   ): Uint8Array;
   encodeFunctionData(
     functionFragment: "initialize",
-    values: [BigNumberish, AddressInput]
+    values: [ConfigInput, BigNumberish, AddressInput]
   ): Uint8Array;
   encodeFunctionData(functionFragment: "mint", values: []): Uint8Array;
   encodeFunctionData(
     functionFragment: "mint_coins",
     values: [BigNumberish]
   ): Uint8Array;
-  encodeFunctionData(functionFragment: "name", values: []): Uint8Array;
   encodeFunctionData(
     functionFragment: "set_mint_amount",
     values: [BigNumberish]
   ): Uint8Array;
-  encodeFunctionData(functionFragment: "symbol", values: []): Uint8Array;
   encodeFunctionData(
     functionFragment: "transfer_coins",
     values: [BigNumberish, AddressInput]
@@ -91,13 +98,14 @@ interface TokenAbiInterface extends Interface {
   ): Uint8Array;
 
   decodeFunctionData(
-    functionFragment: "burn_coins",
+    functionFragment: "already_minted",
     data: BytesLike
   ): DecodedValue;
   decodeFunctionData(
-    functionFragment: "decimals",
+    functionFragment: "burn_coins",
     data: BytesLike
   ): DecodedValue;
+  decodeFunctionData(functionFragment: "config", data: BytesLike): DecodedValue;
   decodeFunctionData(
     functionFragment: "get_balance",
     data: BytesLike
@@ -119,12 +127,10 @@ interface TokenAbiInterface extends Interface {
     functionFragment: "mint_coins",
     data: BytesLike
   ): DecodedValue;
-  decodeFunctionData(functionFragment: "name", data: BytesLike): DecodedValue;
   decodeFunctionData(
     functionFragment: "set_mint_amount",
     data: BytesLike
   ): DecodedValue;
-  decodeFunctionData(functionFragment: "symbol", data: BytesLike): DecodedValue;
   decodeFunctionData(
     functionFragment: "transfer_coins",
     data: BytesLike
@@ -138,20 +144,19 @@ interface TokenAbiInterface extends Interface {
 export class TokenAbi extends Contract {
   interface: TokenAbiInterface;
   functions: {
+    already_minted: InvokeFunction<[address: AddressInput], boolean>;
     burn_coins: InvokeFunction<[burn_amount: BigNumberish], void>;
-    decimals: InvokeFunction<[], number>;
+    config: InvokeFunction<[], ConfigOutput>;
     get_balance: InvokeFunction<[], BN>;
     get_mint_amount: InvokeFunction<[], BN>;
     get_token_balance: InvokeFunction<[asset_id: ContractIdInput], BN>;
     initialize: InvokeFunction<
-      [mint_amount: BigNumberish, owner: AddressInput],
+      [config: ConfigInput, mint_amount: BigNumberish, owner: AddressInput],
       void
     >;
     mint: InvokeFunction<[], void>;
     mint_coins: InvokeFunction<[mint_amount: BigNumberish], void>;
-    name: InvokeFunction<[], string>;
     set_mint_amount: InvokeFunction<[mint_amount: BigNumberish], void>;
-    symbol: InvokeFunction<[], string>;
     transfer_coins: InvokeFunction<
       [coins: BigNumberish, address: AddressInput],
       void

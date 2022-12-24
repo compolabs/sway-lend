@@ -16,7 +16,7 @@ import Loading from "@components/Loading";
 interface IProps {}
 
 const TokensFaucetTable: React.FC<IProps> = () => {
-  const { accountStore } = useStores();
+  const { accountStore, settingsStore } = useStores();
   const vm = useFaucetVM();
   const [tokens, setTokens] = useState<any>([]);
   useMemo(() => {
@@ -61,28 +61,46 @@ const TokensFaucetTable: React.FC<IProps> = () => {
             </Text>
           </Column>
         ),
-        btn: (
-          <Button
-            fixed
-            size="medium"
-            disabled={vm.loading}
-            onClick={() => {
-              if (t.symbol === "ETH") {
-                window.open(
-                  `${FAUCET_URL}/?address=${accountStore.address}`,
-                  "blank"
-                );
-              } else {
-                vm.mint(t.assetId);
-              }
-            }}
-          >
-            {vm.loading ? <Loading /> : "Mint"}
-          </Button>
-        ),
+        btn: (() => {
+          if (accountStore.address == null)
+            return (
+              <Button
+                size="medium"
+                fixed
+                onClick={() => settingsStore.setLoginModalOpened(true)}
+              >
+                Connect wallet
+              </Button>
+            );
+          if (vm.alreadyMintedTokens.includes(t.assetId))
+            return (
+              <Button fixed size="medium" disabled>
+                Already minted
+              </Button>
+            );
+          return (
+            <Button
+              fixed
+              size="medium"
+              disabled={vm.loading}
+              onClick={() => {
+                if (t.symbol === "ETH") {
+                  window.open(
+                    `${FAUCET_URL}/?address=${accountStore.address}`,
+                    "blank"
+                  );
+                } else {
+                  vm.mint(t.assetId);
+                }
+              }}
+            >
+              {vm.loading ? <Loading /> : "Mint"}
+            </Button>
+          );
+        })(),
       }))
     );
-  }, []);
+  }, [accountStore.address, settingsStore, vm.loading, vm.alreadyMintedTokens]);
   const columns = React.useMemo(
     () => [
       {

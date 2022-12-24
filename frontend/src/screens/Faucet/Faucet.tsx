@@ -7,6 +7,7 @@ import { FaucetVMProvider, useFaucetVM } from "@screens/Faucet/FaucetVm";
 import Layout from "@components/Layout";
 import TokensFaucetTable from "@screens/Faucet/TokensFaucetTable";
 import Skeleton from "react-loading-skeleton";
+import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -42,6 +43,7 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
 
 const FaucetImpl: React.FC<IProps> = () => {
   const vm = useFaucetVM();
+  const { accountStore } = useStores();
   return (
     <Layout>
       <Observer>
@@ -51,6 +53,13 @@ const FaucetImpl: React.FC<IProps> = () => {
               <Text weight={500} size="large">
                 Faucet for Fuel Network
               </Text>
+              {accountStore.address == null && (
+                <>
+                  <SizedBox height={8} />
+                  <Text>Connect wallet to mint tokens</Text>
+                  <SizedBox height={8} />
+                </>
+              )}
               <SizedBox height={16} />
               {vm.faucetTokens.length === 0 ? (
                 <Skeleton height={70} style={{ margin: 4 }} count={5} />

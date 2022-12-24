@@ -11,8 +11,7 @@
 
 import { Interface, Contract } from "fuels";
 import type { Provider, BaseWalletLocked, AbstractAddress } from "fuels";
-import { TokenAbi } from "@src/contracts";
-import { TokenAbiInterface } from "@src/contracts/TokenAbi";
+import type { TokenAbi, TokenAbiInterface } from "../TokenAbi";
 
 const _abi = {
   types: [
@@ -30,6 +29,12 @@ const _abi = {
     },
     {
       typeId: 2,
+      type: "bool",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 3,
       type: "enum Error",
       components: [
         {
@@ -56,19 +61,19 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 3,
-      type: "str[4]",
-      components: null,
-      typeParameters: null,
-    },
-    {
       typeId: 4,
-      type: "str[9]",
+      type: "str[32]",
       components: null,
       typeParameters: null,
     },
     {
       typeId: 5,
+      type: "str[8]",
+      components: null,
+      typeParameters: null,
+    },
+    {
+      typeId: 6,
       type: "struct Address",
       components: [
         {
@@ -80,7 +85,29 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 6,
+      typeId: 7,
+      type: "struct Config",
+      components: [
+        {
+          name: "name",
+          type: 4,
+          typeArguments: null,
+        },
+        {
+          name: "symbol",
+          type: 5,
+          typeArguments: null,
+        },
+        {
+          name: "decimals",
+          type: 10,
+          typeArguments: null,
+        },
+      ],
+      typeParameters: null,
+    },
+    {
+      typeId: 8,
       type: "struct ContractId",
       components: [
         {
@@ -92,13 +119,13 @@ const _abi = {
       typeParameters: null,
     },
     {
-      typeId: 7,
+      typeId: 9,
       type: "u64",
       components: null,
       typeParameters: null,
     },
     {
-      typeId: 8,
+      typeId: 10,
       type: "u8",
       components: null,
       typeParameters: null,
@@ -108,8 +135,23 @@ const _abi = {
     {
       inputs: [
         {
+          name: "address",
+          type: 6,
+          typeArguments: null,
+        },
+      ],
+      name: "already_minted",
+      output: {
+        name: "",
+        type: 2,
+        typeArguments: null,
+      },
+    },
+    {
+      inputs: [
+        {
           name: "burn_amount",
-          type: 7,
+          type: 9,
           typeArguments: null,
         },
       ],
@@ -122,10 +164,10 @@ const _abi = {
     },
     {
       inputs: [],
-      name: "decimals",
+      name: "config",
       output: {
         name: "",
-        type: 8,
+        type: 7,
         typeArguments: null,
       },
     },
@@ -134,7 +176,7 @@ const _abi = {
       name: "get_balance",
       output: {
         name: "",
-        type: 7,
+        type: 9,
         typeArguments: null,
       },
     },
@@ -143,7 +185,7 @@ const _abi = {
       name: "get_mint_amount",
       output: {
         name: "",
-        type: 7,
+        type: 9,
         typeArguments: null,
       },
     },
@@ -151,27 +193,32 @@ const _abi = {
       inputs: [
         {
           name: "asset_id",
-          type: 6,
+          type: 8,
           typeArguments: null,
         },
       ],
       name: "get_token_balance",
       output: {
         name: "",
-        type: 7,
+        type: 9,
         typeArguments: null,
       },
     },
     {
       inputs: [
         {
-          name: "mint_amount",
+          name: "config",
           type: 7,
           typeArguments: null,
         },
         {
+          name: "mint_amount",
+          type: 9,
+          typeArguments: null,
+        },
+        {
           name: "owner",
-          type: 5,
+          type: 6,
           typeArguments: null,
         },
       ],
@@ -195,7 +242,7 @@ const _abi = {
       inputs: [
         {
           name: "mint_amount",
-          type: 7,
+          type: 9,
           typeArguments: null,
         },
       ],
@@ -207,19 +254,10 @@ const _abi = {
       },
     },
     {
-      inputs: [],
-      name: "name",
-      output: {
-        name: "",
-        type: 4,
-        typeArguments: null,
-      },
-    },
-    {
       inputs: [
         {
           name: "mint_amount",
-          type: 7,
+          type: 9,
           typeArguments: null,
         },
       ],
@@ -231,24 +269,15 @@ const _abi = {
       },
     },
     {
-      inputs: [],
-      name: "symbol",
-      output: {
-        name: "",
-        type: 3,
-        typeArguments: null,
-      },
-    },
-    {
       inputs: [
         {
           name: "coins",
-          type: 7,
+          type: 9,
           typeArguments: null,
         },
         {
           name: "address",
-          type: 5,
+          type: 6,
           typeArguments: null,
         },
       ],
@@ -263,17 +292,17 @@ const _abi = {
       inputs: [
         {
           name: "coins",
-          type: 7,
+          type: 9,
           typeArguments: null,
         },
         {
           name: "asset_id",
-          type: 6,
+          type: 8,
           typeArguments: null,
         },
         {
           name: "address",
-          type: 5,
+          type: 6,
           typeArguments: null,
         },
       ],
@@ -290,7 +319,7 @@ const _abi = {
       logId: 0,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -298,7 +327,7 @@ const _abi = {
       logId: 1,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -306,7 +335,7 @@ const _abi = {
       logId: 2,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -314,7 +343,7 @@ const _abi = {
       logId: 3,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -322,7 +351,7 @@ const _abi = {
       logId: 4,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -330,7 +359,7 @@ const _abi = {
       logId: 5,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -338,7 +367,7 @@ const _abi = {
       logId: 6,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -346,7 +375,7 @@ const _abi = {
       logId: 7,
       loggedType: {
         name: "",
-        type: 2,
+        type: 3,
         typeArguments: [],
       },
     },
@@ -356,9 +385,11 @@ const _abi = {
 
 export class TokenAbi__factory {
   static readonly abi = _abi;
+
   static createInterface(): TokenAbiInterface {
     return new Interface(_abi) as unknown as TokenAbiInterface;
   }
+
   static connect(
     id: string | AbstractAddress,
     walletOrProvider: BaseWalletLocked | Provider
