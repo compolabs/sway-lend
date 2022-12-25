@@ -1,13 +1,13 @@
 use std::str::FromStr;
 
-use crate::utils::local_tests_utils::*;
+use crate::utils::local_tests_utils::{marketcontract_mod::AssetConfig, *};
 use fuels::{
     prelude::BASE_ASSET_ID,
     tx::{Address, ContractId},
 };
 
 #[tokio::test]
-async fn initialize() {
+async fn pause() {
     //--------------- WALLET ---------------
     let wallet = init_wallet().await;
     let address = Address::from(wallet.address());
@@ -72,13 +72,13 @@ async fn initialize() {
         borrow_per_second_interest_rate_slope_high: 800000000000000000, // decimals: 18
         borrow_per_second_interest_rate_base: 15854895992,              // decimals: 18
         store_front_price_factor: 6000,                                 // decimals: 4
-        base_tracking_supply_speed: 1868287030000000, // decimals 18
-        base_tracking_borrow_speed: 3736574060000000, // decimals 18
+        base_tracking_supply_speed: 1868287030000000,                   // decimals 18
+        base_tracking_borrow_speed: 3736574060000000,                   // decimals 18
         base_min_for_rewards: 20000000, // decimals base_token_decimals
         base_borrow_min: 10000000,      // decimals: base_token_decimals
         target_reserves: 1000000000000, // decimals: base_token_decimals
         asset_configs: vec![
-            crate::local_tests::initialize::marketcontract_mod::AssetConfig {
+            AssetConfig {
                 asset: ContractId::from(link_instance.get_contract_id()),
                 price_feed: ContractId::from(oracle_instance.get_contract_id()),
                 decimals: link_config.decimals,
@@ -87,7 +87,7 @@ async fn initialize() {
                 liquidation_penalty: 700,          // decimals: 4
                 supply_cap: 200000000000000,       // decimals: asset decimals
             },
-            crate::local_tests::initialize::marketcontract_mod::AssetConfig {
+            AssetConfig {
                 asset: ContractId::from(uni_instance.get_contract_id()),
                 price_feed: ContractId::from(oracle_instance.get_contract_id()),
                 decimals: uni_config.decimals,
@@ -96,7 +96,7 @@ async fn initialize() {
                 liquidation_penalty: 700,          // decimals: 4
                 supply_cap: 200000000000000,       // decimals: asset decimals
             },
-            crate::local_tests::initialize::marketcontract_mod::AssetConfig {
+            AssetConfig {
                 asset: ContractId::from(btc_instance.get_contract_id()),
                 price_feed: ContractId::from(oracle_instance.get_contract_id()),
                 decimals: btc_config.decimals,
@@ -105,7 +105,7 @@ async fn initialize() {
                 liquidation_penalty: 500,          // decimals: 4
                 supply_cap: 1000000000000,         // decimals: asset decimals
             },
-            crate::local_tests::initialize::marketcontract_mod::AssetConfig {
+            AssetConfig {
                 asset: ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
                     .expect("Cannot parse BASE_ASSET_ID to contract id"),
                 price_feed: ContractId::from(oracle_instance.get_contract_id()),
@@ -122,12 +122,31 @@ async fn initialize() {
         .await
         .expect("❌ Cannot initialize market");
 
-    //FIXME: not implemented: Cannot decode Vectors until we get support from the compiler.        
-    // let _res = market_abi_calls::get_configuration(&market_instance)
-    //     .await
-    //     .expect("❌ Cannot read configuration")
-    //     .value;
-    // println!("Market config:\n{:#?}", _res);
+    market_abi_calls::supply(&market_instance)
+        .await
+        .expect("❌ Cannot supply");
 
+    let pause_config = PauseConfiguration {
+        supply_paused: true,
+    };
+    market_abi_calls::pause(&market_instance, pause_config)
+        .await
+        .expect("❌ Cannot pause market");
 
+    assert_eq!(
+        market_abi_calls::supply(&market_instance).await.is_err(),
+        true
+    );
+
+    let pause_config = PauseConfiguration {
+        supply_paused: false,
+    };
+    market_abi_calls::pause(&market_instance, pause_config)
+        .await
+        .expect("❌ Cannot pause market");
+
+    assert_eq!(
+        market_abi_calls::supply(&market_instance).await.is_err(),
+        false
+    );
 }

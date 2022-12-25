@@ -20,11 +20,19 @@ pub mod market_abi_calls {
         contract.methods().initialize(config).call().await
     }
 
-    pub async fn configuration(
-        contract: &MarketContract,
-    ) -> Result<CallResponse<MarketConfiguration>, Error> {
-        contract.methods().configuration().simulate().await
+    pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<CallResponse<()>, Error> {
+        contract.methods().pause(config).call().await
     }
+
+    pub async fn supply(contract: &MarketContract) -> Result<CallResponse<()>, Error> {
+        contract.methods().supply().call().await
+    }
+
+    // pub async fn get_configuration(
+    //     contract: &MarketContract,
+    // ) -> Result<CallResponse<MarketConfiguration>, Error> {
+    //     contract.methods().get_configuration().simulate().await
+    // }
 }
 
 // pub mod oracle_abi_calls {

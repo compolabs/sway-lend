@@ -39,3 +39,11 @@ pub struct AssetConfig {
     liquidation_penalty: u64, // decimals: 4
     supply_cap: u64, // decimals: asset decimals
 }
+
+pub struct PauseConfiguration{
+    supply_paused: bool, 
+    // transfer_paused: bool, 
+    // withdraw_paused: bool, 
+    // absorb_paused: bool, 
+    // buy_pause: bool,
+}
