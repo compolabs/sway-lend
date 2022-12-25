@@ -1,4 +1,4 @@
-// TODO:Add License Identifier
+// SPDX-License-Identifier: BUSL-1.1
 contract;
 /*   
 ███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
@@ -10,11 +10,11 @@ contract;
 */
 
 
-/**TODO: Add description like that
+/**
  *
- * @title Compound's Comet Contract
+ * @title Swaylend's Market Contract
  * @notice An efficient monolithic money market protocol
- * @author Sway gang
+ * @author SWAY GANG
  */
 dep constants;
 dep market_configuration;

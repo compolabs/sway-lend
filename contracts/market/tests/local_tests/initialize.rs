@@ -72,6 +72,9 @@ async fn initialize() {
         borrow_per_second_interest_rate_slope_high: 800000000000000000, // decimals: 18
         borrow_per_second_interest_rate_base: 15854895992,              // decimals: 18
         store_front_price_factor: 6000,                                 // decimals: 4
+        base_tracking_supply_speed: 1868287030000000, // decimals 18
+        base_tracking_borrow_speed: 3736574060000000, // decimals 18
+        base_min_for_rewards: 20000000, // decimals base_token_decimals
         base_borrow_min: 10000000,      // decimals: base_token_decimals
         target_reserves: 1000000000000, // decimals: base_token_decimals
         asset_configs: vec![
