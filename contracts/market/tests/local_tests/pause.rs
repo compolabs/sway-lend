@@ -7,6 +7,22 @@ use fuels::{
 };
 
 #[tokio::test]
+async fn test() {
+    let wallet = init_wallet().await;
+    let address = Address::from(wallet.address());
+
+    let usdc_config = DeployTokenConfig {
+        name: String::from("USD Coin"),
+        symbol: String::from("USDC"),
+        decimals: 6,
+        mint_amount: 10000,
+    };
+    let usdc_instance = get_token_contract_instance(&wallet, &usdc_config).await;
+    let contract_id = ContractId::from(usdc_instance.get_contract_id());
+    println!("Address {}", address);
+    println!("ContractId {}", contract_id);
+}
+#[tokio::test]
 async fn pause() {
     //--------------- WALLET ---------------
     let wallet = init_wallet().await;
@@ -70,7 +86,7 @@ async fn pause() {
         supply_per_second_interest_rate_slope_high: 750000000000000000, // decimals: 18
         borrow_per_second_interest_rate_slope_low: 300000000000000000,  // decimals: 18
         borrow_per_second_interest_rate_slope_high: 800000000000000000, // decimals: 18
-        borrow_per_second_interest_rate_base: 15854895992,              // decimals: 18
+        interest_rate_base_per_second: 15854895992,              // decimals: 18
         store_front_price_factor: 6000,                                 // decimals: 4
         base_tracking_supply_speed: 1868287030000000,                   // decimals 18
         base_tracking_borrow_speed: 3736574060000000,                   // decimals 18

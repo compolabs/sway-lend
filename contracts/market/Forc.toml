@@ -3,5 +3,3 @@ authors = ["Alexey"]
 entry = "main.sw"
 license = "Apache-2.0"
 name = "market"
-
-[dependencies]
