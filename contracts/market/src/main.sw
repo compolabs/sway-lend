@@ -25,7 +25,6 @@ use std::{
         balance_of,
         msg_amount,
     },
-    contract_id::ContractId,
     hash::sha256,
     revert::require,
     storage::*,
@@ -118,22 +117,19 @@ fn supply_internal(caller: Address, asset: ContractId, amount: u64) {
 
 const BASE_INDEX_SCALE: u64 = 1000000000000000000; //1e18
 const FACTOR_SCALE: u64 = 1000000000000000000; // 1e18
-// -> base_asset_decimal
+
 pub fn present_value_supply(base_supply_index: u64, principal_value: u64) -> u64 {
     principal_value * base_supply_index / BASE_INDEX_SCALE
 }
 
-// -> base_asset_decimal
 pub fn present_value_borrow(base_borrow_index: u64, principal_value: u64) -> u64 {
     principal_value * base_borrow_index / BASE_INDEX_SCALE
 }
 
-// -> base_asset_decimal
 pub fn principal_value_supply(base_supply_index: u64, present_value: u64) -> u64 {
     present_value * BASE_INDEX_SCALE / base_supply_index
 }
 
-// TODO: че за -1 бля?
 pub fn principal_value_borrow(base_borrow_index: u64, present_value: u64) -> u64 {
     (present_value * BASE_INDEX_SCALE + base_borrow_index - 1) / base_borrow_index
 }
@@ -190,10 +186,22 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) {
     return (base_supply_index, base_borrow_index);
 }
 
+//FIXME: after compiler internal error will be fixed
 #[storage(read)]
-fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
-    let caller = abi(Oracle, price_feed.value);
-    caller.get_price(asset).price
+fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
+    // let caller = abi(Oracle, price_feed.value);
+    // caller.get_price(asset).price
+      match (asset) {
+       ContractId{value:0x6cd466e67547102656267a5f6005113e48d1f53a6846e6819c841a7f3eadafe9} => 250,
+       ContractId{value:0x851ec5e04fa3485ba0794b34030bbcd70e96be282cd429da03c58e8de4d46c00} => 19000,
+       ContractId{value:0xfcdcc57a0c59be38eecab975ddd03c3cd2cb1852957b622d5613d60ec8f4f2c2} => 1,
+       ContractId{value:0xe09c4c702e6a8237dd07f29228c136cc076b79cb9d0e1f891d39c54dc95069ac} => 1,
+       ContractId{value:0x7d4b2c57d0c8715be35224b29357ba2444e40f6cd1d9227a96e8d8f4a8f44ba4} => 1,
+       ContractId{value:0xcc28b139c7664ac9cddc2c01c00559fbbebd6fa8a879db341adf3a4aafdaa137} => 5,
+       ContractId{value:0x579cd9e73d2471fd0ce20156e06e34c09cdf2fd655c993af8d236185305461ee} => 5,
+       ContractId{value:0x0000000000000000000000000000000000000000000000000000000000000000} => 1200,
+        _ => revert(0),
+    }
 }
 
 #[storage(read)]
