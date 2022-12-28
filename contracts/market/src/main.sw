@@ -192,7 +192,8 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) {
 
 #[storage(read)]
 fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
-    abi(Oracle, price_feed.value).get_price(asset).price
+    let caller = abi(Oracle, price_feed.value);
+    caller.get_price(asset).price
 }
 
 #[storage(read)]
