@@ -20,26 +20,8 @@ use std::{
     result::Result,
     revert::require,
 };
+use oracle_abi::*;
 
-abi Oracle {
-    #[storage(read)]
-    fn owner() -> Identity;
-
-    #[storage(read, write)]
-    fn initialize(owner: Address);
-
-    #[storage(read, write)]
-    fn set_price(asset_id: ContractId, price_value: u64);
-
-    #[storage(read)]
-    fn get_price(asset_id: ContractId) -> Price;
-}
-
-struct Price {
-    asset_id: ContractId,
-    price: u64,
-    last_update: u64,
-}
 const ZERO_B256 = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
 storage {

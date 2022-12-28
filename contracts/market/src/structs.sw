@@ -1,13 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-library market_configuration;
-/*   
-███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
-██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
-███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
-╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
-███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
-╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
-*/
+library structs;
 
 pub struct MarketConfiguration {
     governor: Address,
@@ -40,10 +32,33 @@ pub struct AssetConfig {
     supply_cap: u64, // decimals: asset decimals
 }
 
-pub struct PauseConfiguration{
+pub struct PauseConfiguration {
     supply_paused: bool, 
     // transfer_paused: bool, 
     // withdraw_paused: bool, 
     // absorb_paused: bool, 
     // buy_pause: bool,
+}
+
+pub struct UserBasic {
+    borrow_principal: u64, // decimals: base_asset_decimal
+    supply_principal: u64, // decimals: base_asset_decimal
+    //-----------------------
+    base_tracking_index: u64,	// decimals: 18
+    base_tracking_accrued: u64,	// decimals: native_asset_decimal
+}
+
+pub struct MarketBasics {
+    base_supply_index: u64,// decimals	18
+    base_borrow_index: u64,// decimals	18
+    tracking_supply_index: u64,// decimals	18
+    tracking_borrow_index: u64,// decimals	18
+    total_supply_base: u64,// decimals	base_asset_decimal
+    total_borrow_base: u64,// decimals	base_asset_decimal
+    last_accrual_time: u64,
+}
+
+pub enum Error {
+    Paused: (),
+    Unauthorized: (),
 }

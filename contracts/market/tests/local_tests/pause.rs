@@ -7,6 +7,22 @@ use fuels::{
 };
 
 #[tokio::test]
+async fn test() {
+    let wallet = init_wallet().await;
+    let address = Address::from(wallet.address());
+
+    let usdc_config = DeployTokenConfig {
+        name: String::from("USD Coin"),
+        symbol: String::from("USDC"),
+        decimals: 6,
+        mint_amount: 10000,
+    };
+    let usdc_instance = get_token_contract_instance(&wallet, &usdc_config).await;
+    let contract_id = ContractId::from(usdc_instance.get_contract_id());
+    println!("Address {}", address);
+    println!("ContractId {}", contract_id);
+}
+#[tokio::test]
 async fn pause() {
     //--------------- WALLET ---------------
     let wallet = init_wallet().await;

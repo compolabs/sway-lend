@@ -12,10 +12,10 @@ async fn initialize() {
     let wallet = init_wallet().await;
     let address = Address::from(wallet.address());
     println!("Wallet address {address}\n");
-
+    
     //--------------- ORACLE ---------------
     let oracle_instance = get_oracle_contract_instance(&wallet).await;
-
+    
     //--------------- TOKENS ---------------
     let eth_config = DeployTokenConfig {
         name: String::from("Etherium"),
@@ -23,7 +23,7 @@ async fn initialize() {
         decimals: 9,
         mint_amount: 1,
     };
-
+    
     let usdc_config = DeployTokenConfig {
         name: String::from("USD Coin"),
         symbol: String::from("USDC"),
@@ -31,7 +31,7 @@ async fn initialize() {
         mint_amount: 10000,
     };
     let usdc_instance = get_token_contract_instance(&wallet, &usdc_config).await;
-
+    
     let link_config = DeployTokenConfig {
         name: String::from("Chainlink"),
         symbol: String::from("LINK"),
@@ -39,7 +39,7 @@ async fn initialize() {
         mint_amount: 1000,
     };
     let link_instance = get_token_contract_instance(&wallet, &link_config).await;
-
+    
     let btc_config = DeployTokenConfig {
         name: String::from("Bitcoin"),
         symbol: String::from("BTC"),
@@ -47,7 +47,7 @@ async fn initialize() {
         mint_amount: 1,
     };
     let btc_instance = get_token_contract_instance(&wallet, &btc_config).await;
-
+    
     let uni_config = DeployTokenConfig {
         name: String::from("Uniswap"),
         symbol: String::from("UNI"),
@@ -55,10 +55,10 @@ async fn initialize() {
         mint_amount: 1000,
     };
     let uni_instance = get_token_contract_instance(&wallet, &uni_config).await;
-
+    
     //--------------- MARKET ---------------
     let market_instance = get_market_contract_instance(&wallet).await;
-
+    
     let market_config = MarketConfiguration {
         governor: address,
         pause_guardian: address,

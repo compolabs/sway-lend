@@ -5,6 +5,14 @@ source = 'path+from-root-E6BBD1A08F478960'
 [[package]]
 name = 'oracle'
 source = 'member'
+dependencies = [
+    'oracle_abi',
+    'std',
+]
+
+[[package]]
+name = 'oracle_abi'
+source = 'path+from-root-5BB26DB01E9FBC28'
 dependencies = ['std']
 
 [[package]]

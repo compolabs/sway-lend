@@ -2,7 +2,6 @@
 authors = ["Alexey"]
 entry = "main.sw"
 license = "Apache-2.0"
-name = "market"
+name = "oracle_abi"
 
 [dependencies]
-oracle_abi = { path = "../../abi/oracle_abi" }
