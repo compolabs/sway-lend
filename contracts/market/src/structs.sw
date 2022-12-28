@@ -12,7 +12,7 @@ pub struct MarketConfiguration {
     supply_per_second_interest_rate_slope_high: u64, // decimals: 18
     borrow_per_second_interest_rate_slope_low: u64, // decimals: 18
     borrow_per_second_interest_rate_slope_high: u64, // decimals: 18
-    interest_rate_base_per_second: u64, // decimals: 18
+    borrow_per_second_interest_rate_base: u64, // decimals: 18
     store_front_price_factor: u64, // decimals: 4
     base_tracking_supply_speed: u64, // decimals 18
     base_tracking_borrow_speed: u64, // decimals 18
