@@ -55,11 +55,7 @@ class AccountStore {
       if (t == null)
         return new Balance({ balance, usdEquivalent: BN.ZERO, ...asset });
 
-      const usdEquivalent =
-        BN.formatUnits(t.amount?.toString(), asset.decimals).times(
-          asset.defaultPrice ?? 0
-        ) ?? BN.ZERO;
-      return new Balance({ balance, usdEquivalent, ...asset });
+      return new Balance({ balance, ...asset });
     });
 
     this.setAssetBalances(assetBalances);

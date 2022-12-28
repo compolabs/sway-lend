@@ -4,7 +4,6 @@ import { Column, Row } from "@components/Flex";
 import SquareTokenIcon from "@components/SquareTokenIcon";
 import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
-import BN from "@src/utils/BN";
 import Button from "@components/Button";
 import { FAUCET_URL } from "@src/constants";
 import { useFaucetVM } from "@screens/Faucet/FaucetVm";
@@ -36,7 +35,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 type="secondary"
                 size="small"
               >
-                $ {new BN(t.defaultPrice ?? 0).toFormat()}
+                $ {t.price.toFormat(2)}
               </Text>
             </Column>
           </Row>

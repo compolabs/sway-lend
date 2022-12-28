@@ -10,5 +10,7 @@
 */
 
 export type { TokenAbi } from "./TokenAbi";
+export type { OracleAbi } from "./OracleAbi";
 
 export { TokenAbi__factory } from "./factories/TokenAbi__factory";
+export { OracleAbi__factory } from "./factories/OracleAbi__factory";

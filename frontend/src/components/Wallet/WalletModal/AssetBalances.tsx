@@ -10,6 +10,7 @@ import styled from "@emotion/styled";
 import { useStores } from "@stores";
 import Skeleton from "react-loading-skeleton";
 import { FAUCET_URL } from "@src/constants";
+import BN from "@src/utils/BN";
 
 interface IProps extends HTMLAttributes<HTMLDivElement> {}
 
@@ -20,7 +21,7 @@ const Root = styled.div`
 `;
 
 const AssetsBalances: React.FC<IProps> = () => {
-  const { accountStore } = useStores();
+  const { accountStore, pricesStore } = useStores();
   if (accountStore.assetBalances === null)
     return (
       <Root style={{ padding: "0 24px" }}>
@@ -31,15 +32,17 @@ const AssetsBalances: React.FC<IProps> = () => {
     <Root>
       {accountStore.balances.length !== 0 ? (
         accountStore.balances.map((b) => {
+          const price =
+            pricesStore.tokensPrices != null
+              ? pricesStore.tokensPrices[b.assetId]
+              : BN.ZERO;
           return (
             <InvestRow
               key={b.assetId}
               logo={b.logo}
               topLeftInfo={b.name}
               topRightInfo={b.formatBalance}
-              bottomLeftInfo={
-                b.defaultPrice != null ? "$ " + b.defaultPrice : ""
-              }
+              bottomLeftInfo={"$ " + price.toFormat(2)}
               bottomRightInfo={b.formatUsdnEquivalent}
             />
           );
