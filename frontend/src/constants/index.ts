@@ -26,9 +26,12 @@ export const SEED =
   "0x3c930502838f1da408d93665b78c4fc00b884c0128fff900d05b4def71a3da4335d029828ba0a62c26f3563bcd52b0deec84d1014373a1722610d411611c3771";
 export const SEED_ADDRESS =
   "fuel1pln6n26y4e8lrgcaqctp8mddhvgzgt44pc9ychark93ks9mk7yxqr63nle";
+export const CONTRACT_ADDRESSES = {
+  priceOracle:
+    "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59",
+};
 
 export interface IToken {
-  defaultPrice?: number;
   assetId: string;
   name: string;
   symbol: string;

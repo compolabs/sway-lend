@@ -40,6 +40,7 @@ const WalletWrapper = styled.div`
 
 const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
   const mainFunctional = [
+    { name: "Market", link: ROUTES.ROOT, outer: false },
     { name: "Faucet", link: ROUTES.FAUCET, outer: false },
     { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
     { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
