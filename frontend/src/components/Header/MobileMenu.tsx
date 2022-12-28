@@ -44,6 +44,7 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
     { name: "Faucet", link: ROUTES.FAUCET, outer: false },
     { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
     { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
+    { name: "Medium", link: "https://discord.gg/VHgEGXjF", outer: true },
   ];
   return (
     <Root {...{ opened }}>

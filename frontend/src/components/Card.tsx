@@ -47,7 +47,7 @@ const Card = styled.div<{
       }
     })()};
   @media (min-width: 560px) {
-    padding: ${({ paddingDesktop }) => paddingDesktop ?? "24px"};
+    padding: ${({ paddingDesktop }) => paddingDesktop ?? "16px 24px"};
   }
 `;
 export default Card;

@@ -10,7 +10,7 @@ const colors = {
   error: "#ED827E",
   success550: "#1F8943",
   success500: "#35A15A",
-  success100: "#E6F3EB",
+  success100: "#ccebdc",
   error550: "#D66662",
   error500: "#ED827E",
   error100: "#FCF0EF",

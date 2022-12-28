@@ -1,10 +1,13 @@
 import styled from "@emotion/styled";
 import React from "react";
-import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
 import { Observer } from "mobx-react-lite";
 import { MarketVMProvider } from "@screens/Market/MarketVm";
 import Layout from "@components/Layout";
+import AssetsTable from "./AssetsTable";
+import { Column } from "@components/Flex";
+import AccountHealth from "@screens/Market/AccountHealth";
+import MarketInfo from "@screens/Market/MarketInfo";
 
 interface IProps {}
 
@@ -37,17 +40,33 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
       liquiditySort ? "scale(1)" : "scale(1, -1)"};
   }
 `;
+const Container = styled(Column)`
+  width: 100%;
 
+  & > :last-of-type {
+    margin-top: 16px;
+  }
+
+  @media (min-width: 880px) {
+    & > :last-of-type {
+      margin-bottom: 16px;
+    }
+
+    flex-direction: column-reverse;
+  }
+`;
 const MarketImpl: React.FC<IProps> = () => {
   return (
     <Layout>
       <Observer>
         {() => (
           <Root>
-            <Text weight={500} size="large">
-              Market for Fuel Network
-            </Text>
-            <SizedBox height={16} />
+            <Container>
+              <MarketInfo />
+              <AccountHealth />
+            </Container>
+            <SizedBox height={40} />
+            <AssetsTable />
           </Root>
         )}
       </Observer>

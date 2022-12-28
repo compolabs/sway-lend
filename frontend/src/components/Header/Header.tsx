@@ -118,6 +118,7 @@ const Header: React.FC<IProps> = () => {
 
   const communityMenu = [
     { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
+    { name: "Medium", link: "https://discord.gg/VHgEGXjF", outer: true },
     { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
   ];
   const theme = useTheme();
