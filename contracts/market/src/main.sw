@@ -16,6 +16,7 @@ use std::{
         AuthError,
         msg_sender,
     },
+    block::timestamp,
     call_frames::{
         contract_id,
         msg_asset_id,
@@ -191,7 +192,7 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) {
 fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
     // let caller = abi(Oracle, price_feed.value);
     // caller.get_price(asset).price
-      match (asset) {
+    let price = match (asset) {
        ContractId{value:0x6cd466e67547102656267a5f6005113e48d1f53a6846e6819c841a7f3eadafe9} => 250,
        ContractId{value:0x851ec5e04fa3485ba0794b34030bbcd70e96be282cd429da03c58e8de4d46c00} => 19000,
        ContractId{value:0xfcdcc57a0c59be38eecab975ddd03c3cd2cb1852957b622d5613d60ec8f4f2c2} => 1,
@@ -201,7 +202,8 @@ fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
        ContractId{value:0x579cd9e73d2471fd0ce20156e06e34c09cdf2fd655c993af8d236185305461ee} => 5,
        ContractId{value:0x0000000000000000000000000000000000000000000000000000000000000000} => 1200,
         _ => revert(0),
-    }
+    };
+    price * 1000000000
 }
 
 #[storage(read)]
@@ -210,19 +212,56 @@ fn is_borrow_collateralized(account: Address) -> bool {
     let base_borrow_index = storage.market_basic.base_borrow_index;
     let principal_value = storage.user_basic.get(account).borrow_principal;
     let borrow_amount = present_value_borrow(base_borrow_index, principal_value) * get_price(config.base_token, config.base_token_price_feed);
-    let mut borrow_limit = 0 ;
-     
+    
+    let mut borrow_limit = 0 ; 
     let mut index = 0;
     while index < config.asset_configs.len() {
         let asset_config =  match config.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        borrow_limit += balance_of(contract_id(), asset_config.asset) * get_price(asset_config.asset, asset_config.price_feed) * asset_config.borrow_collateral_factor / 10000;
+        borrow_limit += balance_of(contract_id(), asset_config.asset) * get_price(asset_config.asset, asset_config.price_feed) * asset_config.borrow_collateral_factor;
         index = index + 1;
     }
     borrow_limit >= borrow_amount
 }
+
+
+#[storage(read)]
+fn is_liquidatable(account: Address) -> bool {
+    let config = get_config();
+    let base_borrow_index = storage.market_basic.base_borrow_index;
+    let principal_value = storage.user_basic.get(account).borrow_principal;
+    let borrow_amount = present_value_borrow(base_borrow_index, principal_value) * get_price(config.base_token, config.base_token_price_feed);
+    
+    let mut liquidation_treshold = 0;
+    let mut index = 0;
+    while index < config.asset_configs.len() {
+        let asset_config =  match config.asset_configs.get(index) {
+            Option::Some(asset_config) => asset_config,
+            Option::None => continue,
+        };
+        liquidation_treshold += balance_of(contract_id(), asset_config.asset) * get_price(asset_config.asset, asset_config.price_feed) * asset_config.liquidate_collateral_factor;
+        index = index + 1;
+    }
+    return liquidation_treshold < borrow_amount
+}
+
+#[storage(read)]
+fn get_collateral_reserves(asset: ContractId) -> u64 {
+    balance_of(contract_id(), asset) - storage.totals_collateral.get(asset)
+}
+
+#[storage(read)]
+fn get_reserves() -> u64 {
+    let config = get_config();
+    let (base_supply_index, base_borrow_index) = accrued_interest_indices(timestamp() - storage.market_basic.last_accrual_time);
+    let balance = balance_of(contract_id(), config.base_token_price_feed);
+    let total_supply = present_value_supply(base_supply_index, storage.market_basic.total_supply_base);
+    let total_borrow = present_value_borrow(base_borrow_index, storage.market_basic.total_borrow_base);
+    return balance - total_supply + total_borrow; //TODO: add signed numbers
+}
+
 
 
 // ----------------------------------------------------------------------
