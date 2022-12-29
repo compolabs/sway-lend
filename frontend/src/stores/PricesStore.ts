@@ -23,8 +23,13 @@ class PricesStore {
   tokensPrices: Record<string, BN> | null = null;
   setTokensPrices = (v: Record<string, BN>) => (this.tokensPrices = v);
 
+  getTokenPrice = (assetId: string) => {
+    if (this.tokensPrices == null) return BN.ZERO;
+    const price = this.tokensPrices[assetId];
+    return price == null ? BN.ZERO : price;
+  };
+
   updateTokenPrices = async () => {
-    console.log("updateTokenPrices");
     //todo fix to one type of call and new  oracleContracts.get_prices
     const { address } = this.rootStore.accountStore;
     if (address == null) return;
@@ -45,7 +50,7 @@ class PricesStore {
         const v = response.reduce(
           (acc, { value }) => ({
             ...acc,
-            [value.asset_id.value]: BN.formatUnits(value.price.toString(), 6),
+            [value.asset_id.value]: BN.formatUnits(value.price.toString(), 9),
           }),
           {}
         );

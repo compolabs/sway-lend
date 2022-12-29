@@ -32,6 +32,7 @@ export const CONTRACT_ADDRESSES = {
 };
 
 export interface IToken {
+  logo: string;
   assetId: string;
   name: string;
   symbol: string;
