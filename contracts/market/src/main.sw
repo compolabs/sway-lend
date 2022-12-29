@@ -53,7 +53,7 @@ storage {
     config: Option<MarketConfiguration> = Option::None,
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
-    user_collateral: StorageMap<b256, u64> = StorageMap {}, // sha256((address, asset_id) -> b256
+    user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {}, // sha256((address, asset_id) -> b256
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics {
         base_supply_index: 0,
@@ -68,14 +68,12 @@ storage {
 
 // #[storage(read)]
 // fn get_user_collateral(address: Address, asset: ContractId) -> u64 {
-//     let key = sha256((address, asset));
-//     storage.user_collateral.get(key)
+//     storage.user_collateral.get((address, asset))
 // }
 
 // #[storage(write)]
 // fn set_user_collateral(address: Address, asset: ContractId, amount: u64) {
-//     let key = sha256((address, asset));
-//     storage.user_collateral.insert(key, amount);
+//     storage.user_collateral.insert((address, asset), amount);
 // }
 
 #[storage(read)]
@@ -190,8 +188,6 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) {
 //FIXME: after compiler internal error will be fixed
 #[storage(read)]
 fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
-    // let caller = abi(Oracle, price_feed.value);
-    // caller.get_price(asset).price
     let price = match (asset) {
        ContractId{value:0x6cd466e67547102656267a5f6005113e48d1f53a6846e6819c841a7f3eadafe9} => 250,
        ContractId{value:0x851ec5e04fa3485ba0794b34030bbcd70e96be282cd429da03c58e8de4d46c00} => 19000,
@@ -205,6 +201,10 @@ fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
     };
     price * 1000000000
 }
+// fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
+//     let caller = abi(Oracle, price_feed.value);
+//     caller.get_price(asset).price
+// }
 
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {

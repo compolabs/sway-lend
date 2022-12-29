@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::utils::local_tests_utils::{marketcontract_mod::AssetConfig, *};
+use crate::utils::local_tests_utils::{*, market_contract_mod::AssetConfig};
 use fuels::{
     prelude::BASE_ASSET_ID,
     tx::{Address, ContractId},

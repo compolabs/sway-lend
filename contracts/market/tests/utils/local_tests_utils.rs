@@ -1,7 +1,7 @@
 use crate::utils::number_utils::parse_units;
-use fuels::contract::contract::CallResponse;
 use fuels::prelude::*;
 use rand::prelude::Rng;
+use fuels::contract::call_response::FuelCallResponse;
 
 abigen!(OracleContract, "tests/artefacts/oracle/oracle-abi.json");
 abigen!(MarketContract, "out/debug/market-abi.json");
@@ -11,20 +11,21 @@ abigen!(
 );
 
 pub mod market_abi_calls {
+
     use super::*;
 
     pub async fn initialize(
         contract: &MarketContract,
         config: MarketConfiguration,
-    ) -> Result<CallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, Error> {
         contract.methods().initialize(config).call().await
     }
 
-    pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<CallResponse<()>, Error> {
+    pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
         contract.methods().pause(config).call().await
     }
 
-    pub async fn supply(contract: &MarketContract) -> Result<CallResponse<()>, Error> {
+    pub async fn supply(contract: &MarketContract) -> Result<FuelCallResponse<()>, Error> {
         contract.methods().supply().call().await
     }
 
@@ -144,7 +145,7 @@ pub async fn get_token_contract_instance(
     name.push_str(" ".repeat(32 - deploy_config.name.len()).as_str());
     symbol.push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
 
-    let config: tokencontract_mod::Config = tokencontract_mod::Config {
+    let config: token_contract_mod::Config = token_contract_mod::Config {
         name: fuels::core::types::SizedAsciiString::<32>::new(name).unwrap(),
         symbol: fuels::core::types::SizedAsciiString::<8>::new(symbol).unwrap(),
         decimals,
