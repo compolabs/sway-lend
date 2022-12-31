@@ -65,7 +65,7 @@ async fn initialize() {
         base_token: ContractId::from(usdc_instance.get_contract_id()),
         base_token_decimals: usdc_config.decimals,
         base_token_price_feed: ContractId::from(oracle_instance.get_contract_id()),
-        kink: 8000,                                                     // decimals: 4
+        kink: 800000000000000000,                                       // decimals: 18
         supply_per_second_interest_rate_slope_low: 250000000000000000,  // decimals: 18
         supply_per_second_interest_rate_slope_high: 750000000000000000, // decimals: 18
         borrow_per_second_interest_rate_slope_low: 300000000000000000,  // decimals: 18
@@ -77,6 +77,7 @@ async fn initialize() {
         base_min_for_rewards: 20000000, // decimals base_token_decimals
         base_borrow_min: 10000000,      // decimals: base_token_decimals
         target_reserves: 1000000000000, // decimals: base_token_decimals
+        reward_token: ContractId::from(usdc_instance.get_contract_id()), 
         asset_configs: vec![
             AssetConfig {
                 asset: ContractId::from(link_instance.get_contract_id()),

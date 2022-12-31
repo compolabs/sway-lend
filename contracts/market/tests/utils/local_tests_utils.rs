@@ -21,13 +21,13 @@ pub mod market_abi_calls {
         contract.methods().initialize(config).call().await
     }
 
-    pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().pause(config).call().await
-    }
+    // pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
+        // contract.methods().pause(config).call().await
+    // }
 
-    pub async fn supply(contract: &MarketContract) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().supply().call().await
-    }
+    // pub async fn supply(contract: &MarketContract) -> Result<FuelCallResponse<()>, Error> {
+        // contract.methods().supply().call().await
+    // }
 
     // pub async fn get_configuration(
     //     contract: &MarketContract,

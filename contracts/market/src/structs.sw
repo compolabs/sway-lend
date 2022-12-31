@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 library structs;
+use sway_libs::i128::I128;
+
 
 pub struct MarketConfiguration {
     governor: Address,
@@ -19,6 +21,7 @@ pub struct MarketConfiguration {
     base_min_for_rewards: u64, // decimals base_token_decimals
     base_borrow_min: u64, // decimals: base_token_decimals
     target_reserves: u64, // decimals: base_token_decimals
+    reward_token: ContractId, 
     asset_configs: Vec<AssetConfig>,
 }
 
@@ -32,20 +35,21 @@ pub struct AssetConfig {
     supply_cap: u64, // decimals: asset decimals
 }
 
+// TODO: добавить возможность приостановить клейм ревордов
 pub struct PauseConfiguration {
     supply_paused: bool, 
-    // transfer_paused: bool, 
-    // withdraw_paused: bool, 
-    // absorb_paused: bool, 
-    // buy_pause: bool,
+    withdraw_paused: bool, 
+    absorb_paused: bool, 
+    buy_pause: bool,
+    claim_paused: bool,
 }
 
 pub struct UserBasic {
-    borrow_principal: u64, // decimals: base_asset_decimal
-    supply_principal: u64, // decimals: base_asset_decimal
+    principal: I128, // decimals: base_asset_decimal
     //-----------------------
     base_tracking_index: u64,	// decimals: 18
     base_tracking_accrued: u64,	// decimals: native_asset_decimal
+    reward_claimed: u64,	// decimals: native_asset_decimal
 }
 
 pub struct MarketBasics {
@@ -61,4 +65,12 @@ pub struct MarketBasics {
 pub enum Error {
     Paused: (),
     Unauthorized: (),
+    InsufficientReserves: (),
+    NotLiquidatable: (),
+    NotForSale: (),
+    TooMuchSlippage: (),
+    SupplyCapExceeded: (),
+    NotCollateralized: (),
+    BorrowTooSmall: (),
+    NotPermitted: Address,
 }
