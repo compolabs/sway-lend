@@ -300,12 +300,9 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // (18, 18)
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
-    let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
     let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals; flip меняет знак
     let scale = 10.pow(config.base_token_decimals);
-    
-    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
     
     let mut borrow_limit = 0;
     let mut index = 0;
@@ -323,6 +320,10 @@ fn is_borrow_collateralized(account: Address) -> bool {
         index = index + 1;
     }
     let borrow_limit = I128::from_u64(borrow_limit);
+
+    let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
+    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
+
     borrow_limit >= borrow_amount  // borrow_limit >= borrow_amount
 }
 // нужно проверить, что сумма доллоровой стоимости залогов пользователя умноженных на liquidateCollateralFactor меньше чем сумма займа. UPD1230, добавил минус в борроу эмаунт
@@ -330,13 +331,10 @@ fn is_borrow_collateralized(account: Address) -> bool {
 #[storage(read)]
 fn is_liquidatable_internal(account: Address) -> bool {
     let config = get_config();
-    let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
     let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals; flip меняет знак
     let scale = 10.pow(config.base_token_decimals);
     
-    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
-
     let mut liquidation_treshold = 0;
     let mut index = 0;
     while index < config.asset_configs.len() {
@@ -354,6 +352,10 @@ fn is_liquidatable_internal(account: Address) -> bool {
     }
     
     let liquidation_treshold = I128::from_u64(liquidation_treshold);
+
+    let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
+    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
+
     liquidation_treshold < borrow_amount  // liquidation_treshold < borrow_amount
 }
 
@@ -523,8 +525,7 @@ fn absorb_internal(absorber: Address, account: Address) {
     // let assetsIn = get_user_assets(account);
 
     let config = get_config();
-    let base_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
-    let base_scale = 10.pow(config.base_token_decimals);
+    
     let mut delta_value = 0; // decimals 9
 
     let mut i = 0;
@@ -546,6 +547,10 @@ fn absorb_internal(absorber: Address, account: Address) {
 
         i += 1;
     }
+
+    let base_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
+    let base_scale = 10.pow(config.base_token_decimals);
+
     let delta_balance = delta_value * base_scale / base_price; // base_asset_decimals
     let mut new_balance = old_balance + I128::from_u64(delta_balance); // base_asset_decimals
     if (new_balance < I128::zero()) {
@@ -583,10 +588,10 @@ fn buy_collateral_internal(asset: ContractId, min_amount: u64, base_amount: u64,
     require(reserves < I128::zero() || reserves.as_u64() < config.target_reserves, Error::NotForSale);
 
     // Note: Re-entrancy can skip the reserves check above on a second buyCollateral call.
-
+    let reserves = get_collateral_reserves_internal(asset);
     let collateral_amount = quote_collateral_internal(asset, base_amount);
     require(collateral_amount >= min_amount, Error::TooMuchSlippage);
-    require(collateral_amount <= get_collateral_reserves_internal(asset), Error::InsufficientReserves);
+    require(collateral_amount <= reserves, Error::InsufficientReserves);
 
     // Note: Pre-transfer hook can re-enter buyCollateral with a stale collateral ERC20 balance.
     //  Assets should not be listed which allow re-entry from pre-transfer now, as too much collateral could be bought.
@@ -753,7 +758,7 @@ impl Market for Contract {
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64 {
         let base_token_price_feed = get_config().base_token_price_feed;
-        return get_price(asset, base_token_price_feed)
+        get_price(asset, base_token_price_feed)
     }
 
     #[storage(write)]
