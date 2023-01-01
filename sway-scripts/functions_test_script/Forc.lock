@@ -6,9 +6,15 @@ source = 'path+from-root-AE2967028D5567DA'
 name = 'functions_test_script'
 source = 'member'
 dependencies = [
+    'oracle_abi',
     'std',
     'sway_libs',
 ]
+
+[[package]]
+name = 'oracle_abi'
+source = 'path+from-root-38C1DD42401B8F33'
+dependencies = ['std']
 
 [[package]]
 name = 'std'
@@ -17,5 +23,5 @@ dependencies = ['core']
 
 [[package]]
 name = 'sway_libs'
-source = 'path+from-root-38C1DD42401B8F33'
+source = 'git+https://github.com/FuelLabs/sway-libs?tag=v0.4.1#f5539c14f16469e9103eb6c7c09e34d333c8ec5c'
 dependencies = ['std']

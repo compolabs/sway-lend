@@ -163,11 +163,6 @@ fn is_claim_paused() -> bool {
     }
 }
 
-fn is_liquidatable() -> bool{
-    //TODO: inplement
-    true
-}
-
 fn mint_reward_token(_amount: u64){
     //TODO: inplement
 }
@@ -189,42 +184,11 @@ pub fn get_caller() -> Address {
     }
 }
 
-//FIXME: after compiler internal error will be fixed
-fn get_price(asset: ContractId, _price_feed: ContractId) -> u64 {
-    let price = match (asset) {
-        ContractId {
-            value: 0x6cd466e67547102656267a5f6005113e48d1f53a6846e6819c841a7f3eadafe9,
-        } => 250,
-        ContractId {
-            value: 0x851ec5e04fa3485ba0794b34030bbcd70e96be282cd429da03c58e8de4d46c00,
-        } => 19000,
-        ContractId {
-            value: 0xfcdcc57a0c59be38eecab975ddd03c3cd2cb1852957b622d5613d60ec8f4f2c2,
-        } => 1,
-        ContractId {
-            value: 0xe09c4c702e6a8237dd07f29228c136cc076b79cb9d0e1f891d39c54dc95069ac,
-        } => 1,
-        ContractId {
-            value: 0x7d4b2c57d0c8715be35224b29357ba2444e40f6cd1d9227a96e8d8f4a8f44ba4,
-        } => 1,
-        ContractId {
-            value: 0xcc28b139c7664ac9cddc2c01c00559fbbebd6fa8a879db341adf3a4aafdaa137,
-        } => 5,
-        ContractId {
-            value: 0x579cd9e73d2471fd0ce20156e06e34c09cdf2fd655c993af8d236185305461ee,
-        } => 5,
-        ContractId {
-            value: 0x0000000000000000000000000000000000000000000000000000000000000000,
-        } => 1200,
-        _ => revert(0),
-    };
-    price * 1000000000
+fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
+    let res = abi(Oracle, price_feed.value).get_price(asset);
+    res.price
 }
-//#[storage(read)]
-// fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
-//     let caller = abi(Oracle, price_feed.value);
-//     caller.get_price(asset).price
-// }
+
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
@@ -551,7 +515,7 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
 #[storage(read, write)]
 // FIXME: Разробраться что тут приходит в пементе
 fn absorb_internal(absorber: Address, account: Address) {
-    require(is_liquidatable(), Error::NotLiquidatable);
+    require(is_liquidatable_internal(account), Error::NotLiquidatable);
 
     let account_user = storage.user_basic.get(account);
     let old_principal = account_user.principal;

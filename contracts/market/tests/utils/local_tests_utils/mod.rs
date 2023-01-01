@@ -1,80 +1,79 @@
+pub mod market;
+
 use crate::utils::number_utils::parse_units;
+use fuels::contract::call_response::FuelCallResponse;
 use fuels::prelude::*;
 use rand::prelude::Rng;
-use fuels::contract::call_response::FuelCallResponse;
 
 abigen!(OracleContract, "tests/artefacts/oracle/oracle-abi.json");
-abigen!(MarketContract, "out/debug/market-abi.json");
 abigen!(
     TokenContract,
     "tests/artefacts/token/token_contract-abi.json"
 );
 
-pub mod market_abi_calls {
+pub mod oracle_abi_calls {
+    use std::collections::HashMap;
 
     use super::*;
 
-    pub async fn initialize(
-        contract: &MarketContract,
-        config: MarketConfiguration,
-    ) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().initialize(config).call().await
+    pub async fn initialize(contract: &OracleContract, owner: Address) -> FuelCallResponse<()> {
+        contract.methods().initialize(owner).call().await.unwrap()
     }
 
-    // pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
-        // contract.methods().pause(config).call().await
+    // pub async fn owner(contract: &OracleContract) -> Identity {
+    //     contract.methods().owner().call().await.unwrap().value
     // }
 
-    // pub async fn supply(contract: &MarketContract) -> Result<FuelCallResponse<()>, Error> {
-        // contract.methods().supply().call().await
+    // pub async fn get_price(contract: &OracleContract, asset_id: ContractId) -> Price {
+    //     contract
+    //         .methods()
+    //         .get_price(asset_id)
+    //         .call()
+    //         .await
+    //         .unwrap()
+    //         .value
     // }
 
-    // pub async fn get_configuration(
-    //     contract: &MarketContract,
-    // ) -> Result<CallResponse<MarketConfiguration>, Error> {
-    //     contract.methods().get_configuration().simulate().await
-    // }
+    pub async fn sync_prices(contract: &OracleContract, assets: &HashMap<String, Asset>) {
+        let client = reqwest::Client::new();
+        let req = "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
+        let body = client.get(req).send().await.unwrap().text().await.unwrap();
+        let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
+        for (_, asset) in assets.iter() {
+            let price = match responce[asset.coingeco_id.as_str()]["usd"].as_f64() {
+                Some(p) => (p * 10f64.powf(9f64)).round() as u64,
+                _ => 0,
+            };
+            set_price(contract, asset.asset_id, price).await;
+        }
+    }
+
+    pub async fn set_price(
+        contract: &OracleContract,
+        asset_id: ContractId,
+        new_price: u64,
+    ) -> FuelCallResponse<()> {
+        contract
+            .methods()
+            .set_price(asset_id, new_price)
+            .call()
+            .await
+            .unwrap()
+    }
 }
 
-// pub mod oracle_abi_calls {
-//     use super::*;
-
-//     pub async fn initialize(contract: &OracleContract, owner: Address) -> CallResponse<()> {
-//         contract.methods().initialize(owner).call().await.unwrap()
-//     }
-
-//     pub async fn owner(contract: &OracleContract) -> Identity {
-//         contract.methods().owner().call().await.unwrap().value
-//     }
-
-//     pub async fn get_price(contract: &OracleContract, asset_id: ContractId) -> Price {
-//         contract
-//             .methods()
-//             .get_price(asset_id)
-//             .call()
-//             .await
-//             .unwrap()
-//             .value
-//     }
-
-//     pub async fn set_price(
-//         contract: &OracleContract,
-//         asset_id: ContractId,
-//         new_price: u64,
-//     ) -> CallResponse<()> {
-//         contract
-//             .methods()
-//             .set_price(asset_id, new_price)
-//             .call()
-//             .await
-//             .unwrap()
-//     }
-// }
 pub struct DeployTokenConfig {
     pub name: String,
     pub symbol: String,
     pub decimals: u8,
     pub mint_amount: u64,
+}
+
+pub struct Asset {
+    pub config: DeployTokenConfig,
+    pub asset_id: ContractId,
+    pub coingeco_id: String,
+    pub instance: Option<TokenContract>,
 }
 
 pub async fn init_wallet() -> WalletUnlocked {
@@ -102,19 +101,6 @@ pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleCont
     .unwrap();
 
     OracleContract::new(id, wallet.clone())
-}
-
-pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketContract {
-    let id = Contract::deploy(
-        "./out/debug/market.bin",
-        &wallet,
-        TxParameters::default(),
-        StorageConfiguration::default(),
-    )
-    .await
-    .unwrap();
-
-    MarketContract::new(id, wallet.clone())
 }
 
 pub async fn get_token_contract_instance(

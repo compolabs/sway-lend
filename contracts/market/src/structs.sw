@@ -35,7 +35,6 @@ pub struct AssetConfig {
     supply_cap: u64, // decimals: asset decimals
 }
 
-// TODO: добавить возможность приостановить клейм ревордов
 pub struct PauseConfiguration {
     supply_paused: bool, 
     withdraw_paused: bool, 
