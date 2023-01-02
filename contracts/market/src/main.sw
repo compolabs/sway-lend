@@ -500,7 +500,7 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     // discount = store_front_price_factor * (1e4 - liquidate_collateral_factor)
     let discount_factor = store_front_price_factor - liquidate_collateral_factor; // decimals 4
     //assetPriceDiscounted = assetPrice * (10^4 - discountFactor)/10^4
-    let asset_price_discounted = asset_price * (10.pow(4) - discount_factor) / 10.pow(9 - 4); // decimals 9
+    let asset_price_discounted = asset_price * (10.pow(4) - discount_factor) / 10.pow(4); // decimals 9
     // # of collateral assets
     // = (TotalValueOfBaseAmount / DiscountedPriceOfCollateralAsset) * assetScale
     // = ((basePrice * baseAmount / baseScale) / assetPriceDiscounted) * assetScale
