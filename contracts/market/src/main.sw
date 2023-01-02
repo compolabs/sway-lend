@@ -76,22 +76,22 @@ abi Market {
     fn quote_collateral(asset: ContractId, base_amount: u64) -> u64;
 
     #[storage(read, write)]
-    fn absorb(absorber: Address, accounts: Vec<Address>);
+    fn absorb(accounts: Vec<Address>);
 
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, base_amount: u64, recipient: Address);
+    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address); // @Payment base_token
 
     #[storage(read, write)]
-    fn supply_collateral(from: Address, dst: Address, asset: ContractId, amount: u64);
+    fn supply_collateral(dst: Address); // @Payment any collateral asset
 
     #[storage(read, write)]
     fn withdraw_collateral(asset: ContractId, amount: u64);
 
     #[storage(read, write)]
-    fn supply_base();
+    fn supply_base(); // @Payment base_token
 
     #[storage(read, write)]
-    fn withdraw_base(amount: u64);
+    fn withdraw_base(); // @Payment LP Token
     
     #[storage(read)]
     fn withdraw_reward_token(to: Address, amount: u64);
@@ -103,6 +103,7 @@ abi Market {
     fn claim();
 }
 
+// TODO: работает ли обновление стораджа?
 storage {
     config: Option<MarketConfiguration> = Option::None,
     pause_config: Option<PauseConfiguration> = Option::None,
@@ -164,12 +165,12 @@ fn is_claim_paused() -> bool {
 }
 
 fn mint_reward_token(_amount: u64){
-    //TODO: inplement
+    //TODO: implement
 }
 
 #[storage(read)]
 fn get_config() -> MarketConfiguration {
-    match (storage.config) {
+    match storage.config {
         Option::Some(c) => c,
         _ => revert(0),
     }
@@ -259,7 +260,7 @@ fn get_supply_rate_internal(utilization: u64) -> u64 { //18
     let interest_rate_base = 0; //decimals 18, 0 потому что в конфиге нет supply_per_second_interest_rate_base
     let interest_rate_slope_low = config.supply_per_second_interest_rate_slope_low;// decimals 18
     let interest_rate_slope_high = config.supply_per_second_interest_rate_slope_high;// decimals 18
-    if (utilization <= kink_) {
+    if utilization <= kink_ {
         interest_rate_base + interest_rate_slope_low * utilization / FACTOR_SCALE
     } else {
         interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / FACTOR_SCALE
@@ -274,7 +275,7 @@ fn get_borrow_rate_internal(utilization: u64) -> u64 { //18
     let interest_rate_base = config.borrow_per_second_interest_rate_base; //decimals 18
     let interest_rate_slope_low = config.borrow_per_second_interest_rate_slope_low; //decimals 18
     let interest_rate_slope_high = config.borrow_per_second_interest_rate_slope_high; //decimals 18
-    if (utilization <= kink_) {
+    if utilization <= kink_ {
         interest_rate_base + interest_rate_slope_low * utilization / FACTOR_SCALE
     } else {
         interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / FACTOR_SCALE
@@ -286,7 +287,7 @@ fn get_borrow_rate_internal(utilization: u64) -> u64 { //18
 fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // (18, 18)
     let mut base_supply_index_ = storage.market_basic.base_supply_index; // decimals 18
     let mut base_borrow_index_ = storage.market_basic.base_borrow_index; // decimals 18
-    if (time_elapsed > 0) {
+    if time_elapsed > 0 {
         let utilization = get_utilization_internal();  // decimals 18
         let supply_rate = get_supply_rate_internal(utilization); // decimals 18
         let borrow_rate = get_borrow_rate_internal(utilization); // decimals 18
@@ -364,7 +365,6 @@ fn get_collateral_reserves_internal(asset: ContractId) -> u64 { // base_token_de
 }
 
 // @Callable get_reserves_internal() -> I128
-// TODO: discuss u64 -> I128 
 #[storage(read)]
 fn get_reserves_internal() -> I128 {  // base_token_decimals
     let config = get_config();
@@ -378,13 +378,13 @@ fn get_reserves_internal() -> I128 {  // base_token_decimals
 
 // все эти переменные из маркет конфига. нужно для обновления процентов и ревордов
 #[storage(read, write)]
-fn accrue_internal() { // TODO: Проверить работает ли обновление стораджа нормально
+fn accrue_internal() { 
     let config = get_config();
     let mut market_basic = storage.market_basic;
     let now = timestamp();
     let time_elapsed = now - market_basic.last_accrual_time;
-    if (time_elapsed > 0) {
-        let (base_supply_index, base_borrow_index) = accrued_interest_indices(time_elapsed);
+    if time_elapsed > 0 {
+        // let (base_supply_index, base_borrow_index) = accrued_interest_indices(time_elapsed); // #unused
         let total_supply_base = market_basic.total_supply_base; // base_asset_decimal
         let total_borrow_base = market_basic.total_borrow_base; // base_asset_decimal
         let tracking_supply_speed = config.base_tracking_supply_speed; // decimals 18
@@ -392,10 +392,10 @@ fn accrue_internal() { // TODO: Проверить работает ли обн�
         let min_for_rewards = config.base_min_for_rewards; // decimals 6
         let scale = 10.pow(config.base_token_decimals);
     
-        if (total_supply_base >= min_for_rewards) {
+        if total_supply_base >= min_for_rewards {
             market_basic.tracking_supply_index += tracking_supply_speed * time_elapsed / total_supply_base / scale; // 18 
         }
-        if (total_borrow_base >= min_for_rewards) {
+        if total_borrow_base >= min_for_rewards {
             market_basic.tracking_borrow_index += tracking_borrow_speed * time_elapsed / total_borrow_base / scale;  // 18 
         }
         market_basic.last_accrual_time = now;
@@ -410,14 +410,14 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I128
     let mut basic = basic;
     basic.principal = principal_new;
 
-    if (principal >= I128::zero()) {
+    if principal >= I128::zero() {
         let index_delta = storage.market_basic.tracking_supply_index - basic.base_tracking_index; // decimals 18
         basic.base_tracking_accrued += principal.as_u64() * index_delta / FACTOR_SCALE; //native_asset_decimal
     } else {
         let index_delta = storage.market_basic.tracking_borrow_index  - basic.base_tracking_index;
         basic.base_tracking_accrued += principal.flip().as_u64() * index_delta / FACTOR_SCALE; //native_asset_decimal
     }
-    if (principal_new >= I128::zero()) {
+    if principal_new >= I128::zero() {
         basic.base_tracking_index = storage.market_basic.tracking_supply_index;
     } else {
         basic.base_tracking_index = storage.market_basic.tracking_borrow_index;
@@ -427,11 +427,11 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I128
 
 fn repay_and_supply_amount(old_principal: I128, new_principal: I128) -> (u64, u64) {
     // If the new principal is less than the old principal, then no amount has been repaid or supplied
-    if (new_principal < old_principal) {return (0, 0)};
+    if new_principal < old_principal {return (0, 0)};
 
-    if (new_principal <= I128::zero()) {
+    if new_principal <= I128::zero() {
         return ((new_principal - old_principal).as_u64(), 0);
-    } else if (old_principal >= I128::zero()) {
+    } else if old_principal >= I128::zero() {
         return (0, (new_principal - old_principal).as_u64());
     } else {
         return (old_principal.flip().as_u64(), new_principal.as_u64());
@@ -440,11 +440,11 @@ fn repay_and_supply_amount(old_principal: I128, new_principal: I128) -> (u64, u6
 
 fn withdraw_and_borrow_amount(old_principal: I128, new_principal: I128) -> (u64, u64) {
     // If the new principal is greater than the old principal, then no amount has been withdrawn or borrowed
-    if (new_principal > old_principal) {return (0, 0)};
+    if new_principal > old_principal {return (0, 0)};
 
-    if (new_principal >= I128::zero()) {
+    if new_principal >= I128::zero() {
         return ((old_principal - new_principal).as_u64(), 0);
-    } else if (old_principal <= I128::zero()) {
+    } else if old_principal <= I128::zero() {
         return (0, (old_principal - new_principal).as_u64());
     } else {
         return ((old_principal).as_u64(), (new_principal).flip().as_u64());
@@ -513,11 +513,9 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
 // функця переводит залог в собствнность протокола и закрывает долг пользователя
 // @Callable absorb(absorber: Address, accounts: Vec<Address>)
 #[storage(read, write)]
-// FIXME: Разробраться что тут приходит в пементе
 fn absorb_internal(absorber: Address, account: Address) {
     require(is_liquidatable_internal(account), Error::NotLiquidatable);
 
-    let caller = get_caller();
     let account_user = storage.user_basic.get(account);
     let old_principal = account_user.principal;
     let old_balance = present_value(old_principal); // base_asset_decimals
@@ -552,7 +550,7 @@ fn absorb_internal(absorber: Address, account: Address) {
 
     let delta_balance = delta_value * base_scale / base_price; // base_asset_decimals
     let mut new_balance = old_balance + I128::from_u64(delta_balance); // base_asset_decimals
-    if (new_balance < I128::zero()) {
+    if new_balance < I128::zero() {
         new_balance = I128::zero();
     }
 
@@ -570,18 +568,20 @@ fn absorb_internal(absorber: Address, account: Address) {
 
     // если supply_amount > 0, выпускаем LP токен в количестве равном supply_amount и отправляем его пользователю
     if supply_amount > 0 {
-        mint_to_address(supply_amount, caller);
+        mint_to_address(supply_amount, absorber);
     }
 }
 
 // функция для покупки залога ликвидированного пользователя. 
-// @Callable buy_collateral(asset: ContractId, min_amount: u64, base_amount: u64, recipient: Address) 
+// @Callable buy_collateral(asset: ContractId, min_amount: u64, recipient: Address)
+// @Payment base_token
 #[storage(read)]
-// FIXME: Разробраться что тут приходит в пементе
-fn buy_collateral_internal(asset: ContractId, min_amount: u64, base_amount: u64, recipient: Address) {
+fn buy_collateral_internal(asset: ContractId, min_amount: u64, recipient: Address) {
     require(!is_buy_paused(), Error::Paused);
-
     let config = get_config();
+    let base_amount = msg_amount();
+    require(msg_asset_id() == config.base_token && base_amount > 0, Error::InvalidPayment);
+
     let reserves = get_reserves_internal();
     require(reserves < I128::zero() || reserves.as_u64() < config.target_reserves, Error::NotForSale);
 
@@ -597,12 +597,18 @@ fn buy_collateral_internal(asset: ContractId, min_amount: u64, base_amount: u64,
     transfer_to_address(collateral_amount, asset, recipient);
 }
 
-// @Callable supply_collateral(from: Address, dst: Address, asset: ContractId, amount: u64)
+// @Callable supply_collateral(dst: Address)
+// @Payment any collateral asset
 #[storage(read, write)]
-fn supply_collateral_internal(from: Address, dst: Address, asset: ContractId, amount: u64) {
+fn supply_collateral_internal(dst: Address) {
     require(!is_supply_paused(), Error::Paused);
-    
-    let asset_config = get_asset_config_by_asset_id(asset);
+
+    let amount = msg_amount();
+    require(amount > 0, Error::InvalidPayment);
+
+    let asset = msg_asset_id();
+    let asset_config = get_asset_config_by_asset_id(asset); // Тут ебнется если асет не колатерал
+
     let mut total_supply_asset = storage.totals_collateral.get(asset);
     total_supply_asset += amount;
     require(total_supply_asset <= asset_config.supply_cap, Error::SupplyCapExceeded);
@@ -625,7 +631,7 @@ fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
     storage.totals_collateral.insert(asset, new_total_supply_asset);
     storage.user_collateral.insert((caller, asset), src_collateral_new);
 
-    let asset_config = get_asset_config_by_asset_id(asset);
+    // let asset_config = get_asset_config_by_asset_id(asset); // #unused
 
     // Note: no accrue interest, BorrowCF < LiquidationCF covers small changes
     require(is_borrow_collateralized(caller), Error::NotCollateralized);
@@ -634,13 +640,14 @@ fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
 }
 
 // @Callable supply_base()
+// @Payment base_token
 #[storage(read, write)]
-// FIXME: Разробраться что тут приходит в пементе
 fn supply_base_internal()  {
     require(!is_supply_paused(), Error::Paused);
     let caller = get_caller();
+    let config = get_config();
     let amount = msg_amount();
-    // let asset = msg_asset_id();
+    require(msg_asset_id() == config.base_token && amount > 0, Error::InvalidPayment);
     accrue_internal();
 
     let dst_user = storage.user_basic.get(caller);
@@ -657,19 +664,20 @@ fn supply_base_internal()  {
 
     update_base_principal(caller, dst_user, dst_principal_new);
 
-    // TODO: Сейчас supply_amount это u64, это значит что оно всегда больше нуля!!!
     // если supply_amount > 0, выпускаем LP токен в количестве равном supply_amount и отправляем его пользователю
     if supply_amount > 0 {
-        mint_to_address(supply_amount, caller); //TODO: Разобоаться кому отправлять LP токены
+        mint_to_address(supply_amount, caller); 
     }
 
 }
 
-// @Callable withdraw_base(amount: u64)
+// @Callable withdraw_base()
+// @Payment LP Token
 #[storage(read, write)]
-fn withdraw_base_internal(amount: u64)  {    
+fn withdraw_base_internal()  {
     require(!is_withdraw_paused(), Error::Paused);
-
+    let amount = msg_amount();
+    require(msg_asset_id() == contract_id() && amount > 0, Error::InvalidPayment);
     accrue_internal();
 
     let config = get_config();
@@ -688,7 +696,7 @@ fn withdraw_base_internal(amount: u64)  {
 
     update_base_principal(caller, src_user, src_principal_new);
 
-    if (src_balance < I128::zero()) {
+    if src_balance < I128::zero() {
         require(src_balance.flip().as_u64() >= config.base_borrow_min, Error::BorrowTooSmall);
         require(is_borrow_collateralized(caller), Error::NotCollateralized);
     }
@@ -740,9 +748,11 @@ fn claim_internal(){
     let claimed = storage.user_basic.get(caller).reward_claimed;
     let accrued = storage.user_basic.get(caller).base_tracking_accrued;
 
-    if (accrued > claimed) {
+    if accrued > claimed {
         let owed = accrued - claimed;
-        // rewards_claimed[comet][src] = accrued; // TODO: что за rewards_claimed?
+        // TODO: что за rewards_claimed?
+        //  Тут наверно надо создать StorageMap<Address, u64>
+        // rewards_claimed[comet][src] = accrued;
         mint_reward_token(owed);
         transfer_to_address(owed, config.reward_token, caller);
     }
@@ -818,8 +828,9 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn absorb(absorber: Address, accounts: Vec<Address>) {
+    fn absorb(accounts: Vec<Address>) {
         require(!is_absorb_paused(), Error::Paused);    
+        let absorber = get_caller();
         accrue_internal();
         let mut i = 0;
         while i < accounts.len() {
@@ -828,13 +839,13 @@ impl Market for Contract {
         }
     }
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, base_amount: u64, recipient: Address) {
-        buy_collateral_internal(asset, min_amount, base_amount, recipient)
+    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address) { // @Payment base_token
+        buy_collateral_internal(asset, min_amount, recipient)
     }
 
     #[storage(read, write)]
-    fn supply_collateral(from: Address, dst: Address, asset: ContractId, amount: u64){
-        supply_collateral_internal(from, dst, asset, amount)
+    fn supply_collateral(dst: Address) { // @Payment any collateral asset
+        supply_collateral_internal(dst)
     }
 
     #[storage(read, write)]
@@ -843,13 +854,13 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn supply_base(){
+    fn supply_base(){ // @Payment base_token
         supply_base_internal()
     }
 
     #[storage(read, write)]
-    fn withdraw_base(amount: u64){
-        withdraw_base_internal(amount)
+    fn withdraw_base(){ // @Payment LP Token
+        withdraw_base_internal()
     }
 
     #[storage(read)]

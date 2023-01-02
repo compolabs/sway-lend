@@ -71,4 +71,5 @@ pub enum Error {
     NotCollateralized: (),
     BorrowTooSmall: (),
     NotPermitted: Address,
+    InvalidPayment: (),
 }
