@@ -519,6 +519,7 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
 fn absorb_internal(absorber: Address, account: Address) {
     require(is_liquidatable_internal(account), Error::NotLiquidatable);
 
+    let caller = get_caller();
     let account_user = storage.user_basic.get(account);
     let old_principal = account_user.principal;
     let old_balance = present_value(old_principal); // base_asset_decimals
@@ -569,10 +570,9 @@ fn absorb_internal(absorber: Address, account: Address) {
     market_basic.total_borrow_base -= repay_amount;
     storage.market_basic = market_basic;
 
-    // TODO: Сейчас supply_amount это u64, это значит что оно всегда больше нуля!!!
     // если supply_amount > 0, выпускаем LP токен в количестве равном supply_amount и отправляем его пользователю
     if supply_amount > 0 {
-        mint_to_address(supply_amount, account); //TODO: Разобоаться кому отправлять LP токены
+        mint_to_address(supply_amount, caller);
     }
 }
 
