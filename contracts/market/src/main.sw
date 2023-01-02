@@ -301,7 +301,7 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // (18, 18)
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
-    let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals; flip меняет знак
+    let present_value_ = present_value(principal_value_.flip()).as_u64(); // decimals base_asset_decimals; flip меняет знак
     let scale = 10.pow(config.base_token_decimals);
     
     let mut borrow_limit = 0;
@@ -319,10 +319,9 @@ fn is_borrow_collateralized(account: Address) -> bool {
         borrow_limit += balance * price * collateral_factor / 10000 / scale; //decimals 9
         index = index + 1;
     }
-    let borrow_limit = I128::from_u64(borrow_limit);
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
-    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
+    let borrow_amount = present_value_ * base_token_price / scale; // decimals 9
 
     borrow_limit >= borrow_amount  // borrow_limit >= borrow_amount
 }
@@ -332,7 +331,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
 fn is_liquidatable_internal(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
-    let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals; flip меняет знак
+    let present_value_ = present_value(principal_value_.flip()).as_u64(); // decimals base_asset_decimals; flip меняет знак
     let scale = 10.pow(config.base_token_decimals);
     
     let mut liquidation_treshold = 0;
@@ -351,10 +350,8 @@ fn is_liquidatable_internal(account: Address) -> bool {
         index = index + 1;
     }
     
-    let liquidation_treshold = I128::from_u64(liquidation_treshold);
-
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
-    let borrow_amount = present_value_ * I128::from_u64(base_token_price) / I128::from_u64(scale); // decimals 9
+    let borrow_amount = present_value_ * base_token_price / scale; // decimals 9
 
     liquidation_treshold < borrow_amount  // liquidation_treshold < borrow_amount
 }
@@ -500,10 +497,10 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     let liquidate_collateral_factor = asset_config.liquidate_collateral_factor; //decimals 4
     
     // Store front discount is derived from the collateral asset's liquidate_collateral_factor and store_front_price_factor
-    // discount = store_front_price_factor * (1e18 - liquidate_collateral_factor)
+    // discount = store_front_price_factor * (1e4 - liquidate_collateral_factor)
     let discount_factor = store_front_price_factor - liquidate_collateral_factor; // decimals 4
-    let asset_price_discounted = asset_price - discount_factor * 10.pow(9 - 4); // decimals 9
-    
+    //assetPriceDiscounted = assetPrice * (10^4 - discountFactor)/10^4
+    let asset_price_discounted = asset_price * (10.pow(4) - discount_factor) / 10.pow(9 - 4); // decimals 9
     // # of collateral assets
     // = (TotalValueOfBaseAmount / DiscountedPriceOfCollateralAsset) * assetScale
     // = ((basePrice * baseAmount / baseScale) / assetPriceDiscounted) * assetScale
