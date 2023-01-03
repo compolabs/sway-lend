@@ -741,12 +741,14 @@ fn claim_internal(){
     let basic = storage.user_basic.get(caller);
     update_base_principal(caller, basic, basic.principal);
 
-    let claimed = storage.user_basic.get(caller).reward_claimed;
-    let accrued = storage.user_basic.get(caller).base_tracking_accrued;
+    let mut basic = storage.user_basic.get(caller);
+    let claimed = basic.reward_claimed;
+    let accrued = basic.base_tracking_accrued;
 
     if accrued > claimed {
-        let mut user_basic = storage.user_basic.get(caller);
-        user_basic.reward_claimed = accrued;
+        basic.reward_claimed = accrued;
+        storage.user_basic.insert(caller, basic);
+
         let owed = accrued - claimed;
         mint_to_address(owed, caller);
     }
