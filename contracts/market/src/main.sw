@@ -104,6 +104,7 @@ abi Market {
 }
 
 // TODO: работает ли обновление стораджа?
+// TODO: протестировать минт и отправку лп токенов?
 storage {
     config: Option<MarketConfiguration> = Option::None,
     pause_config: Option<PauseConfiguration> = Option::None,
@@ -162,10 +163,6 @@ fn is_claim_paused() -> bool {
         Option::Some(config) => config.claim_paused,
         Option::None(_) => false,
     }
-}
-
-fn mint_reward_token(_amount: u64){
-    //TODO: implement
 }
 
 #[storage(read)]
@@ -715,8 +712,7 @@ fn withdraw_reward_token_internal(to: Address, amount: u64) {
     let config = get_config();
     let sender = get_caller();
     require(sender == config.governor, Error::NotPermitted(sender));
-    mint_reward_token(amount);
-    transfer_to_address(amount, config.reward_token, to);
+    mint_to_address(amount, to);
 }
 
 // @Callable get_reward_owed(account: Address) -> u64
@@ -749,12 +745,10 @@ fn claim_internal(){
     let accrued = storage.user_basic.get(caller).base_tracking_accrued;
 
     if accrued > claimed {
+        let mut user_basic = storage.user_basic.get(caller);
+        user_basic.reward_claimed = accrued;
         let owed = accrued - claimed;
-        // TODO: что за rewards_claimed?
-        //  Тут наверно надо создать StorageMap<Address, u64>
-        // rewards_claimed[comet][src] = accrued;
-        mint_reward_token(owed);
-        transfer_to_address(owed, config.reward_token, caller);
+        mint_to_address(owed, caller);
     }
 }
 
