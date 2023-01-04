@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BUSL-1.1
 library int;
 use sway_libs::i128::I128;
 use std::u128::U128;

@@ -750,9 +750,9 @@ dependencies = [
 
 [[package]]
 name = "cynic"
-version = "2.2.2"
+version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4a3b1c069f38d62c0795fd74df7a55bde42d3ff44e58a00576d1e5c65222fa8"
+checksum = "a4fec275b950c2e854b44f4f35a153f26b853e233e74cf32002afa346e38d87f"
 dependencies = [
  "cynic-proc-macros",
  "reqwest",
@@ -764,9 +764,9 @@ dependencies = [
 
 [[package]]
 name = "cynic-codegen"
-version = "2.2.2"
+version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aefc758a26044bd02a2a0ecb871b158abcb98c92d93d7bc40750285064de602c"
+checksum = "76a1e8c144949c1ff1faca4c9a929fcdcd33ef3e7409a3e76ad51e44164a9c5b"
 dependencies = [
  "counter",
  "darling 0.13.4",
@@ -780,9 +780,9 @@ dependencies = [
 
 [[package]]
 name = "cynic-proc-macros"
-version = "2.2.2"
+version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c948605f5b7ae37c2e70b42c71679172c4a147351ee1b475578ea8f7d70680db"
+checksum = "f16ca3141faff927983492c2e18bb8349181f57acdc32a880e6d00d03299ed1b"
 dependencies = [
  "cynic-codegen",
  "syn",
@@ -2135,9 +2135,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.138"
+version = "0.2.139"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "db6d7e329c562c5dfab7a46a2afabc8b987ab9a4834c9d1ca04dc54c1546cef8"
+checksum = "201de327520df007757c1f0adce6e827fe8562fbc28bfd9c15571c66ca1f5f79"
 
 [[package]]
 name = "link-cplusplus"

@@ -20,8 +20,6 @@ use fuels::{
 abigen!(MarketContract, "out/debug/market-abi.json");
 pub mod market_abi_calls {
 
-    use std::borrow::Borrow;
-
     use super::*;
 
     pub async fn initialize(
