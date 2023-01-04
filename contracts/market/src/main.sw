@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 contract;
 /*   
-███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
-██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
-███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
-╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
-███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
-╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
+    ███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
+    ██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
+    ███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
+    ╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
+    ███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
+    ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
 */
-
 /**
  *
  * @title Swaylend's Market Contract
@@ -79,6 +78,7 @@ abi Market {
 
     #[storage(read)]
     fn withdraw_reserves(to: Address, amount: u64);
+
     #[storage(read)]
     fn quote_collateral(asset: ContractId, base_amount: u64) -> u64;
 
@@ -227,8 +227,7 @@ fn principal_value(present_value_: I128) -> I128 { // -> base_asset_decimals
     let base_supply_index = storage.market_basic.base_supply_index; // -> decimals 18
     let base_borrow_index = storage.market_basic.base_borrow_index; // -> decimals 18
     if present_value_ >= I128::zero() {
-        let principal_value_u64 = 
-        principal_value_supply(base_supply_index, present_value_.as_u64());
+        let principal_value_u64 = principal_value_supply(base_supply_index, present_value_.as_u64());
         I128::from_u64(principal_value_u64)
     } else {
         let principal_value_u64 = principal_value_borrow(base_borrow_index, present_value_.flip().as_u64());
@@ -379,7 +378,6 @@ fn accrue_internal() {
     let now = timestamp();
     let time_elapsed = now - market_basic.last_accrual_time;
     if time_elapsed > 0 {
-        // let (base_supply_index, base_borrow_index) = accrued_interest_indices(time_elapsed); // #unused
         let total_supply_base = market_basic.total_supply_base; // base_asset_decimal
         let total_borrow_base = market_basic.total_borrow_base; // base_asset_decimal
         let tracking_supply_speed = config.base_tracking_supply_speed; // decimals 18
@@ -625,7 +623,6 @@ fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
     storage.totals_collateral.insert(asset, new_total_supply_asset);
     storage.user_collateral.insert((caller, asset), src_collateral_new);
 
-    // let asset_config = get_asset_config_by_asset_id(asset); // #unused
     // Note: no accrue interest, BorrowCF < LiquidationCF covers small changes
     require(is_borrow_collateralized(caller), Error::NotCollateralized);
 
