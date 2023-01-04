@@ -42,7 +42,7 @@ pub mod oracle_abi_calls {
         for (_, asset) in assets.iter() {
             let price = match responce[asset.coingeco_id.as_str()]["usd"].as_f64() {
                 Some(p) => (p * 10f64.powf(9f64)).round() as u64,
-                _ => 0,
+                _ => asset.default_price,
             };
             set_price(contract, asset.asset_id, price).await;
         }
@@ -74,6 +74,7 @@ pub struct Asset {
     pub asset_id: ContractId,
     pub coingeco_id: String,
     pub instance: Option<TokenContract>,
+    pub default_price: u64,
 }
 
 pub async fn init_wallet() -> WalletUnlocked {
