@@ -5,5 +5,6 @@ license = "Apache-2.0"
 name = "market"
 
 [dependencies]
-oracle_abi = { path = "../../abi/oracle_abi" }
 sway_libs = { git = "https://github.com/FuelLabs/sway-libs", tag = "v0.4.1" }
+oracle_abi = { path = "../../abi/oracle_abi" }
+token_abi = { path = "../../abi/token_abi" }

@@ -9,6 +9,7 @@ dependencies = [
     'oracle_abi',
     'std',
     'sway_libs',
+    'token_abi',
 ]
 
 [[package]]
@@ -24,4 +25,9 @@ dependencies = ['core']
 [[package]]
 name = 'sway_libs'
 source = 'git+https://github.com/FuelLabs/sway-libs?tag=v0.4.1#f5539c14f16469e9103eb6c7c09e34d333c8ec5c'
+dependencies = ['std']
+
+[[package]]
+name = 'token_abi'
+source = 'path+from-root-9ED3421BB02FBE52'
 dependencies = ['std']

@@ -14,6 +14,7 @@ dep math;
 use structs::*;
 use int::*;
 use oracle_abi::*;
+use token_abi::*;
 
 use std::{
     address::*,
@@ -103,8 +104,9 @@ abi Market {
     fn claim();
 }
 
-// TODO: работает ли обновление стораджа?
-// TODO: протестировать минт и отправку лп токенов?
+// TODO: Test if the storage update works?
+// TODO: Test the mint and transfer lp tokens?
+// TODO: Testnet sway token deploy
 storage {
     config: Option<MarketConfiguration> = Option::None,
     pause_config: Option<PauseConfiguration> = Option::None,
@@ -126,6 +128,12 @@ storage {
 const BASE_INDEX_SCALE: u64 = 1000000000000000000; //1e18
 const FACTOR_SCALE: u64 = 1000000000000000000; // 1e18
 //=======================================================
+
+#[storage(read)]
+fn mint_reward_token(amount: u64, recipient: Address){
+    let config = get_config();
+    abi(Token, config.reward_token.value).mint_and_transfer(amount, recipient);
+}
 
 #[storage(read)]
 fn is_absorb_paused() -> bool {
@@ -712,7 +720,8 @@ fn withdraw_reward_token_internal(to: Address, amount: u64) {
     let config = get_config();
     let sender = get_caller();
     require(sender == config.governor, Error::NotPermitted(sender));
-    mint_to_address(amount, to);
+
+    mint_reward_token(amount, to);
 }
 
 // @Callable get_reward_owed(account: Address) -> u64
@@ -734,7 +743,6 @@ fn get_reward_owed_internal(account: Address) -> u64 {
 fn claim_internal(){
     require(!is_claim_paused(), Error::Paused);
     let caller = get_caller();
-    let config = get_config();
 
     accrue_internal();
 
@@ -750,7 +758,7 @@ fn claim_internal(){
         storage.user_basic.insert(caller, basic);
 
         let owed = accrued - claimed;
-        mint_to_address(owed, caller);
+        mint_reward_token(owed, caller);
     }
 }
 

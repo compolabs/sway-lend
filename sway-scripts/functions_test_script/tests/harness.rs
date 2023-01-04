@@ -22,14 +22,13 @@ pub async fn setup_wallet() -> (WalletUnlocked, Provider) {
     return (wallet, provider);
 }
 
-
 #[tokio::test]
 async fn main_test() {
     let wallet = launch_provider_and_get_wallet().await;
     let bin_path = "out/debug/functions_test_script.bin";
     let instance = Script::new(wallet.clone(), bin_path);
 
-    let response = instance.main().call().await.unwrap();
+    let response = instance.main().simulate().await.unwrap();
 
     let logs = response.get_logs().unwrap();
     println!("{:#?}", logs);
