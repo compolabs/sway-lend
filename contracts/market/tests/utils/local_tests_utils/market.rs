@@ -1,4 +1,4 @@
-use std::{collections::HashMap, context::balance_of, str::FromStr};
+use std::{collections::HashMap, str::FromStr};
 
 use crate::utils::local_tests_utils::*;
 use fuels::contract::call_response::FuelCallResponse;
@@ -17,7 +17,10 @@ use fuels::{
 };
 
 */
+
 abigen!(MarketContract, "out/debug/market-abi.json");
+
+// TODO: Сделать это классом чтоб не передавать вечно асет айди
 pub mod market_abi_calls {
 
     use super::*;
@@ -35,10 +38,10 @@ pub mod market_abi_calls {
 
     pub async fn supply_base(
         market: &MarketContract,
-        asset_id: AssetId,
+        base_asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
-        let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
+        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
         market
             .methods()
             .supply_base()
@@ -50,22 +53,66 @@ pub mod market_abi_calls {
             .await
     }
 
-    // pub async fn borrow(
-    //     market: &MarketContract,
-    //     asset_id: AssetId,
-    //     amount: u64,
-    // ) -> Result<FuelCallResponse<()>, Error> {
-    //     let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
-    //     market
-    //         .methods()
-    //         .withdraw_base()
-    //         .call_params(call_params)
-    //         .estimate_tx_dependencies(None)
-    //         .await
-    //         .unwrap()
-    //         .call()
-    //         .await
-    // }
+    pub async fn withdraw_base(
+        market: &MarketContract,
+        lp_asset_id: AssetId,
+        amount: u64,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
+        market
+            .methods()
+            .withdraw_base()
+            .call_params(call_params)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
+    
+    pub async fn buy_collateral(
+        market: &MarketContract,
+        base_asset_id: AssetId,
+        amount: u64,
+        asset: ContractId,
+        min_amount: u64,
+        recipient: Address
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+        market
+            .methods()
+            .buy_collateral(asset,min_amount,recipient)
+            .call_params(call_params)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
+
+
+    pub async fn absorb(
+        market: &MarketContract,
+        addresses: Vec<Address>,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        market
+            .methods()
+            .absorb(addresses)
+            .call()
+            .await
+    }
+
+    pub async fn withdraw_collateral(
+        market: &MarketContract,
+        asset: ContractId,
+        amount: u64
+    ) -> Result<FuelCallResponse<()>, Error> {
+        market
+            .methods()
+            .withdraw_collateral(asset,amount)
+            .call()
+            .await
+    }
 
     pub async fn supply_collateral(
         market: &MarketContract,
@@ -116,6 +163,7 @@ pub async fn setup_market() -> (
     // println!("Wallet address {address}\n");
 
     //--------------- TOKENS ---------------
+    //TODO: Сделать эту хуйню циклом
     let eth_config = DeployTokenConfig {
         name: String::from("Etherium"),
         symbol: String::from("ETH"),
@@ -306,19 +354,19 @@ pub async fn setup_market() -> (
     (wallet, assets, market_instance, oracle_instance)
 }
 
-pub async fn get_market_state(market: &MarketContract, base_asset_id: AssetId) {
-    let market_contact_id = ContractId::from(market.get_contract_id());
-    let methods = market.methods();
-    println("market_contact_id {}", market_contact_id)
-    println("base_asset_id {}", base_asset_id)
+pub async fn get_market_state(_market: &MarketContract, _base_asset_id: AssetId) {
+    // let market_contact_id = ContractId::from(market.get_contract_id());
+    // let methods = market.methods();
+    // println!("market_contact_id {}", market_contact_id);
+    // println("base_asset_id {}", base_asset_id);
     
-    ////return these variables
-    //Total balance - base token кол-во у контракта
-    // let balance = methods.balance_of(contract_id(), config.base_token); // base_token_decimals
-    let balance = balance_of(market_contact_id, base_asset_id); 
-    wallet.get_balances().await.unwrap();
+    // ////return these variables
+    // //Total balance - base token кол-во у контракта
+    // // let balance = methods.balance_of(contract_id(), config.base_token); // base_token_decimals
+    // let balance = balance_of(market_contact_id, base_asset_id); 
+    // wallet.get_balances().await.unwrap();
      
-    return balance;
+    // return balance;
 
     //Total supply - долл эквивалент всех колл ассетов на контаркте - asset_configs
     // let total_supply =
