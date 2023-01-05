@@ -54,6 +54,9 @@ abi Market {
 
     #[storage(read)]
     fn get_configuration() -> MarketConfiguration;
+    
+    #[storage(read)]
+    fn get_user_basic(account: Address) -> UserBasic;
 
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64;
@@ -772,6 +775,11 @@ impl Market for Contract {
     #[storage(read)]
     fn get_configuration() -> MarketConfiguration {
         get_config()
+    }
+
+    #[storage(read)]
+    fn get_user_basic(account: Address) -> UserBasic {
+        storage.user_basic.get(account)
     }
     //-----------------------------------
     #[storage(read)]

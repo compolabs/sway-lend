@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::{collections::HashMap, context::balance_of, str::FromStr};
 
 use crate::utils::local_tests_utils::*;
 use fuels::contract::call_response::FuelCallResponse;
@@ -305,3 +305,56 @@ pub async fn setup_market() -> (
     // println!("Market config:\n{:#?}", _res);
     (wallet, assets, market_instance, oracle_instance)
 }
+
+pub async fn get_market_state(market: &MarketContract, base_asset_id: AssetId) {
+    let market_contact_id = ContractId::from(market.get_contract_id());
+    let methods = market.methods();
+    println("market_contact_id {}", market_contact_id)
+    println("base_asset_id {}", base_asset_id)
+    
+    ////return these variables
+    //Total balance - base token кол-во у контракта
+    // let balance = methods.balance_of(contract_id(), config.base_token); // base_token_decimals
+    let balance = balance_of(market_contact_id, base_asset_id); 
+    wallet.get_balances().await.unwrap();
+     
+    return balance;
+
+    //Total supply - долл эквивалент всех колл ассетов на контаркте - asset_configs
+    // let total_supply =
+    //     present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
+
+    // //Total borrow - дол эвивалент взятого токена в залог
+    // let total_borrow =
+    //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
+
+    // //Total user collateral
+    // let total_borrow =
+    //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
+
+    // //Utilization - вызвать get_utilization
+    // let utilization = get_utilization();
+
+    //sRate - вызвать get_supply_rate
+    // let s_rate = get_supply_rate();
+
+    //todo return object with all data
+}
+
+// pub async fn user_market_state(
+//     market: &MarketContract,
+//     account: Address,
+// ) -> Result<FuelCallResponse<()>, Error> {
+//     market
+//         .methods()
+//         .get_user_basic(account)
+//         .await
+//         .unwrap()
+//         .principal;
+//     //todo спросить что такое present_value
+//     // let user_present_value = market
+//     //     .methods()
+//     //     .get_user_basic(account)
+//     //     .await
+//     //     .unwrap().principal;
+// }

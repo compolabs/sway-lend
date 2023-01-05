@@ -11,14 +11,14 @@ async fn get_oracle_price() {
     let price = parse_units(1, 9);
 
     let res = oracle_methods.set_price(asset_id, price).call().await;
-    res.expect("❌ Cannou update oracle price");
+    res.expect("❌ Can not update oracle price");
 
     let res = oracle_methods.get_price(asset_id).simulate().await;
-    res.as_ref().expect("❌ Cannou get oracle price");
+    res.as_ref().expect("❌ Can not get oracle price");
     let oracle_price = res.unwrap().value.price;
 
     let res = market_methods.get_oracle_price(asset_id).simulate().await;
-    // res.as_ref().expect("❌ Cannou get market oracle price");
+    // res.as_ref().expect("❌ Can not get market oracle price");
     let market_oracle_price = res.unwrap().value;
 
     assert_eq!(market_oracle_price, oracle_price);

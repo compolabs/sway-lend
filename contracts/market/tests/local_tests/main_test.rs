@@ -24,14 +24,13 @@ async fn main_test() {
     .await
     .unwrap();
 
-    //  💰 supply_collateral | Alice
-    market::market_abi_calls::supply_collateral(
-        &market.with_wallet(alice).unwrap(),
-        AssetId::from(*uni.instance.as_ref().unwrap().get_contract_id().hash()),
-        parse_units(100, uni.config.decimals),
-    )
-    .await
-    .unwrap();
+    let data = market::market_abi_calls::get_market_state(
+        &market.with_wallet(bob).unwrap(),
+        AssetId::from(*usdc.instance.as_ref().unwrap().get_contract_id().hash())
+    ).await.unwrap();
+    println!("✅ usdc balance after Bob supply {}",data);
+
+   
     // 🤑 borrow
     /*
 
