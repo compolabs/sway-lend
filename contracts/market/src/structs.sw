@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 library structs;
-use sway_libs::i128::I128;
+dep i64;
+
+use i64::I64;
 
 
 pub struct MarketConfiguration {
@@ -44,7 +46,7 @@ pub struct PauseConfiguration {
 }
 
 pub struct UserBasic {
-    principal: I128, // decimals: base_asset_decimal
+    principal: I64, // decimals: base_asset_decimal
     base_tracking_index: u64,	// decimals: 18
     base_tracking_accrued: u64,	// decimals: native_asset_decimal
     reward_claimed: u64,	// decimals: native_asset_decimal
@@ -70,6 +72,6 @@ pub enum Error {
     SupplyCapExceeded: (),
     NotCollateralized: (),
     BorrowTooSmall: (),
-    NotPermitted: Address,
+    NotPermitted: (),
     InvalidPayment: (),
 }

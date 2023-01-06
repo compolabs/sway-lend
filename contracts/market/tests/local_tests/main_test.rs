@@ -1,24 +1,35 @@
-use fuels::tx::AssetId;
+use fuels::tx::{AssetId, ContractId};
 
 use crate::utils::{
-    local_tests_utils::{init_wallet, market},
+    local_tests_utils::{init_wallet, market, oracle_abi_calls},
     number_utils::parse_units,
 };
 
 #[tokio::test]
 async fn main_test() {
-    let (_admin, assets, market, _oracle) = market::setup_market().await;
+    let (_admin, assets, market, oracle) = market::setup_market().await;
     let usdc = assets.get("USDC").unwrap();
     let uni = assets.get("UNI").unwrap();
 
     let alice = init_wallet().await;
     let bob = init_wallet().await;
-    let chad = init_wallet().await;
+    // let chad = init_wallet().await;
 
-    //TODO поставить цену юни 5 юсдс 1
+    oracle_abi_calls::set_price(
+        &oracle,
+        ContractId::from(usdc.instance.as_ref().unwrap().get_contract_id()),
+        parse_units(1, usdc.config.decimals),
+    )
+    .await;
+    oracle_abi_calls::set_price(
+        &oracle,
+        ContractId::from(uni.instance.as_ref().unwrap().get_contract_id()),
+        parse_units(5, uni.config.decimals),
+    )
+    .await;
 
     // 💰 supply_base	Bob 100$/100USDC
-    market::market_abi_calls::supply_base(
+    let _res = market::market_abi_calls::supply_base(
         &market.with_wallet(bob.clone()).unwrap(),
         AssetId::from(*usdc.instance.as_ref().unwrap().get_contract_id().hash()),
         parse_units(100, usdc.config.decimals),
@@ -27,13 +38,13 @@ async fn main_test() {
     .unwrap();
 
     // 💰 supply_collateral	Alice 200$/40UNI
-    market::market_abi_calls::supply_collateral(
-        &market.with_wallet(alice.clone()).unwrap(),
-        AssetId::from(*uni.instance.as_ref().unwrap().get_contract_id().hash()),
-        parse_units(40, uni.config.decimals),
-    )
-    .await
-    .unwrap();
+    // market::market_abi_calls::supply_collateral(
+    //     &market.with_wallet(alice.clone()).unwrap(),
+    //     AssetId::from(*uni.instance.as_ref().unwrap().get_contract_id().hash()),
+    //     parse_units(40, uni.config.decimals),
+    // )
+    // .await
+    // .unwrap();
 
     // // 💸 withdraw_base	Alice -50$/50USDC
     // market::market_abi_calls::withdraw_base(
@@ -87,10 +98,17 @@ async fn main_test() {
     // .await
     // .unwrap();
 
-    // //  🏦 buy_collateral	Bob
-    // market::market_abi_calls::buy_collateral(&market.with_wallet(alice.clone()).unwrap())
-    //     .await
-    //     .unwrap();
+    //  🏦 buy_collateral	Bob
+    // market::market_abi_calls::buy_collateral(
+    //     &market.with_wallet(bob.clone()).unwrap(),
+    //     AssetId::from(*usdc.instance.as_ref().unwrap().get_contract_id().hash()),
+    //     parse_units(180, usdc.config.decimals),
+    //     ContractId::from(uni.instance.as_ref().unwrap().get_contract_id()),
+    //     parse_units(1, uni.config.decimals),
+    //     Address::from(bob.address())
+    // )
+    // .await
+    // .unwrap();
 
     // // 💸 withdraw_base	Bob
     // market::market_abi_calls::withdraw_base(
