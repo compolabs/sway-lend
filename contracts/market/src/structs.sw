@@ -24,7 +24,6 @@ pub struct MarketConfiguration {
     base_borrow_min: u64, // decimals: base_token_decimals
     target_reserves: u64, // decimals: base_token_decimals
     reward_token: ContractId, 
-    asset_configs: Vec<AssetConfig>,
 }
 
 pub struct AssetConfig {

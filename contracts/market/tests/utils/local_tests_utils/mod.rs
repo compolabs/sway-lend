@@ -77,20 +77,6 @@ pub struct Asset {
     pub default_price: u64,
 }
 
-pub async fn init_wallet() -> WalletUnlocked {
-    let mut wallets = launch_custom_provider_and_get_wallets(
-        WalletsConfig::new(
-            Some(1),             /* Single wallet */
-            Some(1),             /* Single coin (UTXO) */
-            Some(1_000_000_000), /* Amount per coin */
-        ),
-        None,
-        None,
-    )
-    .await;
-    wallets.pop().unwrap()
-}
-
 pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleContract {
     let id = Contract::deploy(
         "./tests/artefacts/oracle/oracle.bin",
@@ -147,7 +133,7 @@ pub async fn get_token_contract_instance(
     instance
 }
 
-// pub async fn print_balances(wallet: &WalletUnlocked) {
-//     let balances = wallet.get_balances().await.unwrap();
-//     println!("{:#?}\n", balances);
-// }
+pub async fn print_balances(wallet: &WalletUnlocked) {
+    let balances = wallet.get_balances().await.unwrap();
+    println!("{:#?}\n", balances);
+}

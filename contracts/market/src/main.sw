@@ -13,7 +13,6 @@ use i64::I64;
 use structs::*;
 use oracle_abi::*;
 use token_abi::*;
-
 use std::{
     address::*,
     auth::{
@@ -32,14 +31,15 @@ use std::{
     },
     logging::log,
     revert::require,
-    storage::*,
+    storage::StorageVec,
     token::*,
     u128::U128,
+    
 };
 
 abi Market {
-    #[storage(write)]
-    fn initialize(config: MarketConfiguration);
+    #[storage(read, write)]
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>);
 
     #[storage(write, read)]
     fn pause(config: PauseConfiguration);
@@ -52,6 +52,9 @@ abi Market {
 
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64;
+
+    #[storage(read)]
+    fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig;
     //-------------------------------------------------
     #[storage(read)]
     fn get_utilization() -> u64;
@@ -103,6 +106,7 @@ abi Market {
 
 storage {
     config: Option<MarketConfiguration> = Option::None,
+    asset_configs: StorageVec<AssetConfig> = StorageVec{},
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
@@ -307,8 +311,8 @@ fn is_borrow_collateralized(account: Address) -> bool {
 
     let mut borrow_limit = 0;
     let mut index = 0;
-    while index < config.asset_configs.len() {
-        let asset_config = match config.asset_configs.get(index) {
+    while index < storage.asset_configs.len() {
+        let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
@@ -337,8 +341,8 @@ fn is_liquidatable_internal(account: Address) -> bool {
 
     let mut liquidation_treshold = 0;
     let mut index = 0;
-    while index < config.asset_configs.len() {
-        let asset_config = match config.asset_configs.get(index) {
+    while index < storage.asset_configs.len() {
+        let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
@@ -466,14 +470,14 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
 }
 
 #[storage(read)]
-fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig {
+fn get_asset_config_by_asset_id_internal(asset: ContractId) -> AssetConfig {
     let mut out: Option<AssetConfig> = Option::None;
-    let config = get_config();
     let mut i = 0;
-    while i < config.asset_configs.len() {
-        let asset_config = config.asset_configs.get(i).unwrap();
+    while i < storage.asset_configs.len() {
+        let asset_config = storage.asset_configs.get(i).unwrap();
         if asset_config.asset == asset {
             out = Option::Some(asset_config);
+            break;
         }
         i += 1;
     }
@@ -489,7 +493,7 @@ fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig {
 #[storage(read)]
 fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // asset decimals
     let config = get_config();
-    let asset_config = get_asset_config_by_asset_id(asset);
+    let asset_config = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
     let base_price = get_price(config.base_token, config.base_token_price_feed); // decimals 9
     let store_front_price_factor = config.store_front_price_factor; // decimals 4
@@ -521,8 +525,8 @@ fn absorb_internal(absorber: Address, account: Address) {
 
     let mut delta_value = 0; // decimals 9
     let mut i = 0;
-    while i < config.asset_configs.len() {
-        let asset_config = config.asset_configs.get(i).unwrap();
+    while i < storage.asset_configs.len() {
+        let asset_config = storage.asset_configs.get(i).unwrap();
         let asset = asset_config.asset;
         let seize_amount = storage.user_collateral.get((account, asset)); // asset decimals
         if seize_amount == 0 {
@@ -603,7 +607,7 @@ fn supply_collateral_internal(dst: Address) {
     require(amount > 0, Error::InvalidPayment);
 
     let asset = msg_asset_id();
-    let asset_config = get_asset_config_by_asset_id(asset);
+    let asset_config = get_asset_config_by_asset_id_internal(asset);
     let mut total_supply_asset = storage.totals_collateral.get(asset);
     total_supply_asset += amount;
     require(total_supply_asset <= asset_config.supply_cap, Error::SupplyCapExceeded);
@@ -658,7 +662,7 @@ fn supply_base_internal() {
     market_basic.total_borrow_base -= repay_amount;
     storage.market_basic = market_basic;
     update_base_principal(caller, dst_user, dst_principal_new);
-   
+    
     if supply_amount > 0 {
         mint_to_address(supply_amount, caller);
     }
@@ -696,7 +700,6 @@ fn withdraw_base_internal() {
 
     transfer_to_address(amount, config.base_token, caller);
 
-    // burns the LP token in the amount equal to the withdrawAmount that the user sent when withdrawing
     burn(withdraw_amount);
 }
 
@@ -760,9 +763,14 @@ impl Market for Contract {
         get_price(asset, base_token_price_feed)
     }
 
-    #[storage(write)]
-    fn initialize(config: MarketConfiguration) {
+    #[storage(read, write)]
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>) {
         storage.config = Option::Some(config);
+        let mut i = 0;
+        while i < asset_configs.len() {
+            storage.asset_configs.push(asset_configs.get(i).unwrap());
+            i += 1;
+        }
     }
 
     #[storage(write, read)]
@@ -871,5 +879,10 @@ impl Market for Contract {
     #[storage(read, write)]
     fn claim() {
         claim_internal()
+    }
+
+    #[storage(read)]
+    fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig {
+        get_asset_config_by_asset_id_internal(asset)
     }
 }
