@@ -43,9 +43,11 @@ pub mod market_abi_calls {
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
         let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
             .supply_base()
+            .tx_params(tx_params)
             .call_params(call_params)
             .estimate_tx_dependencies(None)
             .await

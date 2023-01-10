@@ -34,7 +34,6 @@ use std::{
     storage::StorageVec,
     token::*,
     u128::U128,
-    
 };
 
 abi Market {
@@ -49,6 +48,9 @@ abi Market {
 
     #[storage(read)]
     fn get_user_basic(account: Address) -> UserBasic;
+
+    #[storage(read)]
+    fn get_user_collateral(address: Address, asset: ContractId) -> u64;
 
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64;
@@ -104,25 +106,26 @@ abi Market {
     fn claim();
 }
 
+const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 storage {
     config: Option<MarketConfiguration> = Option::None,
-    asset_configs: StorageVec<AssetConfig> = StorageVec{},
+    asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
+    //TODO: base_tracking_index 1e18 by default
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics {
-        base_supply_index: 0,
-        base_borrow_index: 0,
-        tracking_supply_index: 0,
-        tracking_borrow_index: 0,
+        base_supply_index: SCALE_18,
+        base_borrow_index: SCALE_18,
+        tracking_supply_index: SCALE_18,
+        tracking_borrow_index: SCALE_18,
         total_supply_base: 0,
         total_borrow_base: 0,
         last_accrual_time: 0,
     },
 }
 
-const SCALE_18: u64 = 1000000000000000000; // 1e18
 #[storage(read)]
 fn mint_reward_token(amount: u64, recipient: Address) {
     let config = get_config();
@@ -201,19 +204,12 @@ pub fn present_value_borrow(base_borrow_index_: u64, principal_value_: u64) -> u
 }
 
 pub fn principal_value_supply(base_supply_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
-    if base_supply_index_ != 0 {
-        present_value_ * SCALE_18 / base_supply_index_
-    } else {
-        0
-    }
+    let res = U128::from((0, present_value_)) * U128::from((0, SCALE_18)) / U128::from((0, base_supply_index_));
+    res.as_u64().unwrap()
 }
 
 pub fn principal_value_borrow(base_borrow_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
-    if base_borrow_index_ != 0 {
-        (present_value_ * SCALE_18 + base_borrow_index_ - 1) / base_borrow_index_
-    } else {
-        0
-    }
+    (present_value_ * SCALE_18 + base_borrow_index_ - 1) / base_borrow_index_
 }
 
 #[storage(read)]
@@ -468,7 +464,6 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
 
     transfer_to_address(amount, config.base_token, to);
 }
-
 #[storage(read)]
 fn get_asset_config_by_asset_id_internal(asset: ContractId) -> AssetConfig {
     let mut out: Option<AssetConfig> = Option::None;
@@ -498,12 +493,12 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     let base_price = get_price(config.base_token, config.base_token_price_feed); // decimals 9
     let store_front_price_factor = config.store_front_price_factor; // decimals 4
     let liquidate_collateral_factor = asset_config.liquidate_collateral_factor; // decimals 4
-    
+
     // Store front discount is derived from the collateral asset's liquidate_collateral_factor and store_front_price_factor
     let scale4 = 10.pow(4);
     let discount_factor = store_front_price_factor * (scale4 - liquidate_collateral_factor) / scale4; // decimals 4
     let asset_price_discounted = asset_price * (scale4 - discount_factor) / scale4; // decimals 9
-    
+
     // of collateral assets
     let base_scale = 10.pow(config.base_token_decimals);
     let asset_scale = 10.pow(asset_config.decimals);
@@ -656,13 +651,14 @@ fn supply_base_internal() {
 
     let dst_balance = dst_present_value + I64::from(amount);
     let dst_principal_new = principal_value(dst_balance);
+
     let (repay_amount, supply_amount) = repay_and_supply_amount(dst_principal, dst_principal_new);
     let mut market_basic = storage.market_basic;
     market_basic.total_supply_base += supply_amount;
     market_basic.total_borrow_base -= repay_amount;
     storage.market_basic = market_basic;
     update_base_principal(caller, dst_user, dst_principal_new);
-    
+
     if supply_amount > 0 {
         mint_to_address(supply_amount, caller);
     }
@@ -790,6 +786,12 @@ impl Market for Contract {
     fn get_user_basic(account: Address) -> UserBasic {
         storage.user_basic.get(account)
     }
+
+    #[storage(read)]
+    fn get_user_collateral(address: Address, asset: ContractId) -> u64 {
+        storage.user_collateral.get((address, asset))
+    }
+
     //-----------------------------------
     #[storage(read)]
     fn get_utilization() -> u64 {

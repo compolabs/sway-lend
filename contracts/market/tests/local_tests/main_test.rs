@@ -1,7 +1,8 @@
 use fuels::prelude::CallParameters;
 use fuels::tx::{Address, AssetId, ContractId};
 
-use crate::utils::local_tests_utils::print_balances;
+use crate::utils::local_tests_utils::market::market_abi_calls;
+use crate::utils::local_tests_utils::{print_balances, token_abi_calls};
 use crate::utils::{
     local_tests_utils::{market, oracle_abi_calls},
     number_utils::parse_units,
@@ -10,10 +11,21 @@ use crate::utils::{
 #[tokio::test]
 async fn main_test() {
     let (walets, assets, market, oracle) = market::setup_market().await;
+    let pl_asset_id = AssetId::from(*market.get_contract_id().hash());
+
     let usdc = assets.get("USDC").unwrap();
+    let usdc_asset_id = AssetId::from(*usdc.instance.as_ref().unwrap().get_contract_id().hash());
     let uni = assets.get("UNI").unwrap();
-    // let alice = walets[1].clone();
+    let uni_asset_id = AssetId::from(*uni.instance.as_ref().unwrap().get_contract_id().hash());
+    let admin = walets[0].clone();
+    let alice = walets[1].clone();
     let bob = walets[2].clone();
+    // println!(
+    //     "Admin {}\nAlice{}\nBob{}\n",
+    //     admin.address(),
+    //     alice.address(),
+    //     bob.address()
+    // );
     // let chad = init_wallet().await;
     oracle_abi_calls::set_price(
         &oracle,
@@ -28,37 +40,63 @@ async fn main_test() {
     )
     .await;
 
-    usdc.instance
+    let bob_usdc_inst = usdc
+        .instance
         .as_ref()
         .unwrap()
         .with_wallet(bob.clone())
-        .unwrap()
-        .methods()
-        .mint()
-        .estimate_tx_dependencies(None)
-        .await
-        .unwrap()
-        .call()
-        .await
         .unwrap();
-    print_balances(&bob).await;
+
+    token_abi_calls::mint(&bob_usdc_inst).await;
+    assert!(
+        bob.get_asset_balance(&usdc_asset_id).await.unwrap() == usdc.config.mint_amount * 1_000_000
+    );
     // 💰 supply_base	Bob 100$/100USDC
-    let res = market::market_abi_calls::supply_base(
+    let _res = market::market_abi_calls::supply_base(
         &market.with_wallet(bob.clone()).unwrap(),
-        AssetId::from(*usdc.instance.as_ref().unwrap().get_contract_id().hash()),
+        usdc_asset_id,
         parse_units(100, usdc.config.decimals),
     )
     .await
     .unwrap();
-    println!("{:#?}", res.get_logs_with_type::<u64>().unwrap());
-    print_balances(&bob).await;
+    assert!(bob.get_asset_balance(&pl_asset_id).await.unwrap() == 100_000_000);
+
+    let alice_uni_inst = uni
+        .instance
+        .as_ref()
+        .unwrap()
+        .with_wallet(alice.clone())
+        .unwrap();
+
+    token_abi_calls::mint(&alice_uni_inst).await;
+
+    assert!(
+        alice.get_asset_balance(&uni_asset_id).await.unwrap()
+            == uni.config.mint_amount * 1_000_000_000
+    );
+
     // 💰 supply_collateral	Alice 200$/40UNI
-    // let _res = market::market_abi_calls::supply_collateral(
-    //     &market.with_wallet(alice.clone()).unwrap(),
-    //     AssetId::from(*uni.instance.as_ref().unwrap().get_contract_id().hash()),
-    //     parse_units(40, uni.config.decimals),
-    // )
-    // .await.unwrap();
+    let _res = market::market_abi_calls::supply_collateral(
+        &market.with_wallet(alice.clone()).unwrap(),
+        uni_asset_id,
+        parse_units(40, uni.config.decimals),
+    )
+    .await
+    .unwrap();
+    let res = &market
+        .with_wallet(alice.clone())
+        .unwrap()
+        .methods()
+        .get_user_collateral(
+            Address::from(alice.address()),
+            ContractId::from(uni.instance.as_ref().unwrap().get_contract_id()),
+        )
+        .simulate()
+        .await
+        .unwrap();
+
+    assert!(res.value == parse_units(40, uni.config.decimals));
+
     // 💸 withdraw_base	Alice -50$/50USDC
     // market::market_abi_calls::withdraw_base(
     //     &market.with_wallet(alice.clone()).unwrap(),
