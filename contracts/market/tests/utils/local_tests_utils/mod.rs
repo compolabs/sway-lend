@@ -44,7 +44,7 @@ pub mod oracle_abi_calls {
                 Some(p) => (p * 10f64.powf(9f64)).round() as u64,
                 _ => asset.default_price,
             };
-            set_price(contract, asset.asset_id, price).await;
+            set_price(contract, asset.contract_id, price).await;
         }
     }
 
@@ -71,7 +71,8 @@ pub struct DeployTokenConfig {
 
 pub struct Asset {
     pub config: DeployTokenConfig,
-    pub asset_id: ContractId,
+    pub contract_id: ContractId,
+    pub asset_id: AssetId,
     pub coingeco_id: String,
     pub instance: Option<TokenContract>,
     pub default_price: u64,
@@ -124,7 +125,7 @@ pub mod token_abi_calls {
                 Some(p) => (p * 10f64.powf(9f64)).round() as u64,
                 _ => asset.default_price,
             };
-            set_price(contract, asset.asset_id, price).await;
+            set_price(contract, asset.contract_id, price).await;
         }
     }
 

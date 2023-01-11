@@ -6,11 +6,13 @@ contract;
  * @notice An efficient monolithic money market protocol
  * @author SWAY GANG
  */
+dep numbers;
 dep structs;
 dep i64;
 
 use i64::I64;
 use structs::*;
+use numbers::*;
 use oracle_abi::*;
 use token_abi::*;
 use std::{
@@ -196,20 +198,25 @@ fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
 // ----------------------------------------------------------------------
 // ----------------------------------------------------------------------
 pub fn present_value_supply(base_supply_index_: u64, principal_value_: u64) -> u64 { // -> base_asset_decimals
-    principal_value_ * base_supply_index_ / SCALE_18
-}
-
-pub fn present_value_borrow(base_borrow_index_: u64, principal_value_: u64) -> u64 { // -> base_asset_decimals
-    principal_value_ * base_borrow_index_ / SCALE_18
-}
-
-pub fn principal_value_supply(base_supply_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
-    let res = U128::from((0, present_value_)) * U128::from((0, SCALE_18)) / U128::from((0, base_supply_index_));
+    let res = U128::from_u64(principal_value_) * U128::from_u64(base_supply_index_) / U128::from_u64(SCALE_18);
     res.as_u64().unwrap()
 }
 
+pub fn present_value_borrow(base_borrow_index_: u64, principal_value_: u64) -> u64 { // -> base_asset_decimals
+    let res = U128::from_u64(principal_value_) * U128::from_u64(base_borrow_index_) / U128::from_u64(SCALE_18);
+    res.as_u64().unwrap()
+}
+
+//TODO decrease decimals
+pub fn principal_value_supply(base_supply_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
+    let res = U128::from_u64(present_value_) * U128::from_u64(SCALE_18) / U128::from_u64(base_supply_index_);
+    res.as_u64().unwrap()
+}
+
+//TODO decrease decimals
 pub fn principal_value_borrow(base_borrow_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
-    (present_value_ * SCALE_18 + base_borrow_index_ - 1) / base_borrow_index_
+    let res = (U128::from_u64(present_value_) * U128::from_u64(SCALE_18) + U128::from_u64(base_borrow_index_ - 1)) / U128::from_u64(base_borrow_index_);
+    res.as_u64().unwrap()
 }
 
 #[storage(read)]
@@ -298,31 +305,38 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (1
 
 // Checks that the dollar value of the user's collateral multiplied 
 // by borrow_collateral_factor is greater than the (planned) loan amount.
+//TODO decrease decimals
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
     let present_value_ = present_value(principal_value_.flip()).into(); // decimals base_asset_decimals
-    let scale = 10.pow(config.base_token_decimals);
 
-    let mut borrow_limit = 0;
+    let mut borrow_limit = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
+        
         let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        let balance = balance_of(contract_id(), asset_config.asset); // decimals asset_config.decimals
-        let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
-        let collateral_factor = asset_config.borrow_collateral_factor; // decimals 4
-        let scale = 10.pow(asset_config.decimals);
 
-        borrow_limit += balance * price * collateral_factor / 10000 / scale; //decimals 9
+        let balance = balance_of(asset_config.asset, contract_id()); // decimals asset_config.decimals
+        let balance = U128::from_u64(balance);
+
+        let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
+        let price = U128::from_u64(price);
+
+        let collateral_factor = U128::from_u64(asset_config.borrow_collateral_factor); // decimals 4
+        let scale = U128::from_u64(10.pow(asset_config.decimals));
+
+        borrow_limit += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
         index = index + 1;
     }
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
-    let borrow_amount = present_value_ * base_token_price / scale; // decimals 9
+    let base_scale = U128::from_u64(10.pow(config.base_token_decimals));
+    let borrow_amount = U128::from_u64(present_value_) * U128::from_u64(base_token_price) / base_scale; // decimals 9
     borrow_limit >= borrow_amount
 }
 // @Callable is_liquidatable(account: Address) -> bool
@@ -493,12 +507,10 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     let base_price = get_price(config.base_token, config.base_token_price_feed); // decimals 9
     let store_front_price_factor = config.store_front_price_factor; // decimals 4
     let liquidate_collateral_factor = asset_config.liquidate_collateral_factor; // decimals 4
-
     // Store front discount is derived from the collateral asset's liquidate_collateral_factor and store_front_price_factor
     let scale4 = 10.pow(4);
     let discount_factor = store_front_price_factor * (scale4 - liquidate_collateral_factor) / scale4; // decimals 4
     let asset_price_discounted = asset_price * (scale4 - discount_factor) / scale4; // decimals 9
-
     // of collateral assets
     let base_scale = 10.pow(config.base_token_decimals);
     let asset_scale = 10.pow(asset_config.decimals);
@@ -738,7 +750,6 @@ fn claim_internal() {
 
     let basic = storage.user_basic.get(caller);
     update_base_principal(caller, basic, basic.principal);
-
     let mut basic = storage.user_basic.get(caller);
     let claimed = basic.reward_claimed;
     let accrued = basic.base_tracking_accrued;

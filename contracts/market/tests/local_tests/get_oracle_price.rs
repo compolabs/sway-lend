@@ -7,7 +7,7 @@ async fn get_oracle_price() {
     let market_methods = market.methods();
     let oracle_methods = oracle.methods();
 
-    let asset_id = assets.get("USDC").unwrap().asset_id;
+    let asset_id = assets.get("USDC").unwrap().contract_id;
     let price = parse_units(1, 9);
 
     let res = oracle_methods.set_price(asset_id, price).call().await;
