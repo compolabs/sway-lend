@@ -15,7 +15,6 @@ use std::{
         msg_sender,
     },
     block::timestamp,
-    identity::Identity,
     logging::log,
     result::Result,
     revert::require,
@@ -52,8 +51,8 @@ impl Oracle for Contract {
     }
 
     #[storage(read)]
-    fn owner() -> Identity {
-        Identity::Address(storage.owner)
+    fn owner() -> Address {
+        storage.owner
     }
 
     #[storage(read, write)]

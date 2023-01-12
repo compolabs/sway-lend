@@ -8,7 +8,7 @@ pub struct Price {
 
 abi Oracle {
     #[storage(read)]
-    fn owner() -> Identity;
+    fn owner() -> Address;
 
     #[storage(read, write)]
     fn initialize(owner: Address);
