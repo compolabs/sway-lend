@@ -1,3 +1,4 @@
+use std::fs;
 use std::{collections::HashMap, str::FromStr};
 
 use crate::utils::local_tests_utils::*;
@@ -17,7 +18,10 @@ use fuels::{
 };
 
 */
+
 abigen!(MarketContract, "out/debug/market-abi.json");
+
+// TODO: Сделать это классом чтоб не передавать вечно асет айди
 pub mod market_abi_calls {
 
     use super::*;
@@ -25,8 +29,9 @@ pub mod market_abi_calls {
     pub async fn initialize(
         contract: &MarketContract,
         config: MarketConfiguration,
+        assets: Vec<market_contract_mod::AssetConfig>,
     ) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().initialize(config).call().await
+        contract.methods().initialize(config, assets).call().await
     }
 
     // pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
@@ -35,13 +40,15 @@ pub mod market_abi_calls {
 
     pub async fn supply_base(
         market: &MarketContract,
-        asset_id: AssetId,
+        base_asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
-        let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
+        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
             .supply_base()
+            .tx_params(tx_params)
             .call_params(call_params)
             .estimate_tx_dependencies(None)
             .await
@@ -50,15 +57,37 @@ pub mod market_abi_calls {
             .await
     }
 
-    // pub async fn borrow(
+    pub async fn withdraw_base(
+        market: &MarketContract,
+        lp_asset_id: AssetId,
+        amount: u64,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        market
+            .methods()
+            .withdraw_base()
+            .tx_params(tx_params)
+            .call_params(call_params)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
+
+    // pub async fn buy_collateral(
     //     market: &MarketContract,
-    //     asset_id: AssetId,
+    //     base_asset_id: AssetId,
     //     amount: u64,
+    //     asset: ContractId,
+    //     min_amount: u64,
+    //     recipient: Address,
     // ) -> Result<FuelCallResponse<()>, Error> {
-    //     let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
+    //     let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
     //     market
     //         .methods()
-    //         .withdraw_base()
+    //         .buy_collateral(asset, min_amount, recipient)
     //         .call_params(call_params)
     //         .estimate_tx_dependencies(None)
     //         .await
@@ -66,6 +95,32 @@ pub mod market_abi_calls {
     //         .call()
     //         .await
     // }
+
+    // pub async fn absorb(
+    //     market: &MarketContract,
+    //     addresses: Vec<Address>,
+    // ) -> Result<FuelCallResponse<()>, Error> {
+    //     market.methods().absorb(addresses).call().await
+    // }
+
+    pub async fn withdraw_collateral(
+        market: &MarketContract,
+        contract_ids: &[Bech32ContractId],
+        asset: ContractId,
+        amount: u64,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        market
+            .methods()
+            .withdraw_collateral(asset, amount)
+            .tx_params(tx_params)
+            .set_contracts(contract_ids)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
 
     pub async fn supply_collateral(
         market: &MarketContract,
@@ -84,11 +139,77 @@ pub mod market_abi_calls {
             .await
     }
 
+    pub async fn get_user_collateral(
+        market: &MarketContract,
+        address: Address,
+        asset: ContractId,
+    ) -> u64 {
+        market
+            .methods()
+            .get_user_collateral(address, asset)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+
     // pub async fn get_configuration(
     //     contract: &MarketContract,
     // ) -> Result<CallResponse<MarketConfiguration>, Error> {
     //     contract.methods().get_configuration().simulate().await
     // }
+
+    //     pub async fn get_market_state(_market: &MarketContract, _base_asset_id: AssetId) -> ContractId {
+    //         let market_contact_id = ContractId::from(_market.get_contract_id());
+    //         let methods = _market.methods();
+    //         let market_address = AssetId::from(*_market.get_contract_id().hash());
+
+    //         // AssetId::from(*market.get_contract_id().hash())
+    //         let _balances = provider.get_balances(market_address).await?;
+    //         // let base_asset_balance =
+    //         return market_contact_id;
+
+    //         // ////return these variables
+    //         // //Total balance - base token кол-во у контракта
+    //         // // let balance = methods.balance_of(contract_id(), config.base_token); // base_token_decimals
+    //         // let balance = balance_of(market_contact_id, base_asset_id);
+    //         // wallet.get_balances().await.unwrap();
+
+    //         // return balance;
+
+    //         //Total supply - долл эквивалент всех колл ассетов на контаркте - asset_configs
+    //         // let total_supply =
+    //         //     present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
+
+    //         // //Total borrow - дол эвивалент взятого токена в залог
+    //         // let total_borrow =
+    //         //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
+
+    //         // //Total user collateral
+    //         // let total_borrow =
+    //         //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
+
+    //         // //Utilization - вызвать get_utilization
+    //         // let utilization = get_utilization();
+
+    //         //sRate - вызвать get_supply_rate
+    //         // let s_rate = get_supply_rate();
+
+    //         //todo return object with all data
+    //     }
+}
+
+async fn init_wallets() -> Vec<WalletUnlocked> {
+    launch_custom_provider_and_get_wallets(
+        WalletsConfig::new(
+            Some(4),             /* Single wallet */
+            Some(1),             /* Single coin (UTXO) */
+            Some(1_000_000_000), /* Amount per coin */
+        ),
+        None,
+        None,
+    )
+    .await
 }
 
 pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketContract {
@@ -96,7 +217,9 @@ pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketCont
         "./out/debug/market.bin",
         &wallet,
         TxParameters::default(),
-        StorageConfiguration::default(),
+        StorageConfiguration::with_storage_path(Some(
+            "./out/debug/market-storage_slots.json".to_string(),
+        )),
     )
     .await
     .unwrap();
@@ -105,139 +228,86 @@ pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketCont
 }
 
 pub async fn setup_market() -> (
-    WalletUnlocked,
+    Vec<WalletUnlocked>,
     HashMap<String, Asset>,
     MarketContract,
     OracleContract,
 ) {
     //--------------- WALLET ---------------
-    let wallet = init_wallet().await;
-    let address = Address::from(wallet.address());
+    let wallets = init_wallets().await;
+    let address = Address::from(wallets[0].address());
     // println!("Wallet address {address}\n");
 
-    //--------------- TOKENS ---------------
-    let eth_config = DeployTokenConfig {
-        name: String::from("Etherium"),
-        symbol: String::from("ETH"),
-        decimals: 9,
-        mint_amount: 1,
-    };
-
-    let usdc_config = DeployTokenConfig {
-        name: String::from("USD Coin"),
-        symbol: String::from("USDC"),
-        decimals: 6,
-        mint_amount: 10000,
-    };
-    let usdc_instance = get_token_contract_instance(&wallet, &usdc_config).await;
-
-    let link_config = DeployTokenConfig {
-        name: String::from("Chainlink"),
-        symbol: String::from("LINK"),
-        decimals: 9,
-        mint_amount: 1000,
-    };
-    let link_instance = get_token_contract_instance(&wallet, &link_config).await;
-
-    let btc_config = DeployTokenConfig {
-        name: String::from("Bitcoin"),
-        symbol: String::from("BTC"),
-        decimals: 8,
-        mint_amount: 1,
-    };
-    let btc_instance = get_token_contract_instance(&wallet, &btc_config).await;
-
-    let uni_config = DeployTokenConfig {
-        name: String::from("Uniswap"),
-        symbol: String::from("UNI"),
-        decimals: 9,
-        mint_amount: 1000,
-    };
-    let uni_instance = get_token_contract_instance(&wallet, &uni_config).await;
-
-    let sway_config = DeployTokenConfig {
-        name: String::from("Sway Lend Token"),
-        symbol: String::from("SWAY"),
-        decimals: 9,
-        mint_amount: 1000,
-    };
-    let sway_instance = get_token_contract_instance(&wallet, &sway_config).await;
-
     //--------------- ORACLE ---------------
-    let mut assets: HashMap<String, Asset> = HashMap::new();
-    assets.insert(
-        String::from("ETH"),
-        Asset {
-            config: eth_config,
-            asset_id: ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
-                .expect("Cannot parse BASE_ASSET_ID to contract id"),
-            coingeco_id: String::from(String::from("ethereum")),
-            default_price: parse_units(1200, 9),
-            instance: Option::None,
-        },
-    );
-    assets.insert(
-        String::from("USDC"),
-        Asset {
-            config: usdc_config,
-            asset_id: ContractId::from(usdc_instance.get_contract_id()),
-            coingeco_id: String::from("usd-coin"),
-            default_price: parse_units(1, 9),
-            instance: Option::Some(usdc_instance),
-        },
-    );
-    assets.insert(
-        String::from("LINK"),
-        Asset {
-            config: link_config,
-            asset_id: ContractId::from(link_instance.get_contract_id()),
-            coingeco_id: String::from("chainlink"),
-            default_price: parse_units(5, 9),
-            instance: Option::Some(link_instance),
-        },
-    );
-    assets.insert(
-        String::from("BTC"),
-        Asset {
-            config: btc_config,
-            asset_id: ContractId::from(btc_instance.get_contract_id()),
-            coingeco_id: String::from("bitcoin"),
-            default_price: parse_units(19000, 9),
-            instance: Option::Some(btc_instance),
-        },
-    );
-    assets.insert(
-        String::from("UNI"),
-        Asset {
-            config: uni_config,
-            asset_id: ContractId::from(uni_instance.get_contract_id()),
-            coingeco_id: String::from("uniswap"),
-            default_price: parse_units(5, 9),
-            instance: Option::Some(uni_instance),
-        },
-    );
-    assets.insert(
-        String::from("SWAY"),
-        Asset {
-            config: sway_config,
-            asset_id: ContractId::from(sway_instance.get_contract_id()),
-            coingeco_id: String::from("uniswap"),
-            default_price: parse_units(300, 9),
-            instance: Option::Some(sway_instance),
-        },
-    );
-    let oracle_instance = get_oracle_contract_instance(&wallet).await;
+    let oracle_instance = get_oracle_contract_instance(&wallets[0]).await;
     let price_feed = ContractId::from(oracle_instance.get_contract_id());
     oracle_abi_calls::initialize(&oracle_instance, address).await;
-    oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
+    // oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
+
+    //--------------- TOKENS ---------------
+
+    let deploy_config_json_str = fs::read_to_string("tests/utils/local_tests_utils/tokens.json")
+        .expect("Should have been able to read the file");
+    let deploy_configs: serde_json::Value =
+        serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
+    let deploy_configs = deploy_configs.as_array().unwrap();
+    let mut assets: HashMap<String, Asset> = HashMap::new();
+    let mut asset_configs: Vec<market_contract_mod::AssetConfig> = Vec::new();
+    for config_value in deploy_configs {
+        let config = DeployTokenConfig {
+            name: String::from(config_value["name"].as_str().unwrap()),
+            symbol: String::from(config_value["symbol"].as_str().unwrap()),
+            decimals: config_value["decimals"].as_u64().unwrap() as u8,
+            mint_amount: config_value["mint_amount"].as_u64().unwrap(),
+        };
+
+        let instance = if config.symbol != "ETH" {
+            Some(get_token_contract_instance(&wallets[0], &config).await)
+        } else {
+            None
+        };
+        let contract_id = match instance {
+            Option::Some(instance) => ContractId::from(instance.get_contract_id()),
+            Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
+                .expect("Cannot parse BASE_ASSET_ID to contract id"),
+        };
+
+        assets.insert(
+            String::from(config_value["symbol"].as_str().unwrap()),
+            Asset {
+                config,
+                contract_id,
+                asset_id: AssetId::from(*contract_id),
+                coingeco_id: String::from(config_value["coingeco_id"].as_str().unwrap()),
+                default_price: parse_units(config_value["default_price"].as_u64().unwrap(), 9),
+                instance: Option::None,
+            },
+        );
+
+        if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
+            asset_configs.push(market_contract_mod::AssetConfig {
+                asset: contract_id,
+                decimals: config_value["decimals"].as_u64().unwrap() as u8,
+                price_feed: price_feed,
+                borrow_collateral_factor: config_value["borrow_collateral_factor"]
+                    .as_u64()
+                    .unwrap(), // decimals: 4
+                liquidate_collateral_factor: config_value["liquidate_collateral_factor"]
+                    .as_u64()
+                    .unwrap(), // decimals: 4
+                liquidation_penalty: config_value["liquidation_penalty"].as_u64().unwrap(), // decimals: 4
+                supply_cap: config_value["supply_cap"].as_u64().unwrap(), // decimals: asset decimals
+            })
+        }
+    }
 
     //--------------- MARKET ---------------
-    let market_instance = get_market_contract_instance(&wallet).await;
+    let market_instance = get_market_contract_instance(&wallets[0]).await;
 
     let market_config = MarketConfiguration {
         governor: address,
         pause_guardian: address,
-        base_token: assets.get("USDC").unwrap().asset_id,
+        base_token: assets.get("USDC").unwrap().contract_id,
         base_token_decimals: assets.get("USDC").unwrap().config.decimals,
         base_token_price_feed: price_feed,
         kink: 800000000000000000, // decimals: 18
@@ -252,56 +322,30 @@ pub async fn setup_market() -> (
         base_min_for_rewards: 20000000, // decimals base_token_decimals
         base_borrow_min: 10000000, // decimals: base_token_decimals
         target_reserves: 1000000000000, // decimals: base_token_decimals
-        reward_token: assets.get("SWAY").unwrap().asset_id,
-        asset_configs: vec![
-            market_contract_mod::AssetConfig {
-                asset: assets.get("LINK").unwrap().asset_id,
-                decimals: assets.get("LINK").unwrap().config.decimals,
-                price_feed: price_feed,
-                borrow_collateral_factor: 7900,    // decimals: 4
-                liquidate_collateral_factor: 8500, // decimals: 4
-                liquidation_penalty: 700,          // decimals: 4
-                supply_cap: 200000000000000,       // decimals: asset decimals
-            },
-            market_contract_mod::AssetConfig {
-                asset: assets.get("UNI").unwrap().asset_id,
-                decimals: assets.get("UNI").unwrap().config.decimals,
-                price_feed: price_feed,
-                borrow_collateral_factor: 7500,    // decimals: 4
-                liquidate_collateral_factor: 8100, // decimals: 4
-                liquidation_penalty: 700,          // decimals: 4
-                supply_cap: 200000000000000,       // decimals: asset decimals
-            },
-            market_contract_mod::AssetConfig {
-                asset: assets.get("BTC").unwrap().asset_id,
-                decimals: assets.get("BTC").unwrap().config.decimals,
-                price_feed: price_feed,
-                borrow_collateral_factor: 7000,    // decimals: 4
-                liquidate_collateral_factor: 7700, // decimals: 4
-                liquidation_penalty: 500,          // decimals: 4
-                supply_cap: 1000000000000,         // decimals: asset decimals
-            },
-            market_contract_mod::AssetConfig {
-                asset: assets.get("ETH").unwrap().asset_id,
-                decimals: assets.get("ETH").unwrap().config.decimals,
-                price_feed: price_feed,
-                borrow_collateral_factor: 8300,    // decimals: 4
-                liquidate_collateral_factor: 9000, // decimals: 4
-                liquidation_penalty: 500,          // decimals: 4
-                supply_cap: 100000000000000,       // decimals: asset decimals
-            },
-        ],
+        reward_token: assets.get("SWAY").unwrap().contract_id,
     };
 
-    market_abi_calls::initialize(&market_instance, market_config)
+    market_abi_calls::initialize(&market_instance, market_config, asset_configs)
         .await
         .expect("❌ Cannot initialize market");
 
-    //FIXME: not implemented: Cannot decode Vectors until we get support from the compiler.
-    // let _res = market_abi_calls::get_configuration(&market_instance)
-    //     .await
-    //     .expect("❌ Cannot read configuration")
-    //     .value;
-    // println!("Market config:\n{:#?}", _res);
-    (wallet, assets, market_instance, oracle_instance)
+    (wallets, assets, market_instance, oracle_instance)
 }
+
+// pub async fn user_market_state(
+//     market: &MarketContract,
+//     account: Address,
+// ) -> Result<FuelCallResponse<()>, Error> {
+//     market
+//         .methods()
+//         .get_user_basic(account)
+//         .await
+//         .unwrap()
+//         .principal;
+//     //todo спросить что такое present_value
+//     // let user_present_value = market
+//     //     .methods()
+//     //     .get_user_basic(account)
+//     //     .await
+//     //     .unwrap().principal;
+// }
