@@ -12,7 +12,7 @@ interface IProps extends HTMLAttributes<HTMLDivElement> {}
 
 const Root = styled.div`
   display: flex;
-  background: ${({ theme }) => theme.colors.primary50};
+  // background: ${({ theme }) => theme.colors.primary50};
   border-radius: 12px;
   padding: 12px;
   gap: 11px;
@@ -23,8 +23,8 @@ const DarkMode: React.FC<IProps> = ({ ...rest }) => {
   const { settingsStore } = useStores();
   return (
     <Root {...rest}>
-      <Img src={moon} alt="dark theme" />
-      <Text>Dark mode</Text>
+      <Text weight={700}>Dark mode</Text>
+      {/*<Img src={moon} alt="dark theme" />*/}
       <Switch
         onChange={() => settingsStore.toggleTheme()}
         value={settingsStore.selectedTheme === THEME_TYPE.DARK_THEME}

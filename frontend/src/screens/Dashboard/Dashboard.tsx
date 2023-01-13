@@ -1,13 +1,9 @@
 import styled from "@emotion/styled";
 import React from "react";
-import SizedBox from "@components/SizedBox";
 import { Observer } from "mobx-react-lite";
-import { MarketVMProvider } from "@screens/Market/MarketVm";
+import { DashboardVMProvider } from "@screens/Dashboard/DashboardVm";
 import Layout from "@components/Layout";
-import AssetsTable from "./AssetsTable";
 import { Column } from "@components/Flex";
-import AccountHealth from "@screens/Market/AccountHealth";
-import MarketInfo from "@screens/Market/MarketInfo";
 
 interface IProps {}
 
@@ -55,18 +51,19 @@ const Container = styled(Column)`
     flex-direction: column-reverse;
   }
 `;
-const MarketImpl: React.FC<IProps> = () => {
+const DashboardImpl: React.FC<IProps> = () => {
   return (
     <Layout>
       <Observer>
         {() => (
           <Root>
-            <Container>
-              <MarketInfo />
-              <AccountHealth />
-            </Container>
-            <SizedBox height={40} />
-            <AssetsTable />
+            Dashboard
+            {/*<Container>*/}
+            {/*  <DashboardInfo />*/}
+            {/*  <AccountHealth />*/}
+            {/*</Container>*/}
+            {/*<SizedBox height={40} />*/}
+            {/*<AssetsTable />*/}
           </Root>
         )}
       </Observer>
@@ -74,7 +71,9 @@ const MarketImpl: React.FC<IProps> = () => {
   );
 };
 
-const Market: React.FC<IProps> = () => (
-  <MarketVMProvider>{/*<MarketImpl />*/}</MarketVMProvider>
+const Dashboard: React.FC<IProps> = () => (
+  <DashboardVMProvider>
+    <DashboardImpl />
+  </DashboardVMProvider>
 );
-export default Market;
+export default Dashboard;

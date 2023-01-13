@@ -4,6 +4,7 @@ import tokenLogos from "./tokenLogos";
 export const ROUTES = {
   ROOT: "/",
   FAUCET: "/faucet",
+  DASHBOARD: "/dashboard",
 };
 
 export const TOKENS_LIST: Array<IToken> = Object.values(tokens).map((t) => ({

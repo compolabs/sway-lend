@@ -13,8 +13,10 @@ const Root = styled.div`
   .switch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 24px;
+    //width: 40px;
+    //height: 24px;
+    width: 76px;
+    height: 40px;
   }
 
   .switch input {
@@ -48,6 +50,7 @@ const Root = styled.div`
     left: 3px;
     bottom: 3px;
     background-color: white;
+    // content: ${({ theme }) => theme.images.icons.sun};
     box-shadow: 0px 2px 4px rgba(54, 56, 112, 0.12);
 
     -webkit-transition: 0.4s;
@@ -55,7 +58,7 @@ const Root = styled.div`
   }
 
   input:checked + .slider {
-    background-color: ${({ theme }) => theme.colors.blue500};
+    background-color: ${({ theme }) => theme.colors.switch.background};
   }
 
   input:focus + .slider {
@@ -69,11 +72,15 @@ const Root = styled.div`
   }
 
   .slider.round {
-    border-radius: 8px;
+    border-radius: 40px;
+    //border-radius: 50%;
+
     box-shadow: 0 2px 4px rgba(54, 56, 112, 0.12);
   }
 
   .slider.round:before {
+    //border-radius: 50%;
+    content: ${({ theme }) => theme.images.icons.sun};
     border-radius: 6px;
   }
 `;

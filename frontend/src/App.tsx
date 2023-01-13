@@ -9,11 +9,12 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
 import Market from "./screens/Market";
+import Dashboard from "@screens/Dashboard";
 
 const Root = styled(Column)`
   width: 100%;
   align-items: center;
-  background: ${({ theme }) => theme.colors.primary50};
+  background: ${({ theme }) => theme.colors.mainBackground};
   min-height: 100vh;
 `;
 const App: React.FC = () => {
@@ -22,9 +23,11 @@ const App: React.FC = () => {
     <Root>
       <Header />
       <Routes>
-        {/* Landing */}
+        <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+
         <Route path={ROUTES.ROOT} element={<Market />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
+
         <Route path="*" element={<Navigate to={ROUTES.ROOT} />} />
       </Routes>
       <WalletModal

@@ -29,7 +29,8 @@ const MarketInfo: React.FC<IProps> = () => {
       {data.map(({ title, value }) => (
         <Card key={title}>
           <Text
-            size={width && width >= 880 ? "semi-big" : undefined}
+            //todo
+            // size={width && width >= 880 ? "semi-big" : undefined}
             type="secondary"
           >
             {title}
