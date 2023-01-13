@@ -9,7 +9,6 @@ impl U128 {
     }
 }
 
-//TODO fuel std pr
 impl U128{
     pub fn ge(self, other: Self) -> bool {
         self > other || self == other

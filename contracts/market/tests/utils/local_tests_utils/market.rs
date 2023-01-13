@@ -1,23 +1,12 @@
 use std::fs;
 use std::{collections::HashMap, str::FromStr};
 
+use crate::utils::local_tests_utils::oracle::{get_oracle_contract_instance, oracle_abi_calls};
 use crate::utils::local_tests_utils::*;
 use fuels::contract::call_response::FuelCallResponse;
 use fuels::prelude::*;
 
-/*
-use std::{collections::HashMap, str::FromStr};
-
-use crate::utils::local_tests_utils::{
-    market::{market_contract_mod::*, *},
-    *,
-};
-use fuels::{
-    prelude::BASE_ASSET_ID,
-    tx::{Address, ContractId},
-};
-
-*/
+use super::oracle::OracleContract;
 
 abigen!(MarketContract, "out/debug/market-abi.json");
 
@@ -33,10 +22,6 @@ pub mod market_abi_calls {
     ) -> Result<FuelCallResponse<()>, Error> {
         contract.methods().initialize(config, assets).call().await
     }
-
-    // pub async fn pause(contract: &MarketContract, config: PauseConfiguration) -> Result<FuelCallResponse<()>, Error> {
-    // contract.methods().pause(config).call().await
-    // }
 
     pub async fn supply_base(
         market: &MarketContract,
@@ -59,49 +44,24 @@ pub mod market_abi_calls {
 
     pub async fn withdraw_base(
         market: &MarketContract,
-        lp_asset_id: AssetId,
+        contract_ids: &[Bech32ContractId],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
-        let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
+        // let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
-            .withdraw_base()
+            .withdraw_base(amount)
             .tx_params(tx_params)
-            .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            // .call_params(call_params)
+            // .estimate_tx_dependencies(None)
+            // .await
+            // .unwrap()
+            .set_contracts(contract_ids)
+            .append_variable_outputs(1)
             .call()
             .await
     }
-
-    // pub async fn buy_collateral(
-    //     market: &MarketContract,
-    //     base_asset_id: AssetId,
-    //     amount: u64,
-    //     asset: ContractId,
-    //     min_amount: u64,
-    //     recipient: Address,
-    // ) -> Result<FuelCallResponse<()>, Error> {
-    //     let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
-    //     market
-    //         .methods()
-    //         .buy_collateral(asset, min_amount, recipient)
-    //         .call_params(call_params)
-    //         .estimate_tx_dependencies(None)
-    //         .await
-    //         .unwrap()
-    //         .call()
-    //         .await
-    // }
-
-    // pub async fn absorb(
-    //     market: &MarketContract,
-    //     addresses: Vec<Address>,
-    // ) -> Result<FuelCallResponse<()>, Error> {
-    //     market.methods().absorb(addresses).call().await
-    // }
 
     pub async fn withdraw_collateral(
         market: &MarketContract,
@@ -153,50 +113,51 @@ pub mod market_abi_calls {
             .value
     }
 
-    // pub async fn get_configuration(
-    //     contract: &MarketContract,
-    // ) -> Result<CallResponse<MarketConfiguration>, Error> {
-    //     contract.methods().get_configuration().simulate().await
-    // }
+    pub async fn get_user_supply_borrow(market: &MarketContract, address: Address) -> (u64, u64) {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        market
+            .methods()
+            .get_user_supply_borrow(address)
+            .tx_params(tx_params)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
 
-    //     pub async fn get_market_state(_market: &MarketContract, _base_asset_id: AssetId) -> ContractId {
-    //         let market_contact_id = ContractId::from(_market.get_contract_id());
-    //         let methods = _market.methods();
-    //         let market_address = AssetId::from(*_market.get_contract_id().hash());
+    pub async fn _pause(
+        contract: &MarketContract,
+        config: PauseConfiguration,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        contract.methods().pause(config).call().await
+    }
 
-    //         // AssetId::from(*market.get_contract_id().hash())
-    //         let _balances = provider.get_balances(market_address).await?;
-    //         // let base_asset_balance =
-    //         return market_contact_id;
+    pub async fn _buy_collateral(
+        market: &MarketContract,
+        base_asset_id: AssetId,
+        amount: u64,
+        asset: ContractId,
+        min_amount: u64,
+        recipient: Address,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+        market
+            .methods()
+            .buy_collateral(asset, min_amount, recipient)
+            .call_params(call_params)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
 
-    //         // ////return these variables
-    //         // //Total balance - base token кол-во у контракта
-    //         // // let balance = methods.balance_of(contract_id(), config.base_token); // base_token_decimals
-    //         // let balance = balance_of(market_contact_id, base_asset_id);
-    //         // wallet.get_balances().await.unwrap();
-
-    //         // return balance;
-
-    //         //Total supply - долл эквивалент всех колл ассетов на контаркте - asset_configs
-    //         // let total_supply =
-    //         //     present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
-
-    //         // //Total borrow - дол эвивалент взятого токена в залог
-    //         // let total_borrow =
-    //         //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
-
-    //         // //Total user collateral
-    //         // let total_borrow =
-    //         //     present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
-
-    //         // //Utilization - вызвать get_utilization
-    //         // let utilization = get_utilization();
-
-    //         //sRate - вызвать get_supply_rate
-    //         // let s_rate = get_supply_rate();
-
-    //         //todo return object with all data
-    //     }
+    pub async fn _absorb(
+        market: &MarketContract,
+        addresses: Vec<Address>,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        market.methods().absorb(addresses).call().await
+    }
 }
 
 async fn init_wallets() -> Vec<WalletUnlocked> {
@@ -236,12 +197,12 @@ pub async fn setup_market() -> (
     //--------------- WALLET ---------------
     let wallets = init_wallets().await;
     let address = Address::from(wallets[0].address());
-    // println!("Wallet address {address}\n");
 
     //--------------- ORACLE ---------------
     let oracle_instance = get_oracle_contract_instance(&wallets[0]).await;
     let price_feed = ContractId::from(oracle_instance.get_contract_id());
     oracle_abi_calls::initialize(&oracle_instance, address).await;
+    assert!(oracle_abi_calls::owner(&oracle_instance).await == address);
     // oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
 
     //--------------- TOKENS ---------------
@@ -262,7 +223,7 @@ pub async fn setup_market() -> (
         };
 
         let instance = if config.symbol != "ETH" {
-            Some(get_token_contract_instance(&wallets[0], &config).await)
+            Some(token::get_token_contract_instance(&wallets[0], &config).await)
         } else {
             None
         };
@@ -331,21 +292,3 @@ pub async fn setup_market() -> (
 
     (wallets, assets, market_instance, oracle_instance)
 }
-
-// pub async fn user_market_state(
-//     market: &MarketContract,
-//     account: Address,
-// ) -> Result<FuelCallResponse<()>, Error> {
-//     market
-//         .methods()
-//         .get_user_basic(account)
-//         .await
-//         .unwrap()
-//         .principal;
-//     //todo спросить что такое present_value
-//     // let user_present_value = market
-//     //     .methods()
-//     //     .get_user_basic(account)
-//     //     .await
-//     //     .unwrap().principal;
-// }

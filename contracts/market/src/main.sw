@@ -16,7 +16,6 @@ use numbers::*;
 use oracle_abi::*;
 use token_abi::*;
 use std::{
-    address::*,
     auth::{
         AuthError,
         msg_sender,
@@ -34,7 +33,7 @@ use std::{
     logging::log,
     revert::require,
     storage::StorageVec,
-    token::*,
+    token::transfer_to_address,
     u128::U128,
 };
 
@@ -59,6 +58,10 @@ abi Market {
 
     #[storage(read)]
     fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig;
+
+    #[storage(read)]
+    fn get_user_supply_borrow(account: Address) -> (u64, u64);
+    fn balance_of_token(asset: ContractId) -> u64;
     //-------------------------------------------------
     #[storage(read)]
     fn get_utilization() -> u64;
@@ -97,7 +100,7 @@ abi Market {
     #[storage(read, write)]
     fn supply_base(); // @Payment base_token
     #[storage(read, write)]
-    fn withdraw_base(); // @Payment LP Token
+    fn withdraw_base(amount: u64); // TODO add payment LP Token
     #[storage(read)]
     fn withdraw_reward_token(to: Address, amount: u64);
 
@@ -115,7 +118,6 @@ storage {
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
-    //TODO: base_tracking_index 1e18 by default
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics {
         base_supply_index: SCALE_18,
@@ -311,11 +313,9 @@ fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
     let present_value_ = present_value(principal_value_.flip()).into(); // decimals base_asset_decimals
-
     let mut borrow_limit = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
-        
         let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
@@ -335,8 +335,8 @@ fn is_borrow_collateralized(account: Address) -> bool {
     }
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
-    let base_scale = U128::from_u64(10.pow(config.base_token_decimals));
-    let borrow_amount = U128::from_u64(present_value_) * U128::from_u64(base_token_price) / base_scale; // decimals 9
+    let scale = U128::from_u64(10.pow(9));
+    let borrow_amount = U128::from_u64(present_value_) * U128::from_u64(base_token_price) / scale; // decimals 9
     borrow_limit >= borrow_amount
 }
 // @Callable is_liquidatable(account: Address) -> bool
@@ -419,6 +419,10 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
     let principal = basic.principal;
     let mut basic = basic;
     basic.principal = principal_new;
+
+    if basic.base_tracking_index == 0 {
+        basic.base_tracking_index = SCALE_18
+    };
 
     if principal >= I64::from(0) {
         let index_delta = storage.market_basic.tracking_supply_index - basic.base_tracking_index; // decimals 18
@@ -574,9 +578,9 @@ fn absorb_internal(absorber: Address, account: Address) {
     storage.market_basic = market_basic;
 
     // if supply_amount > 0, issue LP token in the amount equal to supply_amount and send it to the user
-    if supply_amount > 0 {
-        mint_to_address(supply_amount, absorber);
-    }
+    // if supply_amount > 0 {
+    //     mint_to_address(supply_amount, absorber);
+    // }
 }
 
 // @Callable buy_collateral(asset: ContractId, min_amount: u64, recipient: Address)
@@ -671,18 +675,17 @@ fn supply_base_internal() {
     storage.market_basic = market_basic;
     update_base_principal(caller, dst_user, dst_principal_new);
 
-    if supply_amount > 0 {
-        mint_to_address(supply_amount, caller);
-    }
+    // if supply_amount > 0 {
+    //     mint_to_address(supply_amount, caller);
+    // }
 }
-
-// @Callable withdraw_base()
-// @Payment LP Token
+// @Callable withdraw_base(amount: u64)
 #[storage(read, write)]
-fn withdraw_base_internal() {
+fn withdraw_base_internal(amount: u64) {
     require(!is_withdraw_paused(), Error::Paused);
-    let amount = msg_amount();
-    require(msg_asset_id() == contract_id() && amount > 0, Error::InvalidPayment);
+    // let amount = msg_amount();
+    // require(msg_asset_id() == contract_id() && amount > 0, Error::InvalidPayment);
+    require(amount > 0, Error::InvalidPayment);
     accrue_internal();
 
     let config = get_config();
@@ -708,7 +711,7 @@ fn withdraw_base_internal() {
 
     transfer_to_address(amount, config.base_token, caller);
 
-    burn(withdraw_amount);
+    // burn(withdraw_amount); 
 }
 
 // @Callable withdraw_reward_token(to: Address, amount: u64)
@@ -803,6 +806,21 @@ impl Market for Contract {
         storage.user_collateral.get((address, asset))
     }
 
+    #[storage(read)]
+    fn get_user_supply_borrow(account: Address) -> (u64, u64) {
+        let principal = storage.user_basic.get(account).principal;
+        let present_value = present_value(principal);
+        if present_value >= I64::new() {
+            (present_value.into(), 0)
+        } else {
+            (0, present_value.flip().into())
+        }
+    }
+
+    fn balance_of_token(asset: ContractId) -> u64 {
+        balance_of(contract_id(), asset)
+    }
+
     //-----------------------------------
     #[storage(read)]
     fn get_utilization() -> u64 {
@@ -818,12 +836,10 @@ impl Market for Contract {
     fn get_borrow_rate(utilization: u64) -> u64 {
         get_borrow_rate_internal(utilization)
     }
-
     #[storage(read)]
     fn is_liquidatable(account: Address) -> bool {
         is_liquidatable_internal(account)
     }
-
     #[storage(read)]
     fn get_collateral_reserves(asset: ContractId) -> I64 {
         get_collateral_reserves_internal(asset)
@@ -876,8 +892,8 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn withdraw_base() { // @Payment LP Token
-        withdraw_base_internal()
+    fn withdraw_base(amount: u64) {
+        withdraw_base_internal(amount)
     }
 
     #[storage(read)]
