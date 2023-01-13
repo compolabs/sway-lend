@@ -9,7 +9,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
 import Market from "./screens/Market";
-import Dashboard from "@screens/Dashboard";
 
 const Root = styled(Column)`
   width: 100%;
@@ -23,12 +22,13 @@ const App: React.FC = () => {
     <Root>
       <Header />
       <Routes>
-        <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
+        {/*<Route path={ROUTES.ROOT} element={<Market />} />*/}
+        {/*<Route path={ROUTES.DASHBOARD} element={<Dashboard />} />*/}
+        <Route path={ROUTES.DASHBOARD} element={<Market />} />
 
-        <Route path={ROUTES.ROOT} element={<Market />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
 
-        <Route path="*" element={<Navigate to={ROUTES.ROOT} />} />
+        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
       </Routes>
       <WalletModal
         onClose={() => settingsStore.setWalletModalOpened(false)}

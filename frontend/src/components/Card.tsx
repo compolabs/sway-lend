@@ -29,9 +29,9 @@ const Card = styled.div<{
   align-items: ${({ alignItems }) => alignItems ?? "default"};
   max-width: ${({ maxWidth }) => `${maxWidth}px` ?? "100%"};
   ${({ bordered, theme }) =>
-    bordered && `border: 1px solid ${theme.colors.primary100};`};
+    bordered && `border: 1px solid ${theme.colors.card.border};`};
   width: 100%;
-  border: 1px solid ${({ theme }) => `${theme.colors.primary100}`};
+  border: 1px solid ${({ theme }) => `${theme.colors.card.border}`};
   border-radius: 4px;
   box-sizing: border-box;
   padding: ${({ paddingMobile }) => paddingMobile ?? "16px"};

@@ -3,7 +3,6 @@ import React from "react";
 import { Observer } from "mobx-react-lite";
 import { DashboardVMProvider } from "@screens/Dashboard/DashboardVm";
 import Layout from "@components/Layout";
-import { Column } from "@components/Flex";
 
 interface IProps {}
 
@@ -36,37 +35,10 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
       liquiditySort ? "scale(1)" : "scale(1, -1)"};
   }
 `;
-const Container = styled(Column)`
-  width: 100%;
-
-  & > :last-of-type {
-    margin-top: 16px;
-  }
-
-  @media (min-width: 880px) {
-    & > :last-of-type {
-      margin-bottom: 16px;
-    }
-
-    flex-direction: column-reverse;
-  }
-`;
 const DashboardImpl: React.FC<IProps> = () => {
   return (
     <Layout>
-      <Observer>
-        {() => (
-          <Root>
-            Dashboard
-            {/*<Container>*/}
-            {/*  <DashboardInfo />*/}
-            {/*  <AccountHealth />*/}
-            {/*</Container>*/}
-            {/*<SizedBox height={40} />*/}
-            {/*<AssetsTable />*/}
-          </Root>
-        )}
-      </Observer>
+      <Observer>{() => <Root>Dashboard</Root>}</Observer>
     </Layout>
   );
 };

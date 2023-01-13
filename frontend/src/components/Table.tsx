@@ -49,7 +49,7 @@ const Root = styled.div<{ hovered?: boolean; fitContent?: boolean }>`
       line-height: 16px;
       text-align: left;
       padding: 14px;
-      border-bottom: 1px solid
+      border-bottom: 2px solid
         ${({ theme }) => `${theme.colors.mainBackground}`};
       background: ${({ theme }) => `${theme.colors.table.background}`};
       cursor: default;
@@ -61,7 +61,7 @@ const Root = styled.div<{ hovered?: boolean; fitContent?: boolean }>`
       line-height: 20px;
       color: ${({ theme }) => `${theme.colors.table.background}`};
       padding: 16px;
-      border-bottom: 1px solid
+      border-bottom: 2px solid
         ${({ theme }) => `${theme.colors.mainBackground}`};
 
       :last-child {

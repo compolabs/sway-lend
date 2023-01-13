@@ -70,7 +70,8 @@ export default {
   },
 
   card: {
-    background: "#212345",
+    background: "rgba(169, 213, 245, 0.05);",
+    border: colors.neutral5,
   },
   icon: {
     borderColor: colors.primary800,

@@ -90,10 +90,12 @@ const Switch: React.FC<IProps> = ({ value, onChange }) => {
         <input type="checkbox" checked={value} onChange={onChange} />
         <span className="slider round">
           <img
+            alt="sun"
             style={{ zIndex: 10, position: "absolute", top: 12, left: 50 }}
             src={theme.images.icons.moon}
           />
           <img
+            alt="moon"
             style={{ zIndex: 10, position: "absolute", top: 12, left: 12 }}
             src={theme.images.icons.sun}
           />

@@ -4,7 +4,6 @@ import { observer } from "mobx-react-lite";
 import Divider from "../Divider";
 import DarkMode from "./DarkMode";
 import { Column } from "../Flex";
-import Scrollbar from "../Scrollbar";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";

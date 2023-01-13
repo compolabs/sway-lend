@@ -50,7 +50,8 @@ export default {
     highlight: colors.neutral2,
   },
   card: {
-    background: colors.white,
+    background: "rgba(255, 255, 255, 0.5);",
+    border: colors.neutral2,
   },
 
   modal: {

@@ -6,7 +6,6 @@ import { MarketVMProvider } from "@screens/Market/MarketVm";
 import Layout from "@components/Layout";
 import AssetsTable from "./AssetsTable";
 import { Column } from "@components/Flex";
-import AccountHealth from "@screens/Market/AccountHealth";
 import MarketInfo from "@screens/Market/MarketInfo";
 
 interface IProps {}
@@ -63,7 +62,6 @@ const MarketImpl: React.FC<IProps> = () => {
           <Root>
             <Container>
               <MarketInfo />
-              <AccountHealth />
             </Container>
             <SizedBox height={40} />
             <AssetsTable />
@@ -75,6 +73,8 @@ const MarketImpl: React.FC<IProps> = () => {
 };
 
 const Market: React.FC<IProps> = () => (
-  <MarketVMProvider>{/*<MarketImpl />*/}</MarketVMProvider>
+  <MarketVMProvider>
+    <MarketImpl />
+  </MarketVMProvider>
 );
 export default Market;
