@@ -27,8 +27,8 @@ use std::{
     },
     constants::ZERO_B256,
     context::{
-        balance_of,
         msg_amount,
+        this_balance,
     },
     logging::log,
     revert::require,
@@ -61,7 +61,11 @@ abi Market {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64);
-    fn balance_of_token(asset: ContractId) -> u64;
+    fn balance_of(asset: ContractId) -> u64;
+    #[storage(read)]
+    fn get_market_basics() -> MarketBasics;
+    #[storage(read)]
+    fn totals_collateral(asset: ContractId) -> u64;
     //-------------------------------------------------
     #[storage(read)]
     fn get_utilization() -> u64;
@@ -256,7 +260,8 @@ fn get_utilization_internal() -> u64 { // -> decimals 18
     if total_supply_ == 0 {
         0
     } else {
-        total_borrow_ * SCALE_18 / total_supply_
+        let res = U128::from_u64(total_borrow_) * U128::from_u64(SCALE_18) / U128::from_u64(total_supply_);
+        res.as_u64().unwrap()
     }
 }
 
@@ -312,7 +317,7 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (1
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
-    let present_value_ = present_value(principal_value_.flip()).into(); // decimals base_asset_decimals
+    let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals
     let mut borrow_limit = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
@@ -321,7 +326,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
             Option::None => continue,
         };
 
-        let balance = balance_of(asset_config.asset, contract_id()); // decimals asset_config.decimals
+        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
 
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
@@ -336,8 +341,12 @@ fn is_borrow_collateralized(account: Address) -> bool {
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(10.pow(9));
-    let borrow_amount = U128::from_u64(present_value_) * U128::from_u64(base_token_price) / scale; // decimals 9
-    borrow_limit >= borrow_amount
+    return if present_value_ < I64::new(){
+        false
+    }else{ 
+        let borrow_amount = U128::from_u64(present_value_.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
+        borrow_limit >= borrow_amount
+    }
 }
 // @Callable is_liquidatable(account: Address) -> bool
 // checks that the dollar value of the user's collateral multiplied
@@ -356,7 +365,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        let balance = balance_of(contract_id(), asset_config.asset); // decimals asset_config.decimals
+        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
         let collateral_factor = asset_config.liquidate_collateral_factor; // decimals 4
         let scale = 10.pow(asset_config.decimals);
@@ -373,7 +382,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
 // @Callable get_collateral_reserves(asset: ContractId) -> I64
 #[storage(read)]
 fn get_collateral_reserves_internal(asset: ContractId) -> I64 { // -> asset decimals
-    I64::from(balance_of(contract_id(), asset)) - I64::from(storage.totals_collateral.get(asset))
+    I64::from(this_balance(asset)) - I64::from(storage.totals_collateral.get(asset))
 }
 
 // @Callable get_reserves_internal() -> I64
@@ -382,7 +391,7 @@ fn get_reserves_internal() -> I64 {  // base_token_decimals
     let config = get_config();
     let last_accrual_time = storage.market_basic.last_accrual_time;
     let (base_supply_index_, base_borrow_index_) = accrued_interest_indices(timestamp() - last_accrual_time); // decimals (18, 18)
-    let balance = balance_of(contract_id(), config.base_token); // base_token_decimals
+    let balance = this_balance(config.base_token); // base_token_decimals
     let total_supply = present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
     let total_borrow = present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
     return I64::from(balance) - I64::from(total_supply) + I64::from(total_borrow);
@@ -817,8 +826,18 @@ impl Market for Contract {
         }
     }
 
-    fn balance_of_token(asset: ContractId) -> u64 {
-        balance_of(contract_id(), asset)
+    fn balance_of(asset: ContractId) -> u64 {
+        this_balance(asset)
+    }
+
+    #[storage(read)]
+    fn get_market_basics() -> MarketBasics {
+        storage.market_basic
+    }
+
+    #[storage(read)]
+    fn totals_collateral(asset: ContractId) -> u64 {
+        storage.totals_collateral.get(asset)
     }
 
     //-----------------------------------
@@ -831,7 +850,6 @@ impl Market for Contract {
     fn get_supply_rate(utilization: u64) -> u64 {
         get_supply_rate_internal(utilization)
     }
-
     #[storage(read)]
     fn get_borrow_rate(utilization: u64) -> u64 {
         get_borrow_rate_internal(utilization)

@@ -35,9 +35,7 @@ pub mod market_abi_calls {
             .supply_base()
             .tx_params(tx_params)
             .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -53,10 +51,6 @@ pub mod market_abi_calls {
             .methods()
             .withdraw_base(amount)
             .tx_params(tx_params)
-            // .call_params(call_params)
-            // .estimate_tx_dependencies(None)
-            // .await
-            // .unwrap()
             .set_contracts(contract_ids)
             .append_variable_outputs(1)
             .call()
@@ -75,9 +69,7 @@ pub mod market_abi_calls {
             .withdraw_collateral(asset, amount)
             .tx_params(tx_params)
             .set_contracts(contract_ids)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -92,9 +84,7 @@ pub mod market_abi_calls {
             .methods()
             .supply_collateral(Address::from(market.get_wallet().address()))
             .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -119,6 +109,53 @@ pub mod market_abi_calls {
             .methods()
             .get_user_supply_borrow(address)
             .tx_params(tx_params)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn get_user_basic(market: &MarketContract, address: Address) -> UserBasic {
+        market
+            .methods()
+            .get_user_basic(address)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn get_market_basics(market: &MarketContract) -> MarketBasics {
+        market
+            .methods()
+            .get_market_basics()
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn totals_collateral(market: &MarketContract, asset: ContractId) -> u64 {
+        market
+            .methods()
+            .totals_collateral(asset)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn get_utilization(market: &MarketContract) -> u64 {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        market
+            .methods()
+            .get_utilization()
+            .tx_params(tx_params)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
+        market
+            .methods()
+            .balance_of(asset_id)
             .simulate()
             .await
             .unwrap()
