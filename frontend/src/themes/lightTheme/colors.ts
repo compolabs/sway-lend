@@ -32,9 +32,11 @@ export default {
   text: colors.neutral6,
   mainBackground: colors.neutral1,
   menuBackground: colors.neutral5,
+  divider: colors.neutral5,
 
   switch: {
     background: colors.neutral3,
+    circleColor: colors.neutral1,
   },
   header: {
     navLinkBackground: colors.neutral3,

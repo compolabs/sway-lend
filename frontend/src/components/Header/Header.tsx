@@ -1,7 +1,5 @@
 import styled from "@emotion/styled";
 import React, { useState } from "react";
-import mobileMenuIcon from "@src/assets/icons/mobileMenu.svg";
-import closeIcon from "@src/assets/icons/close.svg";
 import { Column, Row } from "@components/Flex";
 import MobileMenu from "@components/Header/MobileMenu";
 import SizedBox from "@components/SizedBox";
@@ -66,13 +64,12 @@ const MenuItem = styled.div<{ selected?: boolean }>`
 
   ${({ selected, theme }) =>
     selected
-      ? `color:${theme.colors.primary800}; background:${theme.colors.neutral5};`
+      ? `color:${theme.colors.primary800}; background:${theme.colors.header.navLinkBackground};`
       : `color:${theme.colors.primary650}; background: none;`};
 
   &:hover {
-    background: #313a45;
-    //border-bottom: 4px solid ${({ theme }) => theme.colors.primary300};
-    // color: ${({ theme }) => theme.colors.blue500};
+    background: ${({ theme }) => theme.colors.header.navLinkBackground};
+    opacity: 0.4;
   }
 `;
 
@@ -118,7 +115,7 @@ const Header: React.FC<IProps> = () => {
       link: ROUTES.ROOT,
       icon: theme.images.icons.analytics,
     },
-    { name: "Wallet", link: ROUTES.ROOT, icon: theme.images.icons.wallet },
+    { name: "Wallet", link: ROUTES.WALLET, icon: theme.images.icons.wallet },
   ];
 
   return (

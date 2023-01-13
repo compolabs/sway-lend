@@ -40,8 +40,10 @@ export default {
   mainBackground: "#1E1E1E",
   text: colors.neutral2,
 
+  divider: colors.neutral3,
   switch: {
     background: colors.neutral5,
+    circleColor: colors.neutral6,
   },
   header: {
     navLinkBackground: colors.neutral5,

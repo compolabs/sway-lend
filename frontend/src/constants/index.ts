@@ -5,6 +5,7 @@ export const ROUTES = {
   ROOT: "/",
   FAUCET: "/faucet",
   DASHBOARD: "/dashboard",
+  WALLET: "/wallet",
 };
 
 export const TOKENS_LIST: Array<IToken> = Object.values(tokens).map((t) => ({

@@ -39,7 +39,6 @@ const Body = styled.div`
 
 const WalletWrapper = styled.div`
   padding: 16px;
-  border-top: 1px solid ${({ theme }) => theme.colors.primary100};
 `;
 
 const MenuItem = styled.div<{ selected?: boolean }>`
@@ -83,7 +82,7 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
       link: ROUTES.ROOT,
       icon: theme.images.icons.analytics,
     },
-    { name: "Wallet", link: ROUTES.ROOT, icon: theme.images.icons.wallet },
+    { name: "Wallet", link: ROUTES.WALLET, icon: theme.images.icons.wallet },
   ];
   return (
     <Root {...{ opened }}>
@@ -102,7 +101,7 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
           ))}
         </Container>
         <Divider />
-        <DarkMode style={{ margin: 16 }} />
+        <DarkMode text style={{ margin: 16 }} />
         <WalletWrapper>
           <Wallet />
         </WalletWrapper>
