@@ -1,4 +1,13 @@
 const colors = {
+  neutral1: "#EFF2FD",
+  neutral2: "#E3E9F9",
+  neutral3: "#DFE5FA",
+  neutral4: "#9A9ABD",
+  neutral5: "#313a45",
+  neutral6: "#1F262B",
+  neutral7: "#1A1D1F",
+  primary01: "#3FE8BD",
+
   primary800: "#363870",
   primary650: "#8082C5",
   primary300: "#C6C9F4",
@@ -21,8 +30,42 @@ const colors = {
 // eslint-disable-next-line
 export default {
   ...colors,
+  text: colors.neutral6,
+  mainBackground: colors.neutral1,
+  menuBackground: colors.neutral5,
+  divider: colors.neutral5,
+
+  switch: {
+    background: colors.neutral3,
+    circleColor: colors.neutral1,
+  },
+  header: {
+    navLinkBackground: colors.neutral3,
+    walletInfoColor: colors.neutral4,
+    walletAddressBackground: colors.neutral3,
+    walletBalanceBackground: colors.neutral4,
+  },
+  skeleton: {
+    base: colors.neutral3,
+    highlight: colors.neutral2,
+  },
   card: {
-    background: colors.white,
+    background: "rgba(255, 255, 255, 0.5);",
+    border: colors.neutral2,
+  },
+
+  modal: {
+    background: colors.neutral1,
+    border: colors.neutral3,
+  },
+  table: {
+    headerColor: colors.neutral4,
+    background: "rgba(255, 255, 255, 0.5)",
+  },
+  tooltip: {
+    border: colors.neutral4,
+    background: colors.neutral2,
+    loginTypeBackground: colors.neutral5,
   },
   icon: {
     borderColor: colors.primary100,

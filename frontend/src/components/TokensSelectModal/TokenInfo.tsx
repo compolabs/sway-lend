@@ -4,7 +4,7 @@ import { Column, Row } from "@src/components/Flex";
 import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
 import Balance from "@src/entities/Balance";
-import SquareTokenIcon from "@components/SquareTokenIcon";
+import TokenIcon from "@components/TokenIcon";
 
 interface IProps extends HTMLAttributes<HTMLDivElement> {
   token: Balance;
@@ -20,7 +20,7 @@ const Root = styled.div<{ withClickLogic?: boolean }>`
   box-sizing: border-box;
   width: 100%;
   cursor: ${({ withClickLogic }) => (withClickLogic ? "pointer" : "default")};
-  padding: 10px 24px;
+  padding: 10px 16px;
 
   :hover {
     background: ${({ withClickLogic, theme }) =>
@@ -67,7 +67,7 @@ const TokenInfo: React.FC<IProps> = ({ token, hidden, ...rest }) => {
       {hidden && <Gradient />}
       <Row>
         {token.logo ? (
-          <SquareTokenIcon size="small" src={token.logo} />
+          <TokenIcon size="small" src={token.logo} />
         ) : (
           <DefaultIcon />
         )}

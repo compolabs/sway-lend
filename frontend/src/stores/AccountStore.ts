@@ -100,14 +100,15 @@ class AccountStore {
 
   loginWithFuelWallet = async () => {
     const config = { url: NODE_URL };
-    const res = await window.FuelWeb3?.connect(config);
+    const fuel = window.fuel as any;
+    const res = await fuel?.connect(config);
     if (!res) {
       this.rootStore.notificationStore.notify("User denied", {
         type: "error",
       });
       return;
     }
-    const accounts = await window.FuelWeb3?.accounts();
+    const accounts = await window.fuel?.accounts();
     if (accounts != null && accounts.length > 0) {
       this.setAddress(accounts[0]);
     }

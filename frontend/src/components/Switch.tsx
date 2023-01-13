@@ -1,5 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
+import { useTheme } from "@emotion/react";
 
 interface IProps {
   value: boolean;
@@ -13,8 +14,8 @@ const Root = styled.div`
   .switch {
     position: relative;
     display: inline-block;
-    width: 40px;
-    height: 24px;
+    width: 76px;
+    height: 40px;
   }
 
   .switch input {
@@ -30,7 +31,7 @@ const Root = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: ${({ theme }) => theme.colors.primary100};
+    background-color: ${({ theme }) => theme.colors.switch.background};
 
     :disabled {
       background-color: ${({ theme }) => theme.colors.primary300};
@@ -43,11 +44,12 @@ const Root = styled.div`
   .slider:before {
     position: absolute;
     content: "";
-    width: 18px;
-    height: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
+    width: 36px;
+    height: 36px;
+    left: 2px;
+    bottom: 2px;
+
+    background-color: ${({ theme }) => theme.colors.switch.circleColor};
     box-shadow: 0px 2px 4px rgba(54, 56, 112, 0.12);
 
     -webkit-transition: 0.4s;
@@ -55,35 +57,49 @@ const Root = styled.div`
   }
 
   input:checked + .slider {
-    background-color: ${({ theme }) => theme.colors.blue500};
+    background-color: ${({ theme }) => theme.colors.switch.background};
   }
 
   input:focus + .slider {
-    box-shadow: 0 0 1px ${({ theme }) => theme.colors.primary100};
+    box-shadow: 0 0 1px ${({ theme }) => theme.colors.switch.background};
   }
 
   input:checked + .slider:before {
-    -webkit-transform: translateX(16px);
-    -ms-transform: translateX(16px);
-    transform: translateX(16px);
+    -webkit-transform: translateX(36px);
+    -ms-transform: translateX(36px);
+    transform: translateX(36px);
   }
 
   .slider.round {
-    border-radius: 8px;
+    border-radius: 40px;
+
     box-shadow: 0 2px 4px rgba(54, 56, 112, 0.12);
   }
 
   .slider.round:before {
-    border-radius: 6px;
+    content: ${({ theme }) => theme.images.icons.sun};
+    border-radius: 32px;
   }
 `;
 
 const Switch: React.FC<IProps> = ({ value, onChange }) => {
+  const theme = useTheme();
   return (
     <Root>
       <label className="switch">
         <input type="checkbox" checked={value} onChange={onChange} />
-        <span className="slider round" />
+        <span className="slider round">
+          <img
+            alt="sun"
+            style={{ zIndex: 10, position: "absolute", top: 12, left: 50 }}
+            src={theme.images.icons.moon}
+          />
+          <img
+            alt="moon"
+            style={{ zIndex: 10, position: "absolute", top: 12, left: 12 }}
+            src={theme.images.icons.sun}
+          />
+        </span>
       </label>
     </Root>
   );

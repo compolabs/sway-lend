@@ -1,29 +1,24 @@
 import styled from "@emotion/styled";
 import React, { useState } from "react";
-import mobileMenuIcon from "@src/assets/icons/mobileMenu.svg";
-import closeIcon from "@src/assets/icons/close.svg";
 import { Column, Row } from "@components/Flex";
 import MobileMenu from "@components/Header/MobileMenu";
 import SizedBox from "@components/SizedBox";
 import { observer } from "mobx-react-lite";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Anchor } from "@components/Anchor";
-import Tooltip from "@components/Tooltip";
-import DarkMode from "@components/Header/DarkMode";
 import isRoutesEquals from "@src/utils/isRoutesEquals";
-import LinkGroup from "../LinkGroup";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";
+import Text from "@components/Text";
+import DarkMode from "@components/Header/DarkMode";
 
 interface IProps {}
 
 const Root = styled(Column)`
   width: 100%;
-  background: ${({ theme }) => theme.colors.white};
+  background: ${({ theme }) => theme.colors.mainBackground};
   align-items: center;
   z-index: 102;
-  box-shadow: 0 8px 56px rgba(54, 56, 112, 0.16);
 
   //todo check
   a {
@@ -36,7 +31,7 @@ const TopMenu = styled.header`
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 64px;
+  height: 80px;
   padding: 0 16px;
   max-width: 1440px;
   z-index: 102;
@@ -44,7 +39,7 @@ const TopMenu = styled.header`
     height: 80px;
   }
   box-sizing: border-box;
-  background: ${({ theme }) => theme.colors.white};
+  background: ${({ theme }) => theme.colors.mainBackground};
 
   .logo {
     height: 30px;
@@ -57,27 +52,25 @@ const TopMenu = styled.header`
     cursor: pointer;
   }
 `;
-
-const MenuItem = styled(Anchor)<{ selected?: boolean }>`
+const MenuItem = styled.div<{ selected?: boolean }>`
   cursor: pointer;
   display: flex;
+  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  font-weight: 500;
-  font-size: 16px;
-  line-height: 24px;
-  color: ${({ selected, theme }) =>
-    selected ? theme.colors.primary800 : theme.colors.primary650};
-  box-sizing: border-box;
-  border-bottom: 4px solid
-    ${({ selected, theme }) =>
-      selected ? theme.colors.blue500 : "transparent"};
-  height: 100%;
-  margin: 0 12px;
-  transition: 0.4s;
+  padding: 12px 16px;
+  margin: 0 4px;
+  background: #313a45;
+  border-radius: 4px;
+
+  ${({ selected, theme }) =>
+    selected
+      ? `color:${theme.colors.primary800}; background:${theme.colors.header.navLinkBackground};`
+      : `color:${theme.colors.primary650}; background: none;`};
 
   &:hover {
-    border-bottom: 4px solid ${({ theme }) => theme.colors.primary300};
-    color: ${({ theme }) => theme.colors.blue500};
+    background: ${({ theme }) => theme.colors.header.navLinkBackground};
+    opacity: 0.4;
   }
 `;
 
@@ -104,6 +97,7 @@ const Desktop = styled.div`
 const Header: React.FC<IProps> = () => {
   const [mobileMenuOpened, setMobileMenuOpened] = useState(false);
   const location = useLocation();
+  const theme = useTheme();
   const toggleMenu = (state: boolean) => {
     window.scrollTo({ top: 0, behavior: "smooth" });
     document.body.classList.toggle("noscroll", state);
@@ -112,39 +106,38 @@ const Header: React.FC<IProps> = () => {
   const navigate = useNavigate();
 
   const menuItems = [
-    { name: "Market", link: ROUTES.ROOT },
-    { name: "Faucet", link: ROUTES.FAUCET },
+    {
+      name: "Dashboard",
+      link: ROUTES.DASHBOARD,
+      icon: theme.images.icons.dashboard,
+    },
+    {
+      name: "Faucet",
+      link: ROUTES.FAUCET,
+      icon: theme.images.icons.analytics,
+    },
   ];
 
-  const communityMenu = [
-    { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
-    { name: "Medium", link: "https://discord.gg/VHgEGXjF", outer: true },
-    { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
-  ];
-  const theme = useTheme();
   return (
     <Root>
-      <Mobile>
-        <MobileMenu
-          opened={mobileMenuOpened}
-          onClose={() => toggleMenu(false)}
-        />
-      </Mobile>
-
       <TopMenu>
         <Row alignItems="center" crossAxisSize="max">
           <a href="https://app.swaylend.com">
             <img className="logo" src={theme.images.icons.logo} alt="logo" />
           </a>
           <Desktop>
-            <SizedBox width={54} />
-            {menuItems.map(({ name, link }) => (
+            <SizedBox width={40} />
+            {menuItems.map(({ name, link, icon }) => (
               <MenuItem
                 key={name}
                 selected={isRoutesEquals(link, location.pathname)}
                 onClick={() => navigate(link)}
               >
-                {name}
+                <img src={icon} alt="nav" />
+                <SizedBox width={4} />
+                <Text size="small" weight={700}>
+                  {name}
+                </Text>
               </MenuItem>
             ))}
           </Desktop>
@@ -153,35 +146,27 @@ const Header: React.FC<IProps> = () => {
           <img
             onClick={() => toggleMenu(!mobileMenuOpened)}
             className="icon"
-            src={mobileMenuOpened ? closeIcon : mobileMenuIcon}
+            src={
+              mobileMenuOpened
+                ? theme.images.icons.mobileMenuClose
+                : theme.images.icons.mobileMenu
+            }
             alt="menuControl"
           />
         </Mobile>
         <Desktop>
+          <DarkMode />
+          <SizedBox width={40} />
           <Wallet />
           <SizedBox width={24} />
-          <Tooltip
-            config={{
-              placement: "bottom-start",
-              trigger: "click",
-            }}
-            content={
-              <Column crossAxisSize="max">
-                <LinkGroup title="" links={communityMenu} />
-                <SizedBox height={8} />
-                <DarkMode />
-              </Column>
-            }
-          >
-            <img
-              onClick={() => toggleMenu(!mobileMenuOpened)}
-              className="icon"
-              src={mobileMenuIcon}
-              alt="menuControl"
-            />
-          </Tooltip>
         </Desktop>
       </TopMenu>
+      <Mobile>
+        <MobileMenu
+          opened={mobileMenuOpened}
+          onClose={() => toggleMenu(false)}
+        />
+      </Mobile>
     </Root>
   );
 };

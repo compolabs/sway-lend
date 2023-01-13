@@ -5,7 +5,7 @@ import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
 import Skeleton from "react-loading-skeleton";
 import BN from "@src/utils/BN";
-import SquareTokenIcon from "@components/SquareTokenIcon";
+import TokenIcon from "@components/TokenIcon";
 
 interface IProps extends HTMLAttributes<HTMLDivElement> {
   logo?: string;
@@ -59,7 +59,7 @@ const InvestRow: React.FC<IProps> = ({
   return (
     <Root withClickLogic={withClickLogic} {...rest}>
       <Row>
-        {logo ? <SquareTokenIcon size="small" src={logo} /> : <DefaultIcon />}
+        {logo ? <TokenIcon size="small" src={logo} /> : <DefaultIcon />}
         <SizedBox width={8} />
         <Column>
           <Text weight={500} size="medium">

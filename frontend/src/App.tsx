@@ -13,7 +13,7 @@ import Market from "./screens/Market";
 const Root = styled(Column)`
   width: 100%;
   align-items: center;
-  background: ${({ theme }) => theme.colors.primary50};
+  background: ${({ theme }) => theme.colors.mainBackground};
   min-height: 100vh;
 `;
 const App: React.FC = () => {
@@ -22,10 +22,13 @@ const App: React.FC = () => {
     <Root>
       <Header />
       <Routes>
-        {/* Landing */}
-        <Route path={ROUTES.ROOT} element={<Market />} />
+        {/*<Route path={ROUTES.ROOT} element={<Market />} />*/}
+        {/*<Route path={ROUTES.DASHBOARD} element={<Dashboard />} />*/}
+        <Route path={ROUTES.DASHBOARD} element={<Market />} />
+
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
-        <Route path="*" element={<Navigate to={ROUTES.ROOT} />} />
+
+        <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
       </Routes>
       <WalletModal
         onClose={() => settingsStore.setWalletModalOpened(false)}

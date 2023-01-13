@@ -26,7 +26,7 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
     rest.onClose();
     onLogin(loginType);
   };
-  const isThereWallet = window.FuelWeb3 == null;
+  const isThereWallet = window?.fuel == null;
   const walletLink = "https://fuels-wallet.vercel.app/docs/install/";
   return (
     <Dialog style={{ maxWidth: 360 }} title="Connect wallet" {...rest}>

@@ -1,10 +1,10 @@
 import styled from "@emotion/styled";
 
-type TokenIconSize = "default" | "small";
+type TokenIconSize = "default" | "small" | "tiny";
 
-const SquareTokenIcon = styled.img<{ size?: TokenIconSize }>`
-  border: 1px solid ${({ theme }) => `${theme.colors.icon.borderColor}`};
-  border-radius: ${({ size }) => (size === "small" ? "8px" : "12px")};
+const TokenIcon = styled.img<{ size?: TokenIconSize }>`
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
   box-sizing: border-box;
   box-shadow: none;
   color: transparent;
@@ -12,6 +12,8 @@ const SquareTokenIcon = styled.img<{ size?: TokenIconSize }>`
   ${({ size }) =>
     (() => {
       switch (size) {
+        case "tiny":
+          return "width: 16px; height: 16px;";
         case "small":
           return "width: 40px; height: 40px;";
         default:
@@ -20,4 +22,4 @@ const SquareTokenIcon = styled.img<{ size?: TokenIconSize }>`
     })()}
 `;
 
-export default SquareTokenIcon;
+export default TokenIcon;

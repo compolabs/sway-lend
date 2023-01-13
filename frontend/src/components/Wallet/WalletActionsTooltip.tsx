@@ -6,7 +6,6 @@ import copy from "copy-to-clipboard";
 import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
 import { Anchor } from "@components/Anchor";
-import Divider from "../Divider";
 import { EXPLORER_URL } from "@src/constants";
 
 interface IProps {
@@ -47,17 +46,16 @@ const WalletActionsTooltip: React.FC<IProps> = ({ address }) => {
 
   return (
     <Root>
-      <Text onClick={handleCopyAddress} className="menu-item">
+      <Text weight={500} onClick={handleCopyAddress} className="menu-item">
         Copy address
       </Text>
       <Anchor
         style={{ padding: "10px 0" }}
         href={`${EXPLORER_URL}/address/${address}`}
       >
-        <Text>View in Explorer</Text>
+        <Text weight={500}>View in Explorer</Text>
       </Anchor>
-      <Divider className="divider" />
-      <Text onClick={handleLogout} className="menu-item">
+      <Text weight={500} onClick={handleLogout} className="menu-item">
         Disconnect
       </Text>
     </Root>

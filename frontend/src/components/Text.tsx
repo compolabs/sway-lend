@@ -8,12 +8,12 @@ type TTextType =
   | "error"
   | "success"
   | "purple300";
-type TTextSize = "small" | "medium" | "large" | "big" | "semi-big";
+type TTextSize = "small" | "medium" | "large" | "big";
 type TTextAlign = "center" | "left" | "right" | "justify" | "end";
 
 const Text = styled.p<{
   type?: TTextType;
-  weight?: 400 | 500;
+  weight?: 400 | 500 | 700;
   size?: TTextSize;
   fitContent?: boolean;
   nowrap?: boolean;
@@ -45,7 +45,7 @@ const Text = styled.p<{
         case "purple300":
           return `color: ${theme.colors?.primary300};`;
         default:
-          return `color: ${theme.colors?.primary800};`;
+          return `color: ${theme.colors?.text};`;
       }
     })()}
   ${({ ellipsis }) =>
@@ -55,17 +55,15 @@ const Text = styled.p<{
     (() => {
       switch (size) {
         case "small":
-          return "font-size: 12px; line-height: 16px;";
+          return "font-size: 13px; line-height: 16px;";
         case "medium":
-          return "font-size: 14px; line-height: 20px;";
-        case "semi-big":
-          return "font-size: 20px; line-height: 24px;";
+          return "font-size: 18px; line-height: 24px;";
         case "big":
-          return "font-size: 24px; line-height: 32px;";
+          return "font-size: 40px; line-height: 48px;";
         case "large":
-          return "font-size: 32px;line-height: 40px;";
+          return "font-size: 64px; line-height: 64px;";
         default:
-          return "font-size: 16px; line-height: 24px;";
+          return "font-size: 15px; line-height: 24px;";
       }
     })()}
 `;

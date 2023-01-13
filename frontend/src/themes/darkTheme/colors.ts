@@ -1,4 +1,12 @@
 const colors = {
+  neutral2: "#E3E9F9",
+  neutral3: "#DFE5FA",
+  neutral4: "#9A9ABD",
+  neutral5: "#313a45",
+  neutral6: "#1F262B",
+  neutral7: "#1A1D1F",
+  primary01: "#3FE8BD",
+
   primary800: "#363870",
   primary650: "#8082C5",
   primary300: "#C6C9F4",
@@ -21,6 +29,7 @@ export default {
   ...colors,
   primary800: "#FFFFFF",
   primary650: "#C6C9F4",
+
   primary300: "#8182C5",
   primary100: "#363970",
   primary50: "#181931",
@@ -29,8 +38,40 @@ export default {
   error100: "#3A2A3D",
   attention100: "#3A303F",
 
+  mainBackground: colors.neutral7,
+  text: colors.neutral2,
+
+  divider: colors.neutral3,
+  switch: {
+    background: colors.neutral5,
+    circleColor: colors.neutral6,
+  },
+  modal: {
+    background: colors.neutral6,
+    border: colors.neutral5,
+    loginTypeBackground: colors.neutral5,
+  },
+  table: {
+    headerColor: colors.neutral4,
+    background: "rgba(169, 213, 245, 0.05);",
+  },
+  tooltip: {
+    border: colors.neutral5,
+    background: colors.neutral6,
+  },
+  header: {
+    navLinkBackground: colors.neutral5,
+    walletInfoColor: colors.neutral4,
+    walletAddressBackground: colors.neutral5,
+  },
+  skeleton: {
+    base: colors.neutral6,
+    highlight: colors.neutral5,
+  },
+
   card: {
-    background: "#212345",
+    background: "rgba(169, 213, 245, 0.05);",
+    border: colors.neutral5,
   },
   icon: {
     borderColor: colors.primary800,

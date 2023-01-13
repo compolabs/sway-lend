@@ -13,10 +13,10 @@ const Root = styled.div<{ disable?: boolean }>`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  padding: 16px 24px;
-  border: 1px solid ${({ theme }) => theme.colors.primary100};
+  padding: 16px;
+  background: ${({ theme }) => theme.colors.modal.border};
   box-sizing: border-box;
-  border-radius: 12px;
+  border-radius: 4px;
   margin: 4px 0;
   cursor: ${({ disable }) => (disable ? "not-allowed" : "pointer")};
 `;

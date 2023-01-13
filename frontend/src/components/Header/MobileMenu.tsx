@@ -3,11 +3,14 @@ import React from "react";
 import { observer } from "mobx-react-lite";
 import Divider from "../Divider";
 import DarkMode from "./DarkMode";
-import LinkGroup from "../LinkGroup";
 import { Column } from "../Flex";
-import Scrollbar from "../Scrollbar";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
+import { useTheme } from "@emotion/react";
+import isRoutesEquals from "@src/utils/isRoutesEquals";
+import SizedBox from "@components/SizedBox";
+import Text from "@components/Text";
+import { useLocation, useNavigate } from "react-router-dom";
 
 interface IProps {
   onClose: () => void;
@@ -25,41 +28,82 @@ const Root = styled.div<{ opened: boolean }>`
   transition: 0.2s;
   overflow: hidden;
 
-  ${({ opened }) => (!opened ? `height: 0px;` : "")}
-  .menu-body {
-    display: flex;
-    flex-direction: column;
-    background: ${({ theme }) => theme.colors.white};
-  }
+  ${({ opened }) => !opened && `height: 0px;`}
+`;
+const Body = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: ${({ theme }) => theme.colors.mainBackground};
 `;
 
 const WalletWrapper = styled.div`
-  padding: 24px;
-  border-top: 1px solid ${({ theme }) => theme.colors.primary100};
+  padding: 16px;
 `;
 
+const MenuItem = styled.div<{ selected?: boolean }>`
+  display: flex;
+  cursor: pointer;
+  flex-direction: row;
+  //justify-content: center;
+  //align-items: center;
+  padding: 12px 16px;
+  border-radius: 4px;
+  width: 100%;
+  background: ${({ selected, theme }) =>
+    selected && theme.colors.header.navLinkBackground};
+
+  &:hover {
+  }
+`;
+
+const Container = styled(Column)`
+  //padding: 16px;
+  //background: pink;
+  margin: 16px;
+
+  & > * {
+    margin-bottom: 8px;
+  }
+`;
 const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
-  const mainFunctional = [
-    { name: "Market", link: ROUTES.ROOT, outer: false },
-    { name: "Faucet", link: ROUTES.FAUCET, outer: false },
-    { name: "Twitter", link: "https://twitter.com/swaygangsters", outer: true },
-    { name: "Discord", link: "https://discord.gg/VHgEGXjF", outer: true },
-    { name: "Medium", link: "https://discord.gg/VHgEGXjF", outer: true },
+  const theme = useTheme();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const menuItems = [
+    {
+      name: "Dashboard",
+      link: ROUTES.DASHBOARD,
+      icon: theme.images.icons.dashboard,
+    },
+    {
+      name: "Faucet",
+      link: ROUTES.FAUCET,
+      icon: theme.images.icons.analytics,
+    },
   ];
   return (
     <Root {...{ opened }}>
-      <div className="menu-body">
+      <Body>
+        <Container crossAxisSize="max" style={{ maxHeight: "50vh" }}>
+          {menuItems.map(({ name, link, icon }) => (
+            <MenuItem
+              key={name}
+              selected={isRoutesEquals(link, location.pathname)}
+              onClick={() => navigate(link)}
+            >
+              <img style={{ width: 24, height: 24 }} src={icon} alt="nav" />
+              <SizedBox width={4} />
+              <Text weight={700}>{name}</Text>
+            </MenuItem>
+          ))}
+        </Container>
         <Divider />
-        <Scrollbar style={{ margin: 24, marginBottom: 0 }}>
-          <Column crossAxisSize="max" style={{ maxHeight: "50vh" }}>
-            <LinkGroup onClick={onClose} title="" links={mainFunctional} />
-          </Column>
-        </Scrollbar>
-        <DarkMode style={{ margin: 16 }} />
+        <DarkMode text style={{ margin: 16 }} />
         <WalletWrapper>
           <Wallet />
         </WalletWrapper>
-      </div>
+      </Body>
     </Root>
   );
 };
