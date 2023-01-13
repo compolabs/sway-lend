@@ -21,7 +21,7 @@ export type TNotifyOptions = Partial<{
 
 const style = {
   boxShadow: "0px 8px 24px rgba(54, 56, 112, 0.16)",
-  borderRadius: 12,
+  borderRadius: 4,
   padding: 16,
 };
 
@@ -87,11 +87,11 @@ class NotificationStore {
           }),
           style: {
             ...styles[type],
-            border: `1px solid ${
+            border: `2px solid ${
               this.rootStore.settingsStore.selectedTheme ===
               THEME_TYPE.LIGHT_THEME
-                ? "#F1F2FE"
-                : "#363970"
+                ? "#DFE5FA"
+                : "#313a45"
             }`,
             ...opts.style,
           },

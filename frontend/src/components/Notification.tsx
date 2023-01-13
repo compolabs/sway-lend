@@ -28,7 +28,7 @@ const Root = styled.div<{ type: "warning" | "info" | "error" }>`
           return `background: ${theme.colors.primary100};`;
       }
     })()}
-  border-radius: 12px;
+  border-radius: 4px;
   padding: 18px;
   justify-content: flex-start;
 

@@ -20,7 +20,7 @@ const Root = styled.div<{ withClickLogic?: boolean }>`
   box-sizing: border-box;
   width: 100%;
   cursor: ${({ withClickLogic }) => (withClickLogic ? "pointer" : "default")};
-  padding: 10px 24px;
+  padding: 10px 16px;
 
   :hover {
     background: ${({ withClickLogic, theme }) =>

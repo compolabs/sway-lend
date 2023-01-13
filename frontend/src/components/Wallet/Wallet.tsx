@@ -5,7 +5,6 @@ import { observer } from "mobx-react-lite";
 import Button from "@components/Button";
 import LoggedInAccountInfo from "@components/Wallet/LoggedInAccountInfo";
 import LoginModal from "./LoginModal";
-import DarkMode from "@components/Header/DarkMode";
 
 interface IProps {}
 

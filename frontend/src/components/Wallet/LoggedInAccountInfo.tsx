@@ -11,6 +11,7 @@ import centerEllipsis from "@src/utils/centerEllipsis";
 import TokenIcon from "@components/TokenIcon";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
 import { useTheme } from "@emotion/react";
+import BN from "@src/utils/BN";
 
 interface IProps {}
 
@@ -66,29 +67,25 @@ const AddressContainer = styled.div<{ expanded: boolean }>`
 `;
 
 const LoggedInAccountInfo: React.FC<IProps> = () => {
-  const { accountStore, settingsStore } = useStores();
+  const { accountStore } = useStores();
   const { address } = accountStore;
   const theme = useTheme();
-  // const avatar = address && identityImg.create(address, { size: 24 * 3 });
+  const eth = TOKENS_BY_SYMBOL.ETH;
+  const balance = accountStore.findBalanceByAssetId(eth.assetId);
+  const formattedBalance = BN.formatUnits(
+    balance?.balance ?? BN.ZERO,
+    eth?.decimals
+  );
   const [accountOpened, setAccountOpened] = useState<boolean>(false);
   return (
     <Root>
-      <div />
-      {/*<WalletIcon*/}
-      {/*  onClick={() => settingsStore.setWalletModalOpened(true)}*/}
-      {/*  style={{ cursor: "pointer" }}*/}
-      {/*/>*/}
-      {/*<SizedBox width={24} />*/}
+      <SizedBox width={4} />
       <Container justifyContent="center" alignItems="center">
         <BalanceContainer>
-          <TokenIcon
-            size="tiny"
-            src={TOKENS_BY_SYMBOL.USDT.logo ?? ""}
-            alt="token"
-          />
+          <TokenIcon size="tiny" src={eth.logo} alt="token" />
           <SizedBox width={4} />
           <Text size="small" weight={700}>
-            0.0000
+            {formattedBalance.toFormat(4)}
           </Text>
         </BalanceContainer>
         <Tooltip

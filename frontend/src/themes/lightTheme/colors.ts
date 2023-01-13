@@ -45,17 +45,26 @@ export default {
     walletAddressBackground: colors.neutral3,
     walletBalanceBackground: colors.neutral4,
   },
-
+  skeleton: {
+    base: colors.neutral3,
+    highlight: colors.neutral2,
+  },
   card: {
     background: colors.white,
   },
 
   modal: {
-    background: colors.neutral5,
+    background: colors.neutral1,
+    border: colors.neutral3,
   },
   table: {
     headerColor: colors.neutral4,
     background: "rgba(255, 255, 255, 0.5)",
+  },
+  tooltip: {
+    border: colors.neutral4,
+    background: colors.neutral2,
+    loginTypeBackground: colors.neutral5,
   },
   icon: {
     borderColor: colors.primary100,

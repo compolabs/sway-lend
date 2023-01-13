@@ -8,7 +8,7 @@ body {
     font-family: "Roboto", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background:  ${theme.colors.modal.background};
+    background:  ${theme.colors.mainBackground};
 }
 
 .rc-dialog-mask {
@@ -28,7 +28,7 @@ body {
 
 .rc-dialog-content {
     background: ${theme.colors.modal.background} ;
-    border: 1px solid ${theme.colors.primary100} ;
+    border: 1px solid ${theme.colors.modal.border} ;
     box-shadow: 0px 8px 56px rgba(54, 56, 112, 0.16);
     border-radius: 4px;
     overflow: hidden;
@@ -37,8 +37,8 @@ body {
 }
 
 .rc-dialog-header {
-    border-bottom: 1px solid ${theme.colors.modal.background};
-    background: ${theme.colors.white} ;
+    border-bottom: 2px solid ${theme.colors.modal.border};
+    background: ${theme.colors.modal.background} ;
     padding: 16px 24px;
     max-height: 56px;
 } 
@@ -70,13 +70,13 @@ body {
 }
 
 .rc-notification-notice {
- background: ${theme.colors.modal.background};
+ background: ${theme.colors.mainBackground};
  
 }
 
 .rc-notification-notice-content {
     display: flex;
-    background: ${theme.colors.white};
+    background: ${theme.colors.mainBackground};
 }
 
 .custom-notification .rc-notification-notice-close {
@@ -91,19 +91,19 @@ body {
 
 .recharts-default-tooltip { 
 
-background-color: ${theme.colors.white} !important;
+background-color: ${theme.colors.mainBackground} !important;
 
 }
 
 .react-loading-skeleton {
 
---base-color: ${theme.colors.white};
---highlight-color: ${theme.colors.primary100};
+--base-color: ${theme.colors.skeleton.base};
+--highlight-color: ${theme.colors.skeleton.highlight};
 
 }
 
 .notifications-text {
- color: ${theme.colors.primary800};
+ color: ${theme.colors.text};
 }
 
 

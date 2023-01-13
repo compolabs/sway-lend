@@ -25,7 +25,6 @@ const Link = styled.a`
   font-weight: 500;
   font-size: 14px;
   line-height: 20px;
-  color: #7075e9;
   cursor: pointer;
 `;
 

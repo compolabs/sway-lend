@@ -47,16 +47,26 @@ export default {
     circleColor: colors.neutral6,
   },
   modal: {
-    background: colors.neutral5,
+    background: colors.neutral6,
+    border: colors.neutral5,
+    loginTypeBackground: colors.neutral5,
   },
   table: {
     headerColor: colors.neutral4,
     background: "rgba(169, 213, 245, 0.05);",
   },
+  tooltip: {
+    border: colors.neutral5,
+    background: colors.neutral6,
+  },
   header: {
     navLinkBackground: colors.neutral5,
     walletInfoColor: colors.neutral4,
     walletAddressBackground: colors.neutral5,
+  },
+  skeleton: {
+    base: colors.neutral6,
+    highlight: colors.neutral5,
   },
 
   card: {
