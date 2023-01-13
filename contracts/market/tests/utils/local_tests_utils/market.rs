@@ -45,7 +45,6 @@ pub mod market_abi_calls {
         contract_ids: &[Bech32ContractId],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
-        // let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
@@ -94,13 +93,12 @@ pub mod market_abi_calls {
         address: Address,
         asset: ContractId,
     ) -> u64 {
-        market
+        let res = market
             .methods()
             .get_user_collateral(address, asset)
             .simulate()
-            .await
-            .unwrap()
-            .value
+            .await;
+        res.unwrap().value
     }
 
     pub async fn get_user_supply_borrow(market: &MarketContract, address: Address) -> (u64, u64) {
@@ -115,31 +113,16 @@ pub mod market_abi_calls {
             .value
     }
     pub async fn get_user_basic(market: &MarketContract, address: Address) -> UserBasic {
-        market
-            .methods()
-            .get_user_basic(address)
-            .simulate()
-            .await
-            .unwrap()
-            .value
+        let res = market.methods().get_user_basic(address).simulate().await;
+        res.unwrap().value
     }
     pub async fn get_market_basics(market: &MarketContract) -> MarketBasics {
-        market
-            .methods()
-            .get_market_basics()
-            .simulate()
-            .await
-            .unwrap()
-            .value
+        let res = market.methods().get_market_basics().simulate().await;
+        res.unwrap().value
     }
     pub async fn totals_collateral(market: &MarketContract, asset: ContractId) -> u64 {
-        market
-            .methods()
-            .totals_collateral(asset)
-            .simulate()
-            .await
-            .unwrap()
-            .value
+        let res = market.methods().totals_collateral(asset).simulate().await;
+        res.unwrap().value
     }
     pub async fn get_utilization(market: &MarketContract) -> u64 {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
@@ -153,13 +136,8 @@ pub mod market_abi_calls {
             .value
     }
     pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
-        market
-            .methods()
-            .balance_of(asset_id)
-            .simulate()
-            .await
-            .unwrap()
-            .value
+        let res = market.methods().balance_of(asset_id).simulate().await;
+        res.unwrap().value
     }
 
     pub async fn _pause(
