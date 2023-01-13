@@ -2,6 +2,7 @@ const colors = {
   neutral1: "#EFF2FD",
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
+  neutral4: "#9A9ABD",
   neutral5: "#313a45",
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
@@ -40,10 +41,21 @@ export default {
   },
   header: {
     navLinkBackground: colors.neutral3,
+    walletInfoColor: colors.neutral4,
+    walletAddressBackground: colors.neutral3,
+    walletBalanceBackground: colors.neutral4,
   },
 
   card: {
     background: colors.white,
+  },
+
+  modal: {
+    background: colors.neutral5,
+  },
+  table: {
+    headerColor: colors.neutral4,
+    background: "rgba(255, 255, 255, 0.5)",
   },
   icon: {
     borderColor: colors.primary100,

@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useStores } from "@stores";
 import { Column, Row } from "@components/Flex";
-import SquareTokenIcon from "@components/SquareTokenIcon";
 import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
 import Button from "@components/Button";
@@ -9,6 +8,7 @@ import Scrollbar from "@components/Scrollbar";
 import Table from "@components/Table";
 import { useMarketVM } from "@screens/Market/MarketVm";
 import styled from "@emotion/styled";
+import TokenIcon from "@src/components/TokenIcon";
 
 interface IProps {}
 
@@ -25,7 +25,7 @@ const AssetsTable: React.FC<IProps> = () => {
       vm.marketTokens.map((t) => ({
         asset: (
           <Row>
-            <SquareTokenIcon size="small" src={t.logo} alt="logo" />
+            <TokenIcon size="small" src={t.logo} alt="logo" />
             <SizedBox width={16} />
             <Column crossAxisSize="max">
               <Text size="medium" fitContent style={{ whiteSpace: "nowrap" }}>

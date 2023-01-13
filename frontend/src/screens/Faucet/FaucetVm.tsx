@@ -121,9 +121,9 @@ class FaucetVM {
     this._setLoading(true);
     const { accountStore, notificationStore } = this.rootStore;
     const { address } = accountStore;
-    if (address == null || window.FuelWeb3 == null) return;
+    if (address == null || window?.fuel == null) return;
     //todo add signing from account store
-    const wallet = Wallet.fromAddress(address, window.FuelWeb3?.getProvider());
+    const wallet = Wallet.fromAddress(address, window.fuel?.getProvider());
     const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
     try {

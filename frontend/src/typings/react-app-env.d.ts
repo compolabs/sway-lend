@@ -5,8 +5,11 @@
 
 declare global {
   interface Window {
-    FuelWeb3?: FuelWeb3SDK;
+    fuel?: fuelSDK;
   }
+}
+interface Window {
+  fuel?: fuelSDK;
 }
 declare namespace NodeJS {
   interface ProcessEnv {

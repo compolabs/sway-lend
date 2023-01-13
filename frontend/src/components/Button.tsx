@@ -70,13 +70,17 @@ const Button = styled.button<{
       (() => {
         switch (kind) {
           case "primary":
-            return `background: #6563dd ;border: 1px solid #6563dd;`;
+            return "opacity: 0.8;";
+          // return `background: #6563dd ;border: 1px solid #6563dd;`;
           case "secondary":
-            return `background: ${theme.colors.primary100}; border: 1px solid ${theme.colors.primary100}; color: #6563DD;`;
+            return "opacity: 0.8;";
+          // return `background: ${theme.colors.primary100}; border: 1px solid ${theme.colors.primary100}; color: #6563DD;`;
           case "danger":
-            return `background: ${theme.colors.error550}; border: 1px solid ${theme.colors.error550};`;
+            return "opacity: 0.8;";
+          // return `background: ${theme.colors.error550}; border: 1px solid ${theme.colors.error550};`;
           default:
-            return `background: #6563dd; border: 1px solid #6563dd;`;
+            return "opacity: 0.8;";
+          // return `background: #6563dd; border: 1px solid #6563dd;`;
         }
       })()}
   }

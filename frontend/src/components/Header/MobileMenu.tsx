@@ -78,11 +78,10 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
       icon: theme.images.icons.dashboard,
     },
     {
-      name: "Analytics",
-      link: ROUTES.ROOT,
+      name: "Faucet",
+      link: ROUTES.FAUCET,
       icon: theme.images.icons.analytics,
     },
-    { name: "Wallet", link: ROUTES.WALLET, icon: theme.images.icons.wallet },
   ];
   return (
     <Root {...{ opened }}>

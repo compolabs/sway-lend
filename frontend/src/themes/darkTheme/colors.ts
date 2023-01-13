@@ -1,6 +1,7 @@
 const colors = {
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
+  neutral4: "#9A9ABD",
   neutral5: "#313a45",
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
@@ -37,7 +38,7 @@ export default {
   error100: "#3A2A3D",
   attention100: "#3A303F",
 
-  mainBackground: "#1E1E1E",
+  mainBackground: colors.neutral7,
   text: colors.neutral2,
 
   divider: colors.neutral3,
@@ -45,8 +46,17 @@ export default {
     background: colors.neutral5,
     circleColor: colors.neutral6,
   },
+  modal: {
+    background: colors.neutral5,
+  },
+  table: {
+    headerColor: colors.neutral4,
+    background: "rgba(169, 213, 245, 0.05);",
+  },
   header: {
     navLinkBackground: colors.neutral5,
+    walletInfoColor: colors.neutral4,
+    walletAddressBackground: colors.neutral5,
   },
 
   card: {

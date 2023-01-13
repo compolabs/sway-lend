@@ -8,7 +8,7 @@ body {
     font-family: "Roboto", sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background:  ${theme.colors.white};
+    background:  ${theme.colors.modal.background};
 }
 
 .rc-dialog-mask {
@@ -27,17 +27,17 @@ body {
 }
 
 .rc-dialog-content {
-    background: ${theme.colors.white} ;
+    background: ${theme.colors.modal.background} ;
     border: 1px solid ${theme.colors.primary100} ;
     box-shadow: 0px 8px 56px rgba(54, 56, 112, 0.16);
-    border-radius: 16px;
+    border-radius: 4px;
     overflow: hidden;
     min-height: 286px;
     padding: 0;
 }
 
 .rc-dialog-header {
-    border-bottom: 1px solid ${theme.colors.primary100};
+    border-bottom: 1px solid ${theme.colors.modal.background};
     background: ${theme.colors.white} ;
     padding: 16px 24px;
     max-height: 56px;
@@ -70,7 +70,7 @@ body {
 }
 
 .rc-notification-notice {
- background: ${theme.colors.white};
+ background: ${theme.colors.modal.background};
  
 }
 

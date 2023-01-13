@@ -32,7 +32,7 @@ const Card = styled.div<{
     bordered && `border: 1px solid ${theme.colors.primary100};`};
   width: 100%;
   border: 1px solid ${({ theme }) => `${theme.colors.primary100}`};
-  border-radius: 16px;
+  border-radius: 4px;
   box-sizing: border-box;
   padding: ${({ paddingMobile }) => paddingMobile ?? "16px"};
   ${({ type, theme }) =>

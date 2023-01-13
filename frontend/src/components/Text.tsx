@@ -45,7 +45,7 @@ const Text = styled.p<{
         case "purple300":
           return `color: ${theme.colors?.primary300};`;
         default:
-          return `color: ${theme.colors?.primary800};`;
+          return `color: ${theme.colors?.text};`;
       }
     })()}
   ${({ ellipsis }) =>

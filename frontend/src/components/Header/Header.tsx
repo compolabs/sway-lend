@@ -10,6 +10,7 @@ import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";
 import Text from "@components/Text";
+import DarkMode from "@components/Header/DarkMode";
 
 interface IProps {}
 
@@ -111,11 +112,10 @@ const Header: React.FC<IProps> = () => {
       icon: theme.images.icons.dashboard,
     },
     {
-      name: "Analytics",
-      link: ROUTES.ROOT,
+      name: "Faucet",
+      link: ROUTES.FAUCET,
       icon: theme.images.icons.analytics,
     },
-    { name: "Wallet", link: ROUTES.WALLET, icon: theme.images.icons.wallet },
   ];
 
   return (
@@ -155,6 +155,8 @@ const Header: React.FC<IProps> = () => {
           />
         </Mobile>
         <Desktop>
+          <DarkMode />
+          <SizedBox width={40} />
           <Wallet />
           <SizedBox width={24} />
         </Desktop>

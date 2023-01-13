@@ -34,7 +34,7 @@
 
 @media (min-width: 560px) {
     .wallet-dialog .rc-dialog-content {
-        border-radius: 16px;
+        border-radius: 4px;
         width: 368px;
         height: 560px;
     }
