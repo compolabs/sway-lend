@@ -34,6 +34,8 @@ export default {
   mainBackground: colors.neutral1,
   menuBackground: colors.neutral5,
   divider: colors.neutral5,
+  disabledBtnTextColor: "rgba(26, 29, 31, 0.35);",
+  disabledBtnColor: "rgba(184, 189, 208, 0.5)",
 
   switch: {
     background: colors.neutral3,
@@ -63,9 +65,18 @@ export default {
     background: "rgba(255, 255, 255, 0.5)",
   },
   tooltip: {
-    border: colors.neutral4,
-    background: colors.neutral2,
-    loginTypeBackground: colors.neutral5,
+    border: "none",
+    background: "#F9FAFF",
+    hoverElement: "rgba(223, 229, 250, 0.6)",
+  },
+  dashboard: {
+    tokenRowColor: "#F9FAFF",
+    tokenRowDisabled: "#ffffff",
+    cardBackground: "#F9FAFF",
+  },
+  supplyBtn: {
+    background: colors.neutral3,
+    backgroundSelected: colors.neutral3,
   },
   icon: {
     borderColor: colors.primary100,

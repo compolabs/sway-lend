@@ -3,6 +3,10 @@ import React from "react";
 import { Observer } from "mobx-react-lite";
 import { DashboardVMProvider } from "@screens/Dashboard/DashboardVm";
 import Layout from "@components/Layout";
+import DashboardStats from "@screens/Dashboard/DashboardStats";
+import SizedBox from "@components/SizedBox";
+import AssetsTable from "@screens/Dashboard/AssetsTable";
+import ActionTab from "@screens/Dashboard/ActionTab";
 
 interface IProps {}
 
@@ -14,7 +18,6 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
   padding: 0 16px;
   width: 100%;
   min-height: 100%;
-  max-width: calc(1160px + 32px);
   margin-bottom: 24px;
   margin-top: 40px;
   text-align: left;
@@ -35,10 +38,29 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
       liquiditySort ? "scale(1)" : "scale(1, -1)"};
   }
 `;
+const MainContainer = styled.div`
+  width: 100%;
+  display: grid;
+  @media (min-width: 880px) {
+    grid-template-columns: 3fr 1fr;
+    column-gap: 20px;
+  }
+`;
 const DashboardImpl: React.FC<IProps> = () => {
   return (
     <Layout>
-      <Observer>{() => <Root>Dashboard</Root>}</Observer>
+      <Observer>
+        {() => (
+          <Root>
+            <DashboardStats />
+            <SizedBox height={24} />
+            <MainContainer>
+              <AssetsTable />
+              <ActionTab />
+            </MainContainer>
+          </Root>
+        )}
+      </Observer>
     </Layout>
   );
 };

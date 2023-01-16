@@ -40,6 +40,8 @@ export default {
 
   mainBackground: colors.neutral7,
   text: colors.neutral2,
+  disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",
+  disabledBtnColor: colors.neutral5,
 
   divider: colors.neutral3,
   switch: {
@@ -56,8 +58,9 @@ export default {
     background: "rgba(169, 213, 245, 0.05);",
   },
   tooltip: {
-    border: colors.neutral5,
-    background: colors.neutral6,
+    border: "none",
+    background: "#262F33",
+    hoverElement: colors.neutral5,
   },
   header: {
     navLinkBackground: colors.neutral5,
@@ -67,6 +70,16 @@ export default {
   skeleton: {
     base: colors.neutral6,
     highlight: colors.neutral5,
+  },
+  //todo change disabled to selected
+  dashboard: {
+    tokenRowColor: "#313A45",
+    tokenRowDisabled: "#262F33",
+    cardBackground: "#262F33",
+  },
+  supplyBtn: {
+    background: colors.neutral6,
+    backgroundSelected: colors.neutral5,
   },
 
   card: {

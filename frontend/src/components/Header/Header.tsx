@@ -33,7 +33,7 @@ const TopMenu = styled.header`
   width: 100%;
   height: 80px;
   padding: 0 16px;
-  max-width: 1440px;
+  max-width: 1300px;
   z-index: 102;
   @media (min-width: 880px) {
     height: 80px;
@@ -114,7 +114,7 @@ const Header: React.FC<IProps> = () => {
     {
       name: "Faucet",
       link: ROUTES.FAUCET,
-      icon: theme.images.icons.analytics,
+      icon: theme.images.icons.coins,
     },
   ];
 
@@ -158,7 +158,6 @@ const Header: React.FC<IProps> = () => {
           <DarkMode />
           <SizedBox width={40} />
           <Wallet />
-          <SizedBox width={24} />
         </Desktop>
       </TopMenu>
       <Mobile>

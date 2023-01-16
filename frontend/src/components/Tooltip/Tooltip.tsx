@@ -14,12 +14,13 @@ interface IProps {
 const Root = styled.div<{ fixed?: boolean }>`
   display: flex;
   background: ${({ theme }) => `${theme.colors.tooltip.background}`};
-  max-width: 320px;
-  min-width: 160px;
+  //max-width: 320px;
+  //min-width: 160px;
   z-index: 2;
   width: max-content;
   box-sizing: border-box;
-  padding: 8px 16px 12px;
+  padding: 0 16px;
+  //padding: 16px;
   border: 2px solid ${({ theme }) => `${theme.colors.tooltip.border}`};
   border-radius: 4px;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06), 0 16px 28px rgba(0, 0, 0, 0.07);

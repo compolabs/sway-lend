@@ -34,7 +34,7 @@ const Card = styled.div<{
   border: 1px solid ${({ theme }) => `${theme.colors.card.border}`};
   border-radius: 4px;
   box-sizing: border-box;
-  padding: ${({ paddingMobile }) => paddingMobile ?? "16px"};
+  padding: ${({ paddingMobile }) => paddingMobile ?? "20px"};
   ${({ type, theme }) =>
     (() => {
       switch (type) {

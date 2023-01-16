@@ -19,7 +19,6 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
   padding: 0 16px;
   width: 100%;
   min-height: 100%;
-  max-width: calc(1160px + 32px);
   margin-bottom: 24px;
   margin-top: 40px;
   text-align: left;

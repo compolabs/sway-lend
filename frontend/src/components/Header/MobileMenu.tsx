@@ -79,7 +79,7 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
     {
       name: "Faucet",
       link: ROUTES.FAUCET,
-      icon: theme.images.icons.analytics,
+      icon: theme.images.icons.coins,
     },
   ];
   return (
