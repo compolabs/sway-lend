@@ -22,8 +22,8 @@ type ActionType = "supply" | "borrow";
 class DashboardVm {
   public rootStore: RootStore;
 
-  marketTokens: IToken[] = [
-    TOKENS_BY_SYMBOL.USDC,
+  collaterals: IToken[] = [
+    TOKENS_BY_SYMBOL.SWAY,
     TOKENS_BY_SYMBOL.ETH,
     TOKENS_BY_SYMBOL.BTC,
     TOKENS_BY_SYMBOL.LINK,
@@ -47,7 +47,7 @@ class DashboardVm {
   isThereUserData = false;
 
   get tokenBtnsClick(): Record<string, [() => void]> {
-    return this.marketTokens.reduce((acc, v) => {
+    return this.collaterals.reduce((acc, v) => {
       const c = () => {
         console.log("click click", v.symbol);
       };

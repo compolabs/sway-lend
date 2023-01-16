@@ -84,6 +84,7 @@ const TokenInput: React.FC<IProps> = (props) => {
     []
   );
 
+  //todo add smooth apperiance
   return (
     <Root>
       <InputContainer focused={focused} readOnly={!props.setAmount}>

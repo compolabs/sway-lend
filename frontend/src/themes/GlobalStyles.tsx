@@ -70,13 +70,13 @@ body {
 }
 
 .rc-notification-notice {
- background: ${theme.colors.mainBackground};
- 
+ background: ${theme.colors.notifications.background};
+ box-shadow: ${theme.colors.notifications.boxShadow}
 }
 
 .rc-notification-notice-content {
     display: flex;
-    background: ${theme.colors.mainBackground};
+    background: ${theme.colors.notifications.background};
 }
 
 .custom-notification .rc-notification-notice-close {

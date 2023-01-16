@@ -1,4 +1,5 @@
 const colors = {
+  white: "#ffffff",
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
   neutral4: "#9A9ABD",
@@ -27,7 +28,7 @@ const colors = {
 // eslint-disable-next-line
 export default {
   ...colors,
-  primary800: "#FFFFFF",
+  primary800: colors.white,
   primary650: "#C6C9F4",
 
   primary300: "#8182C5",
@@ -74,7 +75,7 @@ export default {
   //todo change disabled to selected
   dashboard: {
     tokenRowColor: "#313A45",
-    tokenRowDisabled: "#262F33",
+    tokenRowSelected: "#262F33",
     cardBackground: "#262F33",
   },
   supplyBtn: {
@@ -90,6 +91,11 @@ export default {
     borderColor: colors.primary800,
   },
   gradient: "rgba(0, 0, 0, 0.5);",
+  notifications: {
+    boxShadow:
+      "0px 0px 14px -4px rgba(227, 233, 249, 0.05), 0px 32px 48px -8px rgba(227, 233, 249, 0.1)",
+    background: colors.neutral7,
+  },
   tokenDescGradient:
     "linear-gradient(180deg, rgba(248, 248, 255, 0) 0%, #181931 100%)",
   noNftGradient:

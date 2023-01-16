@@ -10,6 +10,7 @@ import { observer } from "mobx-react-lite";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
 import TokenInput from "@components/TokenInput/TokenInput";
 import BN from "@src/utils/BN";
+import useCollapse from "@components/Collapse";
 
 interface IProps {}
 
@@ -41,25 +42,29 @@ const ActionTab: React.FC<IProps> = () => {
     vm.setActionTokenAssetId(TOKENS_BY_SYMBOL.USDC.assetId);
   };
 
+  const { getCollapseProps } = useCollapse({
+    isExpanded: vm.action != null,
+    duration: 500,
+  });
+
   return (
     <Root>
-      {vm.action != null ? (
-        <Card style={{ marginBottom: 24 }}>
-          <Text fitContent weight={600} type="secondary" size="small">
-            {vm.actionName}
-          </Text>
-          <SizedBox height={16} />
-          <TokenInput
-            decimals={vm.token.decimals}
-            amount={vm.tokenAmount ?? BN.ZERO}
-            setAmount={vm.setTokenAmount}
-            assetId={vm.token.assetId}
-          />
-          <SizedBox height={8} />
-          <Button fixed>{vm.actionName}</Button>
-        </Card>
-      ) : (
-        <Row style={{ marginBottom: 24 }}>
+      <Card {...getCollapseProps()}>
+        <Text fitContent weight={600} type="secondary" size="small">
+          {vm.actionName}
+        </Text>
+        <SizedBox height={16} />
+        <TokenInput
+          decimals={vm.token.decimals}
+          amount={vm.tokenAmount ?? BN.ZERO}
+          setAmount={vm.setTokenAmount}
+          assetId={vm.token.assetId}
+        />
+        <SizedBox height={8} />
+        <Button fixed>{vm.actionName}</Button>
+      </Card>
+      {vm.action == null && (
+        <Row>
           <Button onClick={handleSupplyUsdcClick} fixed>
             Supply USDC
           </Button>
@@ -69,7 +74,7 @@ const ActionTab: React.FC<IProps> = () => {
           </Button>
         </Row>
       )}
-
+      <SizedBox height={24} />
       <Card>
         <SizedBox height={24} />
         <Text weight={600} type="secondary" size="small">

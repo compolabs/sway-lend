@@ -14,18 +14,17 @@ const Root = styled.div`
   display: flex;
   flex-direction: column;
 `;
-const TokenRow = styled.div<{ disabled?: boolean }>`
+const TokenRow = styled.div<{ selected?: boolean }>`
   display: flex;
   flex-direction: row;
   padding: 8px 16px;
   align-items: center;
   justify-content: space-between;
 
-  background: ${({ theme, disabled }) =>
-    disabled
-      ? theme.colors.dashboard.tokenRowDisabled
-      : theme.colors.dashboard.tokenRowColor};
-  ${({ disabled }) => disabled && "cursor: not-allowed;"}
+  background: ${({ theme, selected }) =>
+    selected
+      ? theme.colors.dashboard.tokenRowColor
+      : theme.colors.dashboard.tokenRowSelected};
   border-radius: 4px;
   margin-bottom: 2px;
 `;
@@ -34,8 +33,9 @@ const AssetsTable: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   return (
     <Root>
-      {vm.marketTokens.map(({ logo, symbol, name }, index) => (
-        <TokenRow disabled={index !== 0}>
+      {vm.collaterals.map(({ logo, symbol, name, assetId }, index) => (
+        <TokenRow selected={vm.actionTokenAssetId === assetId}>
+          {/*<TokenRow selected={true}>*/}
           <Row alignItems="center">
             <TokenIcon size="small" src={logo} />
             <SizedBox width={20} />
