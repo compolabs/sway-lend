@@ -44,13 +44,13 @@ const Button = styled.button<{
     (() => {
       switch (kind) {
         case "primary":
-          return `background: ${theme.colors.primary01}; color:${theme.colors.neutral7};`;
+          return `background: ${theme.colors.button.primaryBackground}; color:${theme.colors.button.primaryColor};`;
         case "secondary":
-          return `background: ${theme.colors.white}; color:${theme.colors.blue500};`;
+          return `background: ${theme.colors.button.secondaryBackground}; color:${theme.colors.button.secondaryColor};`;
         case "danger":
           return `background: ${theme.colors.error500}; color: #fff;`;
         default:
-          return `background: ${theme.colors.primary01}; color:${theme.colors.neutral7};`;
+          return `background: ${theme.colors.button.primaryBackground}; color:${theme.colors.button.primaryColor};`;
       }
     })()}
   ${({ size }) =>

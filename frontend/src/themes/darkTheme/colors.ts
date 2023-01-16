@@ -44,6 +44,12 @@ export default {
   disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",
   disabledBtnColor: colors.neutral5,
 
+  button: {
+    primaryBackground: colors.primary01,
+    primaryColor: colors.neutral6,
+    secondaryBackground: colors.neutral5,
+    secondaryColor: colors.neutral3,
+  },
   divider: colors.neutral3,
   switch: {
     background: colors.neutral5,
@@ -72,7 +78,6 @@ export default {
     base: colors.neutral6,
     highlight: colors.neutral5,
   },
-  //todo change disabled to selected
   dashboard: {
     tokenRowColor: "#313A45",
     tokenRowSelected: "#262F33",

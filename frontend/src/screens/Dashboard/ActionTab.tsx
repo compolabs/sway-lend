@@ -41,17 +41,23 @@ const ActionTab: React.FC<IProps> = () => {
     vm.setAction("supply");
     vm.setActionTokenAssetId(TOKENS_BY_SYMBOL.USDC.assetId);
   };
+  const handleCancelClick = () => {
+    vm.setAction(null);
+    vm.setActionTokenAssetId(null);
+  };
 
+  //todo fix bug
   const { getCollapseProps } = useCollapse({
     isExpanded: vm.action != null,
     duration: 500,
   });
+  const props = getCollapseProps();
 
   return (
     <Root>
-      <Card {...getCollapseProps()}>
+      <Card {...props}>
         <Text fitContent weight={600} type="secondary" size="small">
-          {vm.actionName}
+          {vm.actionName} {vm.token.symbol}
         </Text>
         <SizedBox height={16} />
         <TokenInput
@@ -61,19 +67,26 @@ const ActionTab: React.FC<IProps> = () => {
           assetId={vm.token.assetId}
         />
         <SizedBox height={8} />
-        <Button fixed>{vm.actionName}</Button>
-      </Card>
-      {vm.action == null && (
         <Row>
-          <Button onClick={handleSupplyUsdcClick} fixed>
-            Supply USDC
+          <Button kind="secondary" fixed onClick={handleCancelClick}>
+            Cancel
           </Button>
           <SizedBox width={8} />
-          <Button disabled fixed>
-            Borrow USDC
-          </Button>
+          <Button fixed>{vm.actionName}</Button>
         </Row>
-      )}
+      </Card>
+      {props["aria-hidden"] === false ||
+        (vm.action == null && (
+          <Row>
+            <Button onClick={handleSupplyUsdcClick} fixed>
+              Supply USDC
+            </Button>
+            <SizedBox width={8} />
+            <Button disabled fixed>
+              Borrow USDC
+            </Button>
+          </Row>
+        ))}
       <SizedBox height={24} />
       <Card>
         <SizedBox height={24} />

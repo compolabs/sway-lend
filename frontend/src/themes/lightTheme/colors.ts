@@ -42,6 +42,13 @@ export default {
     background: colors.neutral3,
     circleColor: colors.neutral1,
   },
+
+  button: {
+    primaryBackground: colors.primary01,
+    primaryColor: colors.neutral6,
+    secondaryBackground: colors.neutral3,
+    secondaryColor: colors.neutral6,
+  },
   header: {
     navLinkBackground: colors.neutral3,
     walletInfoColor: colors.neutral4,
