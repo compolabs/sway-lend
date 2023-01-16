@@ -35,6 +35,7 @@ use std::{
     storage::StorageVec,
     token::transfer_to_address,
     u128::U128,
+    u256::U256,
 };
 
 abi Market {
@@ -268,45 +269,57 @@ fn get_utilization_internal() -> u64 { // -> decimals 18
 // @Callable get_supply_rate(utilization: u64) -> u64
 #[storage(read)]
 fn get_supply_rate_internal(utilization: u64) -> u64 { // -> decimals 18
+    let utilization = U128::from_u64(utilization);
     let config = get_config();
-    let kink_ = config.kink; // decimals 18
-    let interest_rate_base = 0; // decimals 18
-    let interest_rate_slope_low = config.supply_per_second_interest_rate_slope_low;// decimals 18
-    let interest_rate_slope_high = config.supply_per_second_interest_rate_slope_high;// decimals 18
+    let kink_ = U128::from_u64(config.kink); // decimals 18
+    let interest_rate_slope_low = U128::from_u64(config.supply_per_second_interest_rate_slope_low);// decimals 18
+    let interest_rate_slope_high = U128::from_u64(config.supply_per_second_interest_rate_slope_high);// decimals 18
+    let scale = U128::from_u64(SCALE_18);
     if utilization <= kink_ {
-        interest_rate_base + interest_rate_slope_low * utilization / SCALE_18
+        (interest_rate_slope_low * utilization / scale).as_u64().unwrap()
     } else {
-        interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / SCALE_18
+        ((interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
     }
 }
 
 // @Callable get_borrow_rate(utilization: u64) -> u64
 #[storage(read)]
 fn get_borrow_rate_internal(utilization: u64) -> u64 { // -> decimals 18
+    let utilization = U128::from_u64(utilization);
     let config = get_config();
-    let kink_ = config.kink; // decimals 18
-    let interest_rate_base = config.borrow_per_second_interest_rate_base; // decimals 18
-    let interest_rate_slope_low = config.borrow_per_second_interest_rate_slope_low; // decimals 18
-    let interest_rate_slope_high = config.borrow_per_second_interest_rate_slope_high; // decimals 18
+    let kink_ = U128::from_u64(config.kink); // decimals 18
+    let interest_rate_base = U128::from_u64(config.borrow_per_second_interest_rate_base); // decimals 18
+    let interest_rate_slope_low = U128::from_u64(config.borrow_per_second_interest_rate_slope_low); // decimals 18
+    let interest_rate_slope_high = U128::from_u64(config.borrow_per_second_interest_rate_slope_high); // decimals 18
+    let scale = U128::from_u64(SCALE_18);
     if utilization <= kink_ {
-        interest_rate_base + interest_rate_slope_low * utilization / SCALE_18
+        (interest_rate_base + interest_rate_slope_low * utilization / scale).as_u64().unwrap()
     } else {
-        interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / SCALE_18
+        (interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
     }
 }
 
 // calculation of the updated value base_supply/borrow_index
 #[storage(read)]
 fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (18, 18)
-    let mut base_supply_index_ = storage.market_basic.base_supply_index; // decimals 18
-    let mut base_borrow_index_ = storage.market_basic.base_borrow_index; // decimals 18
+    let mut base_supply_index_ = U128::from_u64(storage.market_basic.base_supply_index); // decimals 18
+    let mut base_borrow_index_ = U128::from_u64(storage.market_basic.base_borrow_index); // decimals 18
     if time_elapsed > 0 {
         let utilization = get_utilization_internal();  // decimals 18
-        let supply_rate = get_supply_rate_internal(utilization); // decimals 18
-        let borrow_rate = get_borrow_rate_internal(utilization); // decimals 18
-        base_supply_index_ += base_supply_index_ * supply_rate * time_elapsed / SCALE_18;
-        base_borrow_index_ += base_supply_index_ * supply_rate * time_elapsed / SCALE_18;
+        let supply_rate = U128::from_u64(get_supply_rate_internal(utilization)); // decimals 18
+        let borrow_rate = U128::from_u64(get_borrow_rate_internal(utilization)); // decimals 18
+        let scale = U128::from_u64(SCALE_18);
+    
+        log(base_supply_index_);
+        log(base_borrow_index_);
+        log(supply_rate);
+        log(borrow_rate);
+        
+        base_supply_index_ += base_supply_index_ * supply_rate / scale * U128::from_u64(time_elapsed);
+        base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * U128::from_u64(time_elapsed);
     }
+    let base_supply_index_ = base_supply_index_.as_u64().unwrap();
+    let base_borrow_index_ = base_borrow_index_.as_u64().unwrap();
     return (base_supply_index_, base_borrow_index_);
 }
 
@@ -341,9 +354,9 @@ fn is_borrow_collateralized(account: Address) -> bool {
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(10.pow(9));
-    return if present_value_ < I64::new(){
+    return if present_value_ < I64::new() {
         false
-    }else{ 
+    } else {
         let borrow_amount = U128::from_u64(present_value_.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
         borrow_limit >= borrow_amount
     }
@@ -404,18 +417,23 @@ fn accrue_internal() {
     let now = timestamp();
     let time_elapsed = now - market_basic.last_accrual_time;
     if time_elapsed > 0 {
-        let total_supply_base = market_basic.total_supply_base; // base_asset_decimal
-        let total_borrow_base = market_basic.total_borrow_base; // base_asset_decimal
-        let tracking_supply_speed = config.base_tracking_supply_speed; // decimals 18
-        let tracking_borrow_speed = config.base_tracking_borrow_speed; // decimals 18
-        let min_for_rewards = config.base_min_for_rewards; // decimals 6
-        let scale = 10.pow(config.base_token_decimals);
+        if market_basic.last_accrual_time != 0 {
+            let (base_supply_index, base_borrow_index) = accrued_interest_indices(time_elapsed);
+            market_basic.base_supply_index = base_supply_index;
+            market_basic.base_borrow_index = base_borrow_index;
+        };
+        let total_supply_base = U128::from_u64(market_basic.total_supply_base); // base_asset_decimal
+        let total_borrow_base = U128::from_u64(market_basic.total_borrow_base); // base_asset_decimal
+        let tracking_supply_speed = U128::from_u64(config.base_tracking_supply_speed); // decimals 18
+        let tracking_borrow_speed = U128::from_u64(config.base_tracking_borrow_speed); // decimals 18
+        let min_for_rewards = U128::from_u64(config.base_min_for_rewards); // decimals 6
+        let scale = U128::from_u64(10.pow(config.base_token_decimals));
 
         if total_supply_base >= min_for_rewards {
-            market_basic.tracking_supply_index += tracking_supply_speed * time_elapsed / total_supply_base / scale; // 18 
+            market_basic.tracking_supply_index += (tracking_supply_speed * U128::from_u64(time_elapsed) / total_supply_base / scale).as_u64().unwrap(); // 18 
         }
         if total_borrow_base >= min_for_rewards {
-            market_basic.tracking_borrow_index += tracking_borrow_speed * time_elapsed / total_borrow_base / scale;  // 18 
+            market_basic.tracking_borrow_index += (tracking_borrow_speed * U128::from_u64(time_elapsed) / total_borrow_base / scale).as_u64().unwrap();  // 18 
         }
         market_basic.last_accrual_time = now;
         storage.market_basic = market_basic;

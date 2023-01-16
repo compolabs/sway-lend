@@ -2,10 +2,20 @@
 library numbers;
 // use sway_libs::i128::I128;
 use std::u128::U128;
+use std::u256::U256;
 
 impl U128 {
     pub fn from_u64(value: u64) -> U128 {
         U128::from((0, value))
+    }
+}
+
+impl U256 {
+    pub fn from_u64(value: u64) -> U256 {
+        U256::from((0, 0, 0, value))
+    }
+    pub fn from_u128(value: U128) -> U256 {
+        U256::from((0, 0, value.upper, value.lower))
     }
 }
 

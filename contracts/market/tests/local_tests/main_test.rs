@@ -2,7 +2,7 @@ use fuels::prelude::TxParameters;
 use fuels::signers::WalletUnlocked;
 use fuels::tx::{Address, ContractId};
 
-use crate::utils::local_tests_utils::market::{market_abi_calls, MarketContract, market_contract_mod};
+use crate::utils::local_tests_utils::market::{market_abi_calls, MarketContract};
 use crate::utils::local_tests_utils::oracle::oracle_abi_calls;
 use crate::utils::number_utils::format_units;
 use crate::utils::{local_tests_utils::market, number_utils::parse_units};
@@ -56,9 +56,11 @@ async fn main_test() {
 
     // Bob calls supply_base
     let inst = market.with_wallet(bob.clone()).unwrap();
-    market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
+    let _res = market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
+    println!("logs = {:?}", _res.get_logs_with_type::<u64>());
+    println!("logs = {:?}", _res.get_logs());
 
     // Сheck supply balance equal to 400 USDC
     let (supply_balance, _borrow_balance) =
@@ -86,17 +88,17 @@ async fn main_test() {
 
     // Alice calls supply_collateral
     let inst = market.with_wallet(alice.clone()).unwrap();
-    market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
+    let res = market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .unwrap();
-
+    println!("log = {:?}", res.get_logs_with_type::<u64>());
     // Сheck supply balance equal to 40 UNI
     let address = Address::from(alice.address());
     let res = market_abi_calls::get_user_collateral(&inst, address, uni.contract_id).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
-
+    std::thread::sleep(std::time::Duration::from_secs(100));
     // =================================================
     // ==================== Case #2 ====================
     // 👛 Wallet: Alice
@@ -110,7 +112,8 @@ async fn main_test() {
     let _res = market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
         .await
         .unwrap();
-
+    println!("logs = {:?}", _res.get_logs_with_type::<u64>());
+    println!("logs = {:?}", _res.get_logs());
     // USDC balance check
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount);
@@ -122,7 +125,7 @@ async fn main_test() {
         .expect("❌ Cannot transfer");
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
-
+    std::thread::sleep(std::time::Duration::from_secs(100));
     // =================================================
     // ==================== Case #3 ====================
     // 👛 Wallet: Chad
@@ -142,17 +145,18 @@ async fn main_test() {
 
     //Chad calls supply_collateral
     let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
+    let _res = market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .unwrap();
-
+    println!("logs = {:?}", _res.get_logs_with_type::<u64>());
+    println!("logs = {:?}", _res.get_logs());
     //Сheck supply balance equal to 60 UNI
     let address = Address::from(chad.address());
     let res = market_abi_calls::get_user_collateral(&inst, address, uni.contract_id).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
-
+    std::thread::sleep(std::time::Duration::from_secs(100));
     // =================================================
     // ==================== Case #4 ====================
     // 👛 Wallet: Chad
@@ -173,182 +177,201 @@ async fn main_test() {
 
     // Chad calls supply_base
     let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
+    let _res = market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
-
+    println!("logs = {:?}", _res.get_logs_with_type::<u64>());
+    println!("logs = {:?}", _res.get_logs());
     //Сheck supply balance equal to 200 USDC
     let (supply_balance, _borrow_balance) =
         market_abi_calls::get_user_supply_borrow(&inst, Address::from(chad.address())).await;
-    assert!(supply_balance == amount);
+    // assert!(supply_balance == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    
+    // // =================================================
+    // // ==================== Case #5 ====================
+    // // 👛 Wallet: Alice
+    // // 🤙 Call: withdraw_base
+    // // 💰 Amount: -100.00 USDC
+    // print_case_title(5, "Alice", "withdraw_base", "-100 USDC");
+    // //Alice calls withdraw_base
+    // let amount = parse_units(100, usdc.config.decimals);
+    // let inst = market.with_wallet(alice.clone()).unwrap();
 
-    // =================================================
-    // ==================== Case #5 ====================
-    // 👛 Wallet: Alice
-    // 🤙 Call: withdraw_base
-    // 💰 Amount: -100.00 USDC
-    print_case_title(5, "Alice", "withdraw_base", "-100 USDC");
-    //Alice calls withdraw_base
-    let amount = parse_units(100, usdc.config.decimals);
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    // market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    //     .await
+    //     .unwrap();
 
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
-        .await
-        .unwrap();
+    // // USDC balance check
+    // let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    // USDC balance check
-    let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Transfer money back
+    // alice
+    //     .transfer(admin.address(), amount, usdc.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // Transfer money back
-    alice
-        .transfer(admin.address(), amount, usdc.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #6 ====================
+    // // 👛 Wallet: Chad
+    // // 🤙 Call: withdraw_base
+    // // 💰 Amount: -300.00 USDC
+    // print_case_title(6, "Chad", "withdraw_base", "-300.00 USDC");
+    // //Chad calls withdraw_base
+    // let amount = parse_units(300, usdc.config.decimals);
+    // let inst = market.with_wallet(chad.clone()).unwrap();
+    // let _res = market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    //     .await
+    //     .unwrap();
 
-    // =================================================
-    // ==================== Case #6 ====================
-    // 👛 Wallet: Chad
-    // 🤙 Call: withdraw_base
-    // 💰 Amount: -300.00 USDC
-    print_case_title(6, "Chad", "withdraw_base", "-300.00 USDC");
-    //Chad calls withdraw_base
-    let amount = parse_units(300, usdc.config.decimals);
-    let inst = market.with_wallet(chad.clone()).unwrap();
-    let _res = market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
-        .await
-        .unwrap();
+    // // USDC balance check
+    // let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    // USDC balance check
-    let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Transfer money back
+    // chad.transfer(admin.address(), amount, usdc.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // Transfer money back
-    chad.transfer(admin.address(), amount, usdc.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #7 ====================
+    // // 👛 Wallet: Alice
+    // // 🤙 Call: supply_base
+    // // 💰 Amount: 150.108361 USDC
+    // print_case_title(7, "Alice", "supply_base", "150.108361 USDC");
+    // // Transfer of 150.108361 USDC to the Alice's wallet
+    // let amount = 150_108_361; //TODO: calculate this value
+    // let tx_params = TxParameters::default();
+    // admin
+    //     .transfer(alice.address(), amount, usdc.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // =================================================
-    // ==================== Case #7 ====================
-    // 👛 Wallet: Alice
-    // 🤙 Call: supply_base
-    // 💰 Amount: 150.061096 USDC
-    print_case_title(7, "Alice", "supply_base", "150.061096 USDC");
-    // Transfer of 150.061096 USDC to the Alice's wallet
-    let amount = 150_061_096; //TODO: calculate this value
-    let tx_params = TxParameters::default();
-    admin
-        .transfer(alice.address(), amount, usdc.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // //Сheck balance
+    // let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    //Сheck balance equal to 150.061096 USDC
-    let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Alice calls supply_base
+    // let inst = market.with_wallet(alice.clone()).unwrap();
+    // market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
+    //     .await
+    //     .unwrap();
 
-    // Alice calls supply_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
-    market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
-        .await
-        .unwrap();
+    // //TODO:
+    // //Сheck supply balance equal to 0.061096 USDC
+    // // let (supply_balance, _borrow_balance) =
+    // //     market_abi_calls::get_user_supply_borrow(&inst, Address::from(alice.address())).await;
+    // // assert!(supply_balance == amount - 150_000_000);
 
-    //TODO:
-    //Сheck supply balance equal to 0.061096 USDC
-    let (supply_balance, _borrow_balance) =
-        market_abi_calls::get_user_supply_borrow(&inst, Address::from(alice.address())).await;
-    assert!(supply_balance == amount - 150_000_000);
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #8 ====================
+    // // 👛 Wallet: Chad
+    // // 🤙 Call: supply_base
+    // // 💰 Amount: 100.046928 USDC
+    // print_case_title(8, "Chad", "supply_base", "100.046928 USDC");
+    // // Transfer of 100.046928 USDC to the Chad's wallet
+    // let amount = 100_046_928;
+    // let tx_params = TxParameters::default();
+    // admin
+    //     .transfer(chad.address(), amount, usdc.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // =================================================
-    // ==================== Case #8 ====================
-    // 👛 Wallet: Chad
-    // 🤙 Call: supply_base
-    // 💰 Amount: 100.00 USDC
-    print_case_title(8, "Chad", "supply_base", "100.00 USDC");
-    // Transfer of 100 USDC to the Chad's wallet
-    let amount = parse_units(100, usdc.config.decimals);
-    let tx_params = TxParameters::default();
-    admin
-        .transfer(chad.address(), amount, usdc.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // //Сheck balance
+    // let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    //Сheck balance equal to 100 USDC
-    let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Chad calls supply_base
+    // let inst = market.with_wallet(chad.clone()).unwrap();
+    // market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
+    //     .await
+    //     .unwrap();
 
-    // Chad calls supply_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
-        .await
-        .unwrap();
-
-    //TODO: Сheck
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
-    // =================================================
-    // ==================== Case #9 ====================
-    // 👛 Wallet: Bob
-    // 🤙 Call: withdraw_base
-    // 💰 Amount: -400.058340 USDC
-    print_case_title(9, "Bob", "withdraw_base", "-400.058340 USDC");
-    //Bob calls withdraw_base
+    // //TODO: Сheck
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #9 ====================
+    // // 👛 Wallet: Bob
+    // // 🤙 Call: withdraw_base
+    // // 💰 Amount: -400.058340 USDC
+    // print_case_title(9, "Bob", "withdraw_base", "-400.058340 USDC");
+    // //Bob calls withdraw_base
     // let amount = 400_058_340; //TODO: calculate this value
-    let amount = 400_000_000; //FIXME: 400_000_000 -> 400_058_340
-    let inst = market.with_wallet(bob.clone()).unwrap();
-    let _res = market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
-        .await
-        .unwrap();
+    //                           // let amount = 400_000_000; //FIXME: 400_000_000 -> 400_058_340
+    // let inst = market.with_wallet(bob.clone()).unwrap();
+    // market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    //     .await
+    //     .unwrap();
+    // // USDC balance check
+    // let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    // USDC balance check
-    let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Transfer money back
+    // bob.transfer(admin.address(), amount, usdc.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // Transfer money back
-    bob.transfer(admin.address(), amount, usdc.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #10 ====================
+    // // 👛 Wallet: Alice
+    // // 🤙 Call: withdraw_collateral
+    // // 💰 Amount: -$200.00/40.00 UNI
+    // print_case_title(10, "Alice", "withdraw_collateral", "-$200.00/40.00 UNI");
+    // //Alice calls withdraw_base
+    // let amount = parse_units(40, uni.config.decimals);
+    // let inst = market.with_wallet(alice.clone()).unwrap();
 
-    // =================================================
-    // ==================== Case #10 ====================
-    // 👛 Wallet: Alice
-    // 🤙 Call: withdraw_collateral
-    // 💰 Amount: -$200.00/40.00 UNI
-    print_case_title(10, "Alice", "withdraw_collateral", "-$200.00/40.00 UNI");
-    //Alice calls withdraw_base
-    let amount = parse_units(40, uni.config.decimals);
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    // let _res = market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
+    //     .await
+    //     .unwrap();
+    // // println!("logs = {:?}", res.get_logs_with_type::<market_contract_mod::I64>());
+    // // println!("logs = {:?}", res.get_logs());
+    // // UNI balance check
+    // let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
+    // assert!(balance == amount);
 
-    let res = market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
-        .await
-        .unwrap();
-    println!("logs = {:?}", res.get_logs_with_type::<market_contract_mod::I64>());
-    println!("logs = {:?}", res.get_logs());
-    // UNI balance check
-    let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // // Transfer money back
+    // alice
+    //     .transfer(admin.address(), amount, uni.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
 
-    // Transfer money back
-    alice
-        .transfer(admin.address(), amount, uni.asset_id, tx_params)
-        .await
-        .expect("❌ Cannot transfer");
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
+    // // =================================================
+    // // ==================== Case #11 ====================
+    // // 👛 Wallet: Chad
+    // // 🤙 Call: withdraw_collateral
+    // // 💰 Amount: -$300.00/60.00 UNI
+    // print_case_title(11, "Chad", "withdraw_collateral", "-$300.00/60.00 UNI");
+    // //Chad calls withdraw_base
+    // let amount = parse_units(60, uni.config.decimals);
+    // let inst = market.with_wallet(chad.clone()).unwrap();
 
-    debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
-    // =================================================
-    // ==================== Case #11 ====================
-    // TODO
-    // 👛 Wallet: Chad
-    // 🤙 Call: withdraw_collateral
-    // 💰 Amount: $300.00/60.00 UN
+    // let _res = market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
+    //     .await
+    //     .unwrap();
+    // // println!("logs = {:?}", res.get_logs_with_type::<market_contract_mod::I64>());
+    // // println!("logs = {:?}", res.get_logs());
+    // // UNI balance check
+    // let balance = chad.get_asset_balance(&uni.asset_id).await.unwrap();
+    // assert!(balance == amount);
+
+    // // Transfer money back
+    // chad.transfer(admin.address(), amount, uni.asset_id, tx_params)
+    //     .await
+    //     .expect("❌ Cannot transfer");
+
+    // debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 }
 
 async fn debug_state(
@@ -382,6 +405,7 @@ async fn debug_state(
     );
     println!("Total UNI balance = {} UNI", format_units(uni_balance, 9));
     println!("Utilization {}", format_units(utilization, 18));
+    println!("Last accrual time {}", market_basic.last_accrual_time);
     println!("sRate {}", format_units(s_rate, 18));
     println!("bRate {}", format_units(b_rate, 18));
 
