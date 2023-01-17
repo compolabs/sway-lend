@@ -15,8 +15,11 @@ const Root = styled.div`
   flex-direction: column;
 `;
 const TokenRow = styled.div<{ selected?: boolean }>`
-  display: flex;
-  flex-direction: row;
+  //display: flex;
+  //flex-direction: row;
+  display: grid;
+  grid-template-columns: 6fr 6fr 4fr;
+  //padding: 12px 16px;
   padding: 8px 16px;
   align-items: center;
   justify-content: space-between;
@@ -28,14 +31,30 @@ const TokenRow = styled.div<{ selected?: boolean }>`
   border-radius: 4px;
   margin-bottom: 2px;
 `;
+const Header = styled.div`
+  display: grid;
+  grid-template-columns: 6fr 6fr 4fr;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 2px;
+  background: ${({ theme }) => theme.colors.dashboard.tokenRowColor};
+`;
 
 const AssetsTable: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   return (
     <Root>
-      {vm.collaterals.map(({ logo, symbol, name, assetId }, index) => (
+      <Header>
+        <Text size="small" type="secondary">
+          Collateral asset
+        </Text>
+        <Text />
+        <Text size="small" type="secondary">
+          Protocol balance
+        </Text>
+      </Header>
+      {vm.collaterals.map(({ logo, symbol, name, assetId }) => (
         <TokenRow selected={vm.actionTokenAssetId === assetId}>
-          {/*<TokenRow selected={true}>*/}
           <Row alignItems="center">
             <TokenIcon size="small" src={logo} />
             <SizedBox width={20} />
@@ -46,6 +65,7 @@ const AssetsTable: React.FC<IProps> = () => {
               </Text>
             </Column>
           </Row>
+          <div />
           <Row justifyContent="flex-end" alignItems="center">
             <Text type="secondary" size="small" fitContent>
               0.000

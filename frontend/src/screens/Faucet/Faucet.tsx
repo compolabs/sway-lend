@@ -49,7 +49,7 @@ const FaucetImpl: React.FC<IProps> = () => {
         {() => {
           return (
             <Root>
-              <Text weight={500} size="big">
+              <Text weight={600} size="big">
                 Faucet for Fuel Network
               </Text>
               {accountStore.address == null && (

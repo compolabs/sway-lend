@@ -22,7 +22,7 @@ const Button = styled.button<{
           case "primary":
             return theme.colors.primary01;
           case "secondary":
-            return theme.colors.primary100;
+            return theme.colors.button.secondaryBackground;
           case "danger":
             return theme.colors.error500;
           default:

@@ -23,7 +23,7 @@ const Text = styled.p<{
 }>`
   margin: 0;
   width: ${({ fitContent }) => (fitContent ? "fit-content" : "100%")};
-  font-weight: ${({ weight }) => weight ?? 400};
+  font-weight: ${({ weight }) => weight ?? 500};
   white-space: ${({ nowrap }) => (nowrap ? "nowrap" : "unset")};
   text-decoration: ${({ crossed }) => (crossed ? "line-through" : "unset")};
   text-align: ${({ textAlign }) => textAlign ?? "default"};
@@ -33,7 +33,7 @@ const Text = styled.p<{
         case "primary":
           return `color: ${theme.colors?.primary800};`;
         case "secondary":
-          return `color: ${theme.colors?.primary650};`;
+          return `color: ${theme.colors.neutral4};`;
         case "blue500":
           return `color: ${theme.colors?.blue500};`;
         case "light":

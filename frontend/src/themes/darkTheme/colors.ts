@@ -7,6 +7,8 @@ const colors = {
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
   primary01: "#3FE8BD",
+  primary03: "#FF6A55",
+  secondary1: "#00B493",
 
   primary800: "#363870",
   primary650: "#8082C5",
@@ -94,6 +96,11 @@ export default {
   },
   icon: {
     borderColor: colors.primary800,
+  },
+  progressBar: {
+    main: colors.secondary1,
+    secondary: colors.neutral3,
+    red: colors.primary03,
   },
   gradient: "rgba(0, 0, 0, 0.5);",
   notifications: {

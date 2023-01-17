@@ -8,6 +8,8 @@ const colors = {
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
   primary01: "#3FE8BD",
+  primary03: "#FF6A55",
+  secondary1: "#00B493",
 
   //todo delete not used colors
   primary800: "#363870",
@@ -94,6 +96,11 @@ export default {
     boxShadow:
       "0px 0px 14px -4px rgba(31, 38, 42, 0.05), 0px 32px 48px -8px rgba(31, 38, 42, 0.1)",
     background: colors.white,
+  },
+  progressBar: {
+    main: colors.secondary1,
+    secondary: colors.neutral3,
+    red: colors.primary03,
   },
 
   tokenDescGradient:

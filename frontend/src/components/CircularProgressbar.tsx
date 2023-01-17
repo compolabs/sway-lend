@@ -8,29 +8,22 @@ interface IProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 const Root = styled.div`
-  width: 68px;
-  height: 68px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
 
   .CircularProgressbar .CircularProgressbar-trail {
-    stroke: ${({ theme }) => theme.colors.success100};
+    stroke: ${({ theme }) => theme.colors.progressBar.red};
     stroke-width: 8px;
   }
 
   .CircularProgressbar .CircularProgressbar-path {
     stroke-width: 8px;
-    stroke: ${({ theme }) => theme.colors.success500};
+    stroke: ${({ theme }) => theme.colors.progressBar.main};
   }
 
   .CircularProgressbar .CircularProgressbar-text {
     fill: ${({ theme }) => theme.colors.success500};
-  }
-
-  .CircularProgressbar .CircularProgressbar-text {
-    font-weight: 500;
-    font-size: 26px;
-    line-height: 24px;
-    fill: ${({ theme }) => theme.colors.primary800};
   }
 
   .CircularProgressbar.CircularProgressbar-inverted .CircularProgressbar-trail {
@@ -41,7 +34,7 @@ const Root = styled.div`
 const CircularProgressbar: React.FC<IProps> = ({ percent, ...rest }) => {
   return (
     <Root {...rest}>
-      <Bar value={percent} text={`${percent}%`} />
+      <Bar value={percent} />
     </Root>
   );
 };
