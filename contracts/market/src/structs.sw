@@ -11,7 +11,7 @@ pub struct MarketConfiguration {
     base_token: ContractId,
     base_token_decimals: u8,
     base_token_price_feed: ContractId,
-    kink: u64, // decimals: 4
+    kink: u64, // decimals: 18
     supply_per_second_interest_rate_slope_low: u64, // decimals: 18
     supply_per_second_interest_rate_slope_high: u64, // decimals: 18
     borrow_per_second_interest_rate_slope_low: u64, // decimals: 18
@@ -73,4 +73,5 @@ pub enum Error {
     BorrowTooSmall: (),
     NotPermitted: (),
     InvalidPayment: (),
+    DebuggingDisabled: (),
 }
