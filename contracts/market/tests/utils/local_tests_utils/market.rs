@@ -26,9 +26,11 @@ pub mod market_abi_calls {
         assets: Vec<market_contract_mod::AssetConfig>,
         step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, Error> {
+        let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         contract
             .methods()
             .initialize(config, assets, step)
+            .tx_params(tx_params)
             .call()
             .await
     }
@@ -151,32 +153,32 @@ pub mod market_abi_calls {
         contract.methods().pause(config).call().await
     }
 
-    pub async fn _buy_collateral(
-        market: &MarketContract,
-        base_asset_id: AssetId,
-        amount: u64,
-        asset: ContractId,
-        min_amount: u64,
-        recipient: Address,
-    ) -> Result<FuelCallResponse<()>, Error> {
-        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
-        market
-            .methods()
-            .buy_collateral(asset, min_amount, recipient)
-            .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
-            .call()
-            .await
-    }
+    // pub async fn _buy_collateral(
+    //     market: &MarketContract,
+    //     base_asset_id: AssetId,
+    //     amount: u64,
+    //     asset: ContractId,
+    //     min_amount: u64,
+    //     recipient: Address,
+    // ) -> Result<FuelCallResponse<()>, Error> {
+    //     let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+    //     market
+    //         .methods()
+    //         .buy_collateral(asset, min_amount, recipient)
+    //         .call_params(call_params)
+    //         .estimate_tx_dependencies(None)
+    //         .await
+    //         .unwrap()
+    //         .call()
+    //         .await
+    // }
 
-    pub async fn _absorb(
-        market: &MarketContract,
-        addresses: Vec<Address>,
-    ) -> Result<FuelCallResponse<()>, Error> {
-        market.methods().absorb(addresses).call().await
-    }
+    // pub async fn _absorb(
+    //     market: &MarketContract,
+    //     addresses: Vec<Address>,
+    // ) -> Result<FuelCallResponse<()>, Error> {
+    //     market.methods().absorb(addresses).call().await
+    // }
 }
 
 async fn init_wallets() -> Vec<WalletUnlocked> {

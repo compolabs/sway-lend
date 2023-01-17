@@ -125,6 +125,9 @@ async fn deploy() {
     market_abi_calls::initialize(&market_instance, market_config, asset_configs, Option::None)
         .await
         .expect("❌ Cannot initialize market");
+    println!(
+        "Market contract = {} {}",
+        market_instance.get_contract_id().hash(),
+        market_instance.get_contract_id()
+    );
 }
-
-// println!("Market contract = {:?}", market_instance);
