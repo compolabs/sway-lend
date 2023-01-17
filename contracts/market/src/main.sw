@@ -869,12 +869,21 @@ impl Market for Contract {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64) {
-        let principal = storage.user_basic.get(account).principal;
-        let present_value = present_value(principal);
-        if present_value >= I64::new() {
-            (present_value.into(), 0)
+        let principal_value = storage.user_basic.get(account).principal;
+        let last_accrual_time = storage.market_basic.last_accrual_time;
+        let (supply_index_, borrow_index_) = if last_accrual_time > 0 {  // decimals (18, 18)
+            let time_elapsed = timestamp() - last_accrual_time;
+            accrued_interest_indices(time_elapsed)
         } else {
-            (0, present_value.flip().into())
+            (SCALE_18, SCALE_18)
+        };
+
+        if principal_value >= I64::new() {
+            let supply = present_value_supply(supply_index_, principal_value.into());
+            (supply, 0)
+        } else {
+            let borrow = present_value_borrow(borrow_index_, principal_value.flip().into());
+            (0, borrow)
         }
     }
 
