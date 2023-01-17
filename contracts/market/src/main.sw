@@ -323,7 +323,7 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (1
         let utilization = get_utilization_internal();  // decimals 6
         let supply_rate = get_supply_rate_internal(utilization); // decimals 9
         let borrow_rate = get_borrow_rate_internal(utilization); // decimals 9
-        let scale = 1_000_000_000//1e9;
+        let scale = 1_000_000_000; //1e9;
         base_supply_index_ += base_supply_index_ * supply_rate / scale * time_elapsed;
         base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * time_elapsed;
     }
@@ -419,7 +419,7 @@ fn get_reserves_internal() -> I64 {  // base_token_decimals
     let balance = this_balance(config.base_token); // base_token_decimals
     let total_supply = present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
     let total_borrow = present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
-    return I64::from(balance) - I64::from(total_supply) + I64::from(total_borrow);
+    return I64::from(balance) - I64::from(total_supply + total_borrow);
 }
 
 #[storage(read, write)]

@@ -11,12 +11,12 @@ pub struct MarketConfiguration {
     base_token: ContractId,
     base_token_decimals: u8,
     base_token_price_feed: ContractId,
-    kink: u64, // decimals: 18
-    supply_per_second_interest_rate_slope_low: u64, // decimals: 18
-    supply_per_second_interest_rate_slope_high: u64, // decimals: 18
-    borrow_per_second_interest_rate_slope_low: u64, // decimals: 18
-    borrow_per_second_interest_rate_slope_high: u64, // decimals: 18
-    borrow_per_second_interest_rate_base: u64, // decimals: 18
+    kink: u64, // decimals: 6
+    supply_per_second_interest_rate_slope_low: u64, // decimals: 9
+    supply_per_second_interest_rate_slope_high: u64, // decimals: 9
+    borrow_per_second_interest_rate_slope_low: u64, // decimals: 9
+    borrow_per_second_interest_rate_slope_high: u64, // decimals: 9
+    borrow_per_second_interest_rate_base: u64, // decimals: 9
     store_front_price_factor: u64, // decimals: 4
     base_tracking_supply_speed: u64, // decimals 18
     base_tracking_borrow_speed: u64, // decimals 18
@@ -25,6 +25,7 @@ pub struct MarketConfiguration {
     target_reserves: u64, // decimals: base_token_decimals
     reward_token: ContractId, 
 }
+
 
 pub struct AssetConfig {
     asset: ContractId,

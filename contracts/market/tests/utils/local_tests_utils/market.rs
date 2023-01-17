@@ -26,9 +26,11 @@ pub mod market_abi_calls {
         assets: Vec<market_contract_mod::AssetConfig>,
         step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, Error> {
+        let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         contract
             .methods()
             .initialize(config, assets, step)
+            .tx_params(tx_params)
             .call()
             .await
     }
