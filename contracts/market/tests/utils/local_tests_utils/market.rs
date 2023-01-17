@@ -193,14 +193,13 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
 }
 
 pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
-    // StorageConfiguration::with_storage_path(Some(
-    // "./out/debug/market-storage_slots.json".to_string(),
-    // )),
     let id = Contract::deploy(
         "./out/debug/market.bin",
         &wallet,
         TxParameters::new(Some(1), None, None),
-        StorageConfiguration::default(),
+        StorageConfiguration::with_storage_path(Some(
+            "./out/debug/market-storage_slots.json".to_string(),
+        )),
     )
     .await
     .unwrap();
