@@ -107,12 +107,12 @@ async fn deploy() {
         base_token: assets.get("USDC").unwrap().contract_id,
         base_token_decimals: assets.get("USDC").unwrap().config.decimals,
         base_token_price_feed: price_feed,
-        kink: 800000000000000000, // decimals: 18
-        supply_per_second_interest_rate_slope_low: 10000000000, // decimals: 18
-        supply_per_second_interest_rate_slope_high: 100000000000, // decimals: 18
-        borrow_per_second_interest_rate_slope_low: 25000000000, // decimals: 18
-        borrow_per_second_interest_rate_slope_high: 187500000000, // decimals: 18
-        borrow_per_second_interest_rate_base: 15854895992, // decimals: 18
+        kink: 800000000, // decimals: 9
+        supply_per_second_interest_rate_slope_low: 10, // decimals: 9
+        supply_per_second_interest_rate_slope_high: 100, // decimals: 9
+        borrow_per_second_interest_rate_slope_low: 25, // decimals: 9
+        borrow_per_second_interest_rate_slope_high: 188, // decimals: 9
+        borrow_per_second_interest_rate_base: 16, // decimals: 9
         store_front_price_factor: 6000, // decimals: 4
         base_tracking_supply_speed: 1868287030000000, // decimals 18
         base_tracking_borrow_speed: 3736574060000000, // decimals 18

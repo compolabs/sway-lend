@@ -122,6 +122,7 @@ abi Market {
 }
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
+const SCALE_9: u64 = 1_000_000_000; // 1e9
 storage {
     debug: bool = false,
     debug_timestamp: u64 = 0,
@@ -270,66 +271,64 @@ fn principal_value(present_value_: I64) -> I64 { // -> base_asset_decimals
 
 // @Callable get_utilization() -> u64
 #[storage(read)]
-fn get_utilization_internal() -> u64 { // -> decimals 18
+fn get_utilization_internal() -> u64 { // -> decimals 6
     let market_basic = storage.market_basic;
     let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base); // decimals 6
     let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base); // decimals 6
+    let scale = 1_000_000;
     if total_supply_ == 0 {
         0
     } else {
-        let res = U128::from_u64(total_borrow_) * U128::from_u64(SCALE_18) / U128::from_u64(total_supply_);
-        res.as_u64().unwrap()
+         total_borrow_ * scale / total_supply_
     }
 }
 
 // @Callable get_supply_rate(utilization: u64) -> u64
 #[storage(read)]
-fn get_supply_rate_internal(utilization: u64) -> u64 { // -> decimals 18
-    let utilization = U128::from_u64(utilization);
+fn get_supply_rate_internal(utilization: u64) -> u64 { // -> decimals 9
     let config = get_config();
-    let kink_ = U128::from_u64(config.kink); // decimals 18
-    let interest_rate_slope_low = U128::from_u64(config.supply_per_second_interest_rate_slope_low);// decimals 18
-    let interest_rate_slope_high = U128::from_u64(config.supply_per_second_interest_rate_slope_high);// decimals 18
-    let scale = U128::from_u64(SCALE_18);
+    let kink_ = config.kink; // decimals 6
+    let interest_rate_slope_low = config.supply_per_second_interest_rate_slope_low;// decimals 9
+    let interest_rate_slope_high = config.supply_per_second_interest_rate_slope_high;// decimals 9
+    let scale = 1_000_000; //1e6
     if utilization <= kink_ {
-        (interest_rate_slope_low * utilization / scale).as_u64().unwrap()
+        interest_rate_slope_low * utilization / scale
     } else {
-        ((interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
+        (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale
     }
 }
 
 // @Callable get_borrow_rate(utilization: u64) -> u64
 #[storage(read)]
-fn get_borrow_rate_internal(utilization: u64) -> u64 { // -> decimals 18
-    let utilization = U128::from_u64(utilization); // decimals 18
+fn get_borrow_rate_internal(utilization: u64) -> u64 { // -> decimals 9
     let config = get_config();
-    let kink_ = U128::from_u64(config.kink); // decimals 18
-    let interest_rate_base = U128::from_u64(config.borrow_per_second_interest_rate_base); // decimals 18
-    let interest_rate_slope_low = U128::from_u64(config.borrow_per_second_interest_rate_slope_low); // decimals 18
-    let interest_rate_slope_high = U128::from_u64(config.borrow_per_second_interest_rate_slope_high); // decimals 18
-    let scale = U128::from_u64(SCALE_18);
+    let kink_ = config.kink; // decimals 6
+    let interest_rate_base = config.borrow_per_second_interest_rate_base; // decimals 9
+    let interest_rate_slope_low = config.borrow_per_second_interest_rate_slope_low; // decimals 9
+    let interest_rate_slope_high = config.borrow_per_second_interest_rate_slope_high; // decimals 9
+    let scale = 1_000_000; //1e6
     if utilization <= kink_ {
-        (interest_rate_base + interest_rate_slope_low * utilization / scale).as_u64().unwrap()
+        interest_rate_base + interest_rate_slope_low * utilization / scale
     } else {
-        (interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
+        interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale
     }
 }
 
 // calculation of the updated value base_supply/borrow_index
 #[storage(read)]
 fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (18, 18)
-    let mut base_supply_index_ = U128::from_u64(storage.market_basic.base_supply_index); // decimals 18
-    let mut base_borrow_index_ = U128::from_u64(storage.market_basic.base_borrow_index); // decimals 18
+    let mut base_supply_index_ = storage.market_basic.base_supply_index; // decimals 18
+    let mut base_borrow_index_ = storage.market_basic.base_borrow_index; // decimals 18
     if time_elapsed > 0 {
-        let utilization = get_utilization_internal();  // decimals 18
-        let supply_rate = U128::from_u64(get_supply_rate_internal(utilization)); // decimals 18
-        let borrow_rate = U128::from_u64(get_borrow_rate_internal(utilization)); // decimals 18
-        let scale = U128::from_u64(SCALE_18);
-        base_supply_index_ += base_supply_index_ * supply_rate / scale * U128::from_u64(time_elapsed);
-        base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * U128::from_u64(time_elapsed);
+        let utilization = get_utilization_internal();  // decimals 6
+        let supply_rate = get_supply_rate_internal(utilization); // decimals 9
+        let borrow_rate = get_borrow_rate_internal(utilization); // decimals 9
+        let scale = 1_000_000_000//1e9;
+        base_supply_index_ += base_supply_index_ * supply_rate / scale * time_elapsed;
+        base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * time_elapsed;
     }
-    let base_supply_index_ = base_supply_index_.as_u64().unwrap();
-    let base_borrow_index_ = base_borrow_index_.as_u64().unwrap();
+    // let base_supply_index_ = base_supply_index_.as_u64().unwrap();
+    // let base_borrow_index_ = base_borrow_index_.as_u64().unwrap();
     return (base_supply_index_, base_borrow_index_);
 }
 
@@ -837,10 +836,10 @@ impl Market for Contract {
             storage.debug_step = debug_step.unwrap();
         }
         let mut market_basic = storage.market_basic;
-        market_basic.base_supply_index= SCALE_18;
-        market_basic.base_borrow_index= SCALE_18;
-        market_basic.tracking_supply_index= SCALE_18;
-        market_basic.tracking_borrow_index= SCALE_18;
+        market_basic.base_supply_index = SCALE_18;
+        market_basic.base_borrow_index = SCALE_18;
+        market_basic.tracking_supply_index = SCALE_18;
+        market_basic.tracking_borrow_index = SCALE_18;
         storage.market_basic = market_basic;
     }
 
@@ -869,12 +868,21 @@ impl Market for Contract {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64) {
-        let principal = storage.user_basic.get(account).principal;
-        let present_value = present_value(principal);
-        if present_value >= I64::new() {
-            (present_value.into(), 0)
+        let principal_value = storage.user_basic.get(account).principal;
+        let last_accrual_time = storage.market_basic.last_accrual_time;
+        let (supply_index_, borrow_index_) = if last_accrual_time > 0 {  // decimals (18, 18)
+            let time_elapsed = timestamp() - last_accrual_time;
+            accrued_interest_indices(time_elapsed)
         } else {
-            (0, present_value.flip().into())
+            (SCALE_18, SCALE_18)
+        };
+
+        if principal_value >= I64::new() {
+            let supply = present_value_supply(supply_index_, principal_value.into());
+            (supply, 0)
+        } else {
+            let borrow = present_value_borrow(borrow_index_, principal_value.flip().into());
+            (0, borrow)
         }
     }
 
