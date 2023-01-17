@@ -34,7 +34,6 @@ use std::{
     storage::StorageVec,
     token::transfer_to_address,
     u128::U128,
-    u256::U256,
 };
 
 abi Market {

@@ -135,15 +135,9 @@ pub mod market_abi_calls {
         res.unwrap().value
     }
     pub async fn get_utilization(market: &MarketContract) -> u64 {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
-        market
-            .methods()
-            .get_utilization()
-            .tx_params(tx_params)
-            .simulate()
-            .await
-            .unwrap()
-            .value
+        let p = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().get_utilization().tx_params(p).simulate();
+        res.await.unwrap().value
     }
     pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
         let res = market.methods().balance_of(asset_id).simulate().await;

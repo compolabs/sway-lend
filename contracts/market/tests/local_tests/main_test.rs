@@ -279,10 +279,10 @@ async fn main_test() {
     // 💰 Amount: USDC Balance ~ 100.046928 USDC
 
     print_case_title(8, "Chad", "supply_base", "100.046928 USDC");
+    let amount = 46_928; //FIXME
+    println!("💸 Chad + {} USDC", amount / 10u64.pow(6));
 
     // Transfer of 100.046928 USDC to the Chad's wallet
-    let amount = 46_928; //FIXME
-    let tx_params = TxParameters::default();
     admin
         .transfer(chad.address(), amount, usdc.asset_id, tx_params)
         .await
@@ -310,6 +310,7 @@ async fn main_test() {
     // 💰 Amount: -400.058340 USDC
     print_case_title(9, "Bob", "withdraw_base", "-400.058340 USDC");
     let amount = 58_340; //FIXME
+    println!("💸 Bob + {} USDC", amount / 10u64.pow(6));
 
     //Bob calls withdraw_base
     let inst = market.with_wallet(bob.clone()).unwrap();
