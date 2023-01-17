@@ -19,7 +19,7 @@ pub mod oracle_abi_calls {
     }
 
     pub async fn owner(contract: &OracleContract) -> Address {
-        contract.methods().owner().call().await.unwrap().value
+        contract.methods().owner().simulate().await.unwrap().value
     }
 
     pub async fn get_price(contract: &OracleContract, asset_id: ContractId) -> Price {

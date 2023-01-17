@@ -10,7 +10,7 @@ use super::oracle::OracleContract;
 
 abigen!(MarketContract, "out/debug/market-abi.json");
 
-// TODO: Сделать это классом чтоб не передавать вечно асет айди
+// TODO: Make it a class not to pass a contract instance in the arguments
 pub mod market_abi_calls {
 
     use super::*;
@@ -192,14 +192,15 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
     .await
 }
 
-pub async fn get_market_contract_instance(wallet: &WalletUnlocked) -> MarketContract {
+pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
+    // StorageConfiguration::with_storage_path(Some(
+    // "./out/debug/market-storage_slots.json".to_string(),
+    // )),
     let id = Contract::deploy(
         "./out/debug/market.bin",
         &wallet,
-        TxParameters::default(),
-        StorageConfiguration::with_storage_path(Some(
-            "./out/debug/market-storage_slots.json".to_string(),
-        )),
+        TxParameters::new(Some(1), None, None),
+        StorageConfiguration::default(),
     )
     .await
     .unwrap();
@@ -282,7 +283,7 @@ pub async fn setup_market() -> (
     }
 
     //--------------- MARKET ---------------
-    let market_instance = get_market_contract_instance(&wallets[0]).await;
+    let market_instance = deploy_market_contract(&wallets[0]).await;
 
     let market_config = MarketConfiguration {
         governor: address,
