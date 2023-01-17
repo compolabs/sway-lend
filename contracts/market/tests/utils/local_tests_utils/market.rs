@@ -15,12 +15,22 @@ pub mod market_abi_calls {
 
     use super::*;
 
+    pub async fn debug_increment_timestamp(market: &MarketContract) -> FuelCallResponse<()> {
+        let res = market.methods().debug_increment_timestamp().call().await;
+        res.unwrap()
+    }
+
     pub async fn initialize(
         contract: &MarketContract,
         config: MarketConfiguration,
         assets: Vec<market_contract_mod::AssetConfig>,
+        step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().initialize(config, assets).call().await
+        contract
+            .methods()
+            .initialize(config, assets, step)
+            .call()
+            .await
     }
 
     pub async fn supply_base(
@@ -35,9 +45,7 @@ pub mod market_abi_calls {
             .supply_base()
             .tx_params(tx_params)
             .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -47,16 +55,11 @@ pub mod market_abi_calls {
         contract_ids: &[Bech32ContractId],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, Error> {
-        // let call_params = CallParameters::new(Some(amount), Some(lp_asset_id), None);
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
             .withdraw_base(amount)
             .tx_params(tx_params)
-            // .call_params(call_params)
-            // .estimate_tx_dependencies(None)
-            // .await
-            // .unwrap()
             .set_contracts(contract_ids)
             .append_variable_outputs(1)
             .call()
@@ -75,9 +78,7 @@ pub mod market_abi_calls {
             .withdraw_collateral(asset, amount)
             .tx_params(tx_params)
             .set_contracts(contract_ids)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -92,9 +93,7 @@ pub mod market_abi_calls {
             .methods()
             .supply_collateral(Address::from(market.get_wallet().address()))
             .call_params(call_params)
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -104,13 +103,12 @@ pub mod market_abi_calls {
         address: Address,
         asset: ContractId,
     ) -> u64 {
-        market
+        let res = market
             .methods()
             .get_user_collateral(address, asset)
             .simulate()
-            .await
-            .unwrap()
-            .value
+            .await;
+        res.unwrap().value
     }
 
     pub async fn get_user_supply_borrow(market: &MarketContract, address: Address) -> (u64, u64) {
@@ -123,6 +121,27 @@ pub mod market_abi_calls {
             .await
             .unwrap()
             .value
+    }
+    pub async fn get_user_basic(market: &MarketContract, address: Address) -> UserBasic {
+        let res = market.methods().get_user_basic(address).simulate().await;
+        res.unwrap().value
+    }
+    pub async fn get_market_basics(market: &MarketContract) -> MarketBasics {
+        let res = market.methods().get_market_basics().simulate().await;
+        res.unwrap().value
+    }
+    pub async fn totals_collateral(market: &MarketContract, asset: ContractId) -> u64 {
+        let res = market.methods().totals_collateral(asset).simulate().await;
+        res.unwrap().value
+    }
+    pub async fn get_utilization(market: &MarketContract) -> u64 {
+        let p = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().get_utilization().tx_params(p).simulate();
+        res.await.unwrap().value
+    }
+    pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
+        let res = market.methods().balance_of(asset_id).simulate().await;
+        res.unwrap().value
     }
 
     pub async fn _pause(
@@ -285,8 +304,8 @@ pub async fn setup_market() -> (
         target_reserves: 1000000000000, // decimals: base_token_decimals
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
-
-    market_abi_calls::initialize(&market_instance, market_config, asset_configs)
+    let step = Option::Some(10_000u64);
+    market_abi_calls::initialize(&market_instance, market_config, asset_configs, step)
         .await
         .expect("❌ Cannot initialize market");
 

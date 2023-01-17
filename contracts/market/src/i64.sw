@@ -2,16 +2,16 @@ library i64;
 
 pub struct I64 {
     value: u64,
-    positive: bool,
+    negative: bool,
 }
 
 impl From<u64> for I64 {
     fn from(value: u64) -> Self {
-        Self {value, positive: true}
+        Self {value, negative: false}
     }
 
     fn into(self) -> u64 {
-        if self.positive {
+        if !self.negative {
             self.value
         } else {
             revert(0)
@@ -21,19 +21,19 @@ impl From<u64> for I64 {
 
 impl core::ops::Eq for I64 {
     fn eq(self, other: Self) -> bool {
-        self.value == other.value && self.positive == other.positive
+        self.value == other.value && self.negative == other.negative
     }
 }
 
 impl core::ops::Ord for I64 {
     fn gt(self, other: Self) -> bool {
-        if (self.positive && other.positive) {
+        if (!self.negative && !other.negative) {
             self.value > other.value
-        } else if (self.positive && !other.positive) {
+        } else if (!self.negative && other.negative) {
             true
-        } else if (!self.positive && other.positive) {
+        } else if (self.negative && !other.negative) {
             false
-        } else if (!self.positive && !other.positive) {
+        } else if (self.negative && other.negative) {
             self.value < other.value
         } else {
             revert(0)
@@ -41,13 +41,13 @@ impl core::ops::Ord for I64 {
     }
 
     fn lt(self, other: Self) -> bool {
-        if (self.positive && other.positive) {
+        if (!self.negative && !other.negative) {
             self.value < other.value
-        } else if (self.positive && !other.positive) {
+        } else if (!self.negative && other.negative) {
             false
-        } else if (!self.positive && other.positive) {
+        } else if (self.negative && !other.negative) {
             true
-        } else if (!self.positive && !other.positive) {
+        } else if (self.negative && other.negative) {
             self.value > other.value
         } else {
             revert(0)
@@ -73,7 +73,7 @@ impl I64 {
     pub fn from_uint(value: u64) -> Self {
         Self {
             value,
-            positive: true,
+            negative: false,
         }
     }
 
@@ -81,7 +81,7 @@ impl I64 {
     pub fn max() -> Self {
         Self {
             value: u64::max(),
-            positive: true,
+            negative: false,
         }
     }
 
@@ -89,7 +89,7 @@ impl I64 {
     pub fn min() -> Self {
         Self {
             value: u64::min(),
-            positive: false,
+            negative: true,
         }
     }
 
@@ -97,7 +97,7 @@ impl I64 {
     pub fn neg_from(value: u64) -> Self {
         Self {
             value,
-            positive: if value == 0 { true } else { false },
+            negative: if value == 0 { false } else { true },
         }
     }
 
@@ -105,7 +105,7 @@ impl I64 {
     pub fn new() -> Self {
         Self {
             value: 0,
-            positive: true,
+            negative: false,
         }
     }
 }
@@ -113,18 +113,18 @@ impl I64 {
 impl core::ops::Add for I64 {
     /// Add a I64 to a I64. Panics on overflow.
     fn add(self, other: Self) -> Self {
-        if self.positive && other.positive {
+        if !self.negative && !other.negative {
             Self::from(self.value + other.value)
-        } else if !self.positive && !other.positive {
+        } else if self.negative && other.negative {
             Self::neg_from(self.value + other.value)
         } else if (self.value > other.value) {
             Self {
-                positive: self.positive,
+                negative: self.negative,
                 value: self.value - other.value,
             }
         } else if (self.value < other.value) {
             Self {
-                positive: other.positive,
+                negative: other.negative,
                 value: other.value - self.value,
             }
         } else if (self.value == other.value) {
@@ -139,17 +139,17 @@ impl core::ops::Subtract for I64 {
     /// Subtract a I64 from a I64. Panics of overflow.
     fn subtract(self, other: Self) -> Self {
         if self == other {Self::new()}
-        else if self.positive && other.positive && self.value > other.value {
+        else if !self.negative && !other.negative && self.value > other.value {
             Self::from(self.value - other.value)
-        } else if self.positive && other.positive && self.value < other.value  {
+        } else if !self.negative && !other.negative && self.value < other.value  {
             Self::neg_from(other.value - self.value)
-        } else if !self.positive && !other.positive && self.value > other.value {
+        } else if self.negative && other.negative && self.value > other.value {
             Self::neg_from(self.value - other.value)
-        } else if !self.positive && !other.positive && self.value < other.value  {
+        } else if self.negative && other.negative && self.value < other.value  {
             Self::from(other.value - self.value)
-        } else if self.positive && !other.positive{
+        } else if !self.negative && other.negative{
             Self::from(self.value + other.value)
-        } else if !self.positive && other.positive && self.value > other.value{
+        } else if self.negative && !other.negative {
             Self::neg_from(self.value + other.value)
         }  else{
             revert(0)
@@ -162,9 +162,9 @@ impl core::ops::Multiply for I64 {
     fn multiply(self, other: Self) -> Self {
         if self.value == 0 || other.value == 0{
             Self::new()    
-        }else if self.positive == other.positive {
+        }else if !self.negative == !other.negative {
             Self::from(self.value * other.value)
-        }else if self.positive != other.positive{
+        }else if !self.negative != !other.negative{
             Self::neg_from(self.value * other.value)
         } else{
             revert(0)
@@ -178,9 +178,9 @@ impl core::ops::Divide for I64 {
         require(divisor != Self::new(), "ZeroDivisor");
         if self.value == 0{
             Self::new()    
-        }else if self.positive == divisor.positive {
+        }else if !self.negative == !divisor.negative {
             Self::from(self.value / divisor.value)
-        }else if self.positive != divisor.positive{
+        }else if !self.negative != !divisor.negative{
             Self::neg_from(self.value * divisor.value)
         } else{
             revert(0)

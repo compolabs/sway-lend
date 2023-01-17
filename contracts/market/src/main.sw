@@ -20,15 +20,14 @@ use std::{
         AuthError,
         msg_sender,
     },
-    block::timestamp,
     call_frames::{
         contract_id,
         msg_asset_id,
     },
     constants::ZERO_B256,
     context::{
-        balance_of,
         msg_amount,
+        this_balance,
     },
     logging::log,
     revert::require,
@@ -39,7 +38,10 @@ use std::{
 
 abi Market {
     #[storage(read, write)]
-    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>);
+    fn debug_increment_timestamp();
+
+    #[storage(read, write)]
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>, debug_step: Option<u64>);
 
     #[storage(write, read)]
     fn pause(config: PauseConfiguration);
@@ -61,7 +63,14 @@ abi Market {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64);
-    fn balance_of_token(asset: ContractId) -> u64;
+
+    fn balance_of(asset: ContractId) -> u64;
+    
+    #[storage(read)]
+    fn get_market_basics() -> MarketBasics;
+
+    #[storage(read)]
+    fn totals_collateral(asset: ContractId) -> u64;
     //-------------------------------------------------
     #[storage(read)]
     fn get_utilization() -> u64;
@@ -91,16 +100,20 @@ abi Market {
     fn absorb(accounts: Vec<Address>);
 
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address); // @Payment base_token
+    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address); 
+    
     #[storage(read, write)]
-    fn supply_collateral(dst: Address); // @Payment any collateral asset
+    fn supply_collateral(dst: Address); 
+
     #[storage(read, write)]
     fn withdraw_collateral(asset: ContractId, amount: u64);
 
     #[storage(read, write)]
-    fn supply_base(); // @Payment base_token
+    fn supply_base(); 
+
     #[storage(read, write)]
-    fn withdraw_base(amount: u64); // TODO add payment LP Token
+    fn withdraw_base(amount: u64);
+
     #[storage(read)]
     fn withdraw_reward_token(to: Address, amount: u64);
 
@@ -113,6 +126,10 @@ abi Market {
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 storage {
+    debug: bool = false,
+    debug_timestamp: u64 = 0,
+    debug_step: u64 = 0,
+    //----------
     config: Option<MarketConfiguration> = Option::None,
     asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
@@ -128,6 +145,15 @@ storage {
         total_borrow_base: 0,
         last_accrual_time: 0,
     },
+}
+
+#[storage(read)]
+fn timestamp() -> u64 {
+    if storage.debug {
+        storage.debug_timestamp
+    } else {
+        std::block::timestamp()
+    }
 }
 
 #[storage(read)]
@@ -209,13 +235,11 @@ pub fn present_value_borrow(base_borrow_index_: u64, principal_value_: u64) -> u
     res.as_u64().unwrap()
 }
 
-//TODO decrease decimals
 pub fn principal_value_supply(base_supply_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
     let res = U128::from_u64(present_value_) * U128::from_u64(SCALE_18) / U128::from_u64(base_supply_index_);
     res.as_u64().unwrap()
 }
 
-//TODO decrease decimals
 pub fn principal_value_borrow(base_borrow_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
     let res = (U128::from_u64(present_value_) * U128::from_u64(SCALE_18) + U128::from_u64(base_borrow_index_ - 1)) / U128::from_u64(base_borrow_index_);
     res.as_u64().unwrap()
@@ -251,68 +275,74 @@ fn principal_value(present_value_: I64) -> I64 { // -> base_asset_decimals
 #[storage(read)]
 fn get_utilization_internal() -> u64 { // -> decimals 18
     let market_basic = storage.market_basic;
-    let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base);
-    let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base);
+    let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base); // decimals 6
+    let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base); // decimals 6
     if total_supply_ == 0 {
         0
     } else {
-        total_borrow_ * SCALE_18 / total_supply_
+        let res = U128::from_u64(total_borrow_) * U128::from_u64(SCALE_18) / U128::from_u64(total_supply_);
+        res.as_u64().unwrap()
     }
 }
 
 // @Callable get_supply_rate(utilization: u64) -> u64
 #[storage(read)]
 fn get_supply_rate_internal(utilization: u64) -> u64 { // -> decimals 18
+    let utilization = U128::from_u64(utilization);
     let config = get_config();
-    let kink_ = config.kink; // decimals 18
-    let interest_rate_base = 0; // decimals 18
-    let interest_rate_slope_low = config.supply_per_second_interest_rate_slope_low;// decimals 18
-    let interest_rate_slope_high = config.supply_per_second_interest_rate_slope_high;// decimals 18
+    let kink_ = U128::from_u64(config.kink); // decimals 18
+    let interest_rate_slope_low = U128::from_u64(config.supply_per_second_interest_rate_slope_low);// decimals 18
+    let interest_rate_slope_high = U128::from_u64(config.supply_per_second_interest_rate_slope_high);// decimals 18
+    let scale = U128::from_u64(SCALE_18);
     if utilization <= kink_ {
-        interest_rate_base + interest_rate_slope_low * utilization / SCALE_18
+        (interest_rate_slope_low * utilization / scale).as_u64().unwrap()
     } else {
-        interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / SCALE_18
+        ((interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
     }
 }
 
 // @Callable get_borrow_rate(utilization: u64) -> u64
 #[storage(read)]
 fn get_borrow_rate_internal(utilization: u64) -> u64 { // -> decimals 18
+    let utilization = U128::from_u64(utilization); // decimals 18
     let config = get_config();
-    let kink_ = config.kink; // decimals 18
-    let interest_rate_base = config.borrow_per_second_interest_rate_base; // decimals 18
-    let interest_rate_slope_low = config.borrow_per_second_interest_rate_slope_low; // decimals 18
-    let interest_rate_slope_high = config.borrow_per_second_interest_rate_slope_high; // decimals 18
+    let kink_ = U128::from_u64(config.kink); // decimals 18
+    let interest_rate_base = U128::from_u64(config.borrow_per_second_interest_rate_base); // decimals 18
+    let interest_rate_slope_low = U128::from_u64(config.borrow_per_second_interest_rate_slope_low); // decimals 18
+    let interest_rate_slope_high = U128::from_u64(config.borrow_per_second_interest_rate_slope_high); // decimals 18
+    let scale = U128::from_u64(SCALE_18);
     if utilization <= kink_ {
-        interest_rate_base + interest_rate_slope_low * utilization / SCALE_18
+        (interest_rate_base + interest_rate_slope_low * utilization / scale).as_u64().unwrap()
     } else {
-        interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / SCALE_18
+        (interest_rate_base + (interest_rate_slope_low * kink_ + interest_rate_slope_high * (utilization - kink_)) / scale).as_u64().unwrap()
     }
 }
 
 // calculation of the updated value base_supply/borrow_index
 #[storage(read)]
 fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (18, 18)
-    let mut base_supply_index_ = storage.market_basic.base_supply_index; // decimals 18
-    let mut base_borrow_index_ = storage.market_basic.base_borrow_index; // decimals 18
+    let mut base_supply_index_ = U128::from_u64(storage.market_basic.base_supply_index); // decimals 18
+    let mut base_borrow_index_ = U128::from_u64(storage.market_basic.base_borrow_index); // decimals 18
     if time_elapsed > 0 {
         let utilization = get_utilization_internal();  // decimals 18
-        let supply_rate = get_supply_rate_internal(utilization); // decimals 18
-        let borrow_rate = get_borrow_rate_internal(utilization); // decimals 18
-        base_supply_index_ += base_supply_index_ * supply_rate * time_elapsed / SCALE_18;
-        base_borrow_index_ += base_supply_index_ * supply_rate * time_elapsed / SCALE_18;
+        let supply_rate = U128::from_u64(get_supply_rate_internal(utilization)); // decimals 18
+        let borrow_rate = U128::from_u64(get_borrow_rate_internal(utilization)); // decimals 18
+        let scale = U128::from_u64(SCALE_18);
+        base_supply_index_ += base_supply_index_ * supply_rate / scale * U128::from_u64(time_elapsed);
+        base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * U128::from_u64(time_elapsed);
     }
+    let base_supply_index_ = base_supply_index_.as_u64().unwrap();
+    let base_borrow_index_ = base_borrow_index_.as_u64().unwrap();
     return (base_supply_index_, base_borrow_index_);
 }
 
 // Checks that the dollar value of the user's collateral multiplied 
 // by borrow_collateral_factor is greater than the (planned) loan amount.
-//TODO decrease decimals
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let principal_value_ = storage.user_basic.get(account).principal; // decimals base_asset_decimal
-    let present_value_ = present_value(principal_value_.flip()).into(); // decimals base_asset_decimals
+    let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals
     let mut borrow_limit = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
@@ -321,7 +351,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
             Option::None => continue,
         };
 
-        let balance = balance_of(asset_config.asset, contract_id()); // decimals asset_config.decimals
+        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
 
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
@@ -336,8 +366,12 @@ fn is_borrow_collateralized(account: Address) -> bool {
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(10.pow(9));
-    let borrow_amount = U128::from_u64(present_value_) * U128::from_u64(base_token_price) / scale; // decimals 9
-    borrow_limit >= borrow_amount
+    return if present_value_ < I64::new() {
+        true
+    } else {
+        let borrow_amount = U128::from_u64(present_value_.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
+        borrow_limit >= borrow_amount
+    }
 }
 // @Callable is_liquidatable(account: Address) -> bool
 // checks that the dollar value of the user's collateral multiplied
@@ -356,7 +390,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        let balance = balance_of(contract_id(), asset_config.asset); // decimals asset_config.decimals
+        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
         let collateral_factor = asset_config.liquidate_collateral_factor; // decimals 4
         let scale = 10.pow(asset_config.decimals);
@@ -373,7 +407,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
 // @Callable get_collateral_reserves(asset: ContractId) -> I64
 #[storage(read)]
 fn get_collateral_reserves_internal(asset: ContractId) -> I64 { // -> asset decimals
-    I64::from(balance_of(contract_id(), asset)) - I64::from(storage.totals_collateral.get(asset))
+    I64::from(this_balance(asset)) - I64::from(storage.totals_collateral.get(asset))
 }
 
 // @Callable get_reserves_internal() -> I64
@@ -382,7 +416,7 @@ fn get_reserves_internal() -> I64 {  // base_token_decimals
     let config = get_config();
     let last_accrual_time = storage.market_basic.last_accrual_time;
     let (base_supply_index_, base_borrow_index_) = accrued_interest_indices(timestamp() - last_accrual_time); // decimals (18, 18)
-    let balance = balance_of(contract_id(), config.base_token); // base_token_decimals
+    let balance = this_balance(config.base_token); // base_token_decimals
     let total_supply = present_value_supply(base_supply_index_, storage.market_basic.total_supply_base); // base_token_decimals
     let total_borrow = present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base); // base_token_decimals
     return I64::from(balance) - I64::from(total_supply) + I64::from(total_borrow);
@@ -395,18 +429,23 @@ fn accrue_internal() {
     let now = timestamp();
     let time_elapsed = now - market_basic.last_accrual_time;
     if time_elapsed > 0 {
-        let total_supply_base = market_basic.total_supply_base; // base_asset_decimal
-        let total_borrow_base = market_basic.total_borrow_base; // base_asset_decimal
-        let tracking_supply_speed = config.base_tracking_supply_speed; // decimals 18
-        let tracking_borrow_speed = config.base_tracking_borrow_speed; // decimals 18
-        let min_for_rewards = config.base_min_for_rewards; // decimals 6
-        let scale = 10.pow(config.base_token_decimals);
+        if market_basic.last_accrual_time != 0 {
+            let (base_supply_index, base_borrow_index) = accrued_interest_indices(time_elapsed);
+            market_basic.base_supply_index = base_supply_index;
+            market_basic.base_borrow_index = base_borrow_index;
+        };
+        let total_supply_base = U128::from_u64(market_basic.total_supply_base); // base_asset_decimal
+        let total_borrow_base = U128::from_u64(market_basic.total_borrow_base); // base_asset_decimal
+        let tracking_supply_speed = U128::from_u64(config.base_tracking_supply_speed); // decimals 18
+        let tracking_borrow_speed = U128::from_u64(config.base_tracking_borrow_speed); // decimals 18
+        let min_for_rewards = U128::from_u64(config.base_min_for_rewards); // decimals 6
+        let scale = U128::from_u64(10.pow(config.base_token_decimals));
 
         if total_supply_base >= min_for_rewards {
-            market_basic.tracking_supply_index += tracking_supply_speed * time_elapsed / total_supply_base / scale; // 18 
+            market_basic.tracking_supply_index += (tracking_supply_speed * U128::from_u64(time_elapsed) / total_supply_base / scale).as_u64().unwrap(); // 18 
         }
         if total_borrow_base >= min_for_rewards {
-            market_basic.tracking_borrow_index += tracking_borrow_speed * time_elapsed / total_borrow_base / scale;  // 18 
+            market_basic.tracking_borrow_index += (tracking_borrow_speed * U128::from_u64(time_elapsed) / total_borrow_base / scale).as_u64().unwrap();  // 18 
         }
         market_basic.last_accrual_time = now;
         storage.market_basic = market_basic;
@@ -476,12 +515,12 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
     let sender = get_caller();
 
     require(sender == config.governor, Error::Unauthorized);
-
     let reserves = get_reserves_internal();
     require(reserves >= I64::from(0) && amount <= reserves.into(), Error::InsufficientReserves);
 
     transfer_to_address(amount, config.base_token, to);
 }
+
 #[storage(read)]
 fn get_asset_config_by_asset_id_internal(asset: ContractId) -> AssetConfig {
     let mut out: Option<AssetConfig> = Option::None;
@@ -679,6 +718,7 @@ fn supply_base_internal() {
     //     mint_to_address(supply_amount, caller);
     // }
 }
+
 // @Callable withdraw_base(amount: u64)
 #[storage(read, write)]
 fn withdraw_base_internal(amount: u64) {
@@ -767,6 +807,12 @@ fn claim_internal() {
 }
 
 impl Market for Contract {
+    #[storage(read, write)]
+    fn debug_increment_timestamp() {
+        require(storage.debug, Error::DebuggingDisabled);
+        storage.debug_timestamp = storage.debug_timestamp + storage.debug_step;
+    }
+
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64 {
         let base_token_price_feed = get_config().base_token_price_feed;
@@ -774,12 +820,17 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>) {
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>, debug_step: Option<u64>) {
         storage.config = Option::Some(config);
         let mut i = 0;
         while i < asset_configs.len() {
             storage.asset_configs.push(asset_configs.get(i).unwrap());
             i += 1;
+        }
+        if debug_step.is_some() {
+            storage.debug = true;
+            storage.debug_timestamp = std::block::timestamp();
+            storage.debug_step = debug_step.unwrap();
         }
     }
 
@@ -817,10 +868,19 @@ impl Market for Contract {
         }
     }
 
-    fn balance_of_token(asset: ContractId) -> u64 {
-        balance_of(contract_id(), asset)
+    fn balance_of(asset: ContractId) -> u64 {
+        this_balance(asset)
     }
 
+    #[storage(read)]
+    fn get_market_basics() -> MarketBasics {
+        storage.market_basic
+    }
+
+    #[storage(read)]
+    fn totals_collateral(asset: ContractId) -> u64 {
+        storage.totals_collateral.get(asset)
+    }
     //-----------------------------------
     #[storage(read)]
     fn get_utilization() -> u64 {
@@ -831,7 +891,6 @@ impl Market for Contract {
     fn get_supply_rate(utilization: u64) -> u64 {
         get_supply_rate_internal(utilization)
     }
-
     #[storage(read)]
     fn get_borrow_rate(utilization: u64) -> u64 {
         get_borrow_rate_internal(utilization)
@@ -854,7 +913,6 @@ impl Market for Contract {
     fn withdraw_reserves(to: Address, amount: u64) {
         withdraw_reserves_internal(to, amount)
     }
-
     #[storage(read)]
     fn quote_collateral(asset: ContractId, base_amount: u64) -> u64 {
         quote_collateral_internal(asset, base_amount)
