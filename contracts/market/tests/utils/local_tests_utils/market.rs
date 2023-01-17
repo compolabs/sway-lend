@@ -15,12 +15,22 @@ pub mod market_abi_calls {
 
     use super::*;
 
+    pub async fn debug_increment_timestamp(market: &MarketContract) -> FuelCallResponse<()> {
+        let res = market.methods().debug_increment_timestamp().call().await;
+        res.unwrap()
+    }
+
     pub async fn initialize(
         contract: &MarketContract,
         config: MarketConfiguration,
         assets: Vec<market_contract_mod::AssetConfig>,
+        step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, Error> {
-        contract.methods().initialize(config, assets).call().await
+        contract
+            .methods()
+            .initialize(config, assets, step)
+            .call()
+            .await
     }
 
     pub async fn supply_base(
@@ -300,8 +310,8 @@ pub async fn setup_market() -> (
         target_reserves: 1000000000000, // decimals: base_token_decimals
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
-
-    market_abi_calls::initialize(&market_instance, market_config, asset_configs)
+    let step = Option::Some(10_000u64);
+    market_abi_calls::initialize(&market_instance, market_config, asset_configs, step)
         .await
         .expect("❌ Cannot initialize market");
 

@@ -20,7 +20,6 @@ use std::{
         AuthError,
         msg_sender,
     },
-    block::timestamp,
     call_frames::{
         contract_id,
         msg_asset_id,
@@ -40,7 +39,10 @@ use std::{
 
 abi Market {
     #[storage(read, write)]
-    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>);
+    fn debug_increment_timestamp();
+
+    #[storage(read, write)]
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>, debug_step: Option<u64>);
 
     #[storage(write, read)]
     fn pause(config: PauseConfiguration);
@@ -62,9 +64,12 @@ abi Market {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64);
+
     fn balance_of(asset: ContractId) -> u64;
+    
     #[storage(read)]
     fn get_market_basics() -> MarketBasics;
+
     #[storage(read)]
     fn totals_collateral(asset: ContractId) -> u64;
     //-------------------------------------------------
@@ -96,16 +101,20 @@ abi Market {
     fn absorb(accounts: Vec<Address>);
 
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address); // @Payment base_token
+    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address); 
+    
     #[storage(read, write)]
-    fn supply_collateral(dst: Address); // @Payment any collateral asset
+    fn supply_collateral(dst: Address); 
+
     #[storage(read, write)]
     fn withdraw_collateral(asset: ContractId, amount: u64);
 
     #[storage(read, write)]
-    fn supply_base(); // @Payment base_token
+    fn supply_base(); 
+
     #[storage(read, write)]
-    fn withdraw_base(amount: u64); // TODO add payment LP Token
+    fn withdraw_base(amount: u64);
+
     #[storage(read)]
     fn withdraw_reward_token(to: Address, amount: u64);
 
@@ -118,6 +127,10 @@ abi Market {
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 storage {
+    debug: bool = false,
+    debug_timestamp: u64 = 0,
+    debug_step: u64 = 0,
+    //----------
     config: Option<MarketConfiguration> = Option::None,
     asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
@@ -133,6 +146,15 @@ storage {
         total_borrow_base: 0,
         last_accrual_time: 0,
     },
+}
+
+#[storage(read)]
+fn timestamp() -> u64 {
+    if storage.debug {
+        storage.debug_timestamp
+    } else {
+        std::block::timestamp()
+    }
 }
 
 #[storage(read)]
@@ -214,13 +236,11 @@ pub fn present_value_borrow(base_borrow_index_: u64, principal_value_: u64) -> u
     res.as_u64().unwrap()
 }
 
-//TODO decrease decimals
 pub fn principal_value_supply(base_supply_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
     let res = U128::from_u64(present_value_) * U128::from_u64(SCALE_18) / U128::from_u64(base_supply_index_);
     res.as_u64().unwrap()
 }
 
-//TODO decrease decimals
 pub fn principal_value_borrow(base_borrow_index_: u64, present_value_: u64) -> u64 { // -> base_asset_decimals
     let res = (U128::from_u64(present_value_) * U128::from_u64(SCALE_18) + U128::from_u64(base_borrow_index_ - 1)) / U128::from_u64(base_borrow_index_);
     res.as_u64().unwrap()
@@ -256,8 +276,8 @@ fn principal_value(present_value_: I64) -> I64 { // -> base_asset_decimals
 #[storage(read)]
 fn get_utilization_internal() -> u64 { // -> decimals 18
     let market_basic = storage.market_basic;
-    let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base);
-    let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base);
+    let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base); // decimals 6
+    let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base); // decimals 6
     if total_supply_ == 0 {
         0
     } else {
@@ -285,7 +305,7 @@ fn get_supply_rate_internal(utilization: u64) -> u64 { // -> decimals 18
 // @Callable get_borrow_rate(utilization: u64) -> u64
 #[storage(read)]
 fn get_borrow_rate_internal(utilization: u64) -> u64 { // -> decimals 18
-    let utilization = U128::from_u64(utilization);
+    let utilization = U128::from_u64(utilization); // decimals 18
     let config = get_config();
     let kink_ = U128::from_u64(config.kink); // decimals 18
     let interest_rate_base = U128::from_u64(config.borrow_per_second_interest_rate_base); // decimals 18
@@ -309,12 +329,6 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (1
         let supply_rate = U128::from_u64(get_supply_rate_internal(utilization)); // decimals 18
         let borrow_rate = U128::from_u64(get_borrow_rate_internal(utilization)); // decimals 18
         let scale = U128::from_u64(SCALE_18);
-    
-        log(base_supply_index_);
-        log(base_borrow_index_);
-        log(supply_rate);
-        log(borrow_rate);
-        
         base_supply_index_ += base_supply_index_ * supply_rate / scale * U128::from_u64(time_elapsed);
         base_borrow_index_ += base_borrow_index_ * borrow_rate / scale * U128::from_u64(time_elapsed);
     }
@@ -325,7 +339,6 @@ fn accrued_interest_indices(time_elapsed: u64) -> (u64, u64) { // -> decimals (1
 
 // Checks that the dollar value of the user's collateral multiplied 
 // by borrow_collateral_factor is greater than the (planned) loan amount.
-//TODO decrease decimals
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
@@ -355,7 +368,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(10.pow(9));
     return if present_value_ < I64::new() {
-        false
+        true
     } else {
         let borrow_amount = U128::from_u64(present_value_.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
         borrow_limit >= borrow_amount
@@ -503,12 +516,12 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
     let sender = get_caller();
 
     require(sender == config.governor, Error::Unauthorized);
-
     let reserves = get_reserves_internal();
     require(reserves >= I64::from(0) && amount <= reserves.into(), Error::InsufficientReserves);
 
     transfer_to_address(amount, config.base_token, to);
 }
+
 #[storage(read)]
 fn get_asset_config_by_asset_id_internal(asset: ContractId) -> AssetConfig {
     let mut out: Option<AssetConfig> = Option::None;
@@ -706,6 +719,7 @@ fn supply_base_internal() {
     //     mint_to_address(supply_amount, caller);
     // }
 }
+
 // @Callable withdraw_base(amount: u64)
 #[storage(read, write)]
 fn withdraw_base_internal(amount: u64) {
@@ -794,6 +808,12 @@ fn claim_internal() {
 }
 
 impl Market for Contract {
+    #[storage(read, write)]
+    fn debug_increment_timestamp() {
+        require(storage.debug, Error::DebuggingDisabled);
+        storage.debug_timestamp = storage.debug_timestamp + storage.debug_step;
+    }
+
     #[storage(read)]
     fn get_oracle_price(asset: ContractId) -> u64 {
         let base_token_price_feed = get_config().base_token_price_feed;
@@ -801,12 +821,17 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>) {
+    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>, debug_step: Option<u64>) {
         storage.config = Option::Some(config);
         let mut i = 0;
         while i < asset_configs.len() {
             storage.asset_configs.push(asset_configs.get(i).unwrap());
             i += 1;
+        }
+        if debug_step.is_some() {
+            storage.debug = true;
+            storage.debug_timestamp = std::block::timestamp();
+            storage.debug_step = debug_step.unwrap();
         }
     }
 
@@ -857,7 +882,6 @@ impl Market for Contract {
     fn totals_collateral(asset: ContractId) -> u64 {
         storage.totals_collateral.get(asset)
     }
-
     //-----------------------------------
     #[storage(read)]
     fn get_utilization() -> u64 {
@@ -890,7 +914,6 @@ impl Market for Contract {
     fn withdraw_reserves(to: Address, amount: u64) {
         withdraw_reserves_internal(to, amount)
     }
-
     #[storage(read)]
     fn quote_collateral(asset: ContractId, base_amount: u64) -> u64 {
         quote_collateral_internal(asset, base_amount)
