@@ -10,7 +10,6 @@ import { observer } from "mobx-react-lite";
 import TokenInput from "@components/TokenInput/TokenInput";
 import BN from "@src/utils/BN";
 import useCollapse from "@components/Collapse";
-import { sleep } from "@src/utils/sleep";
 
 interface IProps {}
 

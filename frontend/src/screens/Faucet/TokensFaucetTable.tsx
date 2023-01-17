@@ -15,7 +15,7 @@ import TokenIcon from "@components/TokenIcon";
 interface IProps {}
 
 const TokensFaucetTable: React.FC<IProps> = () => {
-  const { accountStore, settingsStore } = useStores();
+  const { accountStore, settingsStore, pricesStore } = useStores();
   const vm = useFaucetVM();
   const [tokens, setTokens] = useState<any>([]);
   useMemo(() => {
@@ -46,7 +46,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
               {`${t.mintAmount.toFormat()} ${t.symbol}`}
             </Text>
             <Text fitContent style={{ whiteSpace: "nowrap" }} type="secondary">
-              $ {t.mintAmountDollar.toFormat()}
+              $ {t.mintAmountDollar.toFormat(2)}
             </Text>
           </Column>
         ),
@@ -99,7 +99,13 @@ const TokensFaucetTable: React.FC<IProps> = () => {
         })(),
       }))
     );
-  }, [accountStore.address, settingsStore, vm.loading, vm.alreadyMintedTokens]);
+  }, [
+    accountStore.address,
+    settingsStore,
+    vm.loading,
+    vm.alreadyMintedTokens,
+    pricesStore.tokensPrices,
+  ]);
   const columns = React.useMemo(
     () => [
       {

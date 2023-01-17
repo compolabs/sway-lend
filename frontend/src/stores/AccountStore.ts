@@ -113,13 +113,6 @@ class AccountStore {
       this.setAddress(accounts[0]);
     }
   };
-
-  // generateSeed = () => {
-  //   const mn = Mnemonic.generate();
-  //   const seed = Mnemonic.mnemonicToSeed(mn);
-  //   console.log(seed);
-  //   this.setSeed(seed);
-  // };
 }
 
 export default AccountStore;
