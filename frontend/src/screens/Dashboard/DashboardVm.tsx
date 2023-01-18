@@ -17,7 +17,7 @@ export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
 
 export const useDashboardVM = () => useVM(ctx);
 
-type ActionType = "supply" | "borrow";
+export type TAction = "supply" | "borrow" | "repay" | "withdraw";
 
 class DashboardVm {
   public rootStore: RootStore;
@@ -29,8 +29,11 @@ class DashboardVm {
     TOKENS_BY_SYMBOL.UNI,
   ];
 
-  action: ActionType | null = null;
-  setAction = (l: ActionType | null) => (this.action = l);
+  mode: 0 | 1 = 0;
+  setMode = (v: 0 | 1) => (this.mode = v);
+
+  action: TAction | null = null;
+  setAction = (l: TAction | null) => (this.action = l);
 
   tokenAmount: BN | null = null;
   setTokenAmount = (l: BN | null) => (this.tokenAmount = l);
@@ -52,16 +55,6 @@ class DashboardVm {
       };
       return { ...acc, [v.assetId]: [c] };
     }, {} as Record<string, [() => void]>);
-  }
-
-  get actionName() {
-    if (this.action == null) return "";
-    switch (this.action) {
-      case "borrow":
-        return "Borrow";
-      case "supply":
-        return "Supply";
-    }
   }
 
   get token() {

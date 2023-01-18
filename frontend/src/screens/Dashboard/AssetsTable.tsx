@@ -6,7 +6,7 @@ import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
 import { Column, Row } from "@src/components/Flex";
 import Symbol from "@components/Symbol";
-import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import { TAction, useDashboardVM } from "@screens/Dashboard/DashboardVm";
 
 interface IProps {}
 
@@ -42,6 +42,11 @@ const Header = styled.div`
 
 const AssetsTable: React.FC<IProps> = () => {
   const vm = useDashboardVM();
+  const handleAssetClick = (action: TAction, assetId: string) => {
+    console.log("click");
+    vm.setAction(action);
+    vm.setActionTokenAssetId(assetId);
+  };
   return (
     <Root>
       <Header>
@@ -71,9 +76,15 @@ const AssetsTable: React.FC<IProps> = () => {
               0.000
             </Text>
             <SizedBox width={24} />
-            <Symbol type="plus" />
+            <Symbol
+              type="plus"
+              onClick={() => handleAssetClick("supply", assetId)}
+            />
             <SizedBox width={8} />
-            <Symbol type="minus" />
+            <Symbol
+              type="minus"
+              onClick={() => handleAssetClick("withdraw", assetId)}
+            />
           </Row>
         </TokenRow>
       ))}

@@ -1,7 +1,7 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import { Address, Provider } from "fuels";
-import { NODE_URL, TOKENS_LIST } from "@src/constants";
+import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
 
@@ -112,6 +112,14 @@ class AccountStore {
     if (accounts != null && accounts.length > 0) {
       this.setAddress(accounts[0]);
     }
+  };
+
+  getFormattedBalance = (token: IToken): string | null => {
+    const balance = this.findBalanceByAssetId(token.assetId);
+    if (balance == null) return null;
+    return BN.formatUnits(balance.balance ?? BN.ZERO, token.decimals).toFormat(
+      2
+    );
   };
 }
 

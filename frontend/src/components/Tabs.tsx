@@ -31,6 +31,7 @@ const Tab = styled.div<{ active?: boolean }>`
   margin-bottom: -1px;
   user-select: none;
   transition: 0.4s;
+
   :hover {
     border-bottom: ${({ active, theme }) =>
       !active && `4px solid ${theme.colors.primary300}`}

@@ -52,7 +52,7 @@ export default {
     secondaryBackground: colors.neutral5,
     secondaryColor: colors.neutral3,
   },
-  divider: colors.neutral3,
+  divider: "rgba(223, 229, 250, 0.2)",
   switch: {
     background: colors.neutral5,
     circleColor: colors.neutral6,
@@ -79,6 +79,12 @@ export default {
   skeleton: {
     base: colors.neutral6,
     highlight: colors.neutral5,
+  },
+  switchButtons: {
+    selectedBackground: colors.neutral6,
+    selectedColor: colors.neutral3,
+    secondaryBackground: colors.neutral5,
+    secondaryColor: colors.neutral4,
   },
   dashboard: {
     tokenRowColor: "#313A45",

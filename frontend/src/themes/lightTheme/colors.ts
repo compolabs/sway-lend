@@ -36,13 +36,19 @@ export default {
   text: colors.neutral6,
   mainBackground: colors.neutral1,
   menuBackground: colors.neutral5,
-  divider: colors.neutral5,
+  divider: "rgba(31, 38, 43, 0.2)",
   disabledBtnTextColor: "rgba(26, 29, 31, 0.35);",
   disabledBtnColor: "rgba(184, 189, 208, 0.5)",
 
   switch: {
     background: colors.neutral3,
     circleColor: colors.neutral1,
+  },
+  switchButtons: {
+    selectedBackground: colors.neutral1,
+    selectedColor: colors.neutral7,
+    secondaryBackground: colors.neutral3,
+    secondaryColor: colors.neutral4,
   },
 
   button: {

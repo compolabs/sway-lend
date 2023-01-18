@@ -1,15 +1,14 @@
 import styled from "@emotion/styled";
-import React from "react";
-import plus from "@src/assets/icons/plus.svg";
-import minus from "@src/assets/icons/minus.svg";
+import React, { HTMLAttributes } from "react";
 import { useTheme } from "@emotion/react";
 
-interface IProps {
+interface IProps extends HTMLAttributes<HTMLDivElement> {
   selected?: boolean;
+  disabled?: boolean;
   type: "minus" | "plus";
 }
 
-const Root = styled.div<{ selected?: boolean }>`
+const Root = styled.div<{ selected?: boolean; disabled?: boolean }>`
   display: flex;
   flex-direction: column;
   width: 42px;
@@ -17,6 +16,7 @@ const Root = styled.div<{ selected?: boolean }>`
   border-radius: 50%;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   background-color: ${({ theme, selected }) =>
     selected
@@ -25,10 +25,10 @@ const Root = styled.div<{ selected?: boolean }>`
   opacity: ${({ selected }) => selected && "0.5"};
 `;
 
-const Symbol: React.FC<IProps> = ({ selected, type }) => {
+const Symbol: React.FC<IProps> = ({ selected, type, disabled, onClick }) => {
   const theme = useTheme();
   return (
-    <Root selected={selected}>
+    <Root selected={selected} onClick={onClick} disabled={disabled}>
       <img
         style={{ width: 8, height: 8 }}
         src={

@@ -5,18 +5,17 @@ import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import Text from "@src/components/Text";
 import { Row } from "@src/components/Flex";
 import Button from "@components/Button";
-import Divider from "@src/components/Divider";
 import { observer } from "mobx-react-lite";
 import TokenInput from "@components/TokenInput/TokenInput";
 import BN from "@src/utils/BN";
 import useCollapse from "@components/Collapse";
+import toUpperFirstLetter from "@src/utils/toUpperFirstLetter";
 
 interface IProps {}
 
 const Root = styled.div`
   display: flex;
   flex-direction: column;
-  //margin-top: 24px;
   @media (min-width: 880px) {
     margin-top: 0;
   }
@@ -32,11 +31,6 @@ const Card = styled.div`
 
 const ActionTab: React.FC<IProps> = () => {
   const vm = useDashboardVM();
-  const stats = [
-    { title: "Supply APY", value: "60.17%" },
-    { title: "Borrow APY", value: "12.32%" },
-    { title: "Total liquidity", value: "$354,285.32" },
-  ];
 
   const handleCancelClick = () => {
     vm.setAction(null);
@@ -51,7 +45,7 @@ const ActionTab: React.FC<IProps> = () => {
     <Root>
       <Card {...getCollapseProps()}>
         <Text fitContent weight={600} type="secondary" size="small">
-          {vm.actionName} {vm.token.symbol}
+          {toUpperFirstLetter(vm.action ?? "")} {vm.token.symbol}
         </Text>
         <SizedBox height={16} />
         <TokenInput
@@ -66,25 +60,8 @@ const ActionTab: React.FC<IProps> = () => {
             Cancel
           </Button>
           <SizedBox width={8} />
-          <Button fixed>{vm.actionName}</Button>
+          <Button fixed>{toUpperFirstLetter(vm.action ?? "")}</Button>
         </Row>
-      </Card>
-      <Card>
-        <SizedBox height={24} />
-        <Text weight={600} type="secondary" size="small">
-          Position summary
-        </Text>
-        <SizedBox height={16} />
-        <Divider />
-        <SizedBox height={12} />
-        {stats.map(({ value, title }) => (
-          <Row style={{ marginBottom: 12 }}>
-            <Text weight={600}>{title}</Text>
-            <Text textAlign="right" weight={600}>
-              {value}
-            </Text>
-          </Row>
-        ))}
       </Card>
     </Root>
   );
