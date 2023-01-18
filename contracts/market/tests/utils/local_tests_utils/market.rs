@@ -179,6 +179,17 @@ pub mod market_abi_calls {
     // ) -> Result<FuelCallResponse<()>, Error> {
     //     market.methods().absorb(addresses).call().await
     // }
+
+    pub async fn get_collateral_reserves(market: &MarketContract, asset: ContractId) -> market_contract_mod::I64  {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().get_collateral_reserves(asset);
+        res.tx_params(tx_params).simulate().await.unwrap().value
+    }
+    pub async fn get_reserves(market: &MarketContract) -> market_contract_mod::I64 {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().get_reserves();
+        res.tx_params(tx_params).simulate().await.unwrap().value
+    }
 }
 
 async fn init_wallets() -> Vec<WalletUnlocked> {
@@ -285,6 +296,10 @@ pub async fn setup_market() -> (
 
     //--------------- MARKET ---------------
     let market_instance = deploy_market_contract(&wallets[0]).await;
+    let config_json_str = fs::read_to_string("tests/utils/local_tests_utils/config.json")
+        .expect("Should have been able to read the file");
+    let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
+    let config = config.as_object().unwrap();
 
     let market_config = MarketConfiguration {
         governor: address,
@@ -292,21 +307,35 @@ pub async fn setup_market() -> (
         base_token: assets.get("USDC").unwrap().contract_id,
         base_token_decimals: assets.get("USDC").unwrap().config.decimals,
         base_token_price_feed: price_feed,
-        kink: 800000000000000000, // decimals: 18
-        supply_per_second_interest_rate_slope_low: 10000000000, // decimals: 18
-        supply_per_second_interest_rate_slope_high: 100000000000, // decimals: 18
-        borrow_per_second_interest_rate_slope_low: 25000000000, // decimals: 18
-        borrow_per_second_interest_rate_slope_high: 187500000000, // decimals: 18
-        borrow_per_second_interest_rate_base: 15854895992, // decimals: 18
-        store_front_price_factor: 6000, // decimals: 4
-        base_tracking_supply_speed: 1868287030000000, // decimals 18
-        base_tracking_borrow_speed: 3736574060000000, // decimals 18
-        base_min_for_rewards: 20000000, // decimals base_token_decimals
-        base_borrow_min: 10000000, // decimals: base_token_decimals
-        target_reserves: 1000000000000, // decimals: base_token_decimals
+        kink: config["kink"].as_u64().unwrap(), // decimals: 18
+        supply_per_second_interest_rate_slope_low: config
+            ["supply_per_second_interest_rate_slope_low"]
+            .as_u64()
+            .unwrap(), // decimals: 18
+        supply_per_second_interest_rate_slope_high: config
+            ["supply_per_second_interest_rate_slope_high"]
+            .as_u64()
+            .unwrap(), // decimals: 18
+        borrow_per_second_interest_rate_slope_low: config
+            ["borrow_per_second_interest_rate_slope_low"]
+            .as_u64()
+            .unwrap(), // decimals: 18
+        borrow_per_second_interest_rate_slope_high: config
+            ["borrow_per_second_interest_rate_slope_high"]
+            .as_u64()
+            .unwrap(), // decimals: 18
+        borrow_per_second_interest_rate_base: config["borrow_per_second_interest_rate_base"]
+            .as_u64()
+            .unwrap(), // decimals: 18
+        store_front_price_factor: config["store_front_price_factor"].as_u64().unwrap(), // decimals: 4
+        base_tracking_supply_speed: config["base_tracking_supply_speed"].as_u64().unwrap(), // decimals 18
+        base_tracking_borrow_speed: config["base_tracking_borrow_speed"].as_u64().unwrap(), // decimals 18
+        base_min_for_rewards: config["base_min_for_rewards"].as_u64().unwrap(), // decimals base_token_decimals
+        base_borrow_min: config["base_borrow_min"].as_u64().unwrap(), // decimals: base_token_decimals
+        target_reserves: config["target_reserves"].as_u64().unwrap(), // decimals: base_token_decimals
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
-    let step = Option::Some(10_000u64);
+    let step = Option::Some(config["debug_step"].as_u64().unwrap());
     market_abi_calls::initialize(&market_instance, market_config, asset_configs, step)
         .await
         .expect("❌ Cannot initialize market");

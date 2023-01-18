@@ -34,7 +34,7 @@ pub mod oracle_abi_calls {
 
     pub async fn _sync_prices(contract: &OracleContract, assets: &HashMap<String, Asset>) {
         let client = reqwest::Client::new();
-        let req = "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
+        let req = "https://api.coingecko.com/api/v3/simple/price?ids=compound-governance-token%2Cbinancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
         let body = client.get(req).send().await.unwrap().text().await.unwrap();
         let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
         for (_, asset) in assets.iter() {

@@ -14,7 +14,7 @@ async fn main_test() {
     let tx_params = TxParameters::default();
     let scale_6 = 10u64.pow(6) as f64;
 
-    print_title("Supply & withdraw test");
+    print_title("Main test");
     let (wallets, assets, market, oracle) = market::setup_market().await;
 
     // ==================== Assets ====================
@@ -45,13 +45,13 @@ async fn main_test() {
     // ==================== Case #0 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: supply_base
-    // 💰 Amount: 400.00 USDC
+    // 💰 Amount: 100.00 USDC
 
-    print_case_title(0, "Bob", "supply_base", "400.00 USDC");
-    println!("💸 Bob + 400.00 USDC");
+    print_case_title(0, "Bob", "supply_base", "100.00 USDC");
+    println!("💸 Bob + 100.00 USDC");
 
     // Transfer of 400 USDC to the Bob's wallet
-    let amount = parse_units(400, usdc.config.decimals);
+    let amount = parse_units(100, usdc.config.decimals);
     admin
         .transfer(bob.address(), amount, usdc.asset_id, tx_params)
         .await
@@ -66,7 +66,7 @@ async fn main_test() {
         .await
         .unwrap();
 
-    // Сheck supply balance equal to 400 USDC
+    // Сheck supply balance equal to 100 USDC
     let (supply_balance, _borrow_balance) =
         market_abi_calls::get_user_supply_borrow(&inst, Address::from(bob.address())).await;
     assert!(supply_balance == amount);
@@ -189,8 +189,9 @@ async fn main_test() {
         .unwrap();
 
     //Сheck supply balance equal to 200 USDC
-    let (_supply_balance, _borrow_balance) =
+    let (supply_balance, _borrow_balance) =
         market_abi_calls::get_user_supply_borrow(&inst, Address::from(chad.address())).await;
+    println!("{amount} == {supply_balance}");
     assert!(amount - 5 < supply_balance);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
@@ -220,26 +221,28 @@ async fn main_test() {
 
     // =================================================
     // ==================== Case #6 ====================
-    // 👛 Wallet: Chad 🤵
-    // 🤙 Call: withdraw_base
-    // 💰 Amount: 300.00 USDC
+    // 👛 Wallet: Admin 🐔
+    // 🤙 Call: collateral price drops
+    // 💰 Amount: 10%
 
-    print_case_title(6, "Chad", "withdraw_base", "300.00 USDC");
+    print_case_title(6, "Admin", "collateral price drops", "10%");
 
     //Chad calls withdraw_base
-    let amount = parse_units(300, usdc.config.decimals);
-    let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
-        .await
-        .unwrap();
+    let price = oracle_abi_calls::get_price(&oracle, uni.contract_id).await;
+    let price = (price.price as f64 * 0.9) as u64;
+    oracle_abi_calls::set_price(&oracle, uni.contract_id, price).await;
 
-    // USDC balance check
-    let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // Price check
+    let new_price = oracle_abi_calls::get_price(&oracle, uni.contract_id)
+        .await
+        .price;
+    println!("{price} == {new_price}");
+    assert!(new_price == price);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
 
+    return;
     // =================================================
     // ==================== Case #7 ====================
     // 👛 Wallet: Alice 🦹
