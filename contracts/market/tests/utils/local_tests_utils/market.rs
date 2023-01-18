@@ -153,34 +153,59 @@ pub mod market_abi_calls {
         contract.methods().pause(config).call().await
     }
 
-    // pub async fn _buy_collateral(
-    //     market: &MarketContract,
-    //     base_asset_id: AssetId,
-    //     amount: u64,
-    //     asset: ContractId,
-    //     min_amount: u64,
-    //     recipient: Address,
-    // ) -> Result<FuelCallResponse<()>, Error> {
-    //     let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
-    //     market
-    //         .methods()
-    //         .buy_collateral(asset, min_amount, recipient)
-    //         .call_params(call_params)
-    //         .estimate_tx_dependencies(None)
-    //         .await
-    //         .unwrap()
-    //         .call()
-    //         .await
-    // }
+    pub async fn _buy_collateral(
+        market: &MarketContract,
+        base_asset_id: AssetId,
+        amount: u64,
+        asset: ContractId,
+        min_amount: u64,
+        recipient: Address,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+        market
+            .methods()
+            .buy_collateral(asset, min_amount, recipient)
+            .call_params(call_params)
+            .estimate_tx_dependencies(None)
+            .await
+            .unwrap()
+            .call()
+            .await
+    }
 
-    // pub async fn _absorb(
-    //     market: &MarketContract,
-    //     addresses: Vec<Address>,
-    // ) -> Result<FuelCallResponse<()>, Error> {
-    //     market.methods().absorb(addresses).call().await
-    // }
+    pub async fn absorb(
+        market: &MarketContract,
+        contract_ids: &[Bech32ContractId],
+        addresses: Vec<Address>,
+    ) -> Result<FuelCallResponse<()>, Error> {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        market
+            .methods()
+            .absorb(addresses)
+            .set_contracts(contract_ids)
+            .tx_params(tx_params)
+            .call()
+            .await
+    }
 
-    pub async fn get_collateral_reserves(market: &MarketContract, asset: ContractId) -> market_contract_mod::I64  {
+    pub async fn is_liquidatable(
+        market: &MarketContract,
+        contract_ids: &[Bech32ContractId],
+        address: Address,
+    ) -> bool {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().is_liquidatable(address);
+        res.set_contracts(contract_ids)
+            .tx_params(tx_params)
+            .simulate()
+            .await
+            .unwrap()
+            .value
+    }
+    pub async fn get_collateral_reserves(
+        market: &MarketContract,
+        asset: ContractId,
+    ) -> market_contract_mod::I64 {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().get_collateral_reserves(asset);
         res.tx_params(tx_params).simulate().await.unwrap().value

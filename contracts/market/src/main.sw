@@ -55,8 +55,8 @@ abi Market {
     #[storage(read)]
     fn get_user_collateral(address: Address, asset: ContractId) -> u64;
 
-    // #[storage(read)]
-    // fn get_oracle_price(asset: ContractId) -> u64;
+    #[storage(read)]
+    fn get_oracle_price(asset: ContractId) -> u64;
 
     #[storage(read)]
     fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig;
@@ -383,26 +383,26 @@ fn is_liquidatable_internal(account: Address) -> bool {
     };
 
     let config = get_config();
-    let present_value_ = present_value(principal_value_.flip()).into(); // decimals base_asset_decimals
-    let scale = 10.pow(config.base_token_decimals);
+    let present_value_ = U128::from_u64(present_value(principal_value_.flip()).into()); // decimals base_asset_decimals
+    let scale = U128::from_u64(10.pow(config.base_token_decimals));
 
-    let mut liquidation_treshold = 0;
+    let mut liquidation_treshold = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
         let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
-        let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
-        let collateral_factor = asset_config.liquidate_collateral_factor; // decimals 4
-        let scale = 10.pow(asset_config.decimals);
+        let balance = U128::from_u64(this_balance(asset_config.asset)); // decimals asset_config.decimals
+        let price = U128::from_u64(get_price(asset_config.asset, asset_config.price_feed)); // decimals 9
+        let collateral_factor = U128::from_u64(asset_config.liquidate_collateral_factor); // decimals 4
+        let scale = U128::from_u64(10.pow(asset_config.decimals));
 
-        liquidation_treshold += balance * price * collateral_factor / 10000 / scale; //decimals 9
+        liquidation_treshold += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
         index = index + 1;
     }
 
-    let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
+    let base_token_price = U128::from_u64(get_price(config.base_token, config.base_token_price_feed)); //decimals 9
     let borrow_amount = present_value_ * base_token_price / scale; // decimals 9
     liquidation_treshold < borrow_amount
 }
@@ -815,11 +815,11 @@ impl Market for Contract {
         storage.debug_timestamp = storage.debug_timestamp + storage.debug_step;
     }
 
-    // #[storage(read)]
-    // fn get_oracle_price(asset: ContractId) -> u64 {
-    //     let base_token_price_feed = get_config().base_token_price_feed;
-    //     get_price(asset, base_token_price_feed)
-    // }
+    #[storage(read)]
+    fn get_oracle_price(asset: ContractId) -> u64 {
+        let base_token_price_feed = get_config().base_token_price_feed;
+        get_price(asset, base_token_price_feed)
+    }
 
     #[storage(read, write)]
     fn initialize(
