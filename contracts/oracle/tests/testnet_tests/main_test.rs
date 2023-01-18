@@ -6,8 +6,7 @@ use fuels::{
 };
 
 use crate::utils::{
-    local_tests_utils::OracleContract,
-    number_utils::{format_units},
+    local_tests_utils::OracleContract, number_utils::format_units,
     testnet_tests_utils::setup_wallet,
 };
 
@@ -16,7 +15,6 @@ const ORACLE_ADDRESS: &str = "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab446
 struct AssetConfig<'a> {
     symbol: &'a str,
     asset_id: &'a str,
-    decimals: u8,
     default_price: u64,
     coingeco_id: &'a str,
 }
@@ -25,60 +23,46 @@ struct AssetConfig<'a> {
 async fn main_test() {
     let assets = vec![
         AssetConfig {
-            symbol: "BNB",
-            decimals: 8,
-            default_price: 250,
-            asset_id: "0x6cd466e67547102656267a5f6005113e48d1f53a6846e6819c841a7f3eadafe9",
-            coingeco_id: "binancecoin",
+            symbol: "SWAY",
+            default_price: 50 * 10u64.pow(9),
+            asset_id: "0x99075448d291a8f8f69e5f3d25a309c38ad38def9f709a69ae4a2aeaed1701fe",
+            coingeco_id: "compound-governance-token",
+            // decimals: 9,
         },
         AssetConfig {
             symbol: "BTC",
-            decimals: 8,
-            default_price: 19000,
-            asset_id: "0x851ec5e04fa3485ba0794b34030bbcd70e96be282cd429da03c58e8de4d46c00",
+            default_price: 19000 * 10u64.pow(9),
+            asset_id: "0xdd17dda6eeee55f6d327020e6d61b9fa7b3c2ab205c46cdca690a46966f4e1c7",
             coingeco_id: "bitcoin",
-        },
-        AssetConfig {
-            symbol: "BUSD",
-            decimals: 6,
-            default_price: 1,
-            asset_id: "0xfcdcc57a0c59be38eecab975ddd03c3cd2cb1852957b622d5613d60ec8f4f2c2",
-            coingeco_id: "binance-usd",
+            // decimals: 8,
         },
         AssetConfig {
             symbol: "USDC",
-            decimals: 6,
-            default_price: 1,
-            asset_id: "0xe09c4c702e6a8237dd07f29228c136cc076b79cb9d0e1f891d39c54dc95069ac",
+            default_price: 1 * 10u64.pow(9),
+            asset_id: "0xd7d5e5c1220872e6f42b38f85ae80c6072b1b4723e7a7218bbf6717aca962536",
             coingeco_id: "usd-coin",
-        },
-        AssetConfig {
-            symbol: "USDT",
-            decimals: 6,
-            default_price: 1,
-            asset_id: "0x7d4b2c57d0c8715be35224b29357ba2444e40f6cd1d9227a96e8d8f4a8f44ba4",
-            coingeco_id: "tether",
+            // decimals: 6,
         },
         AssetConfig {
             symbol: "UNI",
-            decimals: 9,
-            default_price: 5,
-            asset_id: "0xcc28b139c7664ac9cddc2c01c00559fbbebd6fa8a879db341adf3a4aafdaa137",
+            default_price: 5 * 10u64.pow(9),
+            asset_id: "0x76c4fda9074c4509eaf2652f82bace86e2c7a21bf9faff7bf6228034ebc0f8a2",
             coingeco_id: "uniswap",
+            // decimals: 9,
         },
         AssetConfig {
             symbol: "LINK",
-            decimals: 9,
-            default_price: 5,
-            asset_id: "0x579cd9e73d2471fd0ce20156e06e34c09cdf2fd655c993af8d236185305461ee",
+            default_price: 5 * 10u64.pow(9),
+            asset_id: "0x71be783354a9bccfa9de0e7edf291797775e4a730d0922a9675258dbb47f557b",
             coingeco_id: "chainlink",
+            // decimals: 9,
         },
         AssetConfig {
             symbol: "ETH",
-            decimals: 9,
-            default_price: 1200,
+            default_price: 1200 * 10u64.pow(9),
             asset_id: "0x0000000000000000000000000000000000000000000000000000000000000000",
             coingeco_id: "ethereum",
+            // decimals: 9,
         },
     ];
 
@@ -95,7 +79,7 @@ async fn main_test() {
     println!("{} Initialize\n", if _res.is_ok() { "✅" } else { "❌" });
 
     let client = reqwest::Client::new();
-    let req = "https://api.coingecko.com/api/v3/simple/price?ids=binancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
+    let req = "https://api.coingecko.com/api/v3/simple/price?ids=compound-governance-token%2Cbinancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
     let body = client.get(req).send().await.unwrap().text().await.unwrap();
     let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
 

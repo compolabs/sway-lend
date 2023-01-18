@@ -19,10 +19,10 @@ const RPC: &str = "node-beta-2.fuel.network";
 async fn deploy() {
     let configs: Vec<DeployConfig> = vec![
         DeployConfig {
-            name: String::from("Tether"),
-            symbol: String::from("USDT"),
-            decimals: 6,
-            mint_amount: 10000,
+            name: String::from("Sway token"),
+            symbol: String::from("SWAY"),
+            decimals: 9,
+            mint_amount: 1000,
         },
         DeployConfig {
             name: String::from("USD Coin"),
@@ -30,23 +30,12 @@ async fn deploy() {
             decimals: 6,
             mint_amount: 10000,
         },
-        DeployConfig {
-            name: String::from("Binance USD"),
-            symbol: String::from("BUSD"),
-            decimals: 6,
-            mint_amount: 10000,
-        },
+       
         DeployConfig {
             name: String::from("Bitcoin"),
             symbol: String::from("BTC"),
             decimals: 8,
             mint_amount: 1,
-        },
-        DeployConfig {
-            name: String::from("BNB"),
-            symbol: String::from("BNB"),
-            decimals: 8,
-            mint_amount: 5,
         },
         DeployConfig {
             name: String::from("Uniswap"),
@@ -107,7 +96,7 @@ async fn deploy_token_contract(mut deploy_config: DeployConfig) {
     let methods = instance.methods();
 
     let mint_amount = parse_units(deploy_config.mint_amount, deploy_config.decimals);
-    let config: tokencontract_mod::Config = tokencontract_mod::Config {
+    let config: tokencontract_mod::TokenInitializeConfig = tokencontract_mod::TokenInitializeConfig {
         name: fuels::core::types::SizedAsciiString::<32>::new(deploy_config.name).unwrap(),
         symbol: fuels::core::types::SizedAsciiString::<8>::new(deploy_config.symbol).unwrap(),
         decimals: deploy_config.decimals,
