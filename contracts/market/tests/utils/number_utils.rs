@@ -1,4 +1,4 @@
-// TODO: Добавить возможность принимать флоаты
+// TODO: Add the ability to accept floats
 pub fn parse_units(num: u64, decimals: u8) -> u64 {
     num * 10u64.pow(decimals as u32)
 }

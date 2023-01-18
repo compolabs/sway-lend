@@ -57,11 +57,6 @@ fn validate_owner() {
     let sender = get_msg_sender_address_or_panic();
     require(storage.owner == sender, Error::NotOwner);
 }
-#[storage(read)]
-fn validate_reward_admin() {
-    let sender = get_msg_sender_address_or_panic();
-    require(storage.reward_admins.get(sender), Error::NotOwner);
-}
 
 impl Token for Contract {
     //////////////////////////////////////
@@ -107,8 +102,8 @@ impl Token for Contract {
 
     #[storage(read)]
     fn mint_and_transfer(amount: u64, recipient: Address) {
-        validate_owner();
-        validate_reward_admin();
+        let sender = get_msg_sender_address_or_panic();
+        require(storage.reward_admins.get(sender) || storage.owner == sender, Error::NotOwner);
         mint_to_address(amount, recipient);
     }
 

@@ -22,9 +22,21 @@ pub mod token_abi_calls {
         let res = c.methods().mint().append_variable_outputs(1).call().await;
         res.unwrap()
     }
+    pub async fn mint_and_transfer(
+        c: &TokenContract,
+        amount: u64,
+        recipient: Address,
+    ) -> FuelCallResponse<()> {
+        let res = c
+            .methods()
+            .mint_and_transfer(amount, recipient)
+            .append_variable_outputs(1);
+
+        res.call().await.unwrap()
+    }
     pub async fn initialize(
         c: &TokenContract,
-        config: token_contract_mod::Config,
+        config: TokenInitializeConfig,
         mint_amount: u64,
         address: Address,
     ) -> FuelCallResponse<()> {
@@ -63,7 +75,7 @@ pub async fn get_token_contract_instance(
     name.push_str(" ".repeat(32 - deploy_config.name.len()).as_str());
     symbol.push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
 
-    let config: token_contract_mod::Config = token_contract_mod::Config {
+    let config: TokenInitializeConfig = TokenInitializeConfig {
         name: fuels::core::types::SizedAsciiString::<32>::new(name).unwrap(),
         symbol: fuels::core::types::SizedAsciiString::<8>::new(symbol).unwrap(),
         decimals,

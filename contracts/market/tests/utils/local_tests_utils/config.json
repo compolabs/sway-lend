@@ -1,0 +1,16 @@
+{
+"kink": 800000000000000000,
+"supply_per_second_interest_rate_slope_low": 10000000000,
+"supply_per_second_interest_rate_slope_high": 100000000000,
+"borrow_per_second_interest_rate_slope_low": 25000000000,
+"borrow_per_second_interest_rate_slope_high": 187500000000,
+"borrow_per_second_interest_rate_base": 15854895992,
+"store_front_price_factor": 6000,
+"base_tracking_supply_speed": 1868287030000000,
+"base_tracking_borrow_speed": 3736574060000000,
+"base_min_for_rewards": 20000000,
+"base_borrow_min": 10000000,
+"target_reserves": 1000000000000,
+
+"debug_step": 10000
+}

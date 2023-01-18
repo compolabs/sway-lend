@@ -68,7 +68,7 @@ async fn test() {
 //     let uni_instance = get_token_contract_instance(&wallet, &uni_config).await;
 
 //     //--------------- MARKET ---------------
-//     let market_instance = get_market_contract_instance(&wallet).await;
+//     let market_instance = deploy_market_contract(&wallet).await;
 
 //     let market_config = MarketConfiguration {
 //         governor: address,

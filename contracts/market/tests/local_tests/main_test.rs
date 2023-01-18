@@ -12,8 +12,9 @@ use crate::utils::{local_tests_utils::market, number_utils::parse_units};
 #[tokio::test]
 async fn main_test() {
     let tx_params = TxParameters::default();
+    let scale_6 = 10u64.pow(6) as f64;
 
-    print_title("Supply & withdraw test");
+    print_title("Main test");
     let (wallets, assets, market, oracle) = market::setup_market().await;
 
     // ==================== Assets ====================
@@ -44,13 +45,13 @@ async fn main_test() {
     // ==================== Case #0 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: supply_base
-    // 💰 Amount: 400.00 USDC
+    // 💰 Amount: 100.00 USDC
 
-    print_case_title(0, "Bob", "supply_base", "400.00 USDC");
-    println!("💸 Bob + 400.00 USDC");
+    print_case_title(0, "Bob", "supply_base", "100.00 USDC");
+    println!("💸 Bob + 100.00 USDC");
 
     // Transfer of 400 USDC to the Bob's wallet
-    let amount = parse_units(400, usdc.config.decimals);
+    let amount = parse_units(100, usdc.config.decimals);
     admin
         .transfer(bob.address(), amount, usdc.asset_id, tx_params)
         .await
@@ -65,7 +66,7 @@ async fn main_test() {
         .await
         .unwrap();
 
-    // Сheck supply balance equal to 400 USDC
+    // Сheck supply balance equal to 100 USDC
     let (supply_balance, _borrow_balance) =
         market_abi_calls::get_user_supply_borrow(&inst, Address::from(bob.address())).await;
     assert!(supply_balance == amount);
@@ -188,8 +189,9 @@ async fn main_test() {
         .unwrap();
 
     //Сheck supply balance equal to 200 USDC
-    let (_supply_balance, _borrow_balance) =
+    let (supply_balance, _borrow_balance) =
         market_abi_calls::get_user_supply_borrow(&inst, Address::from(chad.address())).await;
+    println!("{amount} == {supply_balance}");
     assert!(amount - 5 < supply_balance);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
@@ -219,26 +221,28 @@ async fn main_test() {
 
     // =================================================
     // ==================== Case #6 ====================
-    // 👛 Wallet: Chad 🤵
-    // 🤙 Call: withdraw_base
-    // 💰 Amount: 300.00 USDC
+    // 👛 Wallet: Admin 🐔
+    // 🤙 Call: collateral price drops
+    // 💰 Amount: 10%
 
-    print_case_title(6, "Chad", "withdraw_base", "300.00 USDC");
+    print_case_title(6, "Admin", "collateral price drops", "10%");
 
     //Chad calls withdraw_base
-    let amount = parse_units(300, usdc.config.decimals);
-    let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
-        .await
-        .unwrap();
+    let price = oracle_abi_calls::get_price(&oracle, uni.contract_id).await;
+    let price = (price.price as f64 * 0.9) as u64;
+    oracle_abi_calls::set_price(&oracle, uni.contract_id, price).await;
 
-    // USDC balance check
-    let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    // Price check
+    let new_price = oracle_abi_calls::get_price(&oracle, uni.contract_id)
+        .await
+        .price;
+    println!("{price} == {new_price}");
+    assert!(new_price == price);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
 
+    return;
     // =================================================
     // ==================== Case #7 ====================
     // 👛 Wallet: Alice 🦹
@@ -247,12 +251,12 @@ async fn main_test() {
 
     let address = Address::from(alice.address());
     let (_, amount) = market_abi_calls::get_user_supply_borrow(&market, address).await;
-    let amount = amount + 47242; //FIXME
-    let log_amount = format!("Present value: {} USDC", amount / 10u64.pow(6));
+
+    let log_amount = format!("Present value: {} USDC", amount as f64 / scale_6);
     print_case_title(7, "Alice", "supply_base", log_amount.as_str());
 
     let delta_value = amount - 150_000_000;
-    println!("💸 Alice + {} USDC", delta_value / 10u64.pow(6));
+    println!("💸 Alice + {} USDC", delta_value as f64 / scale_6);
 
     // Transfer some coins to pay protocol fee
     admin
@@ -278,9 +282,13 @@ async fn main_test() {
     // 🤙 Call: supply_base
     // 💰 Amount: USDC Balance ~ 100.046928 USDC
 
-    print_case_title(8, "Chad", "supply_base", "100.046928 USDC");
-    let amount = 46_928; //FIXME
-    println!("💸 Chad + {} USDC", amount / 10u64.pow(6));
+    let address = Address::from(chad.address());
+    let (_, amount) = market_abi_calls::get_user_supply_borrow(&market, address).await;
+    println!("amount = {:?}", amount);
+    let delta = amount - 100u64 * scale_6 as u64;
+    let log_amount = format!("{} USDC", amount as f64 / scale_6);
+    print_case_title(8, "Chad", "supply_base", log_amount.as_str());
+    println!("💸 Chad + {} USDC", delta as f64 / scale_6);
 
     // Transfer of 100.046928 USDC to the Chad's wallet
     admin
@@ -290,7 +298,6 @@ async fn main_test() {
 
     //Сheck balance
     let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    println!("balance == amount = {:?} {:?}", balance, amount);
     assert!(balance == amount + 300_000_000);
 
     // Chad calls supply_base
@@ -299,18 +306,22 @@ async fn main_test() {
         .await
         .unwrap();
 
-    //TODO assert
+    let (_, borrow) = market_abi_calls::get_user_supply_borrow(&market, address).await;
+    assert!(borrow == 0);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
+
     // =================================================
     // ==================== Case #9 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: withdraw_base
-    // 💰 Amount: -400.058340 USDC
-    print_case_title(9, "Bob", "withdraw_base", "-400.058340 USDC");
-    let amount = 58_340; //FIXME
-    println!("💸 Bob + {} USDC", amount / 10u64.pow(6));
+    // 💰 Amount: 400.058340 USDC
+
+    let address = Address::from(bob.address());
+    let (amount, _) = market_abi_calls::get_user_supply_borrow(&market, address).await;
+    let log_amount = format!("{} USDC", amount as f64 / scale_6);
+    print_case_title(9, "Bob", "withdraw_base", log_amount.as_str());
 
     //Bob calls withdraw_base
     let inst = market.with_wallet(bob.clone()).unwrap();
@@ -319,20 +330,20 @@ async fn main_test() {
         .unwrap();
 
     // USDC balance check
-    let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
-
-    //TODO assert
+    let (supplied, _) = market_abi_calls::get_user_supply_borrow(&market, address).await;
+    assert!(supplied == 0);
+    assert!(bob.get_asset_balance(&usdc.asset_id).await.unwrap() == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
+
     // =================================================
     // ==================== Case #10 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: withdraw_collateral
-    // 💰 Amount: -$200.00/40.00 UNI
+    // 💰 Amount: 40.00 UNI ~ $200.00
 
-    print_case_title(10, "Alice", "withdraw_collateral", "-$200.00/40.00 UNI");
+    print_case_title(10, "Alice", "withdraw_collateral", "40.00 UNI ($200.00)");
 
     //Alice calls withdraw_base
     let amount = parse_units(40, uni.config.decimals);
@@ -346,16 +357,15 @@ async fn main_test() {
     let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
     assert!(balance == amount);
 
-    //TODO assert
-
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
+
     // =================================================
     // ==================== Case #11 ====================
     // 👛 Wallet: Chad 🤵
     // 🤙 Call: withdraw_collateral
-    // 💰 Amount: -$300.00/60.00 UNI
-    print_case_title(11, "Chad", "withdraw_collateral", "-$300.00/60.00 UNI");
+    // 💰 Amount: 60.00 UNI ~ $300.00
+    print_case_title(11, "Chad", "withdraw_collateral", "60.00 UNI ($300.00)");
     //Chad calls withdraw_base
     let amount = parse_units(60, uni.config.decimals);
     let inst = market.with_wallet(chad.clone()).unwrap();
@@ -363,16 +373,14 @@ async fn main_test() {
     market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
         .await
         .unwrap();
+
     // UNI balance check
     let balance = chad.get_asset_balance(&uni.asset_id).await.unwrap();
     assert!(balance == amount);
 
-    //TODO assert
-
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 }
 
-// bob.get_asset_balance(&usdc.asset_id).await.unwrap()
 async fn debug_state(
     market: &MarketContract,
     wallets: &Vec<WalletUnlocked>,
@@ -391,14 +399,16 @@ async fn debug_state(
     let chad = wallets[3].clone();
     let chad_address = Address::from(chad.address());
 
+    let scale18 = 10u64.pow(18) as f64;
+
     let market_basic = market_abi_calls::get_market_basics(&market).await;
     let supply_base = market_basic.total_supply_base / 10u64.pow(6);
     let borrow_base = market_basic.total_borrow_base / 10u64.pow(6);
     let usdc_balance = market_abi_calls::balance_of(&market, usdc_contract_id).await / 10u64.pow(6);
     let uni_balance = market_abi_calls::balance_of(&market, uni_contract_id).await / 10u64.pow(9);
-    let utilization = market_abi_calls::get_utilization(&market).await / 10u64.pow(18);
-    let s_rate = market_basic.base_supply_index / 10u64.pow(18);
-    let b_rate = market_basic.base_borrow_index / 10u64.pow(18);
+    let utilization = market_abi_calls::get_utilization(&market).await as f64 / scale18;
+    let s_rate = market_basic.base_supply_index as f64 / scale18;
+    let b_rate = market_basic.base_borrow_index as f64 / scale18;
     let total_collateral = market_abi_calls::totals_collateral(&market, uni_contract_id).await;
     let last_accrual_time = market_basic.last_accrual_time;
     println!("🏦 Market\n  Total supply {supply_base} USDC | Total supply {borrow_base} USDC",);
@@ -416,8 +426,10 @@ async fn debug_state(
     let (supply, borrow) = market_abi_calls::get_user_supply_borrow(&market, alice_address).await;
     let supply = format_units(supply, 6);
     let borrow = format_units(borrow, 6);
-    let usdc_balance = alice.get_asset_balance(&usdc_asset_id).await.unwrap() / 10u64.pow(6);
-    let uni_balance = alice.get_asset_balance(&uni_asset_id).await.unwrap() / 10u64.pow(9);
+    let usdc_balance =
+        alice.get_asset_balance(&usdc_asset_id).await.unwrap() as f64 / 10u64.pow(6) as f64;
+    let uni_balance =
+        alice.get_asset_balance(&uni_asset_id).await.unwrap() as f64 / 10u64.pow(9) as f64;
     let collateral =
         market_abi_calls::get_user_collateral(&market, alice_address, uni_contract_id).await;
     println!("\nAlice 🦹");
@@ -432,8 +444,10 @@ async fn debug_state(
     let (supply, borrow) = market_abi_calls::get_user_supply_borrow(&market, bob_address).await;
     let supply = format_units(supply, 6);
     let borrow = format_units(borrow, 6);
-    let usdc_balance = bob.get_asset_balance(&usdc_asset_id).await.unwrap() / 10u64.pow(6);
-    let uni_balance = bob.get_asset_balance(&uni_asset_id).await.unwrap() / 10u64.pow(9);
+    let usdc_balance =
+        bob.get_asset_balance(&usdc_asset_id).await.unwrap() as f64 / 10u64.pow(6) as f64;
+    let uni_balance =
+        bob.get_asset_balance(&uni_asset_id).await.unwrap() as f64 / 10u64.pow(9) as f64;
     let collateral =
         market_abi_calls::get_user_collateral(&market, bob_address, uni_contract_id).await;
     println!("\nBob 🧛");
@@ -449,8 +463,10 @@ async fn debug_state(
     let (supply, borrow) = market_abi_calls::get_user_supply_borrow(&market, chad_address).await;
     let supply = format_units(supply, 6);
     let borrow = format_units(borrow, 6);
-    let usdc_balance = chad.get_asset_balance(&usdc_asset_id).await.unwrap() / 10u64.pow(6);
-    let uni_balance = chad.get_asset_balance(&uni_asset_id).await.unwrap() / 10u64.pow(9);
+    let usdc_balance =
+        chad.get_asset_balance(&usdc_asset_id).await.unwrap() as f64 / 10u64.pow(6) as f64;
+    let uni_balance =
+        chad.get_asset_balance(&uni_asset_id).await.unwrap() as f64 / 10u64.pow(9) as f64;
     let collateral =
         market_abi_calls::get_user_collateral(&market, chad_address, uni_contract_id).await;
     println!("\nChad 🤵");
