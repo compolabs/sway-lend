@@ -16,7 +16,7 @@ const ModeSwitch: React.FC<IProps> = () => {
   return (
     <Root>
       <SwitchButtons
-        values={["+ Deposit mode", "- Loan mode"]}
+        values={["Deposit mode", "Loan mode"]}
         active={vm.mode}
         onActivate={(v) => vm.setMode(v)}
       />

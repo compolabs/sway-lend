@@ -7,6 +7,7 @@ import Text from "@components/Text";
 import { Column, Row } from "@src/components/Flex";
 import Symbol from "@components/Symbol";
 import { TAction, useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import Progressbar from "@components/Progressbar";
 
 interface IProps {}
 
@@ -49,6 +50,19 @@ const AssetsTable: React.FC<IProps> = () => {
   };
   return (
     <Root>
+      <Column crossAxisSize="max">
+        <Row justifyContent="space-between">
+          <Text fitContent weight={600} type="secondary" size="small">
+            Available to Borrow
+          </Text>
+          <Text fitContent weight={600} type="secondary" size="small">
+            60%
+          </Text>
+        </Row>
+        <SizedBox height={4} />
+        <Progressbar percent={60} />
+      </Column>
+      <SizedBox height={32} />
       <Header>
         <Text size="small" type="secondary">
           Collateral asset
@@ -59,7 +73,7 @@ const AssetsTable: React.FC<IProps> = () => {
         </Text>
       </Header>
       {vm.collaterals.map(({ logo, symbol, name, assetId }) => (
-        <TokenRow selected={vm.actionTokenAssetId === assetId}>
+        <TokenRow key={assetId} selected={vm.actionTokenAssetId === assetId}>
           <Row alignItems="center">
             <TokenIcon size="small" src={logo} />
             <SizedBox width={20} />

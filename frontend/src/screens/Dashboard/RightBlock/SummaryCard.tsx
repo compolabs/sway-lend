@@ -21,8 +21,8 @@ const SummaryCard: React.FC<IProps> = () => {
       <SizedBox height={16} />
       <Divider />
       <SizedBox height={12} />
-      {stats.map(({ value, title }) => (
-        <Row style={{ marginBottom: 12 }}>
+      {stats.map(({ value, title }, index) => (
+        <Row key={index} style={{ marginBottom: 12 }}>
           <Text weight={600}>{title}</Text>
           <Text textAlign="right" weight={600}>
             {value}

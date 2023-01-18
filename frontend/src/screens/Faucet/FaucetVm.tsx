@@ -30,6 +30,7 @@ const faucetAmounts: Record<string, number> = {
   BUSD: 10000,
   USDC: 10000,
   USDT: 10000,
+  SWAY: 1000,
 };
 
 class FaucetVM {
