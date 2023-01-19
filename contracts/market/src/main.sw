@@ -354,7 +354,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
             Option::None => continue,
         };
 
-        let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
+        let balance = storage.user_collateral.get((account, asset_config.asset)); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
 
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
@@ -384,7 +384,6 @@ fn is_liquidatable_internal(account: Address) -> bool {
 
     let config = get_config();
     let present_value_ = U128::from_u64(present_value(principal_value_.flip()).into()); // decimals base_asset_decimals
-    let scale = U128::from_u64(10.pow(config.base_token_decimals));
 
     let mut liquidation_treshold = U128::new();
     let mut index = 0;
@@ -393,8 +392,12 @@ fn is_liquidatable_internal(account: Address) -> bool {
             Option::Some(asset_config) => asset_config,
             Option::None => continue,
         };
-        let balance = U128::from_u64(this_balance(asset_config.asset)); // decimals asset_config.decimals
-        let price = U128::from_u64(get_price(asset_config.asset, asset_config.price_feed)); // decimals 9
+        let balance = storage.user_collateral.get((account, asset_config.asset)); // decimals asset_config.decimals
+        let balance = U128::from_u64(balance); 
+
+        let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
+        let price = U128::from_u64(price); 
+        
         let collateral_factor = U128::from_u64(asset_config.liquidate_collateral_factor); // decimals 4
         let scale = U128::from_u64(10.pow(asset_config.decimals));
 
@@ -402,6 +405,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
         index = index + 1;
     }
 
+    let scale = U128::from_u64(10.pow(config.base_token_decimals));
     let base_token_price = U128::from_u64(get_price(config.base_token, config.base_token_price_feed)); //decimals 9
     let borrow_amount = present_value_ * base_token_price / scale; // decimals 9
     liquidation_treshold < borrow_amount
@@ -593,8 +597,8 @@ fn absorb_internal(absorber: Address, account: Address) {
         let price = get_price(asset, asset_config.price_feed); // decimals 9
         let liquidation_penalty = asset_config.liquidation_penalty; // decimals 4
         let asset_scale = 10.pow(asset_config.decimals);
-        let panalty_scale = 10.pow(4);
-        delta_value += seize_amount * price * liquidation_penalty / asset_scale / panalty_scale; // decimals 9
+        let penalty_scale = 10.pow(4);
+        delta_value += seize_amount * price * liquidation_penalty / asset_scale / penalty_scale; // decimals 9
         i += 1;
     }
 

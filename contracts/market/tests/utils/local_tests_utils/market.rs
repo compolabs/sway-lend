@@ -178,7 +178,7 @@ pub mod market_abi_calls {
         contract_ids: &[Bech32ContractId],
         addresses: Vec<Address>,
     ) -> Result<FuelCallResponse<()>, Error> {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let tx_params = TxParameters::new(Some(1), Some(10_000_000_000), Some(0));
         market
             .methods()
             .absorb(addresses)
@@ -202,6 +202,7 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
+
     pub async fn get_collateral_reserves(
         market: &MarketContract,
         asset: ContractId,
