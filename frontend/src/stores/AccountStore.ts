@@ -121,6 +121,10 @@ class AccountStore {
       2
     );
   };
+
+  get isLoggedIn() {
+    return this.address != null;
+  }
 }
 
 export default AccountStore;

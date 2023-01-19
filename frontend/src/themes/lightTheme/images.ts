@@ -13,5 +13,6 @@ export default {
     coins: require("@src/assets/icons/coins.svg").default,
     plus: require("@src/assets/icons/plus.svg").default,
     minus: require("@src/assets/icons/minus.svg").default,
+    rightArrow: require("@src/assets/icons/rightArrow.svg").default,
   },
 };

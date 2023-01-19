@@ -8,7 +8,7 @@ type TTextType =
   | "error"
   | "success"
   | "purple300";
-type TTextSize = "small" | "medium" | "large" | "big";
+type TTextSize = "tiny" | "small" | "medium" | "large" | "big";
 type TTextAlign = "center" | "left" | "right" | "justify" | "end";
 
 const Text = styled.p<{
@@ -54,6 +54,8 @@ const Text = styled.p<{
   ${({ size }) =>
     (() => {
       switch (size) {
+        case "tiny":
+          return "font-size: 12px; line-height: 12px;";
         case "small":
           return "font-size: 13px; line-height: 16px;";
         case "medium":

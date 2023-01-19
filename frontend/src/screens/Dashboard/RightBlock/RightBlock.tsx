@@ -9,6 +9,8 @@ import { Row } from "@src/components/Flex";
 import Button from "@components/Button";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
 import ActionTab from "@screens/Dashboard/ActionsTabs/ActionTab";
+import { action } from "mobx";
+import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -18,6 +20,7 @@ const Root = styled.div`
 `;
 
 const RightBlock: React.FC<IProps> = () => {
+  const { accountStore, settingsStore } = useStores();
   const vm = useDashboardVM();
   const handleUsdcClick = (action: TAction) => {
     vm.setAction(action);
@@ -29,26 +32,51 @@ const RightBlock: React.FC<IProps> = () => {
     <Root>
       <ModeSwitch />
       <SizedBox height={20} />
+      {!accountStore.isLoggedIn && (
+        <Button
+          style={{ marginBottom: 10 }}
+          fixed
+          onClick={() => settingsStore.setLoginModalOpened(true)}
+        >
+          Connect wallet
+        </Button>
+      )}
 
       {vm.actionTokenAssetId == null ? (
         vm.mode === 0 ? (
           <Row>
-            <Button fixed onClick={() => handleUsdcClick("supply")}>
-              Supply USDC
+            <Button
+              fixed
+              onClick={() => handleUsdcClick("supply")}
+              disabled={!accountStore.isLoggedIn}
+            >
+              Supply {vm.baseToken.symbol}
             </Button>
             <SizedBox width={10} />
-            <Button fixed onClick={() => handleUsdcClick("withdraw")}>
-              Withdraw USDC
+            <Button
+              fixed
+              onClick={() => handleUsdcClick("withdraw")}
+              disabled={!accountStore.isLoggedIn}
+            >
+              Withdraw {vm.baseToken.symbol}
             </Button>
           </Row>
         ) : (
           <Row>
-            <Button fixed onClick={() => handleUsdcClick("borrow")}>
-              Borrow USDC
+            <Button
+              fixed
+              onClick={() => handleUsdcClick("borrow")}
+              disabled={!accountStore.isLoggedIn}
+            >
+              Borrow {vm.baseToken.symbol}
             </Button>
             <SizedBox width={10} />
-            <Button fixed onClick={() => handleUsdcClick("repay")}>
-              Repay USDC
+            <Button
+              fixed
+              onClick={() => handleUsdcClick("repay")}
+              disabled={!accountStore.isLoggedIn}
+            >
+              Repay {vm.baseToken.symbol}
             </Button>
           </Row>
         )

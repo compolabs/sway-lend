@@ -12,7 +12,7 @@ body {
 }
 
 .rc-dialog-mask {
-    background: rgba(0, 0, 0, 0.4);
+     background:  ${theme.colors.modal.mask};
 }
 
 .rc-dialog-wrap {

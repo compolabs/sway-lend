@@ -58,9 +58,8 @@ export default {
     circleColor: colors.neutral6,
   },
   modal: {
-    background: colors.neutral6,
-    border: colors.neutral5,
-    loginTypeBackground: colors.neutral5,
+    background: colors.neutral7,
+    mask: "rgba(49, 58, 69, 0.8)",
   },
   table: {
     headerColor: colors.neutral4,

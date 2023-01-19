@@ -146,8 +146,6 @@ const Header: React.FC<IProps> = () => {
           />
         </Mobile>
         <Desktop>
-          {/*<DarkMode />*/}
-          {/*<SizedBox width={40} />*/}
           <Wallet />
         </Desktop>
       </TopMenu>

@@ -73,8 +73,8 @@ export default {
   },
 
   modal: {
-    background: colors.neutral1,
-    border: colors.neutral3,
+    background: colors.white,
+    mask: "rgba(227, 233, 249, 0.8)",
   },
   table: {
     headerColor: colors.neutral4,

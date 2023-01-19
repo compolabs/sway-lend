@@ -5,10 +5,15 @@ import BN from "@src/utils/BN";
 import BigNumberInput from "@components/BigNumberInput";
 import AmountInput from "@components/AmountInput";
 import _ from "lodash";
+import Text from "@components/Text";
+import { Column } from "../Flex";
 
 interface IProps {
   assetId: string;
   setAssetId?: (assetId: string) => void;
+
+  onMaxClick?: () => void;
+  balance?: string;
 
   decimals: number;
 
@@ -25,7 +30,7 @@ const Root = styled.div`
   }
 
   @media (min-width: 560px) {
-    flex-direction: row;
+    //flex-direction: row;
     & > :first-of-type {
       margin-bottom: 0;
       margin-right: 8px;
@@ -42,12 +47,10 @@ const InputContainer = styled.div<{
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  //padding: 16px;
   height: 32px;
   font-weight: 600;
   font-size: 20px;
   line-height: 32px;
-  //border-radius: 12px;
   width: 100%;
   cursor: ${({ readOnly }) => (readOnly ? "not-allowed" : "unset")};
 
@@ -63,6 +66,17 @@ const InputContainer = styled.div<{
         ? theme.colors.primary650
         : focused ?? theme.colors.blue500};
   }
+`;
+
+const MaxButton = styled.div`
+  font-style: normal;
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 24px;
+  padding: 4px 16px;
+  border-radius: 4px;
+  background: ${({ theme }) => theme.colors.button.secondaryBackground};
+  color: ${({ theme }) => theme.colors.button.secondaryColor};
 `;
 const TokenInput: React.FC<IProps> = (props) => {
   const [focused, setFocused] = useState(false);
@@ -84,7 +98,6 @@ const TokenInput: React.FC<IProps> = (props) => {
     []
   );
 
-  //todo add smooth apperiance
   return (
     <Root>
       <InputContainer focused={focused} readOnly={!props.setAmount}>
@@ -110,7 +123,22 @@ const TokenInput: React.FC<IProps> = (props) => {
           placeholder="0.00"
           readOnly={!props.setAmount}
         />
+        {props.onMaxClick && (
+          <MaxButton
+            onClick={() => {
+              setFocused(true);
+              props.onMaxClick && props.onMaxClick();
+            }}
+          >
+            MAX
+          </MaxButton>
+        )}
       </InputContainer>
+      {props.balance && (
+        <Text style={{ marginTop: 2 }} fitContent size="tiny" type="secondary">
+          {`${props.balance} available`}
+        </Text>
+      )}
     </Root>
   );
 };

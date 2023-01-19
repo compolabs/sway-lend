@@ -16,11 +16,8 @@ const Root = styled.div`
   flex-direction: column;
 `;
 const TokenRow = styled.div<{ selected?: boolean }>`
-  //display: flex;
-  //flex-direction: row;
   display: grid;
   grid-template-columns: 6fr 6fr 4fr;
-  //padding: 12px 16px;
   padding: 8px 16px;
   align-items: center;
   justify-content: space-between;
@@ -44,8 +41,8 @@ const Header = styled.div`
 const AssetsTable: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   const handleAssetClick = (action: TAction, assetId: string) => {
-    console.log("click");
     vm.setAction(action);
+    vm.setMode(0);
     vm.setActionTokenAssetId(assetId);
   };
   return (

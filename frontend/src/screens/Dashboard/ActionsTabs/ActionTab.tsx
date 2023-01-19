@@ -32,6 +32,9 @@ const Card = styled.div`
 const ActionTab: React.FC<IProps> = () => {
   const vm = useDashboardVM();
 
+  const handleMaxClick = () => {
+    vm.onMaxBtnClick();
+  };
   const handleCancelClick = () => {
     vm.setAction(null);
     vm.setActionTokenAssetId(null);
@@ -53,6 +56,8 @@ const ActionTab: React.FC<IProps> = () => {
           amount={vm.tokenAmount ?? BN.ZERO}
           setAmount={vm.setTokenAmount}
           assetId={vm.token.assetId}
+          onMaxClick={handleMaxClick}
+          balance={vm.tokenInputBalance}
         />
         <SizedBox height={8} />
         <Row>
@@ -60,7 +65,9 @@ const ActionTab: React.FC<IProps> = () => {
             Cancel
           </Button>
           <SizedBox width={8} />
-          <Button fixed>{toUpperFirstLetter(vm.action ?? "")}</Button>
+          <Button fixed onClick={vm.marketAction}>
+            {toUpperFirstLetter(vm.action ?? "")}
+          </Button>
         </Row>
       </Card>
     </Root>

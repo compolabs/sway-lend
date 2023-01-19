@@ -16,7 +16,6 @@ const Root = styled(Column)`
   align-items: center;
   background: ${({ theme }) => theme.colors.mainBackground};
   min-height: 100vh;
-  min-width: 1440px;
 `;
 const App: React.FC = () => {
   const { settingsStore } = useStores();
