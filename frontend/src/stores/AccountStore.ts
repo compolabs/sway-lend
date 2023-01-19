@@ -58,9 +58,6 @@ class AccountStore {
 
       return new Balance({ balance, ...asset });
     });
-    assetBalances.map(({ symbol, balance }) =>
-      console.log(symbol, balance?.toString())
-    );
     this.setAssetBalances(assetBalances);
   };
   findBalanceByAssetId = (assetId: string) =>
@@ -123,6 +120,11 @@ class AccountStore {
     return BN.formatUnits(balance.balance ?? BN.ZERO, token.decimals).toFormat(
       2
     );
+  };
+  getBalance = (token: IToken): BN | null => {
+    const balance = this.findBalanceByAssetId(token.assetId);
+    if (balance == null) return null;
+    return BN.formatUnits(balance.balance ?? BN.ZERO, token.decimals);
   };
 
   get isLoggedIn() {

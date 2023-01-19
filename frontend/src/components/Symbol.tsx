@@ -16,13 +16,13 @@ const Root = styled.div<{ selected?: boolean; disabled?: boolean }>`
   border-radius: 50%;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  z-index: 2;
 
   background-color: ${({ theme, selected }) =>
     selected
       ? theme.colors.supplyBtn.backgroundSelected
       : theme.colors.supplyBtn.background};
-  opacity: ${({ selected }) => selected && "0.5"};
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
 
 const Symbol: React.FC<IProps> = ({ selected, type, disabled, onClick }) => {

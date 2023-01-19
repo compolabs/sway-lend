@@ -6,8 +6,9 @@ import SizedBox from "@components/SizedBox";
 import Text from "@components/Text";
 import { Column, Row } from "@src/components/Flex";
 import Symbol from "@components/Symbol";
-import { TAction, useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import { ACTION_TYPE, useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import Progressbar from "@components/Progressbar";
+import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -39,8 +40,9 @@ const Header = styled.div`
 `;
 
 const AssetsTable: React.FC<IProps> = () => {
+  const { accountStore } = useStores();
   const vm = useDashboardVM();
-  const handleAssetClick = (action: TAction, assetId: string) => {
+  const handleAssetClick = (action: ACTION_TYPE, assetId: string) => {
     vm.setAction(action);
     vm.setMode(0);
     vm.setActionTokenAssetId(assetId);
@@ -69,36 +71,52 @@ const AssetsTable: React.FC<IProps> = () => {
           Protocol balance
         </Text>
       </Header>
-      {vm.collaterals.map(({ logo, symbol, name, assetId }) => (
-        <TokenRow key={assetId} selected={vm.actionTokenAssetId === assetId}>
-          <Row alignItems="center">
-            <TokenIcon size="small" src={logo} />
-            <SizedBox width={20} />
-            <Column>
-              <Text weight={600}>{name}</Text>
-              <Text weight={500} type="secondary">
-                {symbol}
+      {vm.collaterals.map((token) => {
+        const userBalance = accountStore.getBalance(token);
+        const canWithdraw = false;
+        const canSupply = userBalance != null && userBalance.gt(0);
+        return (
+          <TokenRow
+            key={token.assetId}
+            selected={vm.actionTokenAssetId === token.assetId}
+          >
+            <Row alignItems="center">
+              <TokenIcon size="small" src={token.logo} />
+              <SizedBox width={20} />
+              <Column>
+                <Text weight={600}>{token.name}</Text>
+                <Text weight={500} type="secondary">
+                  {token.symbol}
+                </Text>
+              </Column>
+            </Row>
+            <div />
+            <Row justifyContent="flex-end" alignItems="center">
+              <Text type="secondary" size="small" fitContent>
+                0.000
               </Text>
-            </Column>
-          </Row>
-          <div />
-          <Row justifyContent="flex-end" alignItems="center">
-            <Text type="secondary" size="small" fitContent>
-              0.000
-            </Text>
-            <SizedBox width={24} />
-            <Symbol
-              type="plus"
-              onClick={() => handleAssetClick("supply", assetId)}
-            />
-            <SizedBox width={8} />
-            <Symbol
-              type="minus"
-              onClick={() => handleAssetClick("withdraw", assetId)}
-            />
-          </Row>
-        </TokenRow>
-      ))}
+              <SizedBox width={24} />
+              <Symbol
+                type="plus"
+                disabled={!canSupply}
+                onClick={() =>
+                  canSupply &&
+                  handleAssetClick(ACTION_TYPE.SUPPLY, token.assetId)
+                }
+              />
+              <SizedBox width={8} />
+              <Symbol
+                type="minus"
+                disabled={!canWithdraw}
+                onClick={() =>
+                  canWithdraw &&
+                  handleAssetClick(ACTION_TYPE.WITHDRAW, token.assetId)
+                }
+              />
+            </Row>
+          </TokenRow>
+        );
+      })}
     </Root>
   );
 };

@@ -1,13 +1,6 @@
 import styled from "@emotion/styled";
 
-type TTextType =
-  | "primary"
-  | "secondary"
-  | "light"
-  | "blue500"
-  | "error"
-  | "success"
-  | "purple300";
+type TTextType = "primary" | "secondary";
 type TTextSize = "tiny" | "small" | "medium" | "large" | "big";
 type TTextAlign = "center" | "left" | "right" | "justify" | "end";
 
@@ -31,19 +24,9 @@ const Text = styled.p<{
     (() => {
       switch (type) {
         case "primary":
-          return `color: ${theme.colors?.primary800};`;
+          return `color: ${theme.colors?.text};`;
         case "secondary":
           return `color: ${theme.colors?.neutral4};`;
-        case "blue500":
-          return `color: ${theme.colors?.blue500};`;
-        case "light":
-          return `color: ${theme.colors?.white};`;
-        case "error":
-          return `color: ${theme.colors?.error500};`;
-        case "success":
-          return `color: ${theme.colors?.success};`;
-        case "purple300":
-          return `color: ${theme.colors?.primary300};`;
         default:
           return `color: ${theme.colors?.text};`;
       }

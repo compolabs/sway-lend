@@ -43,7 +43,7 @@ body {
     max-height: 56px;
 } 
 .rc-dialog-header .send-asset{
-    border-bottom: 1px solid ${theme.colors.primary100};
+    border-bottom: 1px solid ${theme.colors.primary01};
 }
 
 .rc-dialog-body {
@@ -86,7 +86,7 @@ body {
 }
 
 .custom-notification .rc-notification-notice-close > svg > path {
-    fill: ${theme.colors.primary300};
+    fill: ${theme.colors.neutral4};
 }
 
 .recharts-default-tooltip { 

@@ -48,7 +48,7 @@ const AddressContainer = styled.div<{ expanded: boolean }>`
   background: ${({ theme }) => theme.colors.header.walletAddressBackground};
 
   :hover {
-    // background: ${({ theme }) => theme.colors.primary100};
+    // background: ${({ theme }) => theme.colors.neutral1};
   }
 
   .avatar {

@@ -32,13 +32,13 @@ const Root = styled.div`
 const StyledLink = styled(Link)`
   font-size: 16px;
   line-height: 24px;
-  color: ${({ theme }) => theme.colors.primary800};
+  color: ${({ theme }) => theme.colors.neutral4};
 `;
 
 const StyledAnchor = styled(Anchor)`
   font-size: 16px;
   line-height: 24px;
-  color: ${({ theme }) => theme.colors.primary800};
+  color: ${({ theme }) => theme.colors.neutral4};
 `;
 
 const LinkGroup: React.FC<IProps> = ({ title, links, ...rest }) => {

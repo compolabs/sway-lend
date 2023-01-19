@@ -56,8 +56,8 @@ const MenuItem = styled.div<{ selected?: boolean }>`
 
   ${({ selected, theme }) =>
     selected
-      ? `color:${theme.colors.primary800}; background:${theme.colors.header.navLinkBackground};`
-      : `color:${theme.colors.primary650}; background: none;`};
+      ? `color:${theme.colors.header.navLinkBackground}; background:${theme.colors.header.navLinkBackground};`
+      : `color:${theme.colors.header.navLinkBackground}; background: none;`};
 
   &:hover {
     background: ${({ theme }) => theme.colors.header.navLinkBackground};

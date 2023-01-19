@@ -59,13 +59,6 @@ const InputContainer = styled.div<{
   input {
     cursor: ${({ readOnly }) => (readOnly ? "not-allowed" : "unset")};
   }
-
-  :hover {
-    border-color: ${({ readOnly, focused, theme }) =>
-      !readOnly && !focused
-        ? theme.colors.primary650
-        : focused ?? theme.colors.blue500};
-  }
 `;
 
 const MaxButton = styled.div`
@@ -75,6 +68,7 @@ const MaxButton = styled.div`
   line-height: 24px;
   padding: 4px 16px;
   border-radius: 4px;
+  cursor: pointer;
   background: ${({ theme }) => theme.colors.button.secondaryBackground};
   color: ${({ theme }) => theme.colors.button.secondaryColor};
 `;

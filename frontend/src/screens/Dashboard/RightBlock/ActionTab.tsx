@@ -9,7 +9,6 @@ import { observer } from "mobx-react-lite";
 import TokenInput from "@components/TokenInput/TokenInput";
 import BN from "@src/utils/BN";
 import useCollapse from "@components/Collapse";
-import toUpperFirstLetter from "@src/utils/toUpperFirstLetter";
 
 interface IProps {}
 
@@ -48,7 +47,7 @@ const ActionTab: React.FC<IProps> = () => {
     <Root>
       <Card {...getCollapseProps()}>
         <Text fitContent weight={600} type="secondary" size="small">
-          {toUpperFirstLetter(vm.action ?? "")} {vm.token.symbol}
+          {vm.operationName} {vm.token.symbol}
         </Text>
         <SizedBox height={16} />
         <TokenInput
@@ -60,15 +59,19 @@ const ActionTab: React.FC<IProps> = () => {
           balance={vm.tokenInputBalance}
         />
         <SizedBox height={8} />
-        <Row>
-          <Button kind="secondary" fixed onClick={handleCancelClick}>
-            Cancel
-          </Button>
-          <SizedBox width={8} />
-          <Button fixed onClick={vm.marketAction}>
-            {toUpperFirstLetter(vm.action ?? "")}
-          </Button>
-        </Row>
+        {vm.loading ? (
+          <Button fixed>Loading...</Button>
+        ) : (
+          <Row>
+            <Button kind="secondary" fixed onClick={handleCancelClick}>
+              Cancel
+            </Button>
+            <SizedBox width={8} />
+            <Button fixed onClick={vm.marketAction}>
+              {vm.operationName}
+            </Button>
+          </Row>
+        )}
       </Card>
     </Root>
   );

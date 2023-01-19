@@ -24,22 +24,6 @@ const Root = styled.div<{ focused?: boolean; error?: boolean }>`
   width: 100%;
   background: ${({ focused }) => (focused ? "#fffff" : "#f1f2fe")};
 
-  background: ${({ theme, focused }) =>
-    focused ? theme.colors.white : theme.colors.primary100};
-
-  border: 1px solid
-    ${({ focused, error, theme }) =>
-      error
-        ? `${theme.colors.error550}`
-        : focused
-        ? `${theme.colors.blue500}`
-        : `${theme.colors.primary100}`};
-
-  :hover {
-    border-color: ${({ focused, error }) =>
-      error ? "#ED827E" : !focused ? "#C6C9F4" : "#7075E9"};
-  }
-
   align-items: center;
   border-radius: 12px;
   justify-content: space-between;
@@ -54,13 +38,13 @@ const Root = styled.div<{ focused?: boolean; error?: boolean }>`
     padding: 0;
     width: 100%;
     color: ${({ focused, theme }) =>
-      focused ? `${theme.colors.primary800}` : `${theme.colors.primary650}`};
+      focused ? `${theme.colors.text}` : `${theme.colors.text}`};
     outline: none;
     border: none;
     background-color: transparent;
 
     ::placeholder {
-      color: ${({ theme }) => `${theme.colors.primary650}`};
+      color: ${({ theme }) => `${theme.colors.text}`};
     }
   }
 `;
@@ -91,16 +75,10 @@ const Input: React.FC<IProps> = ({
         />
         {suffixCondition || (suffix != null && suffix)}
       </Root>
-      {error ? (
-        <Text size="small" type="error" style={{ paddingTop: 4 }}>
-          {errorText}
+      {description && (
+        <Text size="small" type="secondary" style={{ paddingTop: 4 }}>
+          {description}
         </Text>
-      ) : (
-        description && (
-          <Text size="small" type="secondary" style={{ paddingTop: 4 }}>
-            {description}
-          </Text>
-        )
       )}
     </>
   );

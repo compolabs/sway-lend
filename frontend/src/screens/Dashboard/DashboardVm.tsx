@@ -10,14 +10,17 @@ import {
   TOKENS_BY_SYMBOL,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import {
-  MarketAbi,
-  MarketAbi__factory,
-  TokenAbi__factory,
-} from "@src/contracts";
+import { MarketAbi, MarketAbi__factory } from "@src/contracts";
 import { Provider, Wallet } from "fuels";
 
 const ctx = React.createContext<DashboardVm | null>(null);
+
+export enum ACTION_TYPE {
+  SUPPLY,
+  BORROW,
+  REPAY,
+  WITHDRAW,
+}
 
 export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
   children,
@@ -29,7 +32,7 @@ export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
 
 export const useDashboardVM = () => useVM(ctx);
 
-export type TAction = "supply" | "borrow" | "repay" | "withdraw";
+// export type TAction = "supply" | "borrow" | "repay" | "withdraw";
 
 class DashboardVm {
   public rootStore: RootStore;
@@ -67,8 +70,8 @@ class DashboardVm {
   mode: 0 | 1 = 0;
   setMode = (v: 0 | 1) => (this.mode = v);
 
-  action: TAction | null = null;
-  setAction = (l: TAction | null) => (this.action = l);
+  action: ACTION_TYPE | null = null;
+  setAction = (l: ACTION_TYPE | null) => (this.action = l);
 
   tokenAmount: BN | null = null;
   setTokenAmount = (l: BN | null) => (this.tokenAmount = l);
@@ -101,38 +104,35 @@ class DashboardVm {
     this._setLoading(true);
     if (
       // this.marketContract == null ||
-      this.action != "supply" ||
-      this.tokenAmount == null
+      this.action !== ACTION_TYPE.SUPPLY ||
+      this.tokenAmount == null ||
+      this.tokenAmount.lte(0)
     )
       return;
 
     const { address } = this.rootStore.accountStore;
     if (address == null || window?.fuel == null) return;
-    //todo add signing from account store
+
     const wallet = Wallet.fromAddress(address, window.fuel?.getProvider());
     const market = MarketAbi__factory.connect(
       CONTRACT_ADDRESSES.market,
       wallet
     );
 
-    const amount = BN.parseUnits(
-      this.tokenAmount,
-      this.baseToken.decimals
-    ).toString();
     const value = await market.functions
       .supply_base()
       .callParams({
-        forward: [amount, this.baseToken.assetId],
+        forward: [this.tokenAmount.toString(), this.baseToken.assetId],
       })
       .txParams({})
-      .get();
+      .call();
     this._setLoading(false);
     console.log(value);
   };
 
   onMaxBtnClick() {
     if (
-      this.action === "supply" &&
+      this.action === ACTION_TYPE.SUPPLY &&
       this.actionTokenAssetId === this.baseToken.assetId
     ) {
       const baseTokenAmount = this.rootStore.accountStore.findBalanceByAssetId(
@@ -145,7 +145,7 @@ class DashboardVm {
 
   get tokenInputBalance(): string {
     if (
-      this.action === "supply" &&
+      this.action === ACTION_TYPE.SUPPLY &&
       this.actionTokenAssetId === this.baseToken.assetId
     ) {
       return (
@@ -157,12 +157,25 @@ class DashboardVm {
   }
 
   marketAction = () => {
-    console.log("marketAction");
     if (
-      this.action === "supply" &&
+      this.action === ACTION_TYPE.SUPPLY &&
       this.actionTokenAssetId === this.baseToken.assetId
     ) {
       return this.supplyBase();
     }
   };
+
+  get operationName() {
+    switch (this.action) {
+      case ACTION_TYPE.SUPPLY:
+        return "Supply";
+      case ACTION_TYPE.BORROW:
+        return "Borrow";
+      case ACTION_TYPE.REPAY:
+        return "Repay";
+      case ACTION_TYPE.WITHDRAW:
+        return "Withdraw";
+    }
+    return "";
+  }
 }

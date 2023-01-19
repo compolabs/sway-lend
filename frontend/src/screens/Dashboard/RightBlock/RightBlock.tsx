@@ -1,16 +1,15 @@
 import styled from "@emotion/styled";
 import React from "react";
-import ModeSwitch from "@screens/Dashboard/ModeSwitch";
-import { TAction, useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import { ACTION_TYPE, useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import { observer } from "mobx-react-lite";
 import SizedBox from "@components/SizedBox";
 import SummaryCard from "./SummaryCard";
 import { Row } from "@src/components/Flex";
 import Button from "@components/Button";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
-import ActionTab from "@screens/Dashboard/ActionsTabs/ActionTab";
-import { action } from "mobx";
 import { useStores } from "@stores";
+import ActionTab from "@screens/Dashboard/RightBlock/ActionTab";
+import SwitchButtons from "@components/SwitchButtons";
 
 interface IProps {}
 
@@ -22,7 +21,7 @@ const Root = styled.div`
 const RightBlock: React.FC<IProps> = () => {
   const { accountStore, settingsStore } = useStores();
   const vm = useDashboardVM();
-  const handleUsdcClick = (action: TAction) => {
+  const handleBaseTokenClick = (action: ACTION_TYPE) => {
     vm.setAction(action);
     vm.setActionTokenAssetId(TOKENS_BY_SYMBOL.USDC.assetId);
   };
@@ -30,7 +29,15 @@ const RightBlock: React.FC<IProps> = () => {
   //1 - borrow usdc
   return (
     <Root>
-      <ModeSwitch />
+      <SwitchButtons
+        values={["Deposit mode", "Loan mode"]}
+        active={vm.mode}
+        onActivate={(v) => {
+          vm.setMode(v);
+          vm.setAction(null);
+          vm.setActionTokenAssetId(null);
+        }}
+      />
       <SizedBox height={20} />
       {!accountStore.isLoggedIn && (
         <Button
@@ -47,7 +54,7 @@ const RightBlock: React.FC<IProps> = () => {
           <Row>
             <Button
               fixed
-              onClick={() => handleUsdcClick("supply")}
+              onClick={() => handleBaseTokenClick(ACTION_TYPE.SUPPLY)}
               disabled={!accountStore.isLoggedIn}
             >
               Supply {vm.baseToken.symbol}
@@ -55,7 +62,7 @@ const RightBlock: React.FC<IProps> = () => {
             <SizedBox width={10} />
             <Button
               fixed
-              onClick={() => handleUsdcClick("withdraw")}
+              onClick={() => handleBaseTokenClick(ACTION_TYPE.WITHDRAW)}
               disabled={!accountStore.isLoggedIn}
             >
               Withdraw {vm.baseToken.symbol}
@@ -65,7 +72,7 @@ const RightBlock: React.FC<IProps> = () => {
           <Row>
             <Button
               fixed
-              onClick={() => handleUsdcClick("borrow")}
+              onClick={() => handleBaseTokenClick(ACTION_TYPE.BORROW)}
               disabled={!accountStore.isLoggedIn}
             >
               Borrow {vm.baseToken.symbol}
@@ -73,7 +80,7 @@ const RightBlock: React.FC<IProps> = () => {
             <SizedBox width={10} />
             <Button
               fixed
-              onClick={() => handleUsdcClick("repay")}
+              onClick={() => handleBaseTokenClick(ACTION_TYPE.REPAY)}
               disabled={!accountStore.isLoggedIn}
             >
               Repay {vm.baseToken.symbol}

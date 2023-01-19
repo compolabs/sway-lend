@@ -1,36 +1,24 @@
 const colors = {
-  white: "#ffffff",
+  neutral0: "#FFFFFF",
+  neutral1: "#F0F2FA",
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
   neutral4: "#9A9ABD",
-  neutral5: "#313a45",
+  neutral5: "#313A45",
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
+  neutral8: "#111315",
   primary01: "#3FE8BD",
-  primary03: "#FF6A55",
-  secondary1: "#00B493",
-
-  primary800: "#363870",
-  primary650: "#8082C5",
-  primary300: "#C6C9F4",
-  primary100: "#F1F2FE",
-  primary50: "#f8f8ff",
-  blue500: "#7075E9",
-  success: "#35A15A",
-  success550: "#1F8943",
-  success500: "#35A15A",
-  success100: "#E6F3EB",
-  error550: "#D66662",
-  error500: "#ED827E",
-  error100: "#FCF0EF",
-  attention550: "#D9916E",
-  attention500: "#EDAA8A",
-  attention100: "#FCF4F1",
+  primary02: "#1DD4A6",
+  primary03: "#00B493",
+  secondary1: "#FF6A55",
+  secondary2: "#FFB8AE",
+  secondary3: "#CFDAFF",
 };
 // eslint-disable-next-line
 export default {
   ...colors,
-  primary800: colors.white,
+  primary800: colors.neutral0,
   primary650: "#C6C9F4",
 
   primary300: "#8182C5",
@@ -93,6 +81,7 @@ export default {
   supplyBtn: {
     background: colors.neutral6,
     backgroundSelected: colors.neutral5,
+    backgroundDisabled: colors.neutral5,
   },
 
   card: {
@@ -100,7 +89,7 @@ export default {
     border: colors.neutral5,
   },
   icon: {
-    borderColor: colors.primary800,
+    borderColor: "none",
   },
   progressBar: {
     main: colors.secondary1,

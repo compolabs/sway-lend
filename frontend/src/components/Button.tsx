@@ -24,7 +24,7 @@ const Button = styled.button<{
           case "secondary":
             return theme.colors.button.secondaryBackground;
           case "danger":
-            return theme.colors.error500;
+            return theme.colors.secondary1;
           default:
             return theme.colors.primary01;
         }
@@ -48,7 +48,7 @@ const Button = styled.button<{
         case "secondary":
           return `background: ${theme.colors.button.secondaryBackground}; color:${theme.colors.button.secondaryColor};`;
         case "danger":
-          return `background: ${theme.colors.error500}; color: #fff;`;
+          return `background: ${theme.colors.secondary1}; color: #fff;`;
         default:
           return `background: ${theme.colors.button.primaryBackground}; color:${theme.colors.button.primaryColor};`;
       }
@@ -86,9 +86,9 @@ const Button = styled.button<{
           case "primary":
             return `background: ${theme.colors.disabledBtnColor}; border: none; color:${theme.colors.disabledBtnTextColor}; `;
           case "secondary":
-            return `background: ${theme.colors.white}; border: 1px solid ${theme.colors.primary100};`;
+            return `background: ${theme.colors.neutral0}; border: 1px solid ${theme.colors.neutral0};`;
           case "danger":
-            return `background: ${theme.colors.error100}; border: 1px solid ${theme.colors.error100};`;
+            return `background: ${theme.colors.secondary1}; border: 1px solid ${theme.colors.secondary1};`;
           default:
             return `background: ${theme.colors.disabledBtnColor}; border:none; color:${theme.colors.disabledBtnTextColor}; `;
         }

@@ -34,17 +34,7 @@ const Card = styled.div<{
   border-radius: 4px;
   box-sizing: border-box;
   padding: ${({ paddingMobile }) => paddingMobile ?? "20px"};
-  ${({ type, theme }) =>
-    (() => {
-      switch (type) {
-        case "white":
-          return `background: ${theme.colors.card.background};`;
-        case "dark":
-          return `background: ${theme.colors.blue500};`;
-        default:
-          return `background: ${theme.colors.card.background};`;
-      }
-    })()};
+  background: ${({ theme }) => theme.colors.card.background};
   @media (min-width: 560px) {
     padding: ${({ paddingDesktop }) => paddingDesktop ?? "16px 24px"};
   }
