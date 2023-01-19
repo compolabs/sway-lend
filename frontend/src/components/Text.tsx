@@ -33,7 +33,7 @@ const Text = styled.p<{
         case "primary":
           return `color: ${theme.colors?.primary800};`;
         case "secondary":
-          return `color: ${theme.colors.neutral4};`;
+          return `color: ${theme.colors?.neutral4};`;
         case "blue500":
           return `color: ${theme.colors?.blue500};`;
         case "light":

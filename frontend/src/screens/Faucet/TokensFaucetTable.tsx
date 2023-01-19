@@ -61,7 +61,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           </Column>
         ),
         btn: (() => {
-          if (accountStore.address == null)
+          if (!accountStore.isLoggedIn)
             return (
               <Button
                 size="medium"

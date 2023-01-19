@@ -16,6 +16,7 @@ export interface ISerializedAccountStore {
 
 class AccountStore {
   public readonly rootStore: RootStore;
+  //todo add change address if account was changed in extension
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
@@ -57,7 +58,9 @@ class AccountStore {
 
       return new Balance({ balance, ...asset });
     });
-
+    assetBalances.map(({ symbol, balance }) =>
+      console.log(symbol, balance?.toString())
+    );
     this.setAssetBalances(assetBalances);
   };
   findBalanceByAssetId = (assetId: string) =>

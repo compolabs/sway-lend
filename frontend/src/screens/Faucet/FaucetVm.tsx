@@ -25,11 +25,8 @@ const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
   LINK: 1000,
   UNI: 1000,
-  BNB: 5,
   BTC: 1,
-  BUSD: 10000,
   USDC: 10000,
-  USDT: 10000,
   SWAY: 1000,
 };
 
