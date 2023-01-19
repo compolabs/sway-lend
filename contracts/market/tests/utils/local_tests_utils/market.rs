@@ -1,19 +1,26 @@
 use std::fs;
 use std::{collections::HashMap, str::FromStr};
 
+use super::oracle::OracleContract;
 use crate::utils::local_tests_utils::oracle::{get_oracle_contract_instance, oracle_abi_calls};
 use crate::utils::local_tests_utils::*;
-use fuels::contract::call_response::FuelCallResponse;
-use fuels::prelude::*;
+use fuels::prelude::{abigen, Contract, StorageConfiguration, TxParameters, BASE_ASSET_ID};
+use fuels::programs::call_response::FuelCallResponse;
+use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
+use fuels_types::Address;
 
-use super::oracle::OracleContract;
-
-abigen!(MarketContract, "out/debug/market-abi.json");
+abigen!(Contract(
+    name = "MarketContract",
+    abi = "out/debug/market-abi.json"
+));
 
 // TODO: Make it a class not to pass a contract instance in the arguments
 pub mod market_abi_calls {
 
-    use super::*;
+    use fuels::prelude::{CallParameters, SettableContract, TxParameters};
+    use fuels_types::Address;
+
+    use super::{abigen_bindings::market_contract_mod::AssetConfig, *};
 
     pub async fn debug_increment_timestamp(market: &MarketContract) -> FuelCallResponse<()> {
         let res = market.methods().debug_increment_timestamp().call().await;
@@ -23,9 +30,9 @@ pub mod market_abi_calls {
     pub async fn initialize(
         contract: &MarketContract,
         config: MarketConfiguration,
-        assets: Vec<market_contract_mod::AssetConfig>,
+        assets: Vec<AssetConfig>,
         step: Option<u64>,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         contract
             .methods()
@@ -39,7 +46,7 @@ pub mod market_abi_calls {
         market: &MarketContract,
         base_asset_id: AssetId,
         amount: u64,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels_types::errors::Error> {
         let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
@@ -54,9 +61,9 @@ pub mod market_abi_calls {
 
     pub async fn withdraw_base(
         market: &MarketContract,
-        contract_ids: &[Bech32ContractId],
+        contract_ids: &[&dyn SettableContract],
         amount: u64,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
@@ -70,10 +77,10 @@ pub mod market_abi_calls {
 
     pub async fn withdraw_collateral(
         market: &MarketContract,
-        contract_ids: &[Bech32ContractId],
+        contract_ids: &[&dyn SettableContract],
         asset: ContractId,
         amount: u64,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
@@ -89,7 +96,7 @@ pub mod market_abi_calls {
         market: &MarketContract,
         asset_id: AssetId,
         amount: u64,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
         market
             .methods()
@@ -149,23 +156,23 @@ pub mod market_abi_calls {
     pub async fn _pause(
         contract: &MarketContract,
         config: PauseConfiguration,
-    ) -> Result<FuelCallResponse<()>, Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         contract.methods().pause(config).call().await
     }
 
-    pub async fn _buy_collateral(
+    pub async fn buy_collateral(
         market: &MarketContract,
         base_asset_id: AssetId,
         amount: u64,
         asset: ContractId,
         min_amount: u64,
         recipient: Address,
-    ) -> Result<FuelCallResponse<()>, Error> {
-        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         market
             .methods()
             .buy_collateral(asset, min_amount, recipient)
-            .call_params(call_params)
+            .tx_params(TxParameters::new(Some(0), Some(100_000_000), Some(0)))
+            .call_params(CallParameters::new(Some(amount), Some(base_asset_id), None))
             .estimate_tx_dependencies(None)
             .await
             .unwrap()
@@ -175,22 +182,22 @@ pub mod market_abi_calls {
 
     pub async fn absorb(
         market: &MarketContract,
-        contract_ids: &[Bech32ContractId],
+        contract_ids: &[&dyn SettableContract],
         addresses: Vec<Address>,
-    ) -> Result<FuelCallResponse<()>, Error> {
-        let tx_params = TxParameters::new(Some(1), Some(10_000_000_000), Some(0));
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         market
             .methods()
-            .absorb(addresses)
+            // .dummy_absorb(addresses)
+            .absorb(addresses) //FIXME
             .set_contracts(contract_ids)
-            .tx_params(tx_params)
+            .tx_params(TxParameters::new(Some(1), Some(1_000_000_000), None))
             .call()
             .await
     }
 
     pub async fn is_liquidatable(
         market: &MarketContract,
-        contract_ids: &[Bech32ContractId],
+        contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> bool {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
@@ -203,15 +210,12 @@ pub mod market_abi_calls {
             .value
     }
 
-    pub async fn get_collateral_reserves(
-        market: &MarketContract,
-        asset: ContractId,
-    ) -> market_contract_mod::I64 {
+    pub async fn get_collateral_reserves(market: &MarketContract, asset: ContractId) -> I64 {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().get_collateral_reserves(asset);
         res.tx_params(tx_params).simulate().await.unwrap().value
     }
-    pub async fn get_reserves(market: &MarketContract) -> market_contract_mod::I64 {
+    pub async fn get_reserves(market: &MarketContract) -> I64 {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().get_reserves();
         res.tx_params(tx_params).simulate().await.unwrap().value
@@ -271,7 +275,7 @@ pub async fn setup_market() -> (
         serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
     let deploy_configs = deploy_configs.as_array().unwrap();
     let mut assets: HashMap<String, Asset> = HashMap::new();
-    let mut asset_configs: Vec<market_contract_mod::AssetConfig> = Vec::new();
+    let mut asset_configs: Vec<AssetConfig> = Vec::new();
     for config_value in deploy_configs {
         let config = DeployTokenConfig {
             name: String::from(config_value["name"].as_str().unwrap()),
@@ -304,7 +308,7 @@ pub async fn setup_market() -> (
         );
 
         if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
-            asset_configs.push(market_contract_mod::AssetConfig {
+            asset_configs.push(AssetConfig {
                 asset: contract_id,
                 decimals: config_value["decimals"].as_u64().unwrap() as u8,
                 price_feed: price_feed,

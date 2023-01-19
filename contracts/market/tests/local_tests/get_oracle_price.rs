@@ -1,4 +1,4 @@
-use crate::utils::{local_tests_utils::market, number_utils::parse_units};
+use crate::utils::{local_tests_utils::{market, oracle::oracle_abi_calls}, number_utils::parse_units};
 
 #[tokio::test]
 async fn get_oracle_price() {
@@ -19,7 +19,7 @@ async fn get_oracle_price() {
 
     let res = market_methods
         .get_oracle_price(asset_id)
-        .set_contracts(&[oracle.get_contract_id().clone()])
+        .set_contracts(&oracle_abi_calls::get_as_settable_contract(&oracle))
         .simulate()
         .await;
     res.as_ref().expect("❌ Can not get market oracle price");

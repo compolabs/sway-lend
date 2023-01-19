@@ -99,6 +99,9 @@ abi Market {
     #[storage(read, write)]
     fn absorb(accounts: Vec<Address>);
 
+    #[storage(read, write)]
+    fn dummy_absorb(accounts: Vec<Address>);
+
     #[storage(read)]
     fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address);
     #[storage(read, write)]
@@ -564,7 +567,7 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     // of collateral assets
     let base_scale = 10.pow(config.base_token_decimals);
     let asset_scale = 10.pow(asset_config.decimals);
-    return base_price * base_amount * asset_scale / asset_price_discounted / base_scale;
+    return (U128::from_u64(base_price) * U128::from_u64(base_amount) * U128::from_u64(asset_scale) / U128::from_u64(asset_price_discounted) / U128::from_u64(base_scale)).as_u64().unwrap();
 }
 
    // @Callable absorb(absorber: Address, accounts: Vec<Address>)
@@ -575,9 +578,8 @@ fn absorb_internal(absorber: Address, account: Address) {
 
     let account_user = storage.user_basic.get(account);
     let old_principal = account_user.principal;
-    let old_balance = present_value(old_principal);
- // base_asset_decimals
-    // let assetsIn = get_user_assets(account);
+    let old_balance = present_value(old_principal);// base_asset_decimals
+ 
     let config = get_config();
 
     let mut delta_value = 0; // decimals 9
@@ -646,7 +648,7 @@ fn buy_collateral_internal(asset: ContractId, min_amount: u64, recipient: Addres
     let reserves = get_collateral_reserves_internal(asset);
     let collateral_amount = quote_collateral_internal(asset, base_amount);
     require(collateral_amount >= min_amount, Error::TooMuchSlippage);
-    require(I64::from(collateral_amount) <= reserves, Error::InsufficientReserves);
+    require(I64::from(collateral_amount) <= reserves, Error::InsufficientReserves); //FIXME
 
     // Note: Pre-transfer hook can re-enter buyCollateral with a stale collateral ERC20 balance.
     //  Assets should not be listed which allow re-entry from pre-transfer now, as too much collateral could be bought.
@@ -948,6 +950,31 @@ impl Market for Contract {
             i += 1;
         }
     }
+
+    #[storage(read, write)]
+    fn dummy_absorb(accounts: Vec<Address>) {
+        require(!is_absorb_paused(), Error::Paused);
+        let absorber = get_caller();
+        accrue_internal();
+        let mut i = 0;
+        while i < accounts.len() {
+            let account = accounts.get(i).unwrap();
+            let account_user = storage.user_basic.get(account);
+            let supply_amount = 17_276_598;
+            let new_principal = I64::from(supply_amount);
+            let mut market_basic = storage.market_basic;
+
+            let new_principal = principal_value_supply(storage.market_basic.base_supply_index, supply_amount);
+            
+            update_base_principal(account, account_user, I64::from(new_principal));
+            
+            market_basic.total_supply_base += supply_amount;
+            market_basic.total_borrow_base = 0;
+            storage.market_basic = market_basic;
+            i += 1;
+        }
+    }
+
     #[storage(read)]
     fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address) { // @Payment base_token
         buy_collateral_internal(asset, min_amount, recipient)

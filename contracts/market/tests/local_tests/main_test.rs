@@ -17,7 +17,8 @@ async fn main_test() {
 
     print_title("Supply & withdraw test");
     let (wallets, assets, market, oracle) = market::setup_market().await;
-    let contracts = [oracle.get_contract_id().clone()];
+
+    let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
     // ==================== Wallets ====================
     let admin = wallets[0].clone();
     let alice = wallets[1].clone();
@@ -253,39 +254,37 @@ async fn main_test() {
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
-    return;
+    return; //TODO
     // =================================================
     // ==================== Case #8 ====================
-    // 👛 Wallet: Chad 🤵
-    // 🤙 Call: supply_base
-    // 💰 Amount: USDC Balance ~ 100.046928 USDC
+    // 👛 Wallet: Bob 🤵
+    // 🤙 Call: buy_collateral
+    // 💰 Amount: 172.44 USDC
 
-    let (_, amount) = market_abi_calls::get_user_supply_borrow(&market, chad_address).await;
+    let amount = 172_440_000 * AMOUNT_COEFFICIENT; //FIXME
 
-    let delta = amount - 100u64 * AMOUNT_COEFFICIENT * scale_6 as u64;
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
-    print_case_title(8, "Chad", "supply_base", log_amount.as_str());
-    println!("💸 Chad + {} USDC", delta as f64 / scale_6);
+    print_case_title(8, "Bob", "buy_collateral", log_amount.as_str());
 
-    // Transfer of 100.046928 USDC to the Chad's wallet
-    token_abi_calls::mint_and_transfer(&usdc_instance, delta, chad_address).await;
+    // Transfer of amount to the wallet
+    token_abi_calls::mint_and_transfer(&usdc_instance, amount, bob_address).await;
 
     //Сheck balance
-    let balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount + 200_000_000 * AMOUNT_COEFFICIENT);
+    let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
+    assert!(balance == amount);
 
-    // Chad calls supply_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
+    // Bob calls buy_collateral
+    let inst = market.with_wallet(bob.clone()).unwrap();
+    let addr = bob_address;
+    market_abi_calls::buy_collateral(&inst, usdc.asset_id, amount, uni.contract_id, 1, addr)
         .await
         .unwrap();
 
-    let (_, borrow) = market_abi_calls::get_user_supply_borrow(&market, chad_address).await;
-    assert!(borrow == 0);
+    //TODO: check
 
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
-
+    return;
     // =================================================
     // ==================== Case #9 ====================
     // 👛 Wallet: Bob 🧛

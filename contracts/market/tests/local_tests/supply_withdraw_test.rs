@@ -47,7 +47,7 @@ async fn supply_withdraw_test() {
     println!("1 USDC = $ ⎮ 1 UNI = $5\n");
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
-    let contracts = [oracle.get_contract_id().clone()];
+    let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
     // =================================================
     // ==================== Case #0 ====================
     // 👛 Wallet: Bob 🧛
@@ -120,7 +120,7 @@ async fn supply_withdraw_test() {
 
     // Alice calls withdraw_base
     let inst = market.with_wallet(alice.clone()).unwrap();
-    
+
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
