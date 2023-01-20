@@ -82,7 +82,7 @@ const DashboardStats: React.FC<IProps> = () => {
               Borrow balance
             </Text>
             <Text textAlign="end" className="data" size="big" weight={600}>
-              $1,000,514.63
+              $0.00
             </Text>
           </Column>
         </>

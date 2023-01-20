@@ -4,6 +4,7 @@ import { Column, Row } from "@components/Flex";
 import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
 import Progressbar from "@components/Progressbar";
+import { observer } from "mobx-react-lite";
 
 interface IProps {}
 
@@ -25,4 +26,4 @@ const AvailableToBorrow: React.FC<IProps> = () => {
     </Column>
   );
 };
-export default AvailableToBorrow;
+export default observer(AvailableToBorrow);
