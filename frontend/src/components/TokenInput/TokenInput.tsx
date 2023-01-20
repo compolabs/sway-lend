@@ -6,7 +6,6 @@ import BigNumberInput from "@components/BigNumberInput";
 import AmountInput from "@components/AmountInput";
 import _ from "lodash";
 import Text from "@components/Text";
-import { Column } from "../Flex";
 
 interface IProps {
   assetId: string;
@@ -27,14 +26,6 @@ const Root = styled.div`
 
   & > :first-of-type {
     margin-bottom: 8px;
-  }
-
-  @media (min-width: 560px) {
-    //flex-direction: row;
-    & > :first-of-type {
-      margin-bottom: 0;
-      margin-right: 8px;
-    }
   }
 `;
 

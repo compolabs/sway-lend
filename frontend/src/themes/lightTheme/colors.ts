@@ -56,7 +56,9 @@ export default {
     background: "rgba(255, 255, 255, 0.5);",
     border: colors.neutral2,
   },
-
+  tokenTooltip: {
+    background: "#F9FAFF",
+  },
   modal: {
     background: colors.neutral0,
     mask: "rgba(227, 233, 249, 0.8)",
@@ -72,13 +74,13 @@ export default {
   },
   dashboard: {
     tokenRowColor: "#F9FAFF",
-    tokenRowSelected: colors.neutral0,
     cardBackground: "#F9FAFF",
+    tokenRowSelected: colors.neutral0,
   },
   supplyBtn: {
-    background: colors.neutral3,
+    background: "rgba(223, 229, 250,0.6)",
     backgroundSelected: colors.neutral3,
-    backgroundDisabled: colors.neutral5,
+    backgroundDisabled: "rgba(223, 229, 250, 0.5)",
   },
   //fixme
   icon: {
@@ -91,7 +93,7 @@ export default {
     background: colors.neutral0,
   },
   progressBar: {
-    main: colors.secondary1,
+    main: colors.primary03,
     secondary: colors.neutral3,
     red: colors.primary03,
   },

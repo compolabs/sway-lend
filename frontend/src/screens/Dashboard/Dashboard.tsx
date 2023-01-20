@@ -6,7 +6,12 @@ import Layout from "@components/Layout";
 import DashboardStats from "@screens/Dashboard/DashboardStats";
 import SizedBox from "@components/SizedBox";
 import AssetsTable from "./AssetsTable";
-import RightBlock from "@screens/Dashboard/RightBlock";
+import useWindowSize from "@src/hooks/useWindowSize";
+import { Column } from "@src/components/Flex";
+import SwitchActions from "./SwitchActions";
+import ActionTab from "./ActionTab";
+import SummaryCard from "./SummaryCard";
+import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
 
 interface IProps {}
 
@@ -22,24 +27,53 @@ const Root = styled.div`
   text-align: left;
 `;
 const MainContainer = styled.div`
-  width: 100%;
-  display: grid;
+  display: flex;
+  flex-direction: column;
   @media (min-width: 880px) {
+    width: 100%;
+    display: grid;
     grid-template-columns: 2fr 1fr;
     column-gap: 20px;
   }
 `;
 const DashboardImpl: React.FC<IProps> = () => {
+  const { width } = useWindowSize();
   return (
     <Layout>
       <Observer>
         {() => (
           <Root>
             <DashboardStats />
-            <SizedBox height={24} />
+            <SizedBox height={16} />
             <MainContainer>
-              <AssetsTable />
-              <RightBlock />
+              {width && width >= 880 ? (
+                <>
+                  <Column crossAxisSize="max">
+                    <AvailableToBorrow />
+                    <SizedBox height={16} />
+                    <AssetsTable />
+                  </Column>
+                  <Column crossAxisSize="max">
+                    <SwitchActions />
+                    <SizedBox height={16} />
+                    <ActionTab />
+                    <SizedBox height={16} />
+                    <SummaryCard />
+                  </Column>
+                </>
+              ) : (
+                <>
+                  <AvailableToBorrow />
+                  <SizedBox height={16} />
+                  <SwitchActions />
+                  <SizedBox height={16} />
+                  <ActionTab />
+                  <SizedBox height={16} />
+                  <AssetsTable />
+                  <SizedBox height={16} />
+                  <SummaryCard />
+                </>
+              )}
             </MainContainer>
           </Root>
         )}

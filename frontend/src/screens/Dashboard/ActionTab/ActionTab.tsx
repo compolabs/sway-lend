@@ -3,48 +3,32 @@ import React from "react";
 import { ACTION_TYPE, useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import { observer } from "mobx-react-lite";
 import SizedBox from "@components/SizedBox";
-import SummaryCard from "./SummaryCard";
 import { Row } from "@src/components/Flex";
 import Button from "@components/Button";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
 import { useStores } from "@stores";
-import ActionTab from "@screens/Dashboard/RightBlock/ActionTab";
-import SwitchButtons from "@components/SwitchButtons";
+import InputCard from "@screens/Dashboard/ActionTab/InputCard";
 
 interface IProps {}
 
 const Root = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `;
 
-const RightBlock: React.FC<IProps> = () => {
+const ActionTab: React.FC<IProps> = () => {
   const { accountStore, settingsStore } = useStores();
   const vm = useDashboardVM();
   const handleBaseTokenClick = (action: ACTION_TYPE) => {
     vm.setAction(action);
+    vm.setTokenAmount(null);
     vm.setActionTokenAssetId(TOKENS_BY_SYMBOL.USDC.assetId);
   };
-  //0 - deposit
-  //1 - borrow usdc
   return (
     <Root>
-      <SwitchButtons
-        values={["Deposit mode", "Loan mode"]}
-        active={vm.mode}
-        onActivate={(v) => {
-          vm.setMode(v);
-          vm.setAction(null);
-          vm.setActionTokenAssetId(null);
-        }}
-      />
-      <SizedBox height={20} />
       {!accountStore.isLoggedIn && (
-        <Button
-          style={{ marginBottom: 10 }}
-          fixed
-          onClick={() => settingsStore.setLoginModalOpened(true)}
-        >
+        <Button fixed onClick={() => settingsStore.setLoginModalOpened(true)}>
           Connect wallet
         </Button>
       )}
@@ -88,11 +72,9 @@ const RightBlock: React.FC<IProps> = () => {
           </Row>
         )
       ) : (
-        <ActionTab />
+        <InputCard />
       )}
-      <SizedBox height={24} />
-      <SummaryCard />
     </Root>
   );
 };
-export default observer(RightBlock);
+export default observer(ActionTab);

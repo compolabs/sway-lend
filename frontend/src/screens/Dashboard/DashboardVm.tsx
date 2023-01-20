@@ -32,8 +32,6 @@ export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
 
 export const useDashboardVM = () => useVM(ctx);
 
-// export type TAction = "supply" | "borrow" | "repay" | "withdraw";
-
 class DashboardVm {
   public rootStore: RootStore;
 
@@ -90,7 +88,7 @@ class DashboardVm {
     }, {} as Record<string, [() => void]>);
   }
 
-  get token() {
+  get actionToken() {
     if (this.actionTokenAssetId == null) return TOKENS_BY_SYMBOL.USDC;
     return TOKENS_BY_ASSET_ID[this.actionTokenAssetId];
   }
@@ -103,7 +101,6 @@ class DashboardVm {
     console.log("supplyBase");
     this._setLoading(true);
     if (
-      // this.marketContract == null ||
       this.action !== ACTION_TYPE.SUPPLY ||
       this.tokenAmount == null ||
       this.tokenAmount.lte(0)
@@ -130,28 +127,45 @@ class DashboardVm {
     console.log(value);
   };
 
+  supplyCollateral = async () => {
+    console.log("supplyCollateral");
+  };
+  borrowBase = async () => {
+    console.log("borrowBase");
+  };
+  withdrawBase = async () => {
+    console.log("withdrawBase");
+  };
+
   onMaxBtnClick() {
-    if (
-      this.action === ACTION_TYPE.SUPPLY &&
-      this.actionTokenAssetId === this.baseToken.assetId
-    ) {
-      const baseTokenAmount = this.rootStore.accountStore.findBalanceByAssetId(
-        this.baseToken.assetId
+    if (this.actionTokenAssetId == null) return null;
+    if (this.action === ACTION_TYPE.SUPPLY) {
+      const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
+        this.actionTokenAssetId
       );
-      this.setTokenAmount(baseTokenAmount?.balance ?? BN.ZERO);
+      this.setTokenAmount(tokenBalance?.balance ?? BN.ZERO);
     }
-    // return () => void
   }
 
   get tokenInputBalance(): string {
-    if (
-      this.action === ACTION_TYPE.SUPPLY &&
-      this.actionTokenAssetId === this.baseToken.assetId
-    ) {
+    if (this.actionTokenAssetId == null) return "";
+    else if (this.action === ACTION_TYPE.SUPPLY) {
       return (
-        this.rootStore.accountStore.getFormattedBalance(this.baseToken) ??
+        this.rootStore.accountStore.getFormattedBalance(this.actionToken) ??
         "0.00"
       );
+    } else if (
+      this.action === ACTION_TYPE.BORROW &&
+      this.actionToken === this.baseToken
+    ) {
+      return "borrow base";
+    } else if (
+      this.action === ACTION_TYPE.WITHDRAW &&
+      this.actionToken === this.baseToken
+    ) {
+      return "WITHDRAW base";
+    } else if (this.action === ACTION_TYPE.REPAY) {
+      return "return borrow";
     }
     return "";
   }
@@ -162,6 +176,12 @@ class DashboardVm {
       this.actionTokenAssetId === this.baseToken.assetId
     ) {
       return this.supplyBase();
+    }
+    if (
+      this.action === ACTION_TYPE.SUPPLY &&
+      this.collaterals.map((v) => v.assetId).includes(this.baseToken.assetId)
+    ) {
+      return this.supplyCollateral();
     }
   };
 

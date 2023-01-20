@@ -18,10 +18,18 @@ const Root = styled.div<{ selected?: boolean; disabled?: boolean }>`
   justify-content: center;
   z-index: 2;
 
-  background-color: ${({ theme, selected }) =>
-    selected
+  background-color: ${({ theme, selected, disabled }) =>
+    disabled
+      ? theme.colors.supplyBtn.backgroundDisabled
+      : selected
       ? theme.colors.supplyBtn.backgroundSelected
       : theme.colors.supplyBtn.background};
+
+  :hover {
+    background-color: ${({ theme, disabled }) =>
+      !disabled && theme.colors.supplyBtn.backgroundSelected};
+  }
+
   cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
 `;
 

@@ -7,14 +7,16 @@ import Text from "@components/Text";
 import { Column, Row } from "@src/components/Flex";
 import Symbol from "@components/Symbol";
 import { ACTION_TYPE, useDashboardVM } from "@screens/Dashboard/DashboardVm";
-import Progressbar from "@components/Progressbar";
 import { useStores } from "@stores";
+import Tooltip from "@components/Tooltip";
+import TokenInfo from "@screens/Dashboard/TokenInfo";
 
 interface IProps {}
 
 const Root = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `;
 const TokenRow = styled.div<{ selected?: boolean }>`
   display: grid;
@@ -23,12 +25,14 @@ const TokenRow = styled.div<{ selected?: boolean }>`
   align-items: center;
   justify-content: space-between;
 
-  background: ${({ theme, selected }) =>
-    selected
-      ? theme.colors.dashboard.tokenRowColor
-      : theme.colors.dashboard.tokenRowSelected};
+  background: ${({ theme }) => theme.colors.dashboard.tokenRowColor};
   border-radius: 4px;
   margin-bottom: 2px;
+
+  :hover {
+    cursor: pointer;
+    background: ${({ theme }) => theme.colors.dashboard.tokenRowSelected};
+  }
 `;
 const Header = styled.div`
   display: grid;
@@ -38,30 +42,17 @@ const Header = styled.div`
   margin-bottom: 2px;
   background: ${({ theme }) => theme.colors.dashboard.tokenRowColor};
 `;
-
 const AssetsTable: React.FC<IProps> = () => {
   const { accountStore } = useStores();
   const vm = useDashboardVM();
   const handleAssetClick = (action: ACTION_TYPE, assetId: string) => {
+    vm.setTokenAmount(null);
     vm.setAction(action);
     vm.setMode(0);
     vm.setActionTokenAssetId(assetId);
   };
   return (
     <Root>
-      <Column crossAxisSize="max">
-        <Row justifyContent="space-between">
-          <Text fitContent weight={600} type="secondary" size="small">
-            Available to Borrow
-          </Text>
-          <Text fitContent weight={600} type="secondary" size="small">
-            60%
-          </Text>
-        </Row>
-        <SizedBox height={4} />
-        <Progressbar percent={60} />
-      </Column>
-      <SizedBox height={32} />
       <Header>
         <Text size="small" type="secondary">
           Collateral asset
@@ -76,20 +67,19 @@ const AssetsTable: React.FC<IProps> = () => {
         const canWithdraw = false;
         const canSupply = userBalance != null && userBalance.gt(0);
         return (
-          <TokenRow
-            key={token.assetId}
-            selected={vm.actionTokenAssetId === token.assetId}
-          >
-            <Row alignItems="center">
-              <TokenIcon size="small" src={token.logo} />
-              <SizedBox width={20} />
-              <Column>
-                <Text weight={600}>{token.name}</Text>
-                <Text weight={500} type="secondary">
-                  {token.symbol}
-                </Text>
-              </Column>
-            </Row>
+          <TokenRow key={token.assetId}>
+            <Tooltip content={<TokenInfo assetId={token.assetId} />}>
+              <Row alignItems="center">
+                <TokenIcon size="small" src={token.logo} />
+                <SizedBox width={20} />
+                <Column>
+                  <Text weight={600}>{token.name}</Text>
+                  <Text weight={500} type="secondary">
+                    {token.symbol}
+                  </Text>
+                </Column>
+              </Row>
+            </Tooltip>
             <div />
             <Row justifyContent="flex-end" alignItems="center">
               <Text type="secondary" size="small" fitContent>

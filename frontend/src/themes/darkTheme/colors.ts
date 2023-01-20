@@ -58,6 +58,9 @@ export default {
     background: "#262F33",
     hoverElement: colors.neutral5,
   },
+  tokenTooltip: {
+    background: "#262F33",
+  },
   header: {
     navLinkBackground: colors.neutral5,
     walletInfoColor: colors.neutral4,
@@ -74,14 +77,14 @@ export default {
     secondaryColor: colors.neutral4,
   },
   dashboard: {
-    tokenRowColor: "#313A45",
-    tokenRowSelected: "#262F33",
+    tokenRowSelected: "#313A45",
+    tokenRowColor: "#262F33",
     cardBackground: "#262F33",
   },
   supplyBtn: {
-    background: colors.neutral6,
+    background: "rgba(49, 58, 69, 0.5)",
     backgroundSelected: colors.neutral5,
-    backgroundDisabled: colors.neutral5,
+    backgroundDisabled: "rgba(49, 58, 69, 0.3)",
   },
 
   card: {
@@ -92,8 +95,8 @@ export default {
     borderColor: "none",
   },
   progressBar: {
-    main: colors.secondary1,
-    secondary: colors.neutral3,
+    main: colors.primary03,
+    secondary: colors.neutral5,
     red: colors.primary03,
   },
   gradient: "rgba(0, 0, 0, 0.5);",
