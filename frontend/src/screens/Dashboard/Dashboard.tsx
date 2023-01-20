@@ -23,8 +23,11 @@ const Root = styled.div`
   padding: 0 16px;
   width: 100%;
   margin-bottom: 24px;
-  margin-top: 40px;
+  margin-top: 20px;
   text-align: left;
+  @media (min-width: 880px) {
+    margin-top: 40px;
+  }
 `;
 const MainContainer = styled.div`
   display: flex;
