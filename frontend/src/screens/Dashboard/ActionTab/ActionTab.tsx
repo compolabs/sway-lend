@@ -28,9 +28,12 @@ const ActionTab: React.FC<IProps> = () => {
   return (
     <Root>
       {!accountStore.isLoggedIn && (
-        <Button fixed onClick={() => settingsStore.setLoginModalOpened(true)}>
-          Connect wallet
-        </Button>
+        <>
+          <Button fixed onClick={() => settingsStore.setLoginModalOpened(true)}>
+            Connect wallet
+          </Button>
+          <SizedBox height={10} />
+        </>
       )}
 
       {vm.actionTokenAssetId == null ? (
