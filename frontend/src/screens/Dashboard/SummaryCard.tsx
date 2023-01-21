@@ -4,10 +4,14 @@ import Text from "@components/Text";
 import Divider from "@components/Divider";
 import { Row } from "@components/Flex";
 import Card from "@components/Card";
+import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import { observer } from "mobx-react-lite";
 
 interface IProps {}
 
 const SummaryCard: React.FC<IProps> = () => {
+  const vm = useDashboardVM();
+  if (vm.mode === 0) return null;
   const stats = [
     { title: "Supply APY", value: "60.17%" },
     { title: "Borrow APY", value: "12.32%" },
@@ -32,4 +36,4 @@ const SummaryCard: React.FC<IProps> = () => {
     </Card>
   );
 };
-export default SummaryCard;
+export default observer(SummaryCard);

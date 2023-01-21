@@ -1,8 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
 import { observer } from "mobx-react-lite";
-import Divider from "../Divider";
-import DarkMode from "./DarkMode";
 import { Column } from "../Flex";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
@@ -19,7 +17,7 @@ interface IProps {
 
 const Root = styled.div<{ opened: boolean }>`
   z-index: 100;
-  background: rgba(0, 0, 0, 0.4);
+  background: ${({ theme }) => `${theme.colors.modal.mask}`};
   position: absolute;
   top: 64px;
   left: 0;
@@ -44,8 +42,6 @@ const MenuItem = styled.div<{ selected?: boolean }>`
   display: flex;
   cursor: pointer;
   flex-direction: row;
-  //justify-content: center;
-  //align-items: center;
   padding: 12px 16px;
   border-radius: 4px;
   width: 100%;
@@ -57,8 +53,6 @@ const MenuItem = styled.div<{ selected?: boolean }>`
 `;
 
 const Container = styled(Column)`
-  //padding: 16px;
-  //background: pink;
   margin: 16px;
 
   & > * {
@@ -98,8 +92,6 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
             </MenuItem>
           ))}
         </Container>
-        <Divider />
-        <DarkMode text style={{ margin: 16 }} />
         <WalletWrapper>
           <Wallet />
         </WalletWrapper>

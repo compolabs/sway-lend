@@ -3,7 +3,6 @@ import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
 import { Column } from "@components/Flex";
 import Header from "@components/Header/Header";
-import { useStores } from "@stores";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
@@ -17,7 +16,6 @@ const Root = styled(Column)`
   min-height: 100vh;
 `;
 const App: React.FC = () => {
-  const { settingsStore } = useStores();
   return (
     <Root>
       <Header />

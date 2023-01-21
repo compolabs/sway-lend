@@ -54,7 +54,7 @@ const DashboardStats: React.FC<IProps> = () => {
     <Root>
       {width && width >= 880 ? (
         <>
-          <Row justifyContent="space-between" alignItems="center">
+          <Row justifyContent="space-between" alignItems="end">
             <Column crossAxisSize="max">
               <Text className="title" type="secondary" weight={600}>
                 Supply balance

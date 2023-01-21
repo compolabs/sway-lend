@@ -18,7 +18,7 @@ const Root = styled.div<{ type: "warning" | "info" | "error" }>`
     (() => {
       switch (type) {
         case "warning":
-          return `background: ${theme.colors.primary01};`;
+          return `background: ${theme.colors.tokenTooltip.background};`;
         case "info":
           return `background: ${theme.colors.primary01};`;
         case "error":

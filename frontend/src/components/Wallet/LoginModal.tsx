@@ -3,10 +3,8 @@ import Dialog from "@components/Dialog";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import LoginType from "./LoginType";
 import fuel from "@src/assets/icons/fuelLogo.svg";
-import Notification from "@components/Notification";
 import Text from "@components/Text";
 import { observer } from "mobx-react-lite";
-import { Anchor } from "@components/Anchor";
 import Img from "@components/Img";
 import sway from "@src/assets/tokens/sway.svg";
 import styled from "@emotion/styled";
@@ -20,10 +18,15 @@ interface IProps {
 
 const loginTypes = [
   {
-    title: "Fuel",
+    title: "Generate wallet",
     icon: fuel,
-    type: LOGIN_TYPE.FUEL_WALLET,
+    type: LOGIN_TYPE.GENERATE_FROM_SEED,
   },
+  // {
+  //   title: "Fuel",
+  //   icon: fuel,
+  //   type: LOGIN_TYPE.FUEL_WALLET,
+  // },
 ];
 const Root = styled.div`
   display: flex;
@@ -33,11 +36,11 @@ const Root = styled.div`
 `;
 const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
   const handleLogin = (loginType: LOGIN_TYPE) => () => {
-    rest.onClose();
     onLogin(loginType);
+    rest.onClose();
   };
-  const isThereWallet = window?.fuel != null;
-  const walletLink = "https://fuels-wallet.vercel.app/docs/install/";
+  // const isThereWallet = window?.fuel != null;
+  // const walletLink = "https://fuels-wallet.vercel.app/docs/install/";
   return (
     <Dialog style={{ maxWidth: 360 }} {...rest}>
       <Root>
@@ -51,22 +54,26 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
           To start using Swaylend
         </Text>
         <SizedBox height={34} />
-        {isThereWallet ? (
-          loginTypes.map((t) => (
-            <LoginType {...t} key={t.type} onClick={handleLogin(t.type)} />
-          ))
-        ) : (
-          <Notification
-            type="warning"
-            text={
-              <>
-                <Text>Fuel Wallet hasn't been detected.</Text>
-                <Anchor href={walletLink}>You can download it here</Anchor>
-              </>
-            }
-          />
-        )}
-        <SizedBox height={40} />
+        {loginTypes.map((t) => (
+          <LoginType {...t} key={t.type} onClick={handleLogin(t.type)} />
+        ))}
+
+        {/*{isThereWallet ? (*/}
+        {/*  loginTypes.map((t) => (*/}
+        {/*    <LoginType {...t} key={t.type} onClick={handleLogin(t.type)} />*/}
+        {/*  ))*/}
+        {/*) : (*/}
+        {/*  <Notification*/}
+        {/*    type="warning"*/}
+        {/*    text={*/}
+        {/*      <>*/}
+        {/*        <Text>Fuel Wallet hasn't been detected.</Text>*/}
+        {/*        <Anchor href={walletLink}>You can download it here</Anchor>*/}
+        {/*      </>*/}
+        {/*    }*/}
+        {/*  />*/}
+        {/*)}*/}
+        {/*<SizedBox height={40} />*/}
       </Root>
     </Dialog>
   );

@@ -5,13 +5,10 @@ import Text from "@components/Text";
 import copy from "copy-to-clipboard";
 import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
-import { Anchor } from "@components/Anchor";
 import { EXPLORER_URL } from "@src/constants";
 import SizedBox from "@components/SizedBox";
 
-interface IProps {
-  address: string;
-}
+interface IProps {}
 
 const Root = styled(Column)`
   padding: 16px;
@@ -27,14 +24,21 @@ const Root = styled(Column)`
   }
 `;
 
-const WalletActionsTooltip: React.FC<IProps> = ({ address }) => {
+const WalletActionsTooltip: React.FC<IProps> = () => {
   const { notificationStore, accountStore } = useStores();
 
   const handleCopyAddress = () => {
-    address && copy(address);
+    accountStore.address && copy(accountStore.address);
     notificationStore.notify("Your address was copied", {
       type: "success",
       title: "Congratulations!",
+    });
+  };
+  const handleCopySeed = () => {
+    accountStore.seed && copy(accountStore.seed);
+    notificationStore.notify("Don't share it with anyone", {
+      type: "success",
+      title: "Your seed was copied",
     });
   };
   const handleLogout = () => accountStore.disconnect();
@@ -45,9 +49,15 @@ const WalletActionsTooltip: React.FC<IProps> = ({ address }) => {
         Copy address
       </Text>
       <SizedBox height={10} />
+      <Text weight={700} onClick={handleCopySeed} className="menu-item">
+        Copy seed
+      </Text>
+      <SizedBox height={10} />
       <Text
         className="menu-item"
-        onClick={() => window.open(`${EXPLORER_URL}/address/${address}`)}
+        onClick={() =>
+          window.open(`${EXPLORER_URL}/address/${accountStore.address}`)
+        }
         weight={700}
       >
         View in Explorer

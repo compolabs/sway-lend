@@ -1,21 +1,25 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
-import { Address, Provider } from "fuels";
+import { Address, Provider, Wallet } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
+import { Mnemonic } from "@fuel-ts/mnemonic";
 
 export enum LOGIN_TYPE {
   FUEL_WALLET = "FUEL_WALLET",
+  GENERATE_FROM_SEED = "GENERATE_FROM_SEED",
 }
 
 export interface ISerializedAccountStore {
   address: string | null;
   loginType: LOGIN_TYPE | null;
+  seed: string | null;
 }
 
 class AccountStore {
   public readonly rootStore: RootStore;
+
   //todo add change address if account was changed in extension
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
@@ -24,6 +28,8 @@ class AccountStore {
     if (initState) {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
+      this.setSeed(initState.seed);
+      console.log("initState", initState);
     }
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
@@ -35,6 +41,9 @@ class AccountStore {
 
   public address: string | null = null;
   setAddress = (address: string | null) => (this.address = address);
+
+  public seed: string | null = null;
+  setSeed = (seed: string | null) => (this.seed = seed);
 
   public loginType: LOGIN_TYPE | null = null;
   setLoginType = (loginType: LOGIN_TYPE | null) => (this.loginType = loginType);
@@ -82,13 +91,17 @@ class AccountStore {
   serialize = (): ISerializedAccountStore => ({
     address: this.address,
     loginType: this.loginType,
+    seed: this.seed,
   });
 
   login = async (loginType: LOGIN_TYPE) => {
     this.setLoginType(loginType);
     switch (loginType) {
-      case LOGIN_TYPE.FUEL_WALLET:
-        await this.loginWithFuelWallet();
+      // case LOGIN_TYPE.FUEL_WALLET:
+      //   await this.loginWithFuelWallet();
+      //   break;
+      case LOGIN_TYPE.GENERATE_FROM_SEED:
+        await this.generateAccountWithSeed();
         break;
       default:
         return;
@@ -96,6 +109,8 @@ class AccountStore {
   };
   disconnect = async () => {
     this.setAddress(null);
+    this.setSeed(null);
+    this.setLoginType(null);
   };
 
   loginWithFuelWallet = async () => {
@@ -129,6 +144,22 @@ class AccountStore {
 
   get isLoggedIn() {
     return this.address != null;
+  }
+
+  generateAccountWithSeed = () => {
+    const mn = Mnemonic.generate();
+    const seed = Mnemonic.mnemonicToSeed(mn);
+    const wallet = Wallet.fromPrivateKey(seed, NODE_URL);
+    this.setAddress(wallet.address.toAddress());
+    this.setSeed(seed);
+    this.rootStore.settingsStore.setLoginModalOpened(false);
+    this.rootStore.notificationStore.notify("Go to faucet page to mint ETH");
+  };
+
+  get wallet() {
+    if (this.seed == null) return null;
+    const provider = new Provider(NODE_URL);
+    return Wallet.fromPrivateKey(this.seed, provider);
   }
 }
 

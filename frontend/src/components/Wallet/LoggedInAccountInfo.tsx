@@ -94,7 +94,7 @@ const LoggedInAccountInfo: React.FC<IProps> = () => {
             trigger: "click",
             onVisibleChange: setAccountOpened,
           }}
-          content={<WalletActionsTooltip address={address!} />}
+          content={<WalletActionsTooltip />}
         >
           <AddressContainer expanded={accountOpened}>
             <Text size="small" weight={700}>

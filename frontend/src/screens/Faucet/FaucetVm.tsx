@@ -112,10 +112,8 @@ class FaucetVM {
     if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
     this._setLoading(true);
     const { accountStore, notificationStore } = this.rootStore;
-    const { address } = accountStore;
-    if (address == null || window?.fuel == null) return;
-    //todo add signing from account store
-    const wallet = Wallet.fromAddress(address, window.fuel?.getProvider());
+    const { wallet } = accountStore;
+    if (wallet == null) return;
     const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
     try {
@@ -136,30 +134,4 @@ class FaucetVM {
       this._setLoading(false);
     }
   };
-
-  //todo change it to this way when its possible
-
-  //todo add notification to mint eth when there any eth on balance
-
-  // checkTokensThatAlreadyBeenMinted1 = async () => {
-  //   const { address } = this.rootStore.accountStore;
-  //   if (address == null) return;
-  //   const wallet = Wallet.fromAddress(address, new Provider(NODE_URL));
-  //   const b256Address = {
-  //     value: wallet.address.toB256(),
-  //   };
-  //   try {
-  //     const tokensContracts = TOKENS_LIST.filter((v) => v.symbol === "ETH").map(
-  //         (b) => TokenAbi__factory.connect(b.assetId, wallet)
-  //     );
-  //     const response = await Promise.all(
-  //         tokensContracts.map((v) =>
-  //             v.functions.already_minted(b256Address).simulate()
-  //         )
-  //     );
-  //     console.log(response);
-  //   } catch (e) {
-  //     console.log(e);
-  //   }
-  // };
 }

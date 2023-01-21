@@ -47,6 +47,8 @@ export default {
     walletInfoColor: colors.neutral4,
     walletAddressBackground: colors.neutral3,
     walletBalanceBackground: colors.neutral4,
+    mobileMenuIconBackground: colors.neutral3,
+    mobileMenuIconColor: colors.neutral6,
   },
   skeleton: {
     base: colors.neutral3,

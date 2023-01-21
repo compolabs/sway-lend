@@ -65,6 +65,8 @@ export default {
     navLinkBackground: colors.neutral5,
     walletInfoColor: colors.neutral4,
     walletAddressBackground: colors.neutral5,
+    mobileMenuIconBackground: colors.neutral5,
+    mobileMenuIconColor: colors.neutral2,
   },
   skeleton: {
     base: colors.neutral6,
