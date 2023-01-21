@@ -29,7 +29,6 @@ class AccountStore {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
       this.setSeed(initState.seed);
-      console.log("initState", initState);
     }
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
@@ -158,14 +157,13 @@ class AccountStore {
 
   get wallet(): null | WalletUnlocked {
     if (this.seed == null) return null;
-    const provider = new Provider(NODE_URL);
-    return Wallet.fromPrivateKey(this.seed, provider);
+    return Wallet.fromPrivateKey(this.seed, new Provider(NODE_URL));
   }
 
-  // get addressInput(): null | { value: string } {
-  //   if (this.address == null) return null;
-  //   return { value: this.address };
-  // }
+  get addressInput(): null | { value: string } {
+    if (this.wallet == null) return null;
+    return { value: this.wallet.address.toB256() };
+  }
 }
 
 export default AccountStore;

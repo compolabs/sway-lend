@@ -5,7 +5,6 @@ import Text from "@components/Text";
 import { TOKENS_BY_ASSET_ID } from "@src/constants";
 import SizedBox from "@components/SizedBox";
 import { Column, Row } from "@src/components/Flex";
-import Divider from "@src/components/Divider";
 
 interface IProps {
   assetId: string;

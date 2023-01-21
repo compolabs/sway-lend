@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useMemo } from "react";
-import { action, makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
@@ -10,7 +10,6 @@ import {
 } from "@src/constants";
 import BN from "@src/utils/BN";
 import { MarketAbi, MarketAbi__factory } from "@src/contracts";
-import { log } from "util";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
@@ -37,14 +36,21 @@ class DashboardVm {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
-    this.initMarketContract().then(this.updateAccountInfo);
+    this.initMarketContract();
+    this.updateAccountInfo();
     reaction(() => this.rootStore.accountStore.seed, this.initMarketContract);
   }
 
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
 
-  initMarketContract = async () => {
+  suppliedBalance: BN | null = null;
+  setSuppliedBalance = (l: BN | null) => (this.suppliedBalance = l);
+
+  borrowedBalance: BN | null = null;
+  setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
+
+  initMarketContract = () => {
     const { address, wallet } = this.rootStore.accountStore;
     if (address == null || wallet == null) return;
     const marketContract = MarketAbi__factory.connect(
@@ -55,14 +61,15 @@ class DashboardVm {
   };
 
   updateAccountInfo = async () => {
-    const { address } = this.rootStore.accountStore;
-    if (this.marketContract == null || address == null) return;
-    // const addressInput = { value: address };
-    const v = await this.marketContract.functions.get_user_supply_borrow({
-      value: "fuel1s9a20mkrgcw9uulpjpewa38mspzavkr4arw6rhay8htumw7spdaqgvnkhd",
-    });
-    console.log(v);
-    // const supplyAndBase=
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    const { value } = await this.marketContract.functions
+      .get_user_supply_borrow(addressInput)
+      .get();
+    // console.log(result.value);
+    if (value == null) return;
+    this.setSuppliedBalance(new BN(value[0].toString()));
+    this.setBorrowedBalance(new BN(value[1].toString()));
   };
 
   collaterals: IToken[] = [
@@ -87,17 +94,6 @@ class DashboardVm {
 
   actionTokenAssetId: string | null = null;
   setActionTokenAssetId = (l: string | null) => (this.actionTokenAssetId = l);
-
-  isThereUserData = false;
-
-  get tokenBtnsClick(): Record<string, [() => void]> {
-    return this.collaterals.reduce((acc, v) => {
-      const c = () => {
-        console.log("click click", v.symbol);
-      };
-      return { ...acc, [v.assetId]: [c] };
-    }, {} as Record<string, [() => void]>);
-  }
 
   get actionToken() {
     if (this.actionTokenAssetId == null) return TOKENS_BY_SYMBOL.USDC;

@@ -6,6 +6,9 @@ import Text from "@src/components/Text";
 import SizedBox from "@components/SizedBox";
 import Divider from "@src/components/Divider";
 import useWindowSize from "@src/hooks/useWindowSize";
+import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import BN from "@src/utils/BN";
+import Skeleton from "react-loading-skeleton";
 
 interface IProps {}
 
@@ -48,7 +51,17 @@ const Root = styled.div`
   }
 `;
 const DashboardStats: React.FC<IProps> = () => {
+  const vm = useDashboardVM();
   const { width } = useWindowSize();
+  const supplied = BN.formatUnits(
+    vm.suppliedBalance ?? BN.ZERO,
+    vm.baseToken.decimals
+  ).toFormat(2);
+
+  const borrowed = BN.formatUnits(
+    vm.borrowedBalance ?? BN.ZERO,
+    vm.baseToken.decimals
+  ).toFormat(2);
 
   return (
     <Root>
@@ -57,11 +70,15 @@ const DashboardStats: React.FC<IProps> = () => {
           <Row justifyContent="space-between" alignItems="end">
             <Column crossAxisSize="max">
               <Text className="title" type="secondary" weight={600}>
-                Supply balance
+                Supplied balance
               </Text>
-              <Text className="main-data" size="large" weight={600}>
-                $0.00
-              </Text>
+              {vm.suppliedBalance == null ? (
+                <Skeleton height={64} width={200} />
+              ) : (
+                <Text className="main-data" size="large" weight={600}>
+                  ${supplied}
+                </Text>
+              )}
             </Column>
             <Column crossAxisSize="max">
               <Text className="title" type="secondary" weight={600}>
@@ -81,20 +98,30 @@ const DashboardStats: React.FC<IProps> = () => {
             >
               Borrow balance
             </Text>
-            <Text textAlign="end" className="data" size="big" weight={600}>
-              $0.00
-            </Text>
+            {vm.borrowedBalance == null ? (
+              <Row justifyContent="flex-end">
+                <Skeleton height={32} width={200} />
+              </Row>
+            ) : (
+              <Text textAlign="end" className="data" size="big" weight={600}>
+                ${borrowed}
+              </Text>
+            )}
           </Column>
         </>
       ) : (
         <>
           <Column>
             <Text className="title" type="secondary" weight={600}>
-              Supply balance
+              Supplied balance
             </Text>
-            <Text className="main-data" size="big" weight={600}>
-              $0.00
-            </Text>
+            {vm.suppliedBalance == null ? (
+              <Skeleton height={48} width={100} />
+            ) : (
+              <Text className="main-data" size="big" weight={600}>
+                ${supplied}
+              </Text>
+            )}
           </Column>
           <SizedBox height={16} />
           <Divider />
@@ -112,9 +139,16 @@ const DashboardStats: React.FC<IProps> = () => {
               <Text className="title" type="secondary" weight={600}>
                 Borrow balance
               </Text>
-              <Text className="data" size="medium" weight={600}>
-                $0.00
-              </Text>
+
+              {vm.borrowedBalance == null ? (
+                <Row justifyContent="flex-end">
+                  <Skeleton height={32} width={100} />
+                </Row>
+              ) : (
+                <Text className="data" weight={600}>
+                  ${borrowed}
+                </Text>
+              )}
             </Column>
           </Row>
         </>
