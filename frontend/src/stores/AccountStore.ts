@@ -1,6 +1,6 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
-import { Address, Provider, Wallet } from "fuels";
+import { Address, Provider, Wallet, WalletUnlocked } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
@@ -156,11 +156,16 @@ class AccountStore {
     this.rootStore.notificationStore.notify("Go to faucet page to mint ETH");
   };
 
-  get wallet() {
+  get wallet(): null | WalletUnlocked {
     if (this.seed == null) return null;
     const provider = new Provider(NODE_URL);
     return Wallet.fromPrivateKey(this.seed, provider);
   }
+
+  // get addressInput(): null | { value: string } {
+  //   if (this.address == null) return null;
+  //   return { value: this.address };
+  // }
 }
 
 export default AccountStore;

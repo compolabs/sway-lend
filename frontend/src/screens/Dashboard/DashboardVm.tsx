@@ -1,17 +1,16 @@
 import React, { PropsWithChildren, useMemo } from "react";
-import { makeAutoObservable } from "mobx";
+import { action, makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
   CONTRACT_ADDRESSES,
   IToken,
-  NODE_URL,
   TOKENS_BY_ASSET_ID,
   TOKENS_BY_SYMBOL,
 } from "@src/constants";
 import BN from "@src/utils/BN";
 import { MarketAbi, MarketAbi__factory } from "@src/contracts";
-import { Provider, Wallet } from "fuels";
+import { log } from "util";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
@@ -38,20 +37,32 @@ class DashboardVm {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
+    this.initMarketContract().then(this.updateAccountInfo);
+    reaction(() => this.rootStore.accountStore.seed, this.initMarketContract);
   }
 
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
 
   initMarketContract = async () => {
-    const { address } = this.rootStore.accountStore;
-    if (address == null) return;
-    const wallet = Wallet.fromAddress(address, new Provider(NODE_URL));
-    const tokenContract = MarketAbi__factory.connect(
+    const { address, wallet } = this.rootStore.accountStore;
+    if (address == null || wallet == null) return;
+    const marketContract = MarketAbi__factory.connect(
       CONTRACT_ADDRESSES.market,
       wallet
     );
-    this.setMarketContract(tokenContract);
+    this.setMarketContract(marketContract);
+  };
+
+  updateAccountInfo = async () => {
+    const { address } = this.rootStore.accountStore;
+    if (this.marketContract == null || address == null) return;
+    // const addressInput = { value: address };
+    const v = await this.marketContract.functions.get_user_supply_borrow({
+      value: "fuel1s9a20mkrgcw9uulpjpewa38mspzavkr4arw6rhay8htumw7spdaqgvnkhd",
+    });
+    console.log(v);
+    // const supplyAndBase=
   };
 
   collaterals: IToken[] = [
@@ -98,33 +109,46 @@ class DashboardVm {
   }
 
   supplyBase = async () => {
-    console.log("supplyBase");
-    this._setLoading(true);
+    const { accountStore, notificationStore } = this.rootStore;
     if (
       this.action !== ACTION_TYPE.SUPPLY ||
       this.tokenAmount == null ||
+      accountStore.seed == null ||
+      this.marketContract == null ||
       this.tokenAmount.lte(0)
-    )
+    ) {
+      console.log(
+        this.action !== ACTION_TYPE.SUPPLY,
+        this.tokenAmount == null,
+        accountStore.seed == null,
+        this.marketContract == null,
+        this.tokenAmount?.lte(0)
+      );
       return;
+    }
+    this._setLoading(true);
 
-    const { address } = this.rootStore.accountStore;
-    if (address == null || window?.fuel == null) return;
-
-    const wallet = Wallet.fromAddress(address, window.fuel?.getProvider());
-    const market = MarketAbi__factory.connect(
-      CONTRACT_ADDRESSES.market,
-      wallet
-    );
-
-    const value = await market.functions
+    await this.marketContract.functions
       .supply_base()
       .callParams({
         forward: [this.tokenAmount.toString(), this.baseToken.assetId],
       })
-      .txParams({})
-      .call();
-    this._setLoading(false);
-    console.log(value);
+      .txParams({ gasPrice: 1 })
+      .call()
+      .catch((e) =>
+        notificationStore.notify("", { type: "error", title: "oops" })
+      )
+      .then(accountStore.updateAccountBalances)
+      .finally(() => {
+        notificationStore.notify(
+          `You have successfully deposited ${this.formattedTokenAmount} ${this.baseToken.symbol}`,
+          {
+            type: "success",
+            title: "Congrats!",
+          }
+        );
+        this._setLoading(false);
+      });
   };
 
   supplyCollateral = async () => {
@@ -184,6 +208,19 @@ class DashboardVm {
       return this.supplyCollateral();
     }
   };
+
+  get formattedTokenAmount() {
+    if (
+      this.tokenAmount == null ||
+      this.tokenAmount?.eq(0) ||
+      this.actionTokenAssetId == null
+    )
+      return "0.00";
+    return BN.formatUnits(
+      this.tokenAmount,
+      TOKENS_BY_ASSET_ID[this.actionTokenAssetId].decimals
+    ).toFormat(2);
+  }
 
   get operationName() {
     switch (this.action) {

@@ -86,12 +86,12 @@ const Root = styled.div`
 const MobileMenuIcon: React.FC<IProps> = ({ opened, onClick }) => {
   return (
     <Root onClick={onClick}>
-      {/*<div className="demo">*/}
       <div className="menu-icon">
         <input
           className="menu-icon__cheeckbox"
           type="checkbox"
           checked={opened}
+          onChange={() => null}
         />
         <div>
           <span></span>
