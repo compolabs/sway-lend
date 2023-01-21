@@ -684,7 +684,7 @@ fn buy_collateral_internal(asset: ContractId, min_amount: u64, recipient: Addres
     let reserves = get_collateral_reserves_internal(asset);
     let collateral_amount = quote_collateral_internal(asset, base_amount);
     require(collateral_amount >= min_amount, Error::TooMuchSlippage);
-    require(I64::from(collateral_amount) <= reserves, Error::InsufficientReserves); //FIXME
+    require(I64::from(collateral_amount) <= reserves, Error::InsufficientReserves);
 
     // Note: Pre-transfer hook can re-enter buyCollateral with a stale collateral ERC20 balance.
     //  Assets should not be listed which allow re-entry from pre-transfer now, as too much collateral could be bought.
