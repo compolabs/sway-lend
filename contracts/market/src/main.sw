@@ -29,12 +29,12 @@ use std::{
         msg_amount,
         this_balance,
     },
+    hash::sha256,
     logging::log,
     revert::require,
     storage::StorageVec,
     token::transfer_to_address,
     u128::U128,
-    hash::sha256,
 };
 
 abi Market {
@@ -141,8 +141,7 @@ storage {
     asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
-    user_collateral: StorageMap<b256, u64> = StorageMap {},
-    // user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
+    user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics {
         base_supply_index: SCALE_18,
@@ -329,7 +328,9 @@ fn get_borrow_rate_internal(utilization: u64) -> U128 { // -> decimals 18
 // calculation of the updated value base_supply/borrow_index
 #[storage(read)]
 fn accrued_interest_indices(now: u64, last_accrual_time: u64) -> (u64, u64) { // -> decimals (18, 18)
-    if last_accrual_time == 0 {return (SCALE_18, SCALE_18)}
+    if last_accrual_time == 0 {
+        return (SCALE_18, SCALE_18)
+    }
     let time_elapsed = now - last_accrual_time;
     let mut base_supply_index_ = U128::from_u64(storage.market_basic.base_supply_index); // decimals 18
     let mut base_borrow_index_ = U128::from_u64(storage.market_basic.base_borrow_index); // decimals 18
@@ -362,11 +363,13 @@ fn is_borrow_collateralized(account: Address) -> bool {
     while index < storage.asset_configs.len() {
         let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
-            Option::None => continue,
+            Option::None => {
+                index = index + 1;
+                continue
+            },
         };
 
-        let key = sha256((account, asset_config.asset));
-        let balance = storage.user_collateral.get(key); // decimals asset_config.decimals
+        let balance = storage.user_collateral.get((account, asset_config.asset)); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
 
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
@@ -396,22 +399,21 @@ fn is_liquidatable_internal(account: Address) -> bool {
 
     let config = get_config();
     let present_value_ = U128::from_u64(present_value(principal_value_.flip()).into()); // decimals base_asset_decimals
-
     let mut liquidation_treshold = U128::new();
     let mut index = 0;
     while index < storage.asset_configs.len() {
         let asset_config = match storage.asset_configs.get(index) {
             Option::Some(asset_config) => asset_config,
-            Option::None => continue,
+            Option::None => {
+                index = index + 1;
+                continue
+            },
         };
 
-        let key = sha256((account, asset_config.asset));
-        let balance = storage.user_collateral.get(key); // decimals asset_config.decimals
-        let balance = U128::from_u64(balance); 
-
+        let balance = storage.user_collateral.get((account, asset_config.asset)); // decimals asset_config.decimals
+        let balance = U128::from_u64(balance);
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
-        let price = U128::from_u64(price); 
-        
+        let price = U128::from_u64(price);
         let collateral_factor = U128::from_u64(asset_config.liquidate_collateral_factor); // decimals 4
         let scale = U128::from_u64(10.pow(asset_config.decimals));
 
@@ -588,8 +590,7 @@ fn collateral_value_to_sell_internal(asset: ContractId, collateral_amount: u64) 
     let asset_config = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
     let base_price = get_price(config.base_token, config.base_token_price_feed);// decimals 9
-    let base_price = U128::from_u64(base_price); 
-    
+    let base_price = U128::from_u64(base_price);
     let store_front_price_factor = config.store_front_price_factor; // decimals 4
     let liquidation_penalty = asset_config.liquidation_penalty; // decimals 4
     // Store front discount is derived from the collateral asset's liquidation_penalty and store_front_price_factor
@@ -600,10 +601,7 @@ fn collateral_value_to_sell_internal(asset: ContractId, collateral_amount: u64) 
     let base_scale = U128::from_u64(10.pow(config.base_token_decimals));
     let asset_scale = U128::from_u64(10.pow(asset_config.decimals));
     (U128::from_u64(collateral_amount) * asset_price_discounted * base_scale / asset_scale / base_price).as_u64().unwrap()
-    
 }
-
-
 
    // @Callable absorb(absorber: Address, accounts: Vec<Address>)
 // the function transfers the pledge to the property of the protocol and closes the user's debt
@@ -614,20 +612,19 @@ fn absorb_internal(account: Address) {
     let account_user = storage.user_basic.get(account);
     let old_principal = account_user.principal;
     let old_balance = present_value(old_principal);// base_asset_decimals
- 
     let config = get_config();
 
-    let mut delta_value = 0; // decimals 9
+    let mut delta_value = U128::new(); // decimals 9
     let mut i = 0;
     while i < storage.asset_configs.len() {
         let asset_config = storage.asset_configs.get(i).unwrap();
         let asset = asset_config.asset;
-        let key = sha256((account, asset));
-        let seize_amount = storage.user_collateral.get(key); // asset decimals
+        let seize_amount = storage.user_collateral.get((account, asset)); // asset decimals
         if seize_amount == 0 {
+            i += 1;
             continue;
         }
-        storage.user_collateral.insert(key, 0);
+        storage.user_collateral.insert((account, asset), 0);
 
         let total_collateral = storage.totals_collateral.get(asset); // asset decimals
         storage.totals_collateral.insert(asset, total_collateral - seize_amount);
@@ -636,14 +633,14 @@ fn absorb_internal(account: Address) {
         let liquidation_penalty = asset_config.liquidation_penalty; // decimals 4
         let asset_scale = 10.pow(asset_config.decimals);
         let penalty_scale = 10.pow(4);
-        delta_value += seize_amount * price * liquidation_penalty / asset_scale / penalty_scale; // decimals 9
+        delta_value += U128::from_u64(seize_amount) * U128::from_u64(price) * U128::from_u64(liquidation_penalty) / U128::from_u64(asset_scale) / U128::from_u64(penalty_scale); // decimals 9
         i += 1;
     }
 
     let base_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let base_scale = 10.pow(config.base_token_decimals);
 
-    let delta_balance = delta_value * base_scale / base_price; // base_asset_decimals
+    let delta_balance = delta_value.as_u64().unwrap() * base_scale / base_price; // base_asset_decimals
     let mut new_balance = old_balance + I64::from(delta_balance); // base_asset_decimals
     if new_balance < I64::from(0) {
         new_balance = I64::from(0);
@@ -708,25 +705,23 @@ fn supply_collateral_internal() {
     total_supply_asset += amount;
     require(total_supply_asset <= asset_config.supply_cap, Error::SupplyCapExceeded);
 
-    let key = sha256((dst, asset));
-    let dst_collateral = storage.user_collateral.get(key);
+    let dst_collateral = storage.user_collateral.get((dst, asset));
     let dst_collateral_new = dst_collateral + amount;
 
     storage.totals_collateral.insert(asset, total_supply_asset);
-    storage.user_collateral.insert(key, dst_collateral_new);
+    storage.user_collateral.insert((dst, asset), dst_collateral_new);
 }
 
 // @Callable withdraw_collateral(asset: ContractId, amount: u64)
 #[storage(read, write)]
 fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
     let caller = get_caller();
-    let key = sha256((caller, asset));
-    let src_collateral = storage.user_collateral.get(key);
+    let src_collateral = storage.user_collateral.get((caller, asset));
     let src_collateral_new = src_collateral - amount;
 
     let new_total_supply_asset = storage.totals_collateral.get(asset) - amount;
     storage.totals_collateral.insert(asset, new_total_supply_asset);
-    storage.user_collateral.insert(key, src_collateral_new);
+    storage.user_collateral.insert((caller, asset), src_collateral_new);
 
     // Note: no accrue interest, BorrowCF < LiquidationCF covers small changes
     require(is_borrow_collateralized(caller), Error::NotCollateralized);
@@ -884,10 +879,10 @@ impl Market for Contract {
             storage.debug_step = debug_step.unwrap();
         }
         let mut market_basic = storage.market_basic;
-        market_basic.base_supply_index= SCALE_18;
-        market_basic.base_borrow_index= SCALE_18;
-        market_basic.tracking_supply_index= SCALE_18;
-        market_basic.tracking_borrow_index= SCALE_18;
+        market_basic.base_supply_index = SCALE_18;
+        market_basic.base_borrow_index = SCALE_18;
+        market_basic.tracking_supply_index = SCALE_18;
+        market_basic.tracking_borrow_index = SCALE_18;
         storage.market_basic = market_basic;
     }
 
@@ -911,8 +906,7 @@ impl Market for Contract {
 
     #[storage(read)]
     fn get_user_collateral(address: Address, asset: ContractId) -> u64 {
-        let key = sha256((address, asset));
-        storage.user_collateral.get(key)
+        storage.user_collateral.get((address, asset))
     }
 
     #[storage(read)]
@@ -950,20 +944,20 @@ impl Market for Contract {
         while index < storage.asset_configs.len() {
             let asset_config = match storage.asset_configs.get(index) {
                 Option::Some(asset_config) => asset_config,
-                Option::None => continue,
+                Option::None => {
+                    index = index + 1;
+                    continue
+                },
             };
 
-            // let balance = this_balance(asset_config.asset); // decimals asset_config.decimals
-            let key = sha256((account, asset_config.asset));
-            let balance = storage.user_collateral.get(key);
+            let balance = storage.user_collateral.get((account, asset_config.asset));
             let balance = U128::from_u64(balance);
-            
             let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
             let price = U128::from_u64(price);
 
             let collateral_factor = U128::from_u64(asset_config.borrow_collateral_factor); // decimals 4
             let scale = U128::from_u64(10.pow(asset_config.decimals));
-            
+
             borrow_limit += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
             index = index + 1;
         };
@@ -1017,7 +1011,7 @@ impl Market for Contract {
         accrue_internal();
         let mut i = 0;
         while i < accounts.len() {
-            absorb_internal(accounts.get(i).unwrap());
+            absorb_internal(accounts.get(0).unwrap());
             i += 1;
         }
     }
@@ -1027,28 +1021,26 @@ impl Market for Contract {
         // require(!is_absorb_paused(), Error::Paused);
         // let absorber = get_caller();
         accrue_internal();
-        
+
         let account = accounts.get(0).unwrap();
         let account_user = storage.user_basic.get(account);
-        
-        let key = sha256((account, asset));
-        let seize_amount = storage.user_collateral.get(key); // asset decimals
 
-        storage.user_collateral.insert(key, 0);
+        let seize_amount = storage.user_collateral.get((account, asset)); // asset decimals
+        storage.user_collateral.insert((account, asset), 0);
         let total_collateral = storage.totals_collateral.get(asset); // asset decimals
         storage.totals_collateral.insert(asset, total_collateral - seize_amount);
-        
+
         let supply_amount = 17_276_598;
         let new_principal = I64::from(supply_amount);
         let mut market_basic = storage.market_basic;
 
         let new_principal = principal_value_supply(storage.market_basic.base_supply_index, supply_amount);
-            
+
         update_base_principal(account, account_user, I64::from(new_principal));
-            
+
         market_basic.total_supply_base += supply_amount;
         market_basic.total_borrow_base = 0;
-        storage.market_basic = market_basic; 
+        storage.market_basic = market_basic;
     }
 
     #[storage(read)]
