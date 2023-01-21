@@ -131,10 +131,13 @@ class DashboardVm {
       })
       .txParams({ gasPrice: 1 })
       .call()
-      .catch((e) =>
-        notificationStore.notify("", { type: "error", title: "oops" })
+      .catch(
+        (e) =>
+          e != null &&
+          notificationStore.notify("", { type: "error", title: "oops" })
       )
       .then(accountStore.updateAccountBalances)
+      .then(this.updateAccountInfo)
       .finally(() => {
         notificationStore.notify(
           `You have successfully deposited ${this.formattedTokenAmount} ${this.baseToken.symbol}`,
