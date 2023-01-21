@@ -135,16 +135,6 @@ const Header: React.FC<IProps> = () => {
           </Desktop>
         </Row>
         <Mobile>
-          {/*<img*/}
-          {/*  onClick={() => toggleMenu(!mobileMenuOpened)}*/}
-          {/*  className="icon"*/}
-          {/*  src={*/}
-          {/*    mobileMenuOpened*/}
-          {/*      ? theme.images.icons.mobileMenuClose*/}
-          {/*      : theme.images.icons.mobileMenu*/}
-          {/*  }*/}
-          {/*  alt="menuControl"*/}
-          {/*/>*/}
           <MobileMenuIcon
             onClick={() => toggleMenu(!mobileMenuOpened)}
             opened={mobileMenuOpened}
