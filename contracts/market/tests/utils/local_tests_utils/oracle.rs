@@ -74,7 +74,7 @@ pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleCont
     let id = Contract::deploy(
         "./tests/artefacts/oracle/oracle.bin",
         &wallet,
-        TxParameters::default(),
+        TxParameters::new(Some(0), Some(100_000_000), Some(0)),
         StorageConfiguration::default(),
     )
     .await

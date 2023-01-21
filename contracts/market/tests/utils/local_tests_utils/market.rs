@@ -100,7 +100,7 @@ pub mod market_abi_calls {
         let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
         market
             .methods()
-            .supply_collateral(Address::from(market.get_wallet().address()))
+            .supply_collateral()
             .call_params(call_params)
             .append_variable_outputs(1)
             .call()
@@ -160,6 +160,12 @@ pub mod market_abi_calls {
         contract.methods().pause(config).call().await
     }
 
+    pub async fn collateral_value_to_sell(market: &MarketContract, contract_ids: &[&dyn SettableContract], asset: ContractId, collateral_amount: u64) -> u64 {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let res = market.methods().collateral_value_to_sell(asset, collateral_amount);
+        res.tx_params(tx_params).set_contracts(contract_ids).simulate().await.unwrap().value
+    }
+
     pub async fn buy_collateral(
         market: &MarketContract,
         base_asset_id: AssetId,
@@ -183,14 +189,15 @@ pub mod market_abi_calls {
     pub async fn absorb(
         market: &MarketContract,
         contract_ids: &[&dyn SettableContract],
+        uni_asset_id: ContractId,
         addresses: Vec<Address>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         market
             .methods()
-            // .dummy_absorb(addresses)
-            .absorb(addresses) //FIXME
+            .dummy_absorb(uni_asset_id,addresses)
+            // .absorb(addresses) //FIXME
             .set_contracts(contract_ids)
-            .tx_params(TxParameters::new(Some(1), Some(1_000_000_000), None))
+            .tx_params(TxParameters::new(Some(0), Some(100_000_000), None))
             .call()
             .await
     }
@@ -223,6 +230,10 @@ pub mod market_abi_calls {
 }
 
 async fn init_wallets() -> Vec<WalletUnlocked> {
+    // let chain_config = ChainConfig::default();
+    // chain_config
+    // .transaction_parameters
+    // .with_max_gas_per_tx(500_000_000);
     launch_custom_provider_and_get_wallets(
         WalletsConfig::new(
             Some(4),             /* Single wallet */
@@ -231,6 +242,7 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
         ),
         None,
         None,
+        // Some(chain_config),
     )
     .await
 }

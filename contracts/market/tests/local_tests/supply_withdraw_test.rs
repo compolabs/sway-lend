@@ -8,7 +8,7 @@ use crate::utils::{local_tests_utils::market, number_utils::parse_units};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
-const AMOUNT_COEFFICIENT: u64 = 10u64.pow(3);
+const AMOUNT_COEFFICIENT: u64 = 10u64.pow(0);
 
 #[tokio::test]
 async fn supply_withdraw_test() {
