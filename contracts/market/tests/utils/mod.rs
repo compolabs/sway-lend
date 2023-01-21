@@ -78,7 +78,7 @@ pub async fn debug_state(
     );
     let uni_reservs = market_abi_calls::get_collateral_reserves(&market, uni_contract_id).await;
     let uni_reservs = format!(
-        "{}{} USDC",
+        "{}{} UNI",
         if uni_reservs.negative { "-" } else { "+" },
         uni_reservs.value as f64 / 10u64.pow(9) as f64
     );

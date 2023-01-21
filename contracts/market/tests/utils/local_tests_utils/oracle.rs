@@ -1,18 +1,28 @@
-use fuels::{prelude::{abigen, Contract, TxParameters, StorageConfiguration}, signers::WalletUnlocked};
+use fuels::{
+    prelude::{abigen, Contract, SettableContract, StorageConfiguration, TxParameters},
+    signers::WalletUnlocked,
+};
 
-abigen!(OracleContract, "tests/artefacts/oracle/oracle-abi.json");
+abigen!(Contract(
+    name = "OracleContract",
+    abi = "tests/artefacts/oracle/oracle-abi.json"
+));
 
 pub mod oracle_abi_calls {
     use std::collections::HashMap;
 
     use fuels::{
-        contract::call_response::FuelCallResponse,
+        programs::call_response::FuelCallResponse,
         tx::{Address, ContractId},
     };
 
     use crate::utils::local_tests_utils::Asset;
 
     use super::*;
+
+    pub fn get_as_settable_contract(contract: &OracleContract) -> [&dyn SettableContract; 1] {
+        [contract]
+    }
 
     pub async fn initialize(contract: &OracleContract, owner: Address) -> FuelCallResponse<()> {
         contract.methods().initialize(owner).call().await.unwrap()
@@ -64,7 +74,7 @@ pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleCont
     let id = Contract::deploy(
         "./tests/artefacts/oracle/oracle.bin",
         &wallet,
-        TxParameters::default(),
+        TxParameters::new(Some(0), Some(100_000_000), Some(0)),
         StorageConfiguration::default(),
     )
     .await

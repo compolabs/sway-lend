@@ -2,21 +2,22 @@ use crate::utils::number_utils::parse_units;
 use fuels::{
     prelude::{abigen, Contract, StorageConfiguration, TxParameters},
     signers::WalletUnlocked,
-    tx::{Address, Salt},
+    tx::{Address, Salt}, types::SizedAsciiString,
 };
 use rand::prelude::Rng;
 
 use super::DeployTokenConfig;
 
-abigen!(
-    TokenContract,
-    "tests/artefacts/token/token_contract-abi.json"
-);
+abigen!(Contract(
+    name = "TokenContract",
+    abi = "tests/artefacts/token/token_contract-abi.json"
+));
 
 pub mod token_abi_calls {
 
+    use fuels::programs::call_response::FuelCallResponse;
+
     use super::*;
-    use fuels::contract::call_response::FuelCallResponse;
 
     pub async fn mint(c: &TokenContract) -> FuelCallResponse<()> {
         let res = c.methods().mint().append_variable_outputs(1).call().await;
@@ -76,8 +77,8 @@ pub async fn get_token_contract_instance(
     symbol.push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
 
     let config: TokenInitializeConfig = TokenInitializeConfig {
-        name: fuels::core::types::SizedAsciiString::<32>::new(name).unwrap(),
-        symbol: fuels::core::types::SizedAsciiString::<8>::new(symbol).unwrap(),
+        name: SizedAsciiString::<32>::new(name).unwrap(),
+        symbol: SizedAsciiString::<8>::new(symbol).unwrap(),
         decimals,
     };
 
