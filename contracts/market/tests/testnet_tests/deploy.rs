@@ -2,11 +2,10 @@ use std::{collections::HashMap, fs, str::FromStr};
 
 use dotenv::dotenv;
 use fuels::prelude::*;
-use market_contract_mod::MarketConfiguration;
 
 use crate::utils::{
     local_tests_utils::{
-        market::{deploy_market_contract, market_abi_calls, market_contract_mod},
+        market::{deploy_market_contract, market_abi_calls, abigen_bindings::market_contract_mod},
         oracle::OracleContract,
         token::TokenContract,
         Asset, DeployTokenConfig,
@@ -106,7 +105,7 @@ async fn deploy() {
     let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
     let config = config.as_object().unwrap();
 
-    let market_config = MarketConfiguration {
+    let market_config = market_contract_mod::MarketConfiguration {
         governor: address,
         pause_guardian: address,
         base_token: assets.get("USDC").unwrap().contract_id,

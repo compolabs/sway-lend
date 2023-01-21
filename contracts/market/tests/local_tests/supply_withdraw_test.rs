@@ -8,7 +8,7 @@ use crate::utils::{local_tests_utils::market, number_utils::parse_units};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
-const AMOUNT_COEFFICIENT: u64 = 10u64.pow(3);
+const AMOUNT_COEFFICIENT: u64 = 10u64.pow(0);
 
 #[tokio::test]
 async fn supply_withdraw_test() {
@@ -47,6 +47,7 @@ async fn supply_withdraw_test() {
     println!("1 USDC = $ ⎮ 1 UNI = $5\n");
     debug_state(&market, &wallets, usdc.contract_id, uni.contract_id).await;
 
+    let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
     // =================================================
     // ==================== Case #0 ====================
     // 👛 Wallet: Bob 🧛
@@ -119,8 +120,8 @@ async fn supply_withdraw_test() {
 
     // Alice calls withdraw_base
     let inst = market.with_wallet(alice.clone()).unwrap();
-    let cotarcts = [oracle.get_contract_id().clone()];
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+
+    market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
 
@@ -203,7 +204,7 @@ async fn supply_withdraw_test() {
 
     //Alice calls withdraw_base
     let inst = market.with_wallet(alice.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
 
@@ -226,7 +227,7 @@ async fn supply_withdraw_test() {
 
     //Chad calls withdraw_base
     let inst = market.with_wallet(chad.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
 
@@ -310,7 +311,7 @@ async fn supply_withdraw_test() {
 
     //Bob calls withdraw_base
     let inst = market.with_wallet(bob.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &cotarcts, amount)
+    market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
 
@@ -335,7 +336,7 @@ async fn supply_withdraw_test() {
     //Alice calls withdraw_base
     let inst = market.with_wallet(alice.clone()).unwrap();
 
-    market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
+    market_abi_calls::withdraw_collateral(&inst, &contracts, uni.contract_id, amount)
         .await
         .unwrap();
 
@@ -359,7 +360,7 @@ async fn supply_withdraw_test() {
     //Chad calls withdraw_base
     let inst = market.with_wallet(chad.clone()).unwrap();
 
-    market_abi_calls::withdraw_collateral(&inst, &cotarcts, uni.contract_id, amount)
+    market_abi_calls::withdraw_collateral(&inst, &contracts, uni.contract_id, amount)
         .await
         .unwrap();
 
