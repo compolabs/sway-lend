@@ -248,7 +248,7 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
         WalletsConfig::new(
             Some(4),             /* Single wallet */
             Some(1),             /* Single coin (UTXO) */
-            Some(1_000_000_000), /* Amount per coin */
+            Some(1_000_000_000_000_000), /* Amount per coin */
         ),
         None,
         None,

@@ -2,7 +2,8 @@ use crate::utils::number_utils::parse_units;
 use fuels::{
     prelude::{abigen, Contract, StorageConfiguration, TxParameters},
     signers::WalletUnlocked,
-    tx::{Address, Salt}, types::SizedAsciiString,
+    tx::{Address, Salt},
+    types::SizedAsciiString,
 };
 use rand::prelude::Rng;
 
@@ -15,7 +16,7 @@ abigen!(Contract(
 
 pub mod token_abi_calls {
 
-    use fuels::programs::call_response::FuelCallResponse;
+    use fuels::{prelude::BASE_ASSET_ID, programs::call_response::FuelCallResponse};
 
     use super::*;
 
@@ -46,6 +47,22 @@ pub mod token_abi_calls {
             .call()
             .await
             .expect("❌ Cannot initialize token")
+    }
+    pub async fn config(c: &TokenContract) -> TokenInitializeConfig {
+        if c.get_contract_id().hash().to_string() == BASE_ASSET_ID.to_string() {
+            let mut name = String::from("Etherium");
+            let mut symbol = String::from("ETH");
+            name.push_str(" ".repeat(32 - name.len()).as_str());
+            symbol.push_str(" ".repeat(8 - symbol.len()).as_str());
+
+            TokenInitializeConfig {
+                name: SizedAsciiString::<32>::new(name).unwrap(),
+                symbol: SizedAsciiString::<8>::new(symbol).unwrap(),
+                decimals: 9,
+            }
+        } else {
+            c.methods().config().simulate().await.unwrap().value
+        }
     }
 }
 
