@@ -10,6 +10,7 @@ import {
 } from "@src/constants";
 import BN from "@src/utils/BN";
 import { MarketAbi, MarketAbi__factory } from "@src/contracts";
+import { MarketBasicsOutput } from "@src/contracts/MarketAbi";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
@@ -37,11 +38,8 @@ class DashboardVm {
     this.rootStore = rootStore;
     makeAutoObservable(this);
     this.initMarketContract();
-    Promise.all([
-      this.updateAccountInfo(),
-      this.updateSupplyAndBorrowRates(),
-    ]).then(() => this.setInitialized(true));
-    // this.updateAccountInfo().then(() => this.setInitialized(true));
+    this.updateMarketState().then(() => this.setInitialized(true));
+    // this.updateMarketState();
 
     reaction(() => this.rootStore.accountStore.seed, this.initMarketContract);
   }
@@ -62,7 +60,10 @@ class DashboardVm {
   setSupplyRate = (l: BN | null) => (this.supplyRate = l);
 
   borrowRate: BN | null = null;
-  setBorrowRate = (l: BN | null) => (this.supplyRate = l);
+  setBorrowRate = (l: BN | null) => (this.borrowRate = l);
+
+  marketBasic: MarketBasicsOutput | null = null;
+  setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
 
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
@@ -77,6 +78,13 @@ class DashboardVm {
     this.setMarketContract(marketContract);
   };
 
+  updateMarketState = () =>
+    Promise.all([
+      this.updateAccountInfo(),
+      this.updateSupplyAndBorrowRates(),
+      this.updateMarketBasic(),
+    ]);
+
   updateAccountInfo = async () => {
     const { addressInput } = this.rootStore.accountStore;
     if (this.marketContract == null || addressInput == null) return;
@@ -87,6 +95,16 @@ class DashboardVm {
     this.setSuppliedBalance(new BN(value[0].toString()));
     this.setBorrowedBalance(new BN(value[1].toString()));
   };
+
+  updateMarketBasic = async () => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    const { value } = await this.marketContract.functions
+      .get_market_basics()
+      .get();
+    this.setMarketBasic(value);
+  };
+
   updateSupplyAndBorrowRates = async () => {
     const { addressInput } = this.rootStore.accountStore;
     if (this.marketContract == null || addressInput == null) return;
@@ -161,7 +179,7 @@ class DashboardVm {
         return;
       })
       .then(accountStore.updateAccountBalances)
-      .then(this.updateAccountInfo)
+      .then(this.updateMarketState)
       .finally(() => {
         notificationStore.notify(
           `You have successfully deposited ${this.formattedTokenAmount} ${this.baseToken.symbol}`,
@@ -198,7 +216,7 @@ class DashboardVm {
         return;
       })
       .then(accountStore.updateAccountBalances)
-      .then(this.updateAccountInfo)
+      .then(this.updateMarketState)
       .finally(() => {
         notificationStore.notify(
           `You have successfully withdrawn ${this.formattedTokenAmount} ${this.baseToken.symbol}`,
@@ -352,23 +370,26 @@ class DashboardVm {
 
   get borrowApr() {
     if (this.borrowRate == null) return null;
-    return this.borrowRate
-      .times(365)
-      .times(24)
-      .times(60)
-      .times(60)
-      .times(100)
-      .toFormat(2);
+    const rate = BN.formatUnits(this.borrowRate, 18);
+    return (
+      rate.times(365).times(24).times(60).times(60).times(100).toFormat(2) + "%"
+    );
   }
 
   get supplyApr() {
     if (this.supplyRate == null) return null;
-    return this.supplyRate
-      .times(365)
-      .times(24)
-      .times(60)
-      .times(60)
-      .times(100)
-      .toFormat(2);
+    const rate = BN.formatUnits(this.supplyRate, 18);
+    return (
+      rate.times(365).times(24).times(60).times(60).times(100).toFormat(2) + "%"
+    );
+  }
+
+  get totalLiquidity() {
+    if (this.marketBasic == null) return null;
+    const { total_borrow_base, total_supply_base } = this.marketBasic;
+    const value = new BN(total_supply_base.toString()).minus(
+      total_borrow_base.toString()
+    );
+    return "$" + BN.formatUnits(value, this.baseToken.decimals).toFormat(2);
   }
 }

@@ -10,6 +10,7 @@ import { ACTION_TYPE, useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import { useStores } from "@stores";
 import Tooltip from "@components/Tooltip";
 import TokenInfo from "@screens/Dashboard/TokenInfo";
+import Skeleton from "react-loading-skeleton";
 
 interface IProps {}
 
@@ -42,6 +43,21 @@ const Header = styled.div`
   margin-bottom: 2px;
   background: ${({ theme }) => theme.colors.dashboard.tokenRowColor};
 `;
+
+const TokenRowSkeleton = () => (
+  <TokenRow>
+    <Row>
+      <Skeleton width={40} height={40} style={{ borderRadius: 50 }} />
+      <SizedBox width={20} />
+      <Column>
+        <Skeleton height={24} width={100} />
+        <Skeleton height={16} width={100} />
+      </Column>
+    </Row>
+    <div />
+    <Skeleton height={16} width={100} />
+  </TokenRow>
+);
 const AssetsTable: React.FC<IProps> = () => {
   const { accountStore } = useStores();
   const vm = useDashboardVM();
@@ -66,6 +82,8 @@ const AssetsTable: React.FC<IProps> = () => {
         const userBalance = accountStore.getBalance(token);
         const canWithdraw = false;
         const canSupply = userBalance != null && userBalance.gt(0);
+        const balance = accountStore.getFormattedBalance(token);
+        if (!vm.initialized) return <TokenRowSkeleton />;
         return (
           <TokenRow key={token.assetId}>
             <Tooltip content={<TokenInfo assetId={token.assetId} />}>
@@ -74,8 +92,8 @@ const AssetsTable: React.FC<IProps> = () => {
                 <SizedBox width={20} />
                 <Column>
                   <Text weight={600}>{token.name}</Text>
-                  <Text weight={500} type="secondary">
-                    {token.symbol}
+                  <Text size="small" weight={600} type="secondary">
+                    {`${token.symbol} • ${balance} in wallet`}
                   </Text>
                 </Column>
               </Row>

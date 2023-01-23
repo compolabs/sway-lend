@@ -36,6 +36,7 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     { title: "Wallet balance", value: "0.0000" },
     { title: "Borrow potential", value: "0.0000" },
   ];
+  //todo add disconnected state
   return (
     <Root>
       <Text weight={600} size="medium">

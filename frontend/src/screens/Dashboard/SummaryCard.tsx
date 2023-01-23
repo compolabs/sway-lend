@@ -6,6 +6,7 @@ import { Row } from "@components/Flex";
 import Card from "@components/Card";
 import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import { observer } from "mobx-react-lite";
+import Skeleton from "react-loading-skeleton";
 
 interface IProps {}
 
@@ -13,9 +14,15 @@ const SummaryCard: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   if (vm.mode === 0) return null;
   const stats = [
-    { title: "Supply APY", value: "60.17%" },
-    { title: "Borrow APY", value: "12.32%" },
-    { title: "Total liquidity", value: "$354,285.32" },
+    {
+      title: "Supply APR",
+      value: vm.supplyApr,
+    },
+    {
+      title: "Borrow APR",
+      value: vm.borrowApr,
+    },
+    { title: "Total liquidity", value: vm.totalLiquidity },
   ];
   return (
     <Card>
@@ -28,9 +35,13 @@ const SummaryCard: React.FC<IProps> = () => {
       {stats.map(({ value, title }, index) => (
         <Row key={index} style={{ marginBottom: 12 }}>
           <Text weight={600}>{title}</Text>
-          <Text textAlign="right" weight={600}>
-            {value}
-          </Text>
+          {value == null ? (
+            <Skeleton height={24} width={100} />
+          ) : (
+            <Text textAlign="right" weight={600}>
+              {value}
+            </Text>
+          )}
         </Row>
       ))}
     </Card>

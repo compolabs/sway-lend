@@ -70,6 +70,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 Connect wallet
               </Button>
             );
+          //todo add loading state
           if (vm.alreadyMintedTokens.includes(t.assetId))
             return (
               <Button fixed disabled>
@@ -99,6 +100,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
     );
   }, [
     accountStore.address,
+    accountStore.isLoggedIn,
     settingsStore,
     vm.loading,
     vm.alreadyMintedTokens,
