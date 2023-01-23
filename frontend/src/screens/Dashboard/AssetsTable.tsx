@@ -11,6 +11,7 @@ import { useStores } from "@stores";
 import Tooltip from "@components/Tooltip";
 import TokenInfo from "@screens/Dashboard/TokenInfo";
 import Skeleton from "react-loading-skeleton";
+import BN from "@src/utils/BN";
 
 interface IProps {}
 
@@ -80,10 +81,19 @@ const AssetsTable: React.FC<IProps> = () => {
       </Header>
       {vm.collaterals.map((token) => {
         const userBalance = accountStore.getBalance(token);
-        const canWithdraw = false;
         const canSupply = userBalance != null && userBalance.gt(0);
-        const balance = accountStore.getFormattedBalance(token);
-        if (!vm.initialized) return <TokenRowSkeleton />;
+        const walletBalance = accountStore.getFormattedBalance(token);
+        const protocolBalance =
+          vm.collateralBalances != null
+            ? vm.collateralBalances[token.assetId]
+            : BN.ZERO;
+        const canWithdraw = protocolBalance.gt(0);
+        const protocolBalanceFormatted = BN.formatUnits(
+          protocolBalance,
+          token.decimals
+        ).toFormat(2);
+
+        if (!vm.initialized) return <TokenRowSkeleton key={token.assetId} />;
         return (
           <TokenRow key={token.assetId}>
             <Tooltip content={<TokenInfo assetId={token.assetId} />}>
@@ -93,7 +103,7 @@ const AssetsTable: React.FC<IProps> = () => {
                 <Column>
                   <Text weight={600}>{token.name}</Text>
                   <Text size="small" weight={600} type="secondary">
-                    {`${token.symbol} • ${balance} in wallet`}
+                    {`${token.symbol} • ${walletBalance} in wallet`}
                   </Text>
                 </Column>
               </Row>
@@ -101,7 +111,7 @@ const AssetsTable: React.FC<IProps> = () => {
             <div />
             <Row justifyContent="flex-end" alignItems="center">
               <Text type="secondary" size="small" fitContent>
-                0.000
+                {protocolBalanceFormatted}
               </Text>
               <SizedBox width={24} />
               <Symbol

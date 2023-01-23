@@ -93,7 +93,7 @@ const DashboardStats: React.FC<IProps> = () => {
                   {vm.mode === 0 ? "Supply APR" : "Borrow APR"}
                 </Text>
                 <Text className="data" weight={600}>
-                  {vm.mode === 0 ? vm.supplyApr : vm.supplyApr}
+                  {vm.mode === 0 ? vm.supplyApr : vm.borrowApr}
                 </Text>
               </Column>
             </Row>

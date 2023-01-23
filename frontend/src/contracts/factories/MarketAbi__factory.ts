@@ -511,6 +511,21 @@ const _abi = {
     {
       "inputs": [
         {
+          "name": "account",
+          "type": 8,
+          "typeArguments": null
+        }
+      ],
+      "name": "available_to_borrow",
+      "output": {
+        "name": "",
+        "type": 18,
+        "typeArguments": null
+      }
+    },
+    {
+      "inputs": [
+        {
           "name": "asset",
           "type": 10,
           "typeArguments": null
@@ -558,8 +573,54 @@ const _abi = {
       }
     },
     {
+      "inputs": [
+        {
+          "name": "asset",
+          "type": 10,
+          "typeArguments": null
+        },
+        {
+          "name": "collateral_amount",
+          "type": 18,
+          "typeArguments": null
+        }
+      ],
+      "name": "collateral_value_to_sell",
+      "output": {
+        "name": "",
+        "type": 18,
+        "typeArguments": null
+      }
+    },
+    {
       "inputs": [],
       "name": "debug_increment_timestamp",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "asset",
+          "type": 10,
+          "typeArguments": null
+        },
+        {
+          "name": "accounts",
+          "type": 17,
+          "typeArguments": [
+            {
+              "name": "",
+              "type": 8,
+              "typeArguments": null
+            }
+          ]
+        }
+      ],
+      "name": "dummy_absorb",
       "output": {
         "name": "",
         "type": 0,
@@ -626,6 +687,21 @@ const _abi = {
       "output": {
         "name": "",
         "type": 12,
+        "typeArguments": null
+      }
+    },
+    {
+      "inputs": [
+        {
+          "name": "asset",
+          "type": 10,
+          "typeArguments": null
+        }
+      ],
+      "name": "get_oracle_price",
+      "output": {
+        "name": "",
+        "type": 18,
         "typeArguments": null
       }
     },
@@ -824,13 +900,7 @@ const _abi = {
       }
     },
     {
-      "inputs": [
-        {
-          "name": "dst",
-          "type": 8,
-          "typeArguments": null
-        }
-      ],
+      "inputs": [],
       "name": "supply_collateral",
       "output": {
         "name": "",

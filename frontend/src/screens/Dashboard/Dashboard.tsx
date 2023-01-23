@@ -11,7 +11,7 @@ import { Column } from "@src/components/Flex";
 import SwitchActions from "./SwitchActions";
 import ActionTab from "./ActionTab";
 import SummaryCard from "./SummaryCard";
-import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
+// import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
 
 interface IProps {}
 
@@ -52,8 +52,8 @@ const DashboardImpl: React.FC<IProps> = () => {
               {width && width >= 880 ? (
                 <>
                   <Column crossAxisSize="max">
-                    <AvailableToBorrow />
-                    <SizedBox height={16} />
+                    {/*<AvailableToBorrow />*/}
+                    {/*<SizedBox height={16} />*/}
                     <AssetsTable />
                   </Column>
                   <Column crossAxisSize="max">
@@ -66,8 +66,8 @@ const DashboardImpl: React.FC<IProps> = () => {
                 </>
               ) : (
                 <>
-                  <AvailableToBorrow />
-                  <SizedBox height={16} />
+                  {/*<AvailableToBorrow />*/}
+                  {/*<SizedBox height={16} />*/}
                   <SwitchActions />
                   <SizedBox height={16} />
                   <ActionTab />

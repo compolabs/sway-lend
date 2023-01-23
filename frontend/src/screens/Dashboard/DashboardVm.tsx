@@ -9,8 +9,13 @@ import {
   TOKENS_BY_SYMBOL,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import { MarketAbi, MarketAbi__factory } from "@src/contracts";
+import {
+  MarketAbi,
+  MarketAbi__factory,
+  OracleAbi__factory,
+} from "@src/contracts";
 import { MarketBasicsOutput } from "@src/contracts/MarketAbi";
+import { Contract } from "fuels";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
@@ -71,6 +76,10 @@ class DashboardVm {
   setMaxBorrowBaseTokenAmount = (l: BN | null) =>
     (this.maxBorrowBaseTokenAmount = l);
 
+  collateralBalances: Record<string, BN> | null = null;
+  setCollateralBalances = (l: Record<string, BN> | null) =>
+    (this.collateralBalances = l);
+
   initMarketContract = () => {
     const { address, wallet } = this.rootStore.accountStore;
     if (address == null || wallet == null) return;
@@ -87,6 +96,7 @@ class DashboardVm {
       this.updateSupplyAndBorrowRates(),
       this.updateMarketBasic(),
       this.updateMaxBorrowAmount(),
+      this.updateUserCollateralBalances(),
     ]);
 
   updateAccountInfo = async () => {
@@ -112,8 +122,40 @@ class DashboardVm {
   updateMaxBorrowAmount = async () => {
     const { addressInput } = this.rootStore.accountStore;
     if (this.marketContract == null || addressInput == null) return;
-    // const { value } = await this.marketContract.functions().get();
-    // this.setMarketBasic(value);
+    const oracle = new Contract(
+      CONTRACT_ADDRESSES.priceOracle,
+      OracleAbi__factory.abi
+    );
+    const { value } = await this.marketContract.functions
+      .available_to_borrow(addressInput)
+      .txParams({ gasLimit: (1e8).toString() })
+      .addContracts([oracle])
+      .get();
+    this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
+  };
+
+  //fn get_user_collateral(address: Address, asset: ContractId)
+  updateUserCollateralBalances = async () => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    const collaterals = this.collaterals;
+
+    const functions = collaterals.map((b) =>
+      this.marketContract?.functions
+        .get_user_collateral(addressInput, {
+          value: b.assetId,
+        })
+        .get()
+    );
+    const data = await Promise.all(functions);
+    if (data.length > 0) {
+      const v = data.reduce((acc, res, index) => {
+        if (res == null) return acc;
+        const assetId = collaterals[index].assetId;
+        return { ...acc, [assetId]: new BN(res.value.toString()) };
+      }, {});
+      this.setCollateralBalances(v);
+    }
   };
 
   updateSupplyAndBorrowRates = async () => {
@@ -166,7 +208,6 @@ class DashboardVm {
   supplyBase = async () => {
     const { accountStore, notificationStore } = this.rootStore;
     if (
-      this.action !== ACTION_TYPE.SUPPLY ||
       this.tokenAmount == null ||
       accountStore.seed == null ||
       this.marketContract == null ||
@@ -179,7 +220,10 @@ class DashboardVm {
     await this.marketContract.functions
       .supply_base()
       .callParams({
-        forward: [this.tokenAmount.toString(), this.baseToken.assetId],
+        forward: {
+          amount: this.tokenAmount.toString(),
+          assetId: this.baseToken.assetId,
+        },
       })
       .txParams({ gasPrice: 1 })
       .call()
@@ -207,7 +251,6 @@ class DashboardVm {
     if (
       this.action !== ACTION_TYPE.WITHDRAW ||
       this.tokenAmount == null ||
-      accountStore.seed == null ||
       this.marketContract == null ||
       this.tokenAmount.lte(0)
     )
@@ -241,10 +284,124 @@ class DashboardVm {
   };
 
   supplyCollateral = async () => {
-    console.log("supplyCollateral");
+    const { accountStore, notificationStore } = this.rootStore;
+    if (
+      this.tokenAmount == null ||
+      this.actionTokenAssetId == null ||
+      this.marketContract == null ||
+      this.tokenAmount.eq(0)
+    )
+      return;
+
+    this._setLoading(true);
+    await this.marketContract.functions
+      .supply_collateral()
+      .callParams({
+        forward: {
+          assetId: this.actionTokenAssetId,
+          amount: this.tokenAmount.toString(),
+        },
+      })
+      .txParams({ gasPrice: 1 })
+      .call()
+      .catch((err) => {
+        console.log("err", err);
+        err != null &&
+          notificationStore.notify("", { type: "error", title: "oops" });
+        return;
+      })
+      .then(accountStore.updateAccountBalances)
+      .then(this.updateMarketState)
+      .finally(() => {
+        notificationStore.notify(
+          `You have successfully deposited ${this.formattedTokenAmount} ${this.actionToken.symbol}`,
+          {
+            type: "success",
+            title: "Congrats!",
+          }
+        );
+        this._setLoading(false);
+      });
   };
+  withdrawCollateral = async () => {
+    const { accountStore, notificationStore } = this.rootStore;
+    if (
+      this.action !== ACTION_TYPE.WITHDRAW ||
+      this.tokenAmount == null ||
+      this.actionTokenAssetId == null ||
+      this.marketContract == null ||
+      this.tokenAmount.lte(0)
+    )
+      return;
+
+    this._setLoading(true);
+    const am = this.tokenAmount.toString();
+
+    await this.marketContract.functions
+      .withdraw_collateral({ value: this.actionTokenAssetId }, am)
+      .txParams({ gasPrice: 1 })
+      .call()
+      .catch((err) => {
+        console.log("err", err);
+        err != null &&
+          notificationStore.notify("", { type: "error", title: "oops" });
+        return;
+      })
+      .then(accountStore.updateAccountBalances)
+      .then(this.updateMarketState)
+      .finally(() => {
+        notificationStore.notify(
+          `You have successfully withdrawn ${this.formattedTokenAmount} ${this.actionToken.symbol}`,
+          {
+            type: "success",
+            title: "Congrats!",
+          }
+        );
+        this._setLoading(false);
+      });
+  };
+
   borrowBase = async () => {
     console.log("borrowBase");
+    const { accountStore, notificationStore } = this.rootStore;
+    if (
+      this.tokenAmount == null ||
+      this.maxBorrowBaseTokenAmount == null ||
+      this.marketContract == null ||
+      this.tokenAmount.lte(0)
+    )
+      return;
+
+    this._setLoading(true);
+    const am = this.tokenAmount.toString();
+
+    const oracle = new Contract(
+      CONTRACT_ADDRESSES.priceOracle,
+      OracleAbi__factory.abi
+    );
+    await this.marketContract.functions
+      .withdraw_base(am)
+      .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
+      .addContracts([oracle])
+      .call()
+      .catch((err) => {
+        console.log("err", err);
+        err != null &&
+          notificationStore.notify("", { type: "error", title: "oops" });
+        return;
+      })
+      .then(accountStore.updateAccountBalances)
+      .then(this.updateMarketState)
+      .finally(() => {
+        notificationStore.notify(
+          `You have successfully borrowed ${this.formattedTokenAmount} ${this.baseToken.symbol}`,
+          {
+            type: "success",
+            title: "Congrats!",
+          }
+        );
+        this._setLoading(false);
+      });
   };
 
   onMaxBtnClick() {
@@ -256,54 +413,81 @@ class DashboardVm {
       this.setTokenAmount(tokenBalance?.balance ?? BN.ZERO);
     }
     if (this.action === ACTION_TYPE.WITHDRAW) {
-      this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
+      if (this.actionTokenAssetId === this.baseToken.assetId) {
+        this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
+      } else {
+        const balance =
+          this.collateralBalances == null
+            ? BN.ZERO
+            : this.collateralBalances[this.actionTokenAssetId];
+        this.setTokenAmount(balance);
+      }
+    }
+    if (this.action === ACTION_TYPE.BORROW) {
+      //because this value has 9 decimals
+      this.setTokenAmount(this.maxBorrowBaseTokenAmount?.div(1000) ?? BN.ZERO);
     }
   }
 
   get tokenInputBalance(): string {
     if (this.actionTokenAssetId == null) return "";
-    else if (this.action === ACTION_TYPE.SUPPLY) {
+    if (
+      this.action === ACTION_TYPE.SUPPLY ||
+      this.action === ACTION_TYPE.REPAY
+    ) {
       return (
         this.rootStore.accountStore.getFormattedBalance(this.actionToken) ??
         "0.00"
       );
-    } else if (
-      this.action === ACTION_TYPE.BORROW &&
-      this.actionToken === this.baseToken
-    ) {
-      return "borrow base";
-    } else if (
-      this.action === ACTION_TYPE.WITHDRAW &&
-      this.actionToken === this.baseToken
-    ) {
-      return BN.formatUnits(
-        this.suppliedBalance ?? BN.ZERO,
-        this.baseToken.decimals
-      ).toFormat(2);
-    } else if (this.action === ACTION_TYPE.REPAY) {
-      return "return borrow";
     }
+    if (this.action === ACTION_TYPE.BORROW) {
+      if (this.actionToken === this.baseToken) {
+        return BN.formatUnits(
+          this.maxBorrowBaseTokenAmount ?? BN.ZERO,
+          9
+        ).toFormat(2);
+      }
+    }
+    if (this.action === ACTION_TYPE.WITHDRAW) {
+      if (this.actionToken === this.baseToken) {
+        return BN.formatUnits(
+          this.suppliedBalance ?? BN.ZERO,
+          this.baseToken.decimals
+        ).toFormat(2);
+      } else {
+        const balance =
+          this.collateralBalances == null
+            ? BN.ZERO
+            : this.collateralBalances[this.actionTokenAssetId];
+        return BN.formatUnits(balance, this.baseToken.decimals).toFormat(2);
+      }
+    }
+    // if (this.action === ACTION_TYPE.REPAY) {
+    //   return "return borrow";
+    // }
     return "";
   }
 
   marketAction = () => {
-    if (
-      this.action === ACTION_TYPE.SUPPLY &&
-      this.actionTokenAssetId === this.baseToken.assetId
-    ) {
+    if (this.action === ACTION_TYPE.SUPPLY) {
+      if (this.actionTokenAssetId === this.baseToken.assetId) {
+        return this.supplyBase();
+      } else {
+        return this.supplyCollateral();
+      }
+    }
+    if (this.action === ACTION_TYPE.WITHDRAW) {
+      if (this.actionTokenAssetId === this.baseToken.assetId) {
+        return this.withdrawBase();
+      } else {
+        return this.withdrawCollateral();
+      }
+    }
+    if (this.action === ACTION_TYPE.BORROW) {
+      return this.borrowBase();
+    }
+    if (this.action === ACTION_TYPE.REPAY) {
       return this.supplyBase();
-    }
-    if (
-      this.action === ACTION_TYPE.WITHDRAW &&
-      this.actionTokenAssetId === this.baseToken.assetId
-    ) {
-      return this.withdrawBase();
-    }
-    if (
-      this.action === ACTION_TYPE.SUPPLY &&
-      this.collaterals.map((v) => v.assetId).includes(this.baseToken.assetId)
-    ) {
-      return this.supplyCollateral();
     }
   };
 

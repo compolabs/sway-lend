@@ -9,7 +9,7 @@ const SwitchActions: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   return (
     <SwitchButtons
-      values={["Deposit mode", "Loan mode"]}
+      values={["Deposit", "Borrow"]}
       active={vm.mode}
       onActivate={(v) => {
         vm.setMode(v);

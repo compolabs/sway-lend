@@ -45,15 +45,19 @@ export type UserBasicOutput = { principal: I64Output, base_tracking_index: BN, b
 interface MarketAbiInterface extends Interface {
   functions: {
     absorb: FunctionFragment;
+    available_to_borrow: FunctionFragment;
     balance_of: FunctionFragment;
     buy_collateral: FunctionFragment;
     claim: FunctionFragment;
+    collateral_value_to_sell: FunctionFragment;
     debug_increment_timestamp: FunctionFragment;
+    dummy_absorb: FunctionFragment;
     get_asset_config_by_asset_id: FunctionFragment;
     get_borrow_rate: FunctionFragment;
     get_collateral_reserves: FunctionFragment;
     get_configuration: FunctionFragment;
     get_market_basics: FunctionFragment;
+    get_oracle_price: FunctionFragment;
     get_reserves: FunctionFragment;
     get_reward_owed: FunctionFragment;
     get_supply_rate: FunctionFragment;
@@ -75,15 +79,19 @@ interface MarketAbiInterface extends Interface {
   };
 
   encodeFunctionData(functionFragment: 'absorb', values: [Vec<AddressInput>]): Uint8Array;
+  encodeFunctionData(functionFragment: 'available_to_borrow', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'balance_of', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'buy_collateral', values: [ContractIdInput, BigNumberish, AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'claim', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'collateral_value_to_sell', values: [ContractIdInput, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'debug_increment_timestamp', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'dummy_absorb', values: [ContractIdInput, Vec<AddressInput>]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrow_rate', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_collateral_reserves', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_configuration', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_market_basics', values: []): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_oracle_price', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_reserves', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_reward_owed', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_supply_rate', values: [BigNumberish]): Uint8Array;
@@ -96,7 +104,7 @@ interface MarketAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'pause', values: [PauseConfigurationInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'quote_collateral', values: [ContractIdInput, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'supply_base', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'supply_collateral', values: [AddressInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'supply_collateral', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'totals_collateral', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'withdraw_base', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'withdraw_collateral', values: [ContractIdInput, BigNumberish]): Uint8Array;
@@ -104,15 +112,19 @@ interface MarketAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'withdraw_reward_token', values: [AddressInput, BigNumberish]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'absorb', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'available_to_borrow', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'balance_of', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'buy_collateral', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'claim', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'collateral_value_to_sell', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'debug_increment_timestamp', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'dummy_absorb', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_borrow_rate', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_collateral_reserves', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_configuration', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_market_basics', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_oracle_price', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_reserves', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_reward_owed', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_supply_rate', data: BytesLike): DecodedValue;
@@ -137,15 +149,19 @@ export class MarketAbi extends Contract {
   interface: MarketAbiInterface;
   functions: {
     absorb: InvokeFunction<[accounts: Vec<AddressInput>], void>;
+    available_to_borrow: InvokeFunction<[account: AddressInput], BN>;
     balance_of: InvokeFunction<[asset: ContractIdInput], BN>;
     buy_collateral: InvokeFunction<[asset: ContractIdInput, min_amount: BigNumberish, recipient: AddressInput], void>;
     claim: InvokeFunction<[], void>;
+    collateral_value_to_sell: InvokeFunction<[asset: ContractIdInput, collateral_amount: BigNumberish], BN>;
     debug_increment_timestamp: InvokeFunction<[], void>;
+    dummy_absorb: InvokeFunction<[asset: ContractIdInput, accounts: Vec<AddressInput>], void>;
     get_asset_config_by_asset_id: InvokeFunction<[asset: ContractIdInput], AssetConfigOutput>;
     get_borrow_rate: InvokeFunction<[utilization: BigNumberish], BN>;
     get_collateral_reserves: InvokeFunction<[asset: ContractIdInput], I64Output>;
     get_configuration: InvokeFunction<[], MarketConfigurationOutput>;
     get_market_basics: InvokeFunction<[], MarketBasicsOutput>;
+    get_oracle_price: InvokeFunction<[asset: ContractIdInput], BN>;
     get_reserves: InvokeFunction<[], I64Output>;
     get_reward_owed: InvokeFunction<[account: AddressInput], BN>;
     get_supply_rate: InvokeFunction<[utilization: BigNumberish], BN>;
@@ -158,7 +174,7 @@ export class MarketAbi extends Contract {
     pause: InvokeFunction<[pause_config: PauseConfigurationInput], void>;
     quote_collateral: InvokeFunction<[asset: ContractIdInput, base_amount: BigNumberish], BN>;
     supply_base: InvokeFunction<[], void>;
-    supply_collateral: InvokeFunction<[dst: AddressInput], void>;
+    supply_collateral: InvokeFunction<[], void>;
     totals_collateral: InvokeFunction<[asset: ContractIdInput], BN>;
     withdraw_base: InvokeFunction<[amount: BigNumberish], void>;
     withdraw_collateral: InvokeFunction<[asset: ContractIdInput, amount: BigNumberish], void>;
