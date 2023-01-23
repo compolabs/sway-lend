@@ -60,7 +60,11 @@ const InputCard: React.FC<IProps> = () => {
             Cancel
           </Button>
           <SizedBox width={8} />
-          <Button fixed onClick={vm.marketAction}>
+          <Button
+            fixed
+            onClick={vm.marketAction}
+            disabled={!vm.marketActionMainBtnState}
+          >
             {vm.operationName}
           </Button>
         </Row>

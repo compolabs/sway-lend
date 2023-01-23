@@ -28,8 +28,7 @@ const Card = styled.div<{
   justify-content: ${({ justifyContent }) => justifyContent ?? "default"};
   align-items: ${({ alignItems }) => alignItems ?? "default"};
   max-width: ${({ maxWidth }) => `${maxWidth}px` ?? "100%"};
-  ${({ bordered, theme }) =>
-    bordered && `border: 1px solid ${theme.colors.card.border};`};
+  border: none;
   width: 100%;
   border-radius: 4px;
   box-sizing: border-box;

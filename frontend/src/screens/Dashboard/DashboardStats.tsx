@@ -75,18 +75,24 @@ const DashboardStats: React.FC<IProps> = () => {
               {vm.suppliedBalance == null ? (
                 <Skeleton height={64} width={200} />
               ) : (
-                <Text className="main-data" size="large" weight={600}>
+                <Text className="main-data" weight={600}>
                   ${supplied}
                 </Text>
               )}
             </Column>
             <Column crossAxisSize="max">
               <Text className="title" type="secondary" weight={600}>
-                APY
+                {vm.mode === 0 ? "Supply APR" : "Borrow APR"}
               </Text>
-              <Text className="data" size="big" weight={600}>
-                32.54%
-              </Text>
+              {!vm.initialized ? (
+                <Row>
+                  <Skeleton height={32} width={200} />
+                </Row>
+              ) : (
+                <Text className="data" weight={600}>
+                  {vm.mode === 0 ? vm.supplyApr : vm.supplyApr} %
+                </Text>
+              )}
             </Column>
           </Row>
           <Column crossAxisSize="max">
@@ -103,7 +109,7 @@ const DashboardStats: React.FC<IProps> = () => {
                 <Skeleton height={32} width={200} />
               </Row>
             ) : (
-              <Text textAlign="end" className="data" size="big" weight={600}>
+              <Text textAlign="end" className="data" weight={600}>
                 ${borrowed}
               </Text>
             )}
@@ -118,7 +124,7 @@ const DashboardStats: React.FC<IProps> = () => {
             {vm.suppliedBalance == null ? (
               <Skeleton height={48} width={100} />
             ) : (
-              <Text className="main-data" size="big" weight={600}>
+              <Text className="main-data" weight={600}>
                 ${supplied}
               </Text>
             )}
@@ -129,17 +135,22 @@ const DashboardStats: React.FC<IProps> = () => {
           <Row alignItems="center" justifyContent="space-between">
             <Column>
               <Text className="title" type="secondary" weight={600}>
-                APY
+                {vm.mode === 0 ? "Supply APR" : "Borrow APR"}
               </Text>
-              <Text className="data" weight={600}>
-                32.54%
-              </Text>
+              {!vm.initialized ? (
+                <Row>
+                  <Skeleton height={32} width={100} />
+                </Row>
+              ) : (
+                <Text className="data" weight={600}>
+                  {vm.mode === 0 ? vm.supplyApr : vm.supplyApr} %
+                </Text>
+              )}
             </Column>
             <Column style={{ textAlign: "end" }}>
               <Text className="title" type="secondary" weight={600}>
                 Borrow balance
               </Text>
-
               {vm.borrowedBalance == null ? (
                 <Row justifyContent="flex-end">
                   <Skeleton height={32} width={100} />

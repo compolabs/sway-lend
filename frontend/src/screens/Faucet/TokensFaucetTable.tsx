@@ -64,7 +64,6 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           if (!accountStore.isLoggedIn)
             return (
               <Button
-                size="medium"
                 fixed
                 onClick={() => settingsStore.setLoginModalOpened(true)}
               >
@@ -73,14 +72,13 @@ const TokensFaucetTable: React.FC<IProps> = () => {
             );
           if (vm.alreadyMintedTokens.includes(t.assetId))
             return (
-              <Button fixed size="medium" disabled>
+              <Button fixed disabled>
                 Already minted
               </Button>
             );
           return (
             <Button
               fixed
-              size="medium"
               disabled={vm.loading}
               onClick={() => {
                 if (t.symbol === "ETH") {

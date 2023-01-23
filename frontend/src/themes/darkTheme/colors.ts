@@ -29,16 +29,21 @@ export default {
   error100: "#3A2A3D",
   attention100: "#3A303F",
 
-  mainBackground: colors.neutral7,
+  mainBackground: colors.neutral6,
   text: colors.neutral2,
   disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",
   disabledBtnColor: colors.neutral5,
 
   button: {
+    backgroundDisabled: colors.neutral5,
+
+    primaryColor: colors.neutral7,
     primaryBackground: colors.primary01,
-    primaryColor: colors.neutral6,
+    primaryBackgroundHover: colors.primary02,
+
+    secondaryColor: colors.neutral1,
     secondaryBackground: colors.neutral5,
-    secondaryColor: colors.neutral3,
+    secondaryBackgroundHover: colors.neutral4,
   },
   divider: "rgba(223, 229, 250, 0.2)",
   switch: {
@@ -84,13 +89,13 @@ export default {
     cardBackground: "#262F33",
   },
   supplyBtn: {
-    background: "rgba(49, 58, 69, 0.5)",
-    backgroundSelected: colors.neutral5,
-    backgroundDisabled: "rgba(49, 58, 69, 0.3)",
+    background: "#1F262B",
+    backgroundSelected: "#333D46",
+    backgroundDisabled: "#232A2E",
   },
 
   card: {
-    background: "rgba(169, 213, 245, 0.05);",
+    background: "#262F33",
     border: colors.neutral5,
   },
   icon: {

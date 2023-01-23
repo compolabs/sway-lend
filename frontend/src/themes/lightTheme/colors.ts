@@ -37,10 +37,15 @@ export default {
   },
 
   button: {
+    backgroundDisabled: colors.neutral3,
+
+    primaryColor: colors.neutral7,
     primaryBackground: colors.primary01,
-    primaryColor: colors.neutral6,
+    primaryBackgroundHover: colors.primary02,
+
+    secondaryColor: colors.neutral7,
     secondaryBackground: colors.neutral3,
-    secondaryColor: colors.neutral6,
+    secondaryBackgroundHover: colors.secondary3,
   },
   header: {
     navLinkBackground: colors.neutral3,
@@ -52,7 +57,7 @@ export default {
   },
   skeleton: {
     base: colors.neutral3,
-    highlight: colors.neutral2,
+    highlight: colors.neutral1,
   },
   card: {
     background: "rgba(255, 255, 255, 0.5);",
