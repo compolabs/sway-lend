@@ -5,57 +5,65 @@ import Text from "@components/Text";
 import copy from "copy-to-clipboard";
 import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
-import { Anchor } from "@components/Anchor";
 import { EXPLORER_URL } from "@src/constants";
+import SizedBox from "@components/SizedBox";
 
-interface IProps {
-  address: string;
-}
+interface IProps {}
 
 const Root = styled(Column)`
+  padding: 16px;
+
   .menu-item {
-    padding: 10px 0;
+    padding: 12px 20px;
     cursor: pointer;
 
-    :first-of-type {
-      padding-top: 0;
+    :hover {
+      background: ${({ theme }) => theme.colors.tooltip.hoverElement};
+      border-radius: 4px;
     }
-
-    :last-of-type {
-      padding-bottom: 0;
-    }
-  }
-
-  .divider {
-    margin: 0 -16px;
-    width: calc(100% + 32px);
   }
 `;
 
-const WalletActionsTooltip: React.FC<IProps> = ({ address }) => {
+const WalletActionsTooltip: React.FC<IProps> = () => {
   const { notificationStore, accountStore } = useStores();
 
   const handleCopyAddress = () => {
-    address && copy(address);
+    accountStore.address && copy(accountStore.address);
     notificationStore.notify("Your address was copied", {
       type: "success",
       title: "Congratulations!",
     });
   };
+  const handleCopySeed = () => {
+    accountStore.seed && copy(accountStore.seed);
+    notificationStore.notify("Don't share it with anyone", {
+      type: "success",
+      title: "Your seed was copied",
+    });
+  };
   const handleLogout = () => accountStore.disconnect();
 
   return (
-    <Root>
-      <Text weight={500} onClick={handleCopyAddress} className="menu-item">
+    <Root alignItems="center">
+      <Text weight={700} onClick={handleCopyAddress} className="menu-item">
         Copy address
       </Text>
-      <Anchor
-        style={{ padding: "10px 0" }}
-        href={`${EXPLORER_URL}/address/${address}`}
+      <SizedBox height={10} />
+      <Text weight={700} onClick={handleCopySeed} className="menu-item">
+        Copy seed
+      </Text>
+      <SizedBox height={10} />
+      <Text
+        className="menu-item"
+        onClick={() =>
+          window.open(`${EXPLORER_URL}/address/${accountStore.address}`)
+        }
+        weight={700}
       >
-        <Text weight={500}>View in Explorer</Text>
-      </Anchor>
-      <Text weight={500} onClick={handleLogout} className="menu-item">
+        View in Explorer
+      </Text>
+      <SizedBox height={10} />
+      <Text weight={700} onClick={handleLogout} className="menu-item">
         Disconnect
       </Text>
     </Root>

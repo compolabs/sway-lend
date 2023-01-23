@@ -10,7 +10,7 @@ import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";
 import Text from "@components/Text";
-import DarkMode from "@components/Header/DarkMode";
+import MobileMenuIcon from "../MobileMenuIcon";
 
 interface IProps {}
 
@@ -19,25 +19,17 @@ const Root = styled(Column)`
   background: ${({ theme }) => theme.colors.mainBackground};
   align-items: center;
   z-index: 102;
-
-  //todo check
-  a {
-    text-decoration: none;
-  }
 `;
 
 const TopMenu = styled.header`
+  margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  height: 80px;
   padding: 0 16px;
-  max-width: 1440px;
+  max-width: 1300px;
   z-index: 102;
-  @media (min-width: 880px) {
-    height: 80px;
-  }
   box-sizing: border-box;
   background: ${({ theme }) => theme.colors.mainBackground};
 
@@ -65,8 +57,8 @@ const MenuItem = styled.div<{ selected?: boolean }>`
 
   ${({ selected, theme }) =>
     selected
-      ? `color:${theme.colors.primary800}; background:${theme.colors.header.navLinkBackground};`
-      : `color:${theme.colors.primary650}; background: none;`};
+      ? `color:${theme.colors.header.navLinkBackground}; background:${theme.colors.header.navLinkBackground};`
+      : `color:${theme.colors.header.navLinkBackground}; background: none;`};
 
   &:hover {
     background: ${({ theme }) => theme.colors.header.navLinkBackground};
@@ -114,7 +106,7 @@ const Header: React.FC<IProps> = () => {
     {
       name: "Faucet",
       link: ROUTES.FAUCET,
-      icon: theme.images.icons.analytics,
+      icon: theme.images.icons.coins,
     },
   ];
 
@@ -143,22 +135,13 @@ const Header: React.FC<IProps> = () => {
           </Desktop>
         </Row>
         <Mobile>
-          <img
+          <MobileMenuIcon
             onClick={() => toggleMenu(!mobileMenuOpened)}
-            className="icon"
-            src={
-              mobileMenuOpened
-                ? theme.images.icons.mobileMenuClose
-                : theme.images.icons.mobileMenu
-            }
-            alt="menuControl"
+            opened={mobileMenuOpened}
           />
         </Mobile>
         <Desktop>
-          <DarkMode />
-          <SizedBox width={40} />
           <Wallet />
-          <SizedBox width={24} />
         </Desktop>
       </TopMenu>
       <Mobile>

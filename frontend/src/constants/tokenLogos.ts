@@ -6,6 +6,7 @@ import busd from "@src/assets/tokens/BUSD.svg";
 import usdc from "@src/assets/tokens/usdc.svg";
 import uni from "@src/assets/tokens/uni.svg";
 import chainlink from "@src/assets/tokens/chainlink.svg";
+import sway from "@src/assets/tokens/sway.svg";
 import unknown from "@src/assets/notFound.svg";
 
 const tokenLogos: Record<string, string> = {
@@ -17,6 +18,7 @@ const tokenLogos: Record<string, string> = {
   USDC: usdc,
   UNI: uni,
   LINK: chainlink,
+  SWAY: sway,
   UNKNOWN: unknown,
 };
 

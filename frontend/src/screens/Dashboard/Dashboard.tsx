@@ -3,42 +3,84 @@ import React from "react";
 import { Observer } from "mobx-react-lite";
 import { DashboardVMProvider } from "@screens/Dashboard/DashboardVm";
 import Layout from "@components/Layout";
+import DashboardStats from "@screens/Dashboard/DashboardStats";
+import SizedBox from "@components/SizedBox";
+import AssetsTable from "./AssetsTable";
+import useWindowSize from "@src/hooks/useWindowSize";
+import { Column } from "@src/components/Flex";
+import SwitchActions from "./SwitchActions";
+import ActionTab from "./ActionTab";
+import SummaryCard from "./SummaryCard";
+import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
 
 interface IProps {}
 
-const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
+const Root = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
   box-sizing: border-box;
   padding: 0 16px;
   width: 100%;
-  min-height: 100%;
-  max-width: calc(1160px + 32px);
   margin-bottom: 24px;
-  margin-top: 40px;
+  margin-top: 20px;
   text-align: left;
   @media (min-width: 880px) {
-    margin-top: 56px;
+    margin-top: 40px;
   }
-
-  .apy-group {
-    width: 20px;
-    height: 20px;
-    transform: ${({ apySort }) => (apySort ? "scale(1)" : "scale(1, -1)")};
-  }
-
-  .liquidity-group {
-    width: 20px;
-    height: 20px;
-    transform: ${({ liquiditySort }) =>
-      liquiditySort ? "scale(1)" : "scale(1, -1)"};
+`;
+const MainContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  @media (min-width: 880px) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    column-gap: 20px;
   }
 `;
 const DashboardImpl: React.FC<IProps> = () => {
+  const { width } = useWindowSize();
   return (
     <Layout>
-      <Observer>{() => <Root>Dashboard</Root>}</Observer>
+      <Observer>
+        {() => (
+          <Root>
+            <DashboardStats />
+            <SizedBox height={16} />
+            <MainContainer>
+              {width && width >= 880 ? (
+                <>
+                  <Column crossAxisSize="max">
+                    <AvailableToBorrow />
+                    <SizedBox height={16} />
+                    <AssetsTable />
+                  </Column>
+                  <Column crossAxisSize="max">
+                    <SwitchActions />
+                    <SizedBox height={16} />
+                    <ActionTab />
+                    <SizedBox height={16} />
+                    <SummaryCard />
+                  </Column>
+                </>
+              ) : (
+                <>
+                  <AvailableToBorrow />
+                  <SizedBox height={16} />
+                  <SwitchActions />
+                  <SizedBox height={16} />
+                  <ActionTab />
+                  <SizedBox height={16} />
+                  <AssetsTable />
+                  <SizedBox height={16} />
+                  <SummaryCard />
+                </>
+              )}
+            </MainContainer>
+          </Root>
+        )}
+      </Observer>
     </Layout>
   );
 };

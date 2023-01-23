@@ -39,7 +39,7 @@ const getAlert = (
         <Icon type={type} />
         <Column>
           {title && (
-            <Text size="medium" className="notifications-text" weight={500}>
+            <Text size="medium" className="notifications-text" weight={600}>
               {title}
             </Text>
           )}
@@ -47,6 +47,7 @@ const getAlert = (
             size="small"
             type="secondary"
             className="notifications-text"
+            weight={500}
             style={{ marginTop: 2, width: "100%", wordBreak: "break-word" }}
           >
             {content}
