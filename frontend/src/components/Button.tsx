@@ -1,12 +1,9 @@
 import styled from "@emotion/styled";
 
-type TButtonType = "primary" | "secondary" | "danger";
-//todo
-type TButtonSize = "medium" | "large";
+type TButtonType = "primary" | "secondary";
 
 const Button = styled.button<{
   kind?: TButtonType;
-  size?: TButtonSize;
   fixed?: boolean;
 }>`
   white-space: nowrap;
@@ -15,21 +12,7 @@ const Button = styled.button<{
   align-items: center;
   box-sizing: border-box;
 
-  border: 1px solid
-    ${({ kind, theme }) =>
-      (() => {
-        switch (kind) {
-          case "primary":
-            return theme.colors.primary01;
-          case "secondary":
-            return theme.colors.button.secondaryBackground;
-          case "danger":
-            return theme.colors.secondary1;
-          default:
-            return theme.colors.primary01;
-        }
-      })()};
-
+  border: none;
   border-radius: 4px;
   box-shadow: none;
   font-style: normal;
@@ -38,61 +21,31 @@ const Button = styled.button<{
   line-height: 24px;
 
   width: ${({ fixed }) => (fixed ? "100%" : "fit-content")};
-  transition: 0.4s;
+  transition: 0.3s;
+  padding: 8px 16px;
 
-  ${({ kind, theme }) =>
-    (() => {
-      switch (kind) {
-        case "primary":
-          return `background: ${theme.colors.button.primaryBackground}; color:${theme.colors.button.primaryColor};`;
-        case "secondary":
-          return `background: ${theme.colors.button.secondaryBackground}; color:${theme.colors.button.secondaryColor};`;
-        case "danger":
-          return `background: ${theme.colors.secondary1}; color: #fff;`;
-        default:
-          return `background: ${theme.colors.button.primaryBackground}; color:${theme.colors.button.primaryColor};`;
-      }
-    })()}
-  ${({ size }) =>
-    (() => {
-      switch (size) {
-        case "medium":
-          return "padding: 0 20px; height: 40px;";
-        default:
-          return "padding: 0 20px; height: 40px;";
-      }
-    })()}
+  color: ${({ theme, kind }) =>
+    kind === "secondary"
+      ? theme.colors.button.secondaryColor
+      : theme.colors.button.primaryColor};
+
+  background: ${({ theme, kind }) =>
+    kind === "secondary"
+      ? theme.colors.button.secondaryBackground
+      : theme.colors.button.primaryBackground};
+
   :hover {
+    background: ${({ theme, kind }) =>
+      kind === "secondary"
+        ? theme.colors.button.secondaryBackgroundHover
+        : theme.colors.button.primaryBackgroundHover};
     cursor: pointer;
-    ${({ kind }) =>
-      (() => {
-        switch (kind) {
-          case "primary":
-            return "opacity: 0.8;";
-          case "secondary":
-            return "opacity: 0.8;";
-          case "danger":
-            return "opacity: 0.8;";
-          default:
-            return "opacity: 0.8;";
-        }
-      })()}
   }
 
   :disabled {
-    ${({ kind, theme }) =>
-      (() => {
-        switch (kind) {
-          case "primary":
-            return `background: ${theme.colors.disabledBtnColor}; border: none; color:${theme.colors.disabledBtnTextColor}; `;
-          case "secondary":
-            return `background: ${theme.colors.neutral0}; border: 1px solid ${theme.colors.neutral0};`;
-          case "danger":
-            return `background: ${theme.colors.secondary1}; border: 1px solid ${theme.colors.secondary1};`;
-          default:
-            return `background: ${theme.colors.disabledBtnColor}; border:none; color:${theme.colors.disabledBtnTextColor}; `;
-        }
-      })()}
+    background: ${({ theme }) => theme.colors.button.backgroundDisabled};
+    color: ${({ theme }) => theme.colors.neutral4};
+    opacity: 0.6;
     cursor: not-allowed;
   }
 `;
