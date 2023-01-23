@@ -160,10 +160,22 @@ pub mod market_abi_calls {
         contract.methods().pause(config).call().await
     }
 
-    pub async fn collateral_value_to_sell(market: &MarketContract, contract_ids: &[&dyn SettableContract], asset: ContractId, collateral_amount: u64) -> u64 {
+    pub async fn collateral_value_to_sell(
+        market: &MarketContract,
+        contract_ids: &[&dyn SettableContract],
+        asset: ContractId,
+        collateral_amount: u64,
+    ) -> u64 {
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
-        let res = market.methods().collateral_value_to_sell(asset, collateral_amount);
-        res.tx_params(tx_params).set_contracts(contract_ids).simulate().await.unwrap().value
+        let res = market
+            .methods()
+            .collateral_value_to_sell(asset, collateral_amount);
+        res.tx_params(tx_params)
+            .set_contracts(contract_ids)
+            .simulate()
+            .await
+            .unwrap()
+            .value
     }
 
     pub async fn buy_collateral(
@@ -189,13 +201,11 @@ pub mod market_abi_calls {
     pub async fn absorb(
         market: &MarketContract,
         contract_ids: &[&dyn SettableContract],
-        uni_asset_id: ContractId,
         addresses: Vec<Address>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         market
             .methods()
-            .dummy_absorb(uni_asset_id,addresses)
-            // .absorb(addresses) //FIXME
+            .absorb(addresses)
             .set_contracts(contract_ids)
             .tx_params(TxParameters::new(Some(0), Some(100_000_000), None))
             .call()
@@ -238,7 +248,7 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
         WalletsConfig::new(
             Some(4),             /* Single wallet */
             Some(1),             /* Single coin (UTXO) */
-            Some(1_000_000_000), /* Amount per coin */
+            Some(1_000_000_000_000_000), /* Amount per coin */
         ),
         None,
         None,
