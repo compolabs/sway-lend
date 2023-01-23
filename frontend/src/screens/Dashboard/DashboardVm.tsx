@@ -39,7 +39,6 @@ class DashboardVm {
     makeAutoObservable(this);
     this.initMarketContract();
     this.updateMarketState().then(() => this.setInitialized(true));
-    // this.updateMarketState();
 
     reaction(() => this.rootStore.accountStore.seed, this.initMarketContract);
   }
@@ -68,6 +67,10 @@ class DashboardVm {
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
 
+  maxBorrowBaseTokenAmount: BN | null = null;
+  setMaxBorrowBaseTokenAmount = (l: BN | null) =>
+    (this.maxBorrowBaseTokenAmount = l);
+
   initMarketContract = () => {
     const { address, wallet } = this.rootStore.accountStore;
     if (address == null || wallet == null) return;
@@ -83,6 +86,7 @@ class DashboardVm {
       this.updateAccountInfo(),
       this.updateSupplyAndBorrowRates(),
       this.updateMarketBasic(),
+      this.updateMaxBorrowAmount(),
     ]);
 
   updateAccountInfo = async () => {
@@ -103,6 +107,13 @@ class DashboardVm {
       .get_market_basics()
       .get();
     this.setMarketBasic(value);
+  };
+
+  updateMaxBorrowAmount = async () => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    // const { value } = await this.marketContract.functions().get();
+    // this.setMarketBasic(value);
   };
 
   updateSupplyAndBorrowRates = async () => {
