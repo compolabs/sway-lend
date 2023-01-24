@@ -6,6 +6,7 @@ import BigNumberInput from "@components/BigNumberInput";
 import AmountInput from "@components/AmountInput";
 import _ from "lodash";
 import Text from "@components/Text";
+import SizedBox from "@components/SizedBox";
 
 interface IProps {
   assetId: string;
@@ -13,6 +14,8 @@ interface IProps {
 
   onMaxClick?: () => void;
   balance?: string;
+
+  error: string | null;
 
   decimals: number;
 
@@ -119,10 +122,18 @@ const TokenInput: React.FC<IProps> = (props) => {
           </MaxButton>
         )}
       </InputContainer>
-      {props.balance && (
-        <Text style={{ marginTop: 2 }} fitContent size="tiny" type="secondary">
-          {`${props.balance} available`}
+      <SizedBox height={2} />
+      {/*{props.error==null}*/}
+      {props.error != null ? (
+        <Text fitContent size="tiny" type="error">
+          {props.error}
         </Text>
+      ) : (
+        props.balance && (
+          <Text fitContent size="tiny" type="secondary">
+            {`${props.balance} available`}
+          </Text>
+        )
       )}
     </Root>
   );

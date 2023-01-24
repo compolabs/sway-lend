@@ -8,6 +8,7 @@ import Button from "@components/Button";
 import { TOKENS_BY_SYMBOL } from "@src/constants";
 import { useStores } from "@stores";
 import InputCard from "@screens/Dashboard/ActionTab/InputCard";
+import useCollapse from "@src/components/Collapse";
 
 interface IProps {}
 
@@ -25,6 +26,10 @@ const ActionTab: React.FC<IProps> = () => {
     vm.setTokenAmount(null);
     vm.setActionTokenAssetId(TOKENS_BY_SYMBOL.USDC.assetId);
   };
+  const { getCollapseProps } = useCollapse({
+    isExpanded: vm.action == null,
+    duration: 300,
+  });
   return (
     <Root>
       {!accountStore.isLoggedIn && (
@@ -35,9 +40,8 @@ const ActionTab: React.FC<IProps> = () => {
           <SizedBox height={10} />
         </>
       )}
-
-      {vm.actionTokenAssetId == null ? (
-        vm.mode === 0 ? (
+      <div {...getCollapseProps()}>
+        {vm.mode === 0 ? (
           <Row>
             <Button
               fixed
@@ -73,10 +77,9 @@ const ActionTab: React.FC<IProps> = () => {
               Repay {vm.baseToken.symbol}
             </Button>
           </Row>
-        )
-      ) : (
-        <InputCard />
-      )}
+        )}
+      </div>
+      <InputCard />
     </Root>
   );
 };
