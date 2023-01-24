@@ -28,7 +28,6 @@ const InputCard: React.FC<IProps> = () => {
     isExpanded: vm.action != null,
     duration: 500,
   });
-
   return (
     <div {...getCollapseProps()}>
       <Card>

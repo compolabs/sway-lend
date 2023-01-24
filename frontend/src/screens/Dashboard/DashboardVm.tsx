@@ -218,39 +218,24 @@ class DashboardVm {
   }
 
   supplyBase = async () => {
-    const { accountStore, notificationStore } = this.rootStore;
     if (
       this.tokenAmount == null ||
-      accountStore.seed == null ||
       this.marketContract == null ||
       this.tokenAmount.lte(0)
     )
       return;
-
-    this._setLoading(true);
-    try {
-      return this.marketContract.functions
-        .supply_base()
-        .callParams({
-          forward: {
-            amount: this.tokenAmount.toString(),
-            assetId: this.baseToken.assetId,
-          },
-        })
-        .txParams({ gasPrice: 1 })
-        .call()
-        .then(accountStore.updateAccountBalances)
-        .then(this.notifyThatActionIsSuccessful)
-        .then(this.updateMarketState);
-    } catch (e) {
-      console.error(e);
-      notificationStore.notify("", { type: "error", title: "oops" });
-    } finally {
-      this._setLoading(false);
-    }
+    return this.marketContract.functions
+      .supply_base()
+      .callParams({
+        forward: {
+          amount: this.tokenAmount.toString(),
+          assetId: this.baseToken.assetId,
+        },
+      })
+      .txParams({ gasPrice: 1 })
+      .call();
   };
   withdrawBase = async () => {
-    const { accountStore, notificationStore } = this.rootStore;
     if (
       this.tokenAmount == null ||
       this.marketContract == null ||
@@ -258,24 +243,13 @@ class DashboardVm {
     )
       return;
 
-    this._setLoading(true);
-    try {
-      return this.marketContract.functions
-        .withdraw_base(this.tokenAmount.toString())
-        .txParams({ gasPrice: 1 })
-        .call()
-        .then(accountStore.updateAccountBalances)
-        .then(this.notifyThatActionIsSuccessful)
-        .then(this.updateMarketState);
-    } catch (e) {
-      console.error(e);
-      notificationStore.notify("", { type: "error", title: "oops" });
-    } finally {
-      this._setLoading(false);
-    }
+    await this.marketContract.functions
+      .withdraw_base(this.tokenAmount.toString())
+      .txParams({ gasPrice: 1 })
+      .call();
   };
   supplyCollateral = async () => {
-    const { accountStore, notificationStore } = this.rootStore;
+    const { accountStore } = this.rootStore;
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
@@ -284,59 +258,34 @@ class DashboardVm {
     )
       return;
 
-    this._setLoading(true);
-    try {
-      return this.marketContract.functions
-        .supply_collateral()
-        .callParams({
-          forward: {
-            assetId: this.actionTokenAssetId,
-            amount: this.tokenAmount.toString(),
-          },
-        })
-        .txParams({ gasPrice: 1 })
-        .call()
-        .then(accountStore.updateAccountBalances)
-        .then(this.notifyThatActionIsSuccessful)
-        .then(this.updateMarketState);
-    } catch (e) {
-      console.error(e);
-      notificationStore.notify("", { type: "error", title: "oops" });
-    } finally {
-      this._setLoading(false);
-    }
+    await this.marketContract.functions
+      .supply_collateral()
+      .callParams({
+        forward: {
+          assetId: this.actionTokenAssetId,
+          amount: this.tokenAmount.toString(),
+        },
+      })
+      .txParams({ gasPrice: 1 })
+      .call();
   };
   withdrawCollateral = async () => {
-    const { accountStore, notificationStore } = this.rootStore;
     if (
-      this.action !== ACTION_TYPE.WITHDRAW ||
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
       this.marketContract == null ||
       this.tokenAmount.lte(0)
     )
       return;
-    this._setLoading(true);
-    try {
-      return this.marketContract.functions
-        .withdraw_collateral(
-          { value: this.actionTokenAssetId },
-          this.tokenAmount.toString()
-        )
-        .txParams({ gasPrice: 1 })
-        .call()
-        .then(accountStore.updateAccountBalances)
-        .then(this.notifyThatActionIsSuccessful)
-        .then(this.updateMarketState);
-    } catch (e) {
-      console.error(e);
-      notificationStore.notify("", { type: "error", title: "oops" });
-    } finally {
-      this._setLoading(false);
-    }
+    await this.marketContract.functions
+      .withdraw_collateral(
+        { value: this.actionTokenAssetId },
+        this.tokenAmount.toString()
+      )
+      .txParams({ gasPrice: 1 })
+      .call();
   };
   borrowBase = async () => {
-    const { accountStore, notificationStore } = this.rootStore;
     if (
       this.tokenAmount == null ||
       this.maxBorrowBaseTokenAmount == null ||
@@ -344,25 +293,15 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    this._setLoading(true);
     const oracle = new Contract(
       CONTRACT_ADDRESSES.priceOracle,
       OracleAbi__factory.abi
     );
-    try {
-      return this.marketContract.functions
-        .withdraw_base(this.tokenAmount.toString())
-        .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
-        .addContracts([oracle])
-        .call()
-        .then(accountStore.updateAccountBalances)
-        .then(this.notifyThatActionIsSuccessful)
-        .then(this.updateMarketState);
-    } catch (e) {
-      notificationStore.notify("", { type: "error", title: "oops" });
-    } finally {
-      this._setLoading(false);
-    }
+    await this.marketContract.functions
+      .withdraw_base(this.tokenAmount.toString())
+      .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
+      .addContracts([oracle])
+      .call();
   };
 
   onMaxBtnClick() {
@@ -433,26 +372,38 @@ class DashboardVm {
     return "";
   }
 
-  marketAction = () => {
-    if (this.action === ACTION_TYPE.SUPPLY) {
-      if (this.actionTokenAssetId === this.baseToken.assetId) {
-        return this.supplyBase();
-      } else {
-        return this.supplyCollateral();
+  marketAction = async () => {
+    const { accountStore } = this.rootStore;
+    this._setLoading(true);
+    try {
+      if (this.action === ACTION_TYPE.SUPPLY) {
+        if (this.actionTokenAssetId === this.baseToken.assetId) {
+          await this.supplyBase();
+        } else {
+          await this.supplyCollateral();
+        }
       }
-    }
-    if (this.action === ACTION_TYPE.WITHDRAW) {
-      if (this.actionTokenAssetId === this.baseToken.assetId) {
-        return this.withdrawBase();
-      } else {
-        return this.withdrawCollateral();
+      if (this.action === ACTION_TYPE.WITHDRAW) {
+        if (this.actionTokenAssetId === this.baseToken.assetId) {
+          await this.withdrawBase();
+        } else {
+          await this.withdrawCollateral();
+        }
       }
-    }
-    if (this.action === ACTION_TYPE.BORROW) {
-      return this.borrowBase();
-    }
-    if (this.action === ACTION_TYPE.REPAY) {
-      return this.supplyBase();
+      if (this.action === ACTION_TYPE.BORROW) {
+        await this.borrowBase();
+      }
+      if (this.action === ACTION_TYPE.REPAY) {
+        await this.supplyBase();
+      }
+      this.notifyThatActionIsSuccessful();
+      this.hideAll();
+      await accountStore.updateAccountBalances();
+      await this.updateMarketState();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      this._setLoading(false);
     }
   };
 
@@ -505,7 +456,7 @@ class DashboardVm {
       const balance = this.rootStore.accountStore.findBalanceByAssetId(
         this.baseToken.assetId
       );
-      return this.tokenAmount.gt(balance?.balance ?? BN.ZERO);
+      return this.tokenAmount.lte(balance?.balance ?? BN.ZERO);
     }
 
     return true;
@@ -686,5 +637,10 @@ class DashboardVm {
         title: "Congrats!",
       }
     );
+  };
+  hideAll = () => {
+    this.setAction(null);
+    this.setActionTokenAssetId(null);
+    this.setTokenAmount(null);
   };
 }
