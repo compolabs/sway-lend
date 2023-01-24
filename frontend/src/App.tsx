@@ -3,12 +3,11 @@ import styled from "@emotion/styled";
 import { observer } from "mobx-react-lite";
 import { Column } from "@components/Flex";
 import Header from "@components/Header/Header";
-import WalletModal from "./components/Wallet/WalletModal";
-import { useStores } from "@stores";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
-import Market from "./screens/Market";
+import Dashboard from "@screens/Dashboard";
+import Footer from "@components/Footer";
 
 const Root = styled(Column)`
   width: 100%;
@@ -17,23 +16,15 @@ const Root = styled(Column)`
   min-height: 100vh;
 `;
 const App: React.FC = () => {
-  const { settingsStore } = useStores();
   return (
     <Root>
       <Header />
       <Routes>
-        {/*<Route path={ROUTES.ROOT} element={<Market />} />*/}
-        {/*<Route path={ROUTES.DASHBOARD} element={<Dashboard />} />*/}
-        <Route path={ROUTES.DASHBOARD} element={<Market />} />
-
+        <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
-
         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
       </Routes>
-      <WalletModal
-        onClose={() => settingsStore.setWalletModalOpened(false)}
-        visible={settingsStore.walletModalOpened}
-      />
+      <Footer />
     </Root>
   );
 };

@@ -11,7 +11,7 @@ import { useStores } from "@stores";
 
 interface IProps {}
 
-const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
+const Root = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -19,25 +19,11 @@ const Root = styled.div<{ apySort?: boolean; liquiditySort?: boolean }>`
   padding: 0 16px;
   width: 100%;
   min-height: 100%;
-  max-width: calc(1160px + 32px);
   margin-bottom: 24px;
   margin-top: 40px;
   text-align: left;
   @media (min-width: 880px) {
     margin-top: 56px;
-  }
-
-  .apy-group {
-    width: 20px;
-    height: 20px;
-    transform: ${({ apySort }) => (apySort ? "scale(1)" : "scale(1, -1)")};
-  }
-
-  .liquidity-group {
-    width: 20px;
-    height: 20px;
-    transform: ${({ liquiditySort }) =>
-      liquiditySort ? "scale(1)" : "scale(1, -1)"};
   }
 `;
 
@@ -50,10 +36,10 @@ const FaucetImpl: React.FC<IProps> = () => {
         {() => {
           return (
             <Root>
-              <Text weight={500} size="big">
+              <Text weight={600} size="big">
                 Faucet for Fuel Network
               </Text>
-              {accountStore.address == null && (
+              {!accountStore.isLoggedIn && (
                 <>
                   <SizedBox height={8} />
                   <Text>Connect wallet to mint tokens</Text>

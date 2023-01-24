@@ -12,7 +12,7 @@ body {
 }
 
 .rc-dialog-mask {
-    background: rgba(0, 0, 0, 0.4);
+     background:  ${theme.colors.modal.mask};
 }
 
 .rc-dialog-wrap {
@@ -43,7 +43,7 @@ body {
     max-height: 56px;
 } 
 .rc-dialog-header .send-asset{
-    border-bottom: 1px solid ${theme.colors.primary100};
+    border-bottom: 1px solid ${theme.colors.primary01};
 }
 
 .rc-dialog-body {
@@ -70,13 +70,13 @@ body {
 }
 
 .rc-notification-notice {
- background: ${theme.colors.mainBackground};
- 
+ background: ${theme.colors.notifications.background};
+ box-shadow: ${theme.colors.notifications.boxShadow}
 }
 
 .rc-notification-notice-content {
     display: flex;
-    background: ${theme.colors.mainBackground};
+    background: ${theme.colors.notifications.background};
 }
 
 .custom-notification .rc-notification-notice-close {
@@ -86,7 +86,7 @@ body {
 }
 
 .custom-notification .rc-notification-notice-close > svg > path {
-    fill: ${theme.colors.primary300};
+    fill: ${theme.colors.neutral4};
 }
 
 .recharts-default-tooltip { 

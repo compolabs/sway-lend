@@ -28,24 +28,12 @@ const Card = styled.div<{
   justify-content: ${({ justifyContent }) => justifyContent ?? "default"};
   align-items: ${({ alignItems }) => alignItems ?? "default"};
   max-width: ${({ maxWidth }) => `${maxWidth}px` ?? "100%"};
-  ${({ bordered, theme }) =>
-    bordered && `border: 1px solid ${theme.colors.card.border};`};
+  border: none;
   width: 100%;
-  border: 1px solid ${({ theme }) => `${theme.colors.card.border}`};
   border-radius: 4px;
   box-sizing: border-box;
-  padding: ${({ paddingMobile }) => paddingMobile ?? "16px"};
-  ${({ type, theme }) =>
-    (() => {
-      switch (type) {
-        case "white":
-          return `background: ${theme.colors.card.background};`;
-        case "dark":
-          return `background: ${theme.colors.blue500};`;
-        default:
-          return `background: ${theme.colors.card.background};`;
-      }
-    })()};
+  padding: ${({ paddingMobile }) => paddingMobile ?? "20px"};
+  background: ${({ theme }) => theme.colors.card.background};
   @media (min-width: 560px) {
     padding: ${({ paddingDesktop }) => paddingDesktop ?? "16px 24px"};
   }

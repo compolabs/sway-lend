@@ -34,7 +34,7 @@ const Root = styled.div`
     background-color: ${({ theme }) => theme.colors.switch.background};
 
     :disabled {
-      background-color: ${({ theme }) => theme.colors.primary300};
+      background-color: ${({ theme }) => theme.colors.neutral4};
     }
 
     -webkit-transition: 0.4s;

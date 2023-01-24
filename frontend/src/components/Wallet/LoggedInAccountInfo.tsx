@@ -48,7 +48,7 @@ const AddressContainer = styled.div<{ expanded: boolean }>`
   background: ${({ theme }) => theme.colors.header.walletAddressBackground};
 
   :hover {
-    // background: ${({ theme }) => theme.colors.primary100};
+    // background: ${({ theme }) => theme.colors.neutral1};
   }
 
   .avatar {
@@ -94,7 +94,7 @@ const LoggedInAccountInfo: React.FC<IProps> = () => {
             trigger: "click",
             onVisibleChange: setAccountOpened,
           }}
-          content={<WalletActionsTooltip address={address!} />}
+          content={<WalletActionsTooltip />}
         >
           <AddressContainer expanded={accountOpened}>
             <Text size="small" weight={700}>

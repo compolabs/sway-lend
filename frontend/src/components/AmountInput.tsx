@@ -3,12 +3,14 @@ import styled from "@emotion/styled";
 
 const Root = styled.input<{ small?: boolean }>`
   font-size: ${({ small }) => (small ? "16px;" : "20px")};
-  line-height: 24px;
+  caret-color: ${({ theme }) => theme.colors.primary01};
+  font-weight: 600;
+  line-height: 32px;
   border: none;
   background: transparent;
   outline: none;
   width: 100%;
-  color: ${({ theme }) => theme.colors.primary800};
+  color: ${({ theme }) => theme.colors.text};
 
   ::-webkit-outer-spin-button,
   ::-webkit-inner-spin-button {
@@ -21,7 +23,7 @@ const Root = styled.input<{ small?: boolean }>`
   }
 
   ::placeholder {
-    color: ${({ theme }) => theme.colors.primary650};
+    color: ${({ theme }) => theme.colors.text};
   }
 `;
 

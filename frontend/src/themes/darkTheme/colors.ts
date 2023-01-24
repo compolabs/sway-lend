@@ -1,33 +1,24 @@
 const colors = {
+  neutral0: "#FFFFFF",
+  neutral1: "#F0F2FA",
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
   neutral4: "#9A9ABD",
-  neutral5: "#313a45",
+  neutral5: "#313A45",
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
+  neutral8: "#111315",
   primary01: "#3FE8BD",
-
-  primary800: "#363870",
-  primary650: "#8082C5",
-  primary300: "#C6C9F4",
-  primary100: "#F1F2FE",
-  primary50: "#f8f8ff",
-  blue500: "#7075E9",
-  success: "#35A15A",
-  success550: "#1F8943",
-  success500: "#35A15A",
-  success100: "#E6F3EB",
-  error550: "#D66662",
-  error500: "#ED827E",
-  error100: "#FCF0EF",
-  attention550: "#D9916E",
-  attention500: "#EDAA8A",
-  attention100: "#FCF4F1",
+  primary02: "#1DD4A6",
+  primary03: "#00B493",
+  secondary1: "#FF6A55",
+  secondary2: "#FFB8AE",
+  secondary3: "#CFDAFF",
 };
 // eslint-disable-next-line
 export default {
   ...colors,
-  primary800: "#FFFFFF",
+  primary800: colors.neutral0,
   primary650: "#C6C9F4",
 
   primary300: "#8182C5",
@@ -38,45 +29,89 @@ export default {
   error100: "#3A2A3D",
   attention100: "#3A303F",
 
-  mainBackground: colors.neutral7,
+  mainBackground: colors.neutral6,
   text: colors.neutral2,
+  disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",
+  disabledBtnColor: colors.neutral5,
 
-  divider: colors.neutral3,
+  button: {
+    backgroundDisabled: colors.neutral5,
+
+    primaryColor: colors.neutral7,
+    primaryBackground: colors.primary01,
+    primaryBackgroundHover: colors.primary02,
+
+    secondaryColor: colors.neutral1,
+    secondaryBackground: colors.neutral5,
+    secondaryBackgroundHover: colors.neutral4,
+  },
+  divider: "rgba(223, 229, 250, 0.2)",
   switch: {
     background: colors.neutral5,
     circleColor: colors.neutral6,
   },
   modal: {
-    background: colors.neutral6,
-    border: colors.neutral5,
-    loginTypeBackground: colors.neutral5,
+    background: colors.neutral7,
+    mask: "rgba(49, 58, 69, 0.8)",
   },
   table: {
     headerColor: colors.neutral4,
     background: "rgba(169, 213, 245, 0.05);",
   },
   tooltip: {
-    border: colors.neutral5,
-    background: colors.neutral6,
+    border: "none",
+    background: "#262F33",
+    hoverElement: colors.neutral5,
+  },
+  tokenTooltip: {
+    background: "#262F33",
   },
   header: {
     navLinkBackground: colors.neutral5,
     walletInfoColor: colors.neutral4,
     walletAddressBackground: colors.neutral5,
+    mobileMenuIconBackground: colors.neutral5,
+    mobileMenuIconColor: colors.neutral2,
   },
   skeleton: {
     base: colors.neutral6,
     highlight: colors.neutral5,
   },
+  switchButtons: {
+    selectedBackground: colors.neutral6,
+    selectedColor: colors.neutral3,
+    secondaryBackground: colors.neutral5,
+    secondaryColor: colors.neutral4,
+  },
+  dashboard: {
+    tokenRowSelected: "#313A45",
+    tokenRowColor: "#262F33",
+    cardBackground: "#262F33",
+  },
+  supplyBtn: {
+    background: "#1F262B",
+    backgroundSelected: "#333D46",
+    backgroundDisabled: "#232A2E",
+  },
 
   card: {
-    background: "rgba(169, 213, 245, 0.05);",
+    background: "#262F33",
     border: colors.neutral5,
   },
   icon: {
-    borderColor: colors.primary800,
+    borderColor: "none",
+  },
+  progressBar: {
+    main: colors.primary03,
+    secondary: colors.neutral5,
+    red: colors.primary03,
   },
   gradient: "rgba(0, 0, 0, 0.5);",
+  notifications: {
+    boxShadow:
+      "0px 0px 14px -4px rgba(227, 233, 249, 0.05), 0px 32px 48px -8px rgba(227, 233, 249, 0.1)",
+    background: colors.neutral7,
+  },
   tokenDescGradient:
     "linear-gradient(180deg, rgba(248, 248, 255, 0) 0%, #181931 100%)",
   noNftGradient:

@@ -31,6 +31,7 @@ class PricesStore {
 
   updateTokenPrices = async () => {
     //todo fix to one type of call and new  oracleContracts.get_prices
+    //todo fix without seed
     const { address } = this.rootStore.accountStore;
     if (address == null) return;
     const checkWallet = Wallet.fromSeed(SEED, "", new Provider(NODE_URL));

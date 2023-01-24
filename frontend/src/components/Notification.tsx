@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import React, { HTMLAttributes } from "react";
 import Text from "@components/Text";
-// import info from "@src/assets/icons/info.svg";
 import error from "@src/assets/icons/error.svg";
 import warning from "@src/assets/icons/warning.svg";
 import SizedBox from "@components/SizedBox";
@@ -19,13 +18,13 @@ const Root = styled.div<{ type: "warning" | "info" | "error" }>`
     (() => {
       switch (type) {
         case "warning":
-          return `background: ${theme.colors.attention100};`;
+          return `background: ${theme.colors.tokenTooltip.background};`;
         case "info":
-          return `background: ${theme.colors.primary100};`;
+          return `background: ${theme.colors.primary01};`;
         case "error":
-          return `background: ${theme.colors.error100};`;
+          return `background: ${theme.colors.primary01};`;
         default:
-          return `background: ${theme.colors.primary100};`;
+          return `background: ${theme.colors.primary01};`;
       }
     })()}
   border-radius: 4px;
@@ -33,7 +32,7 @@ const Root = styled.div<{ type: "warning" | "info" | "error" }>`
   justify-content: flex-start;
 
   a {
-    color: #6563dd;
+    color: #00b493;
     text-decoration: underline;
   }
 `;

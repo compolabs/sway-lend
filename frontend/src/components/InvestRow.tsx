@@ -25,25 +25,12 @@ const Root = styled.div<{ withClickLogic?: boolean }>`
   width: 100%;
   cursor: ${({ withClickLogic }) => (withClickLogic ? "pointer" : "default")};
   padding: 8px 24px;
-
-  :hover {
-    background: ${({ withClickLogic, theme }) =>
-      withClickLogic && `${theme.colors.primary100}`};
-  }
-
-  .green {
-    color: ${({ theme }) => theme.colors.success};
-  }
-
-  .red {
-    color: ${({ theme }) => theme.colors.error500};
-  }
 `;
 const DefaultIcon = styled.div`
   width: 40px;
   height: 40px;
-  color: ${({ theme }) => theme.colors.primary100};
-  border: 1px solid ${({ theme }) => theme.colors.primary100};
+  color: ${({ theme }) => theme.colors.neutral1};
+  border: 1px solid ${({ theme }) => theme.colors.neutral1};
   border-radius: 8px;
 `;
 const InvestRow: React.FC<IProps> = ({
