@@ -170,11 +170,11 @@ pub mod market_abi_calls {
         res.unwrap().value
     }
 
-    pub async fn _pause(
+    pub async fn pause(
         contract: &MarketContract,
-        config: PauseConfiguration,
+        config: &PauseConfiguration,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        contract.methods().pause(config).call().await
+        contract.methods().pause(config.clone()).call().await
     }
 
     pub async fn collateral_value_to_sell(
