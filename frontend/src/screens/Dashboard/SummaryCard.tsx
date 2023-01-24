@@ -12,18 +12,24 @@ interface IProps {}
 
 const SummaryCard: React.FC<IProps> = () => {
   const vm = useDashboardVM();
-  if (vm.mode === 0) return null;
   const stats = [
     {
       title: "Supply APR",
       value: vm.supplyApr,
+      changeValue: vm.possibleSupplyApr,
     },
     {
       title: "Borrow APR",
       value: vm.borrowApr,
+      changeValue: vm.possibleBorrowApr,
     },
-    { title: "Total liquidity", value: vm.totalLiquidity },
+    {
+      title: "Total liquidity",
+      value: vm.totalLiquidity,
+      changeValue: null,
+    },
   ];
+
   return (
     <Card>
       <Text weight={600} type="secondary" size="small">
@@ -32,15 +38,27 @@ const SummaryCard: React.FC<IProps> = () => {
       <SizedBox height={16} />
       <Divider />
       <SizedBox height={12} />
-      {stats.map(({ value, title }, index) => (
+      {stats.map(({ value, title, changeValue }, index) => (
         <Row key={index} style={{ marginBottom: 12 }}>
           <Text weight={600}>{title}</Text>
           {value == null ? (
             <Skeleton height={24} width={100} />
           ) : (
-            <Text textAlign="right" weight={600}>
-              {value}
-            </Text>
+            <>
+              {changeValue != null ? (
+                <Text
+                  textAlign="right"
+                  style={{ color: "#00b493" }}
+                  weight={600}
+                >
+                  {changeValue}
+                </Text>
+              ) : (
+                <Text textAlign="right" weight={600}>
+                  {value}
+                </Text>
+              )}
+            </>
           )}
         </Row>
       ))}

@@ -10,7 +10,7 @@ import useWindowSize from "@src/hooks/useWindowSize";
 import { Column } from "@src/components/Flex";
 import SwitchActions from "./SwitchActions";
 import ActionTab from "./ActionTab";
-import SummaryCard from "./SummaryCard";
+// import SummaryCard from "./SummaryCard";
 // import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
 
 interface IProps {}
@@ -60,8 +60,8 @@ const DashboardImpl: React.FC<IProps> = () => {
                     <SwitchActions />
                     <SizedBox height={16} />
                     <ActionTab />
-                    <SizedBox height={16} />
-                    <SummaryCard />
+                    {/*<SizedBox height={16} />*/}
+                    {/*<SummaryCard />*/}
                   </Column>
                 </>
               ) : (
@@ -73,8 +73,8 @@ const DashboardImpl: React.FC<IProps> = () => {
                   <ActionTab />
                   <SizedBox height={16} />
                   <AssetsTable />
-                  <SizedBox height={16} />
-                  <SummaryCard />
+                  {/*<SizedBox height={16} />*/}
+                  {/*<SummaryCard />*/}
                 </>
               )}
             </MainContainer>

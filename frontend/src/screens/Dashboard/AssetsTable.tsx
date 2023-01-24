@@ -103,7 +103,9 @@ const AssetsTable: React.FC<IProps> = () => {
                 <Column>
                   <Text weight={600}>{token.name}</Text>
                   <Text size="small" weight={600} type="secondary">
-                    {`${token.symbol} • ${walletBalance} in wallet`}
+                    {accountStore.isLoggedIn
+                      ? `${token.symbol} • ${walletBalance} in wallet`
+                      : `${token.symbol}`}
                   </Text>
                 </Column>
               </Row>
