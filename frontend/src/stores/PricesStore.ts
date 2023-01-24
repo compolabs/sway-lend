@@ -4,6 +4,7 @@ import BN from "@src/utils/BN";
 import { Provider, Wallet } from "fuels";
 import {
   CONTRACT_ADDRESSES,
+  IToken,
   NODE_URL,
   SEED,
   TOKENS_LIST,
@@ -27,6 +28,12 @@ class PricesStore {
     if (this.tokensPrices == null) return BN.ZERO;
     const price = this.tokensPrices[assetId];
     return price == null ? BN.ZERO : price;
+  };
+
+  getFormattedTokenPrice = (token: IToken): string => {
+    if (this.tokensPrices == null) return "$ 0.00";
+    const price = this.tokensPrices[token.assetId];
+    return "$" + price.toFormat(2);
   };
 
   updateTokenPrices = async () => {

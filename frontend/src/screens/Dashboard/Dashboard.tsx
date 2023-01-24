@@ -10,7 +10,7 @@ import useWindowSize from "@src/hooks/useWindowSize";
 import { Column } from "@src/components/Flex";
 import SwitchActions from "./SwitchActions";
 import ActionTab from "./ActionTab";
-import SummaryCard from "./SummaryCard";
+// import SummaryCard from "./SummaryCard";
 // import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
 
 interface IProps {}

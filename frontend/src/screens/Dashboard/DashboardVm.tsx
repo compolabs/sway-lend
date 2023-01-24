@@ -14,7 +14,10 @@ import {
   MarketAbi__factory,
   OracleAbi__factory,
 } from "@src/contracts";
-import { MarketBasicsOutput } from "@src/contracts/MarketAbi";
+import {
+  AssetConfigOutput,
+  MarketBasicsOutput,
+} from "@src/contracts/MarketAbi";
 import { Contract } from "fuels";
 
 const ctx = React.createContext<DashboardVm | null>(null);
@@ -93,6 +96,10 @@ class DashboardVm {
   setCollateralBalances = (l: Record<string, BN> | null) =>
     (this.collateralBalances = l);
 
+  collateralsData: Record<string, AssetConfigOutput> | null = null;
+  setCollateralData = (l: Record<string, AssetConfigOutput> | null) =>
+    (this.collateralsData = l);
+
   initMarketContract = () => {
     const { address, wallet } = this.rootStore.accountStore;
     if (address == null || wallet == null) return;
@@ -110,6 +117,7 @@ class DashboardVm {
       this.updateMarketBasic(),
       this.updateMaxBorrowAmount(),
       this.updateUserCollateralBalances(),
+      this.updateCollateralsData(),
     ]);
 
   updateAccountInfo = async () => {
@@ -167,6 +175,26 @@ class DashboardVm {
         return { ...acc, [assetId]: new BN(res.value.toString()) };
       }, {});
       this.setCollateralBalances(v);
+    }
+  };
+  updateCollateralsData = async () => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    const collaterals = this.collaterals;
+
+    const functions = collaterals.map((b) =>
+      this.marketContract?.functions
+        .get_asset_config_by_asset_id({ value: b.assetId })
+        .get()
+    );
+    const data = await Promise.all(functions);
+    if (data.length > 0) {
+      const v = data.reduce((acc, res, index) => {
+        if (res == null) return acc;
+        const assetId = collaterals[index].assetId;
+        return { ...acc, [assetId]: res.value };
+      }, {});
+      this.setCollateralData(v);
     }
   };
 
@@ -489,14 +517,14 @@ class DashboardVm {
   }
 
   get borrowApr() {
-    if (this.borrowRate == null) return null;
+    if (this.borrowRate == null) return "0.00";
     const rate = BN.formatUnits(this.borrowRate, 18);
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";
   }
 
   get supplyApr() {
-    if (this.supplyRate == null) return null;
+    if (this.supplyRate == null) return "0.00";
     const rate = BN.formatUnits(this.supplyRate, 18);
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";

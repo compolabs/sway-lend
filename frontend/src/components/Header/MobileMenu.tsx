@@ -1,7 +1,6 @@
 import styled from "@emotion/styled";
 import React from "react";
 import { observer } from "mobx-react-lite";
-import { Column } from "../Flex";
 import Wallet from "../Wallet";
 import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";
@@ -30,6 +29,8 @@ const Root = styled.div<{ opened: boolean }>`
 `;
 const Body = styled.div`
   display: flex;
+  background: pink;
+  width: 100%;
   flex-direction: column;
   background: ${({ theme }) => theme.colors.mainBackground};
 `;
@@ -42,6 +43,7 @@ const MenuItem = styled.div<{ selected?: boolean }>`
   display: flex;
   cursor: pointer;
   flex-direction: row;
+  box-sizing: border-box;
   padding: 12px 16px;
   border-radius: 4px;
   width: 100%;
@@ -52,8 +54,11 @@ const MenuItem = styled.div<{ selected?: boolean }>`
   }
 `;
 
-const Container = styled(Column)`
-  margin: 16px;
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  max-height: 50vh;
 
   & > * {
     margin-bottom: 8px;
@@ -79,7 +84,7 @@ const MobileMenu: React.FC<IProps> = ({ opened, onClose }) => {
   return (
     <Root {...{ opened }}>
       <Body>
-        <Container crossAxisSize="max" style={{ maxHeight: "50vh" }}>
+        <Container>
           {menuItems.map(({ name, link, icon }) => (
             <MenuItem
               key={name}

@@ -5,6 +5,9 @@ import Text from "@components/Text";
 import { TOKENS_BY_ASSET_ID } from "@src/constants";
 import SizedBox from "@components/SizedBox";
 import { Column, Row } from "@src/components/Flex";
+import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
+import BN from "@src/utils/BN";
+import { useStores } from "@stores";
 
 interface IProps {
   assetId: string;
@@ -25,18 +28,26 @@ const Container = styled(Column)`
 `;
 
 const TokenInfo: React.FC<IProps> = ({ assetId }) => {
+  const { accountStore, pricesStore } = useStores();
+  const vm = useDashboardVM();
   const token = TOKENS_BY_ASSET_ID[assetId];
+  if (vm.collateralsData == null) return null;
+  const stats = vm.collateralsData[assetId];
+  const price = pricesStore.getFormattedTokenPrice(token);
+  const penalty = BN.formatUnits(
+    stats.liquidation_penalty.toString(),
+    4
+  ).toFormat(2);
+  const collFactor = BN.formatUnits(
+    stats.borrow_collateral_factor.toString(),
+    4
+  ).toFormat(2);
   const tokenData = [
-    { title: "Oracle price", value: "0.00" },
-    { title: "Collateral factor", value: "0.00" },
-    { title: "Liquidation factor", value: "0.00" },
-    { title: "Oracle price", value: "0.00", divider: true },
-    { title: "Protocol balance", value: "0.00" },
-    { title: "Borrow capacity", value: "0.0000", divider: true },
-    { title: "Wallet balance", value: "0.0000" },
-    { title: "Borrow potential", value: "0.0000" },
+    { title: "Oracle price", value: price },
+    { title: "Collateral factor", value: collFactor + "%" },
+    { title: "Liquidation penalty", value: penalty + "%" },
+    { title: "Wallet balance", value: accountStore.getFormattedBalance(token) },
   ];
-  //todo add disconnected state
   return (
     <Root>
       <Text weight={600} size="medium">
@@ -44,7 +55,7 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
       </Text>
       <SizedBox height={12} />
       <Container crossAxisSize="max">
-        {tokenData.map(({ title, value, divider }, index) => (
+        {tokenData.map(({ title, value }, index) => (
           <Row key={index} alignItems="center" justifyContent="space-between">
             <Text fitContent weight={600} type="secondary">
               {title}
