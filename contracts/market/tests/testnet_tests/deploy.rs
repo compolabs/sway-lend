@@ -140,7 +140,7 @@ async fn deploy() {
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
 
-    market_abi_calls::initialize(&market_instance, market_config, asset_configs, Option::None)
+    market_abi_calls::initialize(&market_instance, &market_config, &asset_configs, Option::None)
         .await
         .expect("❌ Cannot initialize market");
     println!(

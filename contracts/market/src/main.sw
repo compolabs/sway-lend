@@ -106,9 +106,6 @@ abi Market {
     #[storage(read, write)]
     fn absorb(accounts: Vec<Address>);
 
-    #[storage(read, write)]
-    fn dummy_absorb(asset: ContractId, accounts: Vec<Address>);
-
     #[storage(read)]
     fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address);
     #[storage(read, write)]
@@ -121,14 +118,14 @@ abi Market {
     #[storage(read, write)]
     fn withdraw_base(amount: u64);
 
-    #[storage(read)]
-    fn withdraw_reward_token(to: Address, amount: u64);
+    // #[storage(read)]
+    // fn withdraw_reward_token(to: Address, amount: u64);
 
-    #[storage(read, write)]
-    fn get_reward_owed(account: Address) -> u64;
+    // #[storage(read, write)]
+    // fn get_reward_owed(account: Address) -> u64;
 
-    #[storage(read, write)]
-    fn claim();
+    // #[storage(read, write)]
+    // fn claim();
 }
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
@@ -199,13 +196,13 @@ fn is_withdraw_paused() -> bool {
     }
 }
 
-#[storage(read)]
-fn is_claim_paused() -> bool {
-    match storage.pause_config {
-        Option::Some(config) => config.claim_paused,
-        Option::None(_) => false,
-    }
-}
+// #[storage(read)]
+// fn is_claim_paused() -> bool {
+//     match storage.pause_config {
+//         Option::Some(config) => config.claim_paused,
+//         Option::None(_) => false,
+//     }
+// }
 
 #[storage(read)]
 fn get_config() -> MarketConfiguration {
@@ -828,7 +825,7 @@ fn get_reward_owed_internal(account: Address) -> u64 {
 // @Callable claim()
 #[storage(read, write)]
 fn claim_internal() {
-    require(!is_claim_paused(), Error::Paused);
+    // require(!is_claim_paused(), Error::Paused);
     let caller = get_caller();
 
     accrue_internal();
@@ -867,6 +864,7 @@ impl Market for Contract {
         asset_configs: Vec<AssetConfig>,
         debug_step: Option<u64>,
     ) {
+        require(storage.config.is_none(), Error::AlreadyInitialized);
         storage.config = Option::Some(config);
         let mut i = 0;
         while i < asset_configs.len() {
@@ -1016,33 +1014,6 @@ impl Market for Contract {
         }
     }
 
-    #[storage(read, write)]
-    fn dummy_absorb(asset: ContractId, accounts: Vec<Address>) {
-        // require(!is_absorb_paused(), Error::Paused);
-        // let absorber = get_caller();
-        accrue_internal();
-
-        let account = accounts.get(0).unwrap();
-        let account_user = storage.user_basic.get(account);
-
-        let seize_amount = storage.user_collateral.get((account, asset)); // asset decimals
-        storage.user_collateral.insert((account, asset), 0);
-        let total_collateral = storage.totals_collateral.get(asset); // asset decimals
-        storage.totals_collateral.insert(asset, total_collateral - seize_amount);
-
-        let supply_amount = 17_276_598;
-        let new_principal = I64::from(supply_amount);
-        let mut market_basic = storage.market_basic;
-
-        let new_principal = principal_value_supply(storage.market_basic.base_supply_index, supply_amount);
-
-        update_base_principal(account, account_user, I64::from(new_principal));
-
-        market_basic.total_supply_base += supply_amount;
-        market_basic.total_borrow_base = 0;
-        storage.market_basic = market_basic;
-    }
-
     #[storage(read)]
     fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address) { // @Payment base_token
         buy_collateral_internal(asset, min_amount, recipient)
@@ -1068,20 +1039,20 @@ impl Market for Contract {
         withdraw_base_internal(amount)
     }
 
-    #[storage(read)]
-    fn withdraw_reward_token(to: Address, amount: u64) {
-        withdraw_reward_token_internal(to, amount)
-    }
+    // #[storage(read)]
+    // fn withdraw_reward_token(to: Address, amount: u64) {
+    //     withdraw_reward_token_internal(to, amount)
+    // }
 
-    #[storage(read, write)]
-    fn get_reward_owed(account: Address) -> u64 {
-        get_reward_owed_internal(account)
-    }
+    // #[storage(read, write)]
+    // fn get_reward_owed(account: Address) -> u64 {
+    //     get_reward_owed_internal(account)
+    // }
 
-    #[storage(read, write)]
-    fn claim() {
-        claim_internal()
-    }
+    // #[storage(read, write)]
+    // fn claim() {
+    //     claim_internal()
+    // }
 
     #[storage(read)]
     fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig {

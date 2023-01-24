@@ -29,14 +29,14 @@ pub mod market_abi_calls {
 
     pub async fn initialize(
         contract: &MarketContract,
-        config: MarketConfiguration,
-        assets: Vec<AssetConfig>,
+        config: &MarketConfiguration,
+        assets: &Vec<AssetConfig>,
         step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         contract
             .methods()
-            .initialize(config, assets, step)
+            .initialize(config.clone(), assets.clone(), step)
             .tx_params(tx_params)
             .call()
             .await
@@ -115,6 +115,23 @@ pub mod market_abi_calls {
         let res = market
             .methods()
             .get_user_collateral(address, asset)
+            .simulate()
+            .await;
+        res.unwrap().value
+    }
+
+    pub async fn available_to_borrow(
+        market: &MarketContract,
+        contract_ids: &[&dyn SettableContract],
+        address: Address,
+    ) -> u64 {
+        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+
+        let res = market
+            .methods()
+            .available_to_borrow(address)
+            .tx_params(tx_params)
+            .set_contracts(contract_ids)
             .simulate()
             .await;
         res.unwrap().value
@@ -246,8 +263,8 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
     // .with_max_gas_per_tx(500_000_000);
     launch_custom_provider_and_get_wallets(
         WalletsConfig::new(
-            Some(4),             /* Single wallet */
-            Some(1),             /* Single coin (UTXO) */
+            Some(4),                     /* Single wallet */
+            Some(1),                     /* Single coin (UTXO) */
             Some(1_000_000_000_000_000), /* Amount per coin */
         ),
         None,
@@ -353,11 +370,41 @@ pub async fn setup_market() -> (
     let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
     let config = config.as_object().unwrap();
 
-    let market_config = MarketConfiguration {
-        governor: address,
-        pause_guardian: address,
-        base_token: assets.get("USDC").unwrap().contract_id,
-        base_token_decimals: assets.get("USDC").unwrap().config.decimals,
+    let market_config = get_market_config(
+        address,
+        address,
+        assets.get("USDC").unwrap().contract_id,
+        assets.get("USDC").unwrap().config.decimals,
+        price_feed,
+        assets.get("SWAY").unwrap().contract_id,
+    );
+
+    let step = Option::Some(config["debug_step"].as_u64().unwrap());
+    market_abi_calls::initialize(&market_instance, &market_config, &asset_configs, step)
+        .await
+        .expect("❌ Cannot initialize market");
+
+    (wallets, assets, market_instance, oracle_instance)
+}
+
+pub fn get_market_config(
+    governor: Address,
+    pause_guardian: Address,
+    base_token: ContractId,
+    base_token_decimals: u8,
+    price_feed: ContractId,
+    reward_token: ContractId,
+) -> MarketConfiguration {
+    let config_json_str = fs::read_to_string("tests/utils/local_tests_utils/config.json")
+        .expect("Should have been able to read the file");
+    let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
+    let config = config.as_object().unwrap();
+
+    MarketConfiguration {
+        governor,
+        pause_guardian,
+        base_token,
+        base_token_decimals,
         base_token_price_feed: price_feed,
         kink: config["kink"].as_u64().unwrap(), // decimals: 18
         supply_per_second_interest_rate_slope_low: config
@@ -385,12 +432,6 @@ pub async fn setup_market() -> (
         base_min_for_rewards: config["base_min_for_rewards"].as_u64().unwrap(), // decimals base_token_decimals
         base_borrow_min: config["base_borrow_min"].as_u64().unwrap(), // decimals: base_token_decimals
         target_reserves: config["target_reserves"].as_u64().unwrap(), // decimals: base_token_decimals
-        reward_token: assets.get("SWAY").unwrap().contract_id,
-    };
-    let step = Option::Some(config["debug_step"].as_u64().unwrap());
-    market_abi_calls::initialize(&market_instance, market_config, asset_configs, step)
-        .await
-        .expect("❌ Cannot initialize market");
-
-    (wallets, assets, market_instance, oracle_instance)
+        reward_token,
+    }
 }

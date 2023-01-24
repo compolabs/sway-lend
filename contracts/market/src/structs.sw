@@ -41,7 +41,7 @@ pub struct PauseConfiguration {
     withdraw_paused: bool, 
     absorb_paused: bool, 
     buy_pause: bool,
-    claim_paused: bool,
+    // claim_paused: bool,
 }
 
 pub struct UserBasic {
@@ -62,6 +62,7 @@ pub struct MarketBasics {
 }
 
 pub enum Error {
+    AlreadyInitialized: (),
     Paused: (),
     Unauthorized: (),
     InsufficientReserves: (),
