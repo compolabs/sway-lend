@@ -469,7 +469,7 @@ class DashboardVm {
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
-      this.rootStore.notificationStore.notify(
+      this.rootStore.notificationStore.toast(
         "Something went wrong. Please check console for more details",
         {
           type: "error",
@@ -725,7 +725,7 @@ class DashboardVm {
         action = "withdrawn";
         break;
     }
-    this.rootStore.notificationStore.notify(
+    this.rootStore.notificationStore.toast(
       `You have successfully ${action} ${this.formattedTokenAmount} ${this.actionToken.symbol}`,
       {
         link: `${EXPLORER_URL}/transaction/${link}`,

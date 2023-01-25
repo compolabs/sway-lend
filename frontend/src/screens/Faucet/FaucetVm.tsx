@@ -126,7 +126,7 @@ class FaucetVM {
       await this.rootStore.accountStore.updateAccountBalances();
     } catch (e) {
       console.log(e);
-      notificationStore.notify(
+      notificationStore.toast(
         `You have already minted ${TOKENS_BY_ASSET_ID[assetId].symbol}`,
         { type: "error" }
       );

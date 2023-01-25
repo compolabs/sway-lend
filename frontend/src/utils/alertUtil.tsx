@@ -1,6 +1,5 @@
 import React from "react";
 import styled from "@emotion/styled";
-import { ReactComponent as CloseIcon } from "@src/assets/icons/close.svg";
 import { ReactComponent as ErrorIcon } from "@src/assets/icons/error.svg";
 import { ReactComponent as SuccessIcon } from "@src/assets/icons/success.svg";
 import { ReactComponent as WarningIcon } from "@src/assets/icons/warning.svg";
@@ -8,6 +7,7 @@ import { ReactComponent as InfoIcon } from "@src/assets/icons/information.svg";
 import { Column, Row } from "@components/Flex";
 import Text from "@components/Text";
 import { TNotifyOptions } from "@stores/NotificationStore";
+import { TypeOptions } from "react-toastify";
 
 const Root = styled.div`
   display: flex;
@@ -26,12 +26,15 @@ const Link = styled.a`
   font-size: 14px;
   line-height: 20px;
   cursor: pointer;
-  color: #00b493;
+
+  p {
+    color: #00b493;
+  }
 `;
 
 const getAlert = (
   content: string,
-  { type, title, link, linkTitle, onClick, onClickText }: TNotifyOptions
+  { type, title, link, linkTitle }: TNotifyOptions
 ) => {
   if (!type) return null;
   return (
@@ -60,11 +63,6 @@ const getAlert = (
               </Text>
             </Link>
           )}
-          {onClick && (
-            <Link target="_blank" onClick={onClick}>
-              {onClickText}
-            </Link>
-          )}
         </Column>
       </Body>
     </Root>
@@ -72,7 +70,7 @@ const getAlert = (
 };
 
 const Icon: React.FunctionComponent<{
-  type: "error" | "info" | "warning" | "success";
+  type: TypeOptions;
 }> = ({ type }) => {
   let icon = null;
   const Root = styled.div`
@@ -94,7 +92,5 @@ const Icon: React.FunctionComponent<{
   }
   return <Root>{icon}</Root>;
 };
-
-export const closeAlertIcon = <CloseIcon />;
 
 export default getAlert;

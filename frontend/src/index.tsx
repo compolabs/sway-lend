@@ -32,31 +32,32 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <storesContext.Provider value={mobxStore}>
-      <ThemeWrapper>
-        <Router>
-          <App />
-        </Router>
-        <ToastContainer
-          position="bottom-right"
-          autoClose={5000}
-          closeButton={({ closeToast }) => (
-            <CloseIcon onClick={(e) => closeToast(e as any)} />
-          )}
-          hideProgressBar
-          newestOnTop={true}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
-        <GlobalStyles />
-      </ThemeWrapper>
-    </storesContext.Provider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <storesContext.Provider value={mobxStore}>
+    <ThemeWrapper>
+      <Router>
+        <App />
+      </Router>
+      <ToastContainer
+        icon={<div />}
+        position="bottom-right"
+        autoClose={500000}
+        closeButton={({ closeToast }) => (
+          <CloseIcon onClick={(e) => closeToast(e as any)} />
+        )}
+        hideProgressBar
+        newestOnTop={true}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+      <GlobalStyles />
+    </ThemeWrapper>
+  </storesContext.Provider>
+  // </React.StrictMode>
 );
 
 console.log(

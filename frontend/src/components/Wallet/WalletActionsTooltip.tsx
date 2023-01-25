@@ -29,14 +29,14 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
 
   const handleCopyAddress = () => {
     accountStore.address && copy(accountStore.address);
-    notificationStore.notify("Your address was copied", {
+    notificationStore.toast("Your address was copied", {
       type: "success",
       title: "Congratulations!",
     });
   };
   const handleCopySeed = () => {
     accountStore.seed && copy(accountStore.seed);
-    notificationStore.notify("Don't share it with anyone", {
+    notificationStore.toast("Don't share it with anyone", {
       type: "success",
       title: "Your seed was copied",
     });
