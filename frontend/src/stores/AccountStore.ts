@@ -20,8 +20,6 @@ export interface ISerializedAccountStore {
 class AccountStore {
   public readonly rootStore: RootStore;
 
-  //todo add change address if account was changed in extension
-
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
@@ -110,6 +108,7 @@ class AccountStore {
     this.setAddress(null);
     this.setSeed(null);
     this.setLoginType(null);
+    window.location.reload();
   };
 
   loginWithFuelWallet = async () => {

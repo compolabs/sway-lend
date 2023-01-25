@@ -114,7 +114,7 @@ const Header: React.FC<IProps> = () => {
     <Root>
       <TopMenu>
         <Row alignItems="center" crossAxisSize="max">
-          <a href="https://app.swaylend.com">
+          <a href="https://swaylend.com">
             <img className="logo" src={theme.images.icons.logo} alt="logo" />
           </a>
           <Desktop>
