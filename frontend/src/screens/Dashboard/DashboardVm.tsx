@@ -277,7 +277,6 @@ class DashboardVm {
       .call();
   };
   supplyCollateral = async () => {
-    const { accountStore } = this.rootStore;
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
@@ -517,15 +516,17 @@ class DashboardVm {
   }
 
   get borrowApr() {
-    if (this.borrowRate == null) return "0.00";
+    if (this.borrowRate == null || this.loading) return "0.00";
     const rate = BN.formatUnits(this.borrowRate, 18);
+    console.log(rate.toString());
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";
   }
 
   get supplyApr() {
-    if (this.supplyRate == null) return "0.00";
+    if (this.supplyRate == null || this.loading) return "0.00";
     const rate = BN.formatUnits(this.supplyRate, 18);
+    console.log(rate.toString());
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";
   }

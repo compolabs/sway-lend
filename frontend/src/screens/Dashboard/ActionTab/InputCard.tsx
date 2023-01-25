@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import SizedBox from "@components/SizedBox";
 import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import Text from "@src/components/Text";
