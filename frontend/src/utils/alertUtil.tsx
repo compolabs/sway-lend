@@ -26,6 +26,7 @@ const Link = styled.a`
   font-size: 14px;
   line-height: 20px;
   cursor: pointer;
+  color: #00b493;
 `;
 
 const getAlert = (
@@ -54,7 +55,9 @@ const getAlert = (
           </Text>
           {link && (
             <Link target="_blank" href={link}>
-              {linkTitle || link}
+              <Text weight={600} type="secondary">
+                {linkTitle || link}
+              </Text>
             </Link>
           )}
           {onClick && (

@@ -4,6 +4,7 @@ import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
   CONTRACT_ADDRESSES,
+  EXPLORER_URL,
   IToken,
   TOKENS_BY_ASSET_ID,
   TOKENS_BY_SYMBOL,
@@ -281,7 +282,7 @@ class DashboardVm {
     )
       return;
 
-    await this.marketContract.functions
+    return this.marketContract.functions
       .withdraw_base(this.tokenAmount.toString())
       .txParams({ gasPrice: 1 })
       .call();
@@ -295,7 +296,7 @@ class DashboardVm {
     )
       return;
 
-    await this.marketContract.functions
+    return this.marketContract.functions
       .supply_collateral()
       .callParams({
         forward: {
@@ -318,7 +319,7 @@ class DashboardVm {
       CONTRACT_ADDRESSES.priceOracle,
       OracleAbi__factory.abi
     );
-    await this.marketContract.functions
+    return this.marketContract.functions
       .withdraw_collateral(
         { value: this.actionTokenAssetId },
         this.tokenAmount.toString()
@@ -339,7 +340,7 @@ class DashboardVm {
       CONTRACT_ADDRESSES.priceOracle,
       OracleAbi__factory.abi
     );
-    await this.marketContract.functions
+    return this.marketContract.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
       .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
       .addContracts([oracle])
@@ -439,28 +440,31 @@ class DashboardVm {
   marketAction = async () => {
     const { accountStore } = this.rootStore;
     this._setLoading(true);
+    let tx = null;
     try {
       if (this.action === ACTION_TYPE.SUPPLY) {
         if (this.actionTokenAssetId === this.baseToken.assetId) {
-          await this.supplyBase();
+          tx = await this.supplyBase();
         } else {
-          await this.supplyCollateral();
+          tx = await this.supplyCollateral();
         }
       }
       if (this.action === ACTION_TYPE.WITHDRAW) {
         if (this.actionTokenAssetId === this.baseToken.assetId) {
-          await this.withdrawBase();
+          tx = await this.withdrawBase();
         } else {
-          await this.withdrawCollateral();
+          tx = await this.withdrawCollateral();
         }
       }
       if (this.action === ACTION_TYPE.BORROW) {
-        await this.borrowBase();
+        tx = await this.borrowBase();
       }
       if (this.action === ACTION_TYPE.REPAY) {
-        await this.supplyBase();
+        tx = await this.supplyBase();
       }
-      this.notifyThatActionIsSuccessful();
+      this.notifyThatActionIsSuccessful(
+        tx?.transactionResult.transactionId ?? ""
+      );
       this.hideAll();
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
@@ -707,7 +711,7 @@ class DashboardVm {
     return null;
   }
 
-  notifyThatActionIsSuccessful = () => {
+  notifyThatActionIsSuccessful = (link: string) => {
     let action = "";
     switch (this.action) {
       case ACTION_TYPE.BORROW:
@@ -724,6 +728,8 @@ class DashboardVm {
     this.rootStore.notificationStore.notify(
       `You have successfully ${action} ${this.formattedTokenAmount} ${this.actionToken.symbol}`,
       {
+        link: `${EXPLORER_URL}/transaction/${link}`,
+        linkTitle: "View on Explorer",
         type: "success",
         title: "Congrats!",
       }
@@ -744,7 +750,6 @@ class DashboardVm {
     );
     const collateralBalances = Object.entries(this.collateralBalances).reduce(
       (acc, [assetId, v]) => {
-        // console.log(assetId, balance.toString());
         const token = TOKENS_BY_ASSET_ID[assetId];
         const balance = BN.formatUnits(v, token.decimals);
         const dollBalance = getTokenPrice(assetId).times(balance);
