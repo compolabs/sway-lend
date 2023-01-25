@@ -55,6 +55,11 @@ const _abi = {
       "type": "enum Error",
       "components": [
         {
+          "name": "AlreadyInitialized",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
           "name": "Paused",
           "type": 0,
           "typeArguments": null
@@ -393,11 +398,6 @@ const _abi = {
           "name": "buy_pause",
           "type": 3,
           "typeArguments": null
-        },
-        {
-          "name": "claim_paused",
-          "type": 3,
-          "typeArguments": null
         }
       ],
       "typeParameters": null
@@ -564,15 +564,6 @@ const _abi = {
       }
     },
     {
-      "inputs": [],
-      "name": "claim",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      }
-    },
-    {
       "inputs": [
         {
           "name": "asset",
@@ -595,32 +586,6 @@ const _abi = {
     {
       "inputs": [],
       "name": "debug_increment_timestamp",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      }
-    },
-    {
-      "inputs": [
-        {
-          "name": "asset",
-          "type": 10,
-          "typeArguments": null
-        },
-        {
-          "name": "accounts",
-          "type": 17,
-          "typeArguments": [
-            {
-              "name": "",
-              "type": 8,
-              "typeArguments": null
-            }
-          ]
-        }
-      ],
-      "name": "dummy_absorb",
       "output": {
         "name": "",
         "type": 0,
@@ -711,21 +676,6 @@ const _abi = {
       "output": {
         "name": "",
         "type": 11,
-        "typeArguments": null
-      }
-    },
-    {
-      "inputs": [
-        {
-          "name": "account",
-          "type": 8,
-          "typeArguments": null
-        }
-      ],
-      "name": "get_reward_owed",
-      "output": {
-        "name": "",
-        "type": 18,
         "typeArguments": null
       }
     },
@@ -977,26 +927,6 @@ const _abi = {
         "type": 0,
         "typeArguments": null
       }
-    },
-    {
-      "inputs": [
-        {
-          "name": "to",
-          "type": 8,
-          "typeArguments": null
-        },
-        {
-          "name": "amount",
-          "type": 18,
-          "typeArguments": null
-        }
-      ],
-      "name": "withdraw_reward_token",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      }
     }
   ],
   "loggedTypes": [
@@ -1178,14 +1108,6 @@ const _abi = {
     },
     {
       "logId": 22,
-      "loggedType": {
-        "name": "",
-        "type": 4,
-        "typeArguments": []
-      }
-    },
-    {
-      "logId": 23,
       "loggedType": {
         "name": "",
         "type": 4,
