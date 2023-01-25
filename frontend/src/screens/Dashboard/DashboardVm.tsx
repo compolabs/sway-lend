@@ -304,12 +304,17 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
+    const oracle = new Contract(
+      CONTRACT_ADDRESSES.priceOracle,
+      OracleAbi__factory.abi
+    );
     await this.marketContract.functions
       .withdraw_collateral(
         { value: this.actionTokenAssetId },
         this.tokenAmount.toString()
       )
       .txParams({ gasPrice: 1 })
+      .addContracts([oracle])
       .call();
   };
   borrowBase = async () => {
@@ -428,6 +433,13 @@ class DashboardVm {
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
+      this.rootStore.notificationStore.notify(
+        "Something went wrong. Please check console for more details",
+        {
+          type: "error",
+          title: "Oops..",
+        }
+      );
       console.error(e);
     } finally {
       this._setLoading(false);
@@ -518,7 +530,6 @@ class DashboardVm {
   get borrowApr() {
     if (this.borrowRate == null || this.loading) return "0.00";
     const rate = BN.formatUnits(this.borrowRate, 18);
-    console.log(rate.toString());
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";
   }
@@ -526,7 +537,6 @@ class DashboardVm {
   get supplyApr() {
     if (this.supplyRate == null || this.loading) return "0.00";
     const rate = BN.formatUnits(this.supplyRate, 18);
-    console.log(rate.toString());
     const coefficient = new BN(365).times(24).times(60).times(60).times(100);
     return rate.times(coefficient).toFormat(2) + "%";
   }
