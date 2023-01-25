@@ -53,10 +53,10 @@ const Root = styled.div`
 const DashboardStats: React.FC<IProps> = () => {
   const vm = useDashboardVM();
   const { width } = useWindowSize();
-  const supplied = BN.formatUnits(
-    vm.suppliedBalance ?? BN.ZERO,
-    vm.baseToken.decimals
-  ).toFormat(2);
+  // const supplied = BN.formatUnits(
+  //   vm.suppliedBalance ?? BN.ZERO,
+  //   vm.baseToken.decimals
+  // ).toFormat(2);
 
   const borrowed = BN.formatUnits(
     vm.borrowedBalance ?? BN.ZERO,
@@ -85,7 +85,7 @@ const DashboardStats: React.FC<IProps> = () => {
                   Supplied balance
                 </Text>
                 <Text className="main-data" weight={600}>
-                  ${supplied}
+                  ${vm.totalSuppliedBalance}
                 </Text>
               </Column>
               <Column crossAxisSize="max">
@@ -104,7 +104,7 @@ const DashboardStats: React.FC<IProps> = () => {
                 type="secondary"
                 weight={600}
               >
-                Borrow balance
+                Borrowed balance
               </Text>
               <Text textAlign="end" className="data" weight={600}>
                 ${borrowed}
@@ -139,7 +139,7 @@ const DashboardStats: React.FC<IProps> = () => {
               Supplied balance
             </Text>
             <Text className="main-data" weight={600}>
-              ${supplied}
+              ${vm.totalSuppliedBalance}
             </Text>
           </Column>
           <SizedBox height={16} />
@@ -156,7 +156,7 @@ const DashboardStats: React.FC<IProps> = () => {
             </Column>
             <Column style={{ textAlign: "end" }}>
               <Text className="title" type="secondary" weight={600}>
-                Borrow balance
+                Borrowed balance
               </Text>
               <Text className="data" weight={600}>
                 ${borrowed}
