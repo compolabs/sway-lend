@@ -13,6 +13,9 @@ import "react-loading-skeleton/dist/skeleton.css";
 import "rc-dialog/assets/index.css";
 import ThemeWrapper from "./themes/ThemeProvider";
 import GlobalStyles from "@src/themes/GlobalStyles";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ReactComponent as CloseIcon } from "@src/assets/icons/close.svg";
 
 const initState = loadState();
 
@@ -29,16 +32,32 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
-  <React.StrictMode>
-    <storesContext.Provider value={mobxStore}>
-      <ThemeWrapper>
-        <Router>
-          <App />
-        </Router>
-        <GlobalStyles />
-      </ThemeWrapper>
-    </storesContext.Provider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <storesContext.Provider value={mobxStore}>
+    <ThemeWrapper>
+      <Router>
+        <App />
+      </Router>
+      <ToastContainer
+        icon={<div />}
+        position="bottom-right"
+        autoClose={500000}
+        closeButton={({ closeToast }) => (
+          <CloseIcon onClick={(e) => closeToast(e as any)} />
+        )}
+        hideProgressBar
+        newestOnTop={true}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+      <GlobalStyles />
+    </ThemeWrapper>
+  </storesContext.Provider>
+  // </React.StrictMode>
 );
 
 console.log(

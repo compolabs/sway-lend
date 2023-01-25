@@ -115,7 +115,7 @@ class AccountStore {
     const fuel = window.fuel as any;
     const res = await fuel?.connect(config);
     if (!res) {
-      this.rootStore.notificationStore.notify("User denied", {
+      this.rootStore.notificationStore.toast("User denied", {
         type: "error",
       });
       return;
@@ -150,7 +150,7 @@ class AccountStore {
     this.setAddress(wallet.address.toAddress());
     this.setSeed(seed);
     this.rootStore.settingsStore.setLoginModalOpened(false);
-    this.rootStore.notificationStore.notify("Go to faucet page to mint ETH");
+    this.rootStore.notificationStore.toast("Go to faucet page to mint ETH");
   };
 
   get wallet(): null | WalletUnlocked {

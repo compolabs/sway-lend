@@ -40,3 +40,7 @@ a {
     font-weight: 700;
 }
 
+
+.Toastify__toast-icon{
+    display: none !important;
+}
