@@ -1,8 +1,8 @@
 import React from "react";
 import styled from "@emotion/styled";
-import Text from "@components/Text";
 import DarkMode from "@components/Header/DarkMode";
 import Divider from "./Divider";
+import { Anchor } from "@components/Anchor";
 
 interface IProps {}
 
@@ -28,6 +28,13 @@ const Row = styled.div`
   @media (min-width: 880px) {
     padding: 20px 0;
   }
+
+  a {
+    font-size: 13px;
+    line-height: 16px;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors?.neutral4};
+  }
 `;
 
 const Footer: React.FC<IProps> = () => {
@@ -35,9 +42,9 @@ const Footer: React.FC<IProps> = () => {
     <Root>
       <Divider />
       <Row>
-        <Text fitContent weight={600} size="small" type="secondary">
-          Terms
-        </Text>
+        <Anchor href="https://discord.com/invite/AZruaHcW" type="secondary">
+          Need help?
+        </Anchor>
         <DarkMode />
       </Row>
     </Root>

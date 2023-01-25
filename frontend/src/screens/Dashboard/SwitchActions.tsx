@@ -12,9 +12,11 @@ const SwitchActions: React.FC<IProps> = () => {
       values={["Deposit", "Borrow"]}
       active={vm.mode}
       onActivate={(v) => {
-        vm.setMode(v);
-        vm.setAction(null);
-        vm.setActionTokenAssetId(null);
+        if (!vm.loading) {
+          vm.setMode(v);
+          vm.setAction(null);
+          vm.setActionTokenAssetId(null);
+        }
       }}
     />
   );

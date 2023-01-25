@@ -21,7 +21,6 @@ const Button = styled.button<{
   line-height: 24px;
 
   width: ${({ fixed }) => (fixed ? "100%" : "fit-content")};
-  transition: 0.3s;
   padding: 8px 16px;
 
   color: ${({ theme, kind }) =>
