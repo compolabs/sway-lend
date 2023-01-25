@@ -108,7 +108,6 @@ class AccountStore {
     this.setAddress(null);
     this.setSeed(null);
     this.setLoginType(null);
-    window.location.reload();
   };
 
   loginWithFuelWallet = async () => {

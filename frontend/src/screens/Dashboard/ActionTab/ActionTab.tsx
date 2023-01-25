@@ -54,7 +54,7 @@ const ActionTab: React.FC<IProps> = () => {
             <Button
               fixed
               onClick={() => handleBaseTokenClick(ACTION_TYPE.WITHDRAW)}
-              disabled={!accountStore.isLoggedIn}
+              disabled={!accountStore.isLoggedIn || vm.suppliedBalance?.eq(0)}
             >
               Withdraw {vm.baseToken.symbol}
             </Button>
@@ -64,7 +64,9 @@ const ActionTab: React.FC<IProps> = () => {
             <Button
               fixed
               onClick={() => handleBaseTokenClick(ACTION_TYPE.BORROW)}
-              disabled={!accountStore.isLoggedIn}
+              disabled={
+                !accountStore.isLoggedIn || vm.maxBorrowBaseTokenAmount?.eq(0)
+              }
             >
               Borrow {vm.baseToken.symbol}
             </Button>
@@ -72,7 +74,7 @@ const ActionTab: React.FC<IProps> = () => {
             <Button
               fixed
               onClick={() => handleBaseTokenClick(ACTION_TYPE.REPAY)}
-              disabled={!accountStore.isLoggedIn}
+              disabled={!accountStore.isLoggedIn || vm.borrowedBalance?.eq(0)}
             >
               Repay {vm.baseToken.symbol}
             </Button>

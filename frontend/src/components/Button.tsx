@@ -28,20 +28,29 @@ const Button = styled.button<{
       ? theme.colors.button.secondaryColor
       : theme.colors.button.primaryColor};
 
+  border: 1px solid
+    ${({ theme, kind }) =>
+      kind === "secondary"
+        ? theme.colors.button.secondaryBackground
+        : theme.colors.button.primaryBackground};
+
   background: ${({ theme, kind }) =>
     kind === "secondary"
       ? theme.colors.button.secondaryBackground
       : theme.colors.button.primaryBackground};
 
   :hover {
-    background: ${({ theme, kind }) =>
-      kind === "secondary"
+    background: ${({ theme, kind, disabled }) =>
+      disabled
+        ? "none"
+        : kind === "secondary"
         ? theme.colors.button.secondaryBackgroundHover
         : theme.colors.button.primaryBackgroundHover};
     cursor: pointer;
   }
 
   :disabled {
+    border: 1px solid ${({ theme }) => theme.colors.button.backgroundDisabled};
     background: ${({ theme }) => theme.colors.button.backgroundDisabled};
     color: ${({ theme }) => theme.colors.neutral4};
     opacity: 0.6;

@@ -748,6 +748,7 @@ class DashboardVm {
       this.suppliedBalance ?? BN.ZERO,
       this.baseToken.decimals
     );
+    const baseTokenPrice = getTokenPrice(this.baseToken.assetId);
     const collateralBalances = Object.entries(this.collateralBalances).reduce(
       (acc, [assetId, v]) => {
         const token = TOKENS_BY_ASSET_ID[assetId];
@@ -757,6 +758,9 @@ class DashboardVm {
       },
       BN.ZERO
     );
-    return baseTokenBalance.plus(collateralBalances).toFormat(2);
+    return baseTokenBalance
+      .times(baseTokenPrice)
+      .plus(collateralBalances)
+      .toFormat(2);
   }
 }

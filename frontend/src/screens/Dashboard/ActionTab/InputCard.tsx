@@ -47,7 +47,9 @@ const InputCard: React.FC<IProps> = () => {
         />
         <SizedBox height={8} />
         {vm.loading ? (
-          <Button fixed>Loading...</Button>
+          <Button disabled fixed>
+            Loading...
+          </Button>
         ) : (
           <Row>
             <Button kind="secondary" fixed onClick={handleCancelClick}>

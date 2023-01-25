@@ -46,7 +46,10 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     { title: "Oracle price", value: price },
     { title: "Collateral factor", value: collFactor + "%" },
     { title: "Liquidation penalty", value: penalty + "%" },
-    { title: "Wallet balance", value: accountStore.getFormattedBalance(token) },
+    {
+      title: "Wallet balance",
+      value: `${accountStore.getFormattedBalance(token)}  ${token.symbol}`,
+    },
   ];
   return (
     <Root>
