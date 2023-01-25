@@ -94,9 +94,11 @@ abi Market {
     #[storage(read)]
     fn get_reserves() -> I64;
 
+    // TODO: test withdraw_reserves
     #[storage(read)]
     fn withdraw_reserves(to: Address, amount: u64);
 
+    // TODO: test quote_collateral
     #[storage(read)]
     fn quote_collateral(asset: ContractId, base_amount: u64) -> u64;
 
