@@ -13,6 +13,9 @@ import "react-loading-skeleton/dist/skeleton.css";
 import "rc-dialog/assets/index.css";
 import ThemeWrapper from "./themes/ThemeProvider";
 import GlobalStyles from "@src/themes/GlobalStyles";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ReactComponent as CloseIcon } from "@src/assets/icons/close.svg";
 
 const initState = loadState();
 
@@ -35,6 +38,21 @@ root.render(
         <Router>
           <App />
         </Router>
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          closeButton={({ closeToast }) => (
+            <CloseIcon onClick={(e) => closeToast(e as any)} />
+          )}
+          hideProgressBar
+          newestOnTop={true}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
         <GlobalStyles />
       </ThemeWrapper>
     </storesContext.Provider>
