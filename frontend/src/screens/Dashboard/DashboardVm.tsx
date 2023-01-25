@@ -47,7 +47,6 @@ class DashboardVm {
     makeAutoObservable(this);
     this.initMarketContract();
     this.updateMarketState().then(() => this.setInitialized(true));
-
     reaction(() => this.rootStore.accountStore.seed, this.initMarketContract);
   }
 
@@ -75,6 +74,9 @@ class DashboardVm {
   possibleBorrowRate: BN | null = null;
   setPossibleBorrowRate = (l: BN | null) => (this.possibleBorrowRate = l);
 
+  baseTokenReserve: BN | null = null;
+  setBaseTokenReserve = (l: BN | null) => (this.baseTokenReserve = l);
+
   marketBasic: MarketBasicsOutput | null = null;
   setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
 
@@ -88,8 +90,7 @@ class DashboardVm {
   get fixedMaxBorrowedAmount() {
     //todo fix it on contract
     if (this.maxBorrowBaseTokenAmount == null) return BN.ZERO;
-    const am = this.maxBorrowBaseTokenAmount.div(1000).toFixed(2);
-    return new BN(am);
+    return this.maxBorrowBaseTokenAmount;
   }
 
   collateralBalances: Record<string, BN> | null = null;
@@ -118,6 +119,7 @@ class DashboardVm {
       this.updateMaxBorrowAmount(),
       this.updateUserCollateralBalances(),
       this.updateCollateralsData(),
+      this.updateTotalBaseTokenReserve(),
     ]);
 
   updateAccountInfo = async () => {
@@ -138,6 +140,14 @@ class DashboardVm {
       .get_market_basics()
       .get();
     this.setMarketBasic(value);
+  };
+  updateTotalBaseTokenReserve = async () => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (this.marketContract == null || addressInput == null) return;
+    const { value } = await this.marketContract.functions
+      .balance_of({ value: this.baseToken.assetId })
+      .get();
+    this.setBaseTokenReserve(new BN(value.toString()));
   };
 
   updateMaxBorrowAmount = async () => {
@@ -330,19 +340,28 @@ class DashboardVm {
       OracleAbi__factory.abi
     );
     await this.marketContract.functions
-      .withdraw_base(this.tokenAmount.toString())
+      .withdraw_base(this.tokenAmount.toFixed(0))
       .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
       .addContracts([oracle])
       .call();
   };
 
   onMaxBtnClick() {
-    if (this.actionTokenAssetId == null) return null;
+    if (
+      this.actionTokenAssetId == null ||
+      this.maxBorrowBaseTokenAmount == null ||
+      this.baseTokenReserve == null
+    )
+      return null;
     if (this.action === ACTION_TYPE.SUPPLY) {
       const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
         this.actionTokenAssetId
       );
-      this.setTokenAmount(tokenBalance?.balance ?? BN.ZERO);
+      let balance = tokenBalance?.balance ?? BN.ZERO;
+      if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
+        balance = balance.minus(500);
+      }
+      this.setTokenAmount(balance);
     }
     if (this.action === ACTION_TYPE.WITHDRAW) {
       if (this.actionTokenAssetId === this.baseToken.assetId) {
@@ -356,6 +375,10 @@ class DashboardVm {
       }
     }
     if (this.action === ACTION_TYPE.BORROW) {
+      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
+        this.setTokenAmount(this.baseTokenReserve);
+        return;
+      }
       this.setTokenAmount(this.fixedMaxBorrowedAmount);
     }
     if (this.action === ACTION_TYPE.REPAY) {
@@ -369,7 +392,12 @@ class DashboardVm {
   }
 
   get tokenInputBalance(): string {
-    if (this.actionTokenAssetId == null) return "";
+    if (
+      this.actionTokenAssetId == null ||
+      this.maxBorrowBaseTokenAmount == null ||
+      this.baseTokenReserve == null
+    )
+      return "";
     if (
       this.action === ACTION_TYPE.SUPPLY ||
       this.action === ACTION_TYPE.REPAY
@@ -380,12 +408,16 @@ class DashboardVm {
       );
     }
     if (this.action === ACTION_TYPE.BORROW) {
-      if (this.actionToken === this.baseToken) {
+      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
         return BN.formatUnits(
-          this.maxBorrowBaseTokenAmount ?? BN.ZERO,
-          9
+          this.baseTokenReserve ?? 0,
+          this.baseToken.decimals
         ).toFormat(2);
       }
+      return BN.formatUnits(
+        this.maxBorrowBaseTokenAmount ?? BN.ZERO,
+        this.baseToken.decimals
+      ).toFormat(2);
     }
     if (this.action === ACTION_TYPE.WITHDRAW) {
       if (this.actionToken === this.baseToken) {
@@ -488,6 +520,11 @@ class DashboardVm {
     }
     //if borrow
     if (this.action === ACTION_TYPE.BORROW) {
+      if (this.baseTokenReserve?.eq(0)) return false;
+      //if reserve is let than user collateral
+      if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
+        return this.tokenAmount?.lte(this.baseTokenReserve);
+      }
       return this.tokenAmount.lte(this.fixedMaxBorrowedAmount);
     }
     //if repay
@@ -564,55 +601,55 @@ class DashboardVm {
     return "$" + BN.formatUnits(value, this.baseToken.decimals).toFormat(2);
   }
 
-  calcPositionSummary = async () => {
-    if (!this.initialized) return;
-    if (
-      this.action == null ||
-      this.actionTokenAssetId == null ||
-      this.marketContract == null ||
-      this.marketBasic == null ||
-      this.tokenAmount == null
-    ) {
-      return;
-    }
-    if (this.tokenAmount.eq(0)) {
-      this.setPossibleSupplyRate(null);
-      this.setPossibleBorrowRate(null);
-    }
-    if (
-      this.collaterals
-        .map((v) => v.assetId)
-        .includes(this.actionTokenAssetId) ||
-      this.action === ACTION_TYPE.REPAY ||
-      this.action === ACTION_TYPE.WITHDRAW
-    )
-      return;
-
-    const { total_borrow_base, total_supply_base } = this.marketBasic;
-
-    let top = new BN(total_borrow_base.toString());
-    let bottom = new BN(total_supply_base.toString());
-
-    if (this.action === ACTION_TYPE.BORROW) {
-      top = top.plus(this.tokenAmount);
-    }
-    if (this.action === ACTION_TYPE.SUPPLY) {
-      bottom = bottom.plus(this.tokenAmount);
-    }
-    const utilization = BN.parseUnits(top.div(bottom), 18).toFixed(0);
-
-    const [borrow, supply] = await Promise.all([
-      this.marketContract.functions.get_borrow_rate(utilization).get(),
-      this.marketContract.functions.get_supply_rate(utilization).get(),
-    ]);
-
-    if (this.action === ACTION_TYPE.BORROW) {
-      this.setPossibleBorrowRate(new BN(borrow.value.toString()));
-    }
-    if (this.action === ACTION_TYPE.SUPPLY) {
-      this.setPossibleSupplyRate(new BN(supply.value.toString()));
-    }
-  };
+  // calcPositionSummary = async () => {
+  //   if (!this.initialized) return;
+  //   if (
+  //     this.action == null ||
+  //     this.actionTokenAssetId == null ||
+  //     this.marketContract == null ||
+  //     this.marketBasic == null ||
+  //     this.tokenAmount == null
+  //   ) {
+  //     return;
+  //   }
+  //   if (this.tokenAmount.eq(0)) {
+  //     this.setPossibleSupplyRate(null);
+  //     this.setPossibleBorrowRate(null);
+  //   }
+  //   if (
+  //     this.collaterals
+  //       .map((v) => v.assetId)
+  //       .includes(this.actionTokenAssetId) ||
+  //     this.action === ACTION_TYPE.REPAY ||
+  //     this.action === ACTION_TYPE.WITHDRAW
+  //   )
+  //     return;
+  //
+  //   const { total_borrow_base, total_supply_base } = this.marketBasic;
+  //
+  //   let top = new BN(total_borrow_base.toString());
+  //   let bottom = new BN(total_supply_base.toString());
+  //
+  //   if (this.action === ACTION_TYPE.BORROW) {
+  //     top = top.plus(this.tokenAmount);
+  //   }
+  //   if (this.action === ACTION_TYPE.SUPPLY) {
+  //     bottom = bottom.plus(this.tokenAmount);
+  //   }
+  //   const utilization = BN.parseUnits(top.div(bottom), 18).toFixed(0);
+  //
+  //   const [borrow, supply] = await Promise.all([
+  //     this.marketContract.functions.get_borrow_rate(utilization).get(),
+  //     this.marketContract.functions.get_supply_rate(utilization).get(),
+  //   ]);
+  //
+  //   if (this.action === ACTION_TYPE.BORROW) {
+  //     this.setPossibleBorrowRate(new BN(borrow.value.toString()));
+  //   }
+  //   if (this.action === ACTION_TYPE.SUPPLY) {
+  //     this.setPossibleSupplyRate(new BN(supply.value.toString()));
+  //   }
+  // };
 
   get tokenInputError(): string | null {
     if (
@@ -620,6 +657,7 @@ class DashboardVm {
       this.actionTokenAssetId == null ||
       this.maxBorrowBaseTokenAmount == null ||
       this.borrowedBalance == null ||
+      this.baseTokenReserve == null ||
       this.collateralBalances == null
     )
       return null;
@@ -642,6 +680,20 @@ class DashboardVm {
       }
     }
     if (this.action === ACTION_TYPE.BORROW) {
+      if (this.baseTokenReserve?.eq(0)) {
+        return `There is no ${this.baseToken.symbol} to borrow`;
+      }
+      //if reserve is less than user collateral
+      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
+        if (this.tokenAmount?.gt(this.baseTokenReserve ?? 0)) {
+          const max = BN.formatUnits(
+            this.baseTokenReserve,
+            this.baseToken.decimals
+          ).toFormat(2);
+          return `Max to borrow is ${max} ${this.baseToken.symbol}`;
+        }
+        return null;
+      }
       if (this.tokenAmount.gt(this.fixedMaxBorrowedAmount))
         return "Insufficient balance";
     }
@@ -682,4 +734,24 @@ class DashboardVm {
     this.setActionTokenAssetId(null);
     this.setTokenAmount(null);
   };
+
+  get totalSuppliedBalance() {
+    if (!this.initialized || this.collateralBalances == null) return "0.00";
+    const { getTokenPrice } = this.rootStore.pricesStore;
+    const baseTokenBalance = BN.formatUnits(
+      this.suppliedBalance ?? BN.ZERO,
+      this.baseToken.decimals
+    );
+    const collateralBalances = Object.entries(this.collateralBalances).reduce(
+      (acc, [assetId, v]) => {
+        // console.log(assetId, balance.toString());
+        const token = TOKENS_BY_ASSET_ID[assetId];
+        const balance = BN.formatUnits(v, token.decimals);
+        const dollBalance = getTokenPrice(assetId).times(balance);
+        return acc.plus(dollBalance);
+      },
+      BN.ZERO
+    );
+    return baseTokenBalance.plus(collateralBalances).toFormat(2);
+  }
 }

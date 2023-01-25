@@ -36,6 +36,7 @@ const InputCard: React.FC<IProps> = () => {
         </Text>
         <SizedBox height={16} />
         <TokenInput
+          disabled={vm.loading}
           decimals={vm.actionToken.decimals}
           amount={vm.tokenAmount ?? BN.ZERO}
           setAmount={vm.setTokenAmount}

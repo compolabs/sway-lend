@@ -42,7 +42,7 @@ const Footer: React.FC<IProps> = () => {
     <Root>
       <Divider />
       <Row>
-        <Anchor href="https://discord.com/invite/AZruaHcW" type="secondary">
+        <Anchor href="https://discord.gg/eC97a9U2Pe" type="secondary">
           Need help?
         </Anchor>
         <DarkMode />

@@ -15,6 +15,8 @@ interface IProps {
   onMaxClick?: () => void;
   balance?: string;
 
+  disabled?: boolean;
+
   error: string | null;
 
   decimals: number;
@@ -75,6 +77,7 @@ const TokenInput: React.FC<IProps> = (props) => {
   }, [props.amount]);
 
   const handleChangeAmount = (v: BN) => {
+    if (props.disabled) return;
     setAmount(v);
     debounce(v);
   };
@@ -114,6 +117,7 @@ const TokenInput: React.FC<IProps> = (props) => {
         {props.onMaxClick && (
           <MaxButton
             onClick={() => {
+              if (props.disabled) return;
               setFocused(true);
               props.onMaxClick && props.onMaxClick();
             }}
