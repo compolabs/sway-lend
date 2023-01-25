@@ -939,6 +939,7 @@ impl Market for Contract {
     fn available_to_borrow(account: Address) -> u64 {
         let mut borrow_limit = U128::new();
         let mut index = 0;
+        let config = get_config();
         while index < storage.asset_configs.len() {
             let asset_config = match storage.asset_configs.get(index) {
                 Option::Some(asset_config) => asset_config,
@@ -954,9 +955,9 @@ impl Market for Contract {
             let price = U128::from_u64(price);
 
             let collateral_factor = U128::from_u64(asset_config.borrow_collateral_factor); // decimals 4
-            let scale = U128::from_u64(10.pow(asset_config.decimals));
+            let scale = U128::from_u64(10.pow(asset_config.decimals + 4 + 9 - config.base_token_decimals));
 
-            borrow_limit += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
+            borrow_limit += balance * price * collateral_factor / scale; //base_token_decimals
             index = index + 1;
         };
         borrow_limit.as_u64().unwrap()
