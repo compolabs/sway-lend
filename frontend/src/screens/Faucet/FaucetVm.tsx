@@ -3,8 +3,7 @@ import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { TokenAbi__factory } from "@src/contracts";
-import { NODE_URL, TOKENS_BY_ASSET_ID, TOKENS_LIST } from "@src/constants";
-import { Provider, Wallet } from "fuels";
+import { EXPLORER_URL, TOKENS_BY_ASSET_ID, TOKENS_LIST } from "@src/constants";
 import BN from "@src/utils/BN";
 
 const ctx = React.createContext<FaucetVM | null>(null);
@@ -51,20 +50,16 @@ class FaucetVM {
   }
 
   checkTokensThatAlreadyBeenMinted = async () => {
-    const { address } = this.rootStore.accountStore;
-    if (address == null) return;
-    const wallet = Wallet.fromAddress(address, new Provider(NODE_URL));
-    const b256Address = {
-      value: wallet.address.toB256(),
-    };
+    const { walletToRead, addressInput } = this.rootStore.accountStore;
+    if (walletToRead == null || addressInput == null) return;
     const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
     try {
       const tokensContracts = tokens.map((b) =>
-        TokenAbi__factory.connect(b.assetId, wallet)
+        TokenAbi__factory.connect(b.assetId, walletToRead)
       );
       const response = await Promise.all(
         tokensContracts.map((v) =>
-          v.functions.already_minted(b256Address).get()
+          v.functions.already_minted(addressInput).get()
         )
       );
       if (response.length > 0) {
@@ -112,24 +107,33 @@ class FaucetVM {
     if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
     this._setLoading(true);
     const { accountStore, notificationStore } = this.rootStore;
-    const { wallet } = accountStore;
+    const wallet = await accountStore.getWallet();
     if (wallet == null) return;
     const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
     try {
-      const v = await tokenContract.functions
+      const { transactionResult } = await tokenContract.functions
         .mint()
         .txParams({ gasPrice: 1 })
         .call();
-      console.log(v);
-      this.setAlreadyMintedTokens([...this.alreadyMintedTokens, assetId]);
+      if (transactionResult != null) {
+        this.setAlreadyMintedTokens([...this.alreadyMintedTokens, assetId]);
+        const token = TOKENS_BY_ASSET_ID[assetId];
+        this.rootStore.notificationStore.toast(
+          `You have successfully minted ${token.symbol}`,
+          {
+            link: `${EXPLORER_URL}/transaction/${transactionResult.transactionId}`,
+            linkTitle: "View on Explorer",
+            type: "success",
+            title: "Congrats!",
+          }
+        );
+      }
       await this.rootStore.accountStore.updateAccountBalances();
     } catch (e) {
-      console.log(e);
-      notificationStore.toast(
-        `You have already minted ${TOKENS_BY_ASSET_ID[assetId].symbol}`,
-        { type: "error" }
-      );
+      const errorText = e?.toString();
+      console.log(errorText);
+      notificationStore.toast(errorText ?? "", { type: "error" });
     } finally {
       this._setLoading(false);
     }

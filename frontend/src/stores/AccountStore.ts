@@ -1,6 +1,6 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
-import { Address, Provider, Wallet, WalletUnlocked } from "fuels";
+import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
@@ -94,9 +94,9 @@ class AccountStore {
   login = async (loginType: LOGIN_TYPE) => {
     this.setLoginType(loginType);
     switch (loginType) {
-      // case LOGIN_TYPE.FUEL_WALLET:
-      //   await this.loginWithFuelWallet();
-      //   break;
+      case LOGIN_TYPE.FUEL_WALLET:
+        await this.loginWithFuelWallet();
+        break;
       case LOGIN_TYPE.GENERATE_FROM_SEED:
         await this.generateAccountWithSeed();
         break;
@@ -111,19 +111,16 @@ class AccountStore {
   };
 
   loginWithFuelWallet = async () => {
-    const config = { url: NODE_URL };
-    const fuel = window.fuel as any;
-    const res = await fuel?.connect(config);
+    const fuel = window.fuel;
+    const res = await fuel?.connect({ url: NODE_URL });
     if (!res) {
       this.rootStore.notificationStore.toast("User denied", {
         type: "error",
       });
       return;
     }
-    const accounts = await window.fuel?.accounts();
-    if (accounts != null && accounts.length > 0) {
-      this.setAddress(accounts[0]);
-    }
+    const account = await window.fuel.currentAccount();
+    this.setAddress(account);
   };
 
   getFormattedBalance = (token: IToken): string | null => {
@@ -153,15 +150,30 @@ class AccountStore {
     this.rootStore.notificationStore.toast("Go to faucet page to mint ETH");
   };
 
-  get wallet(): null | WalletUnlocked {
-    if (this.seed == null) return null;
-    return Wallet.fromPrivateKey(this.seed, new Provider(NODE_URL));
+  getWallet = async (): Promise<WalletLocked | WalletUnlocked | null> => {
+    if (this.address == null) return null;
+    switch (this.loginType) {
+      case LOGIN_TYPE.FUEL_WALLET:
+        return window.fuel?.getWallet(this.address);
+      case LOGIN_TYPE.GENERATE_FROM_SEED:
+        if (this.seed == null) return null;
+        return Wallet.fromPrivateKey(this.seed, new Provider(NODE_URL));
+    }
+    return null;
+  };
+  get walletToRead(): WalletLocked | null {
+    if (this.address == null) return null;
+    return Wallet.fromAddress(this.address, new Provider(NODE_URL));
   }
 
   get addressInput(): null | { value: string } {
-    if (this.wallet == null) return null;
-    return { value: this.wallet.address.toB256() };
+    if (this.address == null) return null;
+    return { value: Address.fromString(this.address).toB256() };
   }
+
+  isWavesKeeperInstalled = false;
+  setWavesKeeperInstalled = (state: boolean) =>
+    (this.isWavesKeeperInstalled = state);
 }
 
 export default AccountStore;
