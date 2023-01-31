@@ -92,7 +92,11 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 }
               }}
             >
-              {vm.loading ? <Loading /> : "Mint"}
+              {vm.loading && vm.actionTokenAssetId === t.assetId ? (
+                <Loading />
+              ) : (
+                "Mint"
+              )}
             </Button>
           );
         })(),

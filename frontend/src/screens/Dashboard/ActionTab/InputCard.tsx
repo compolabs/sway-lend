@@ -10,11 +10,18 @@ import BN from "@src/utils/BN";
 import useCollapse from "@components/Collapse";
 import SummaryCard from "@screens/Dashboard/SummaryCard";
 import Card from "@src/components/Card";
+import { useStores } from "@stores";
 
 interface IProps {}
 
 const InputCard: React.FC<IProps> = () => {
+  const { accountStore } = useStores();
   const vm = useDashboardVM();
+  const { getCollapseProps } = useCollapse({
+    isExpanded: vm.action != null,
+    duration: 500,
+  });
+  if (!accountStore.isLoggedIn) return null;
 
   const handleCancelClick = () => {
     vm.setAction(null);
@@ -23,11 +30,6 @@ const InputCard: React.FC<IProps> = () => {
     vm.setPossibleBorrowRate(null);
     vm.setPossibleSupplyRate(null);
   };
-
-  const { getCollapseProps } = useCollapse({
-    isExpanded: vm.action != null,
-    duration: 500,
-  });
   return (
     <div {...getCollapseProps()}>
       <Card>

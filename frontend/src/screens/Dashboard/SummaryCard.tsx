@@ -29,7 +29,6 @@ const SummaryCard: React.FC<IProps> = () => {
       changeValue: null,
     },
   ];
-
   return (
     <Card>
       <Text weight={600} type="secondary" size="small">
