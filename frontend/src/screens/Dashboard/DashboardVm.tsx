@@ -482,13 +482,12 @@ class DashboardVm {
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
-      this.rootStore.notificationStore.toast(
-        "Something went wrong. Please check console for more details",
-        {
-          type: "error",
-          title: "Oops..",
-        }
-      );
+      const error = JSON.parse(JSON.stringify(e));
+      const messageText = Object.keys(error?.logs[0])[0] ?? "Error message";
+      this.rootStore.notificationStore.toast(messageText, {
+        type: "error",
+        title: "Oops..",
+      });
       console.error(e);
     } finally {
       this._setLoading(false);
@@ -742,7 +741,7 @@ class DashboardVm {
         link: `${EXPLORER_URL}/transaction/${link}`,
         linkTitle: "View on Explorer",
         type: "success",
-        title: "Congrats!",
+        title: "Transaction is completed!",
       }
     );
   };

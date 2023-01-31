@@ -75,6 +75,9 @@ class FaucetVM {
     }
   };
 
+  actionTokenAssetId: string | null = null;
+  setActionTokenAssetId = (l: string | null) => (this.actionTokenAssetId = l);
+
   get faucetTokens() {
     const { accountStore, pricesStore } = this.rootStore;
     if (accountStore.assetBalances == null) return [];
@@ -106,6 +109,7 @@ class FaucetVM {
   mint = async (assetId?: string) => {
     if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
     this._setLoading(true);
+    this.setActionTokenAssetId(assetId);
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
@@ -125,7 +129,7 @@ class FaucetVM {
             link: `${EXPLORER_URL}/transaction/${transactionResult.transactionId}`,
             linkTitle: "View on Explorer",
             type: "success",
-            title: "Congrats!",
+            title: "Transaction is completed!",
           }
         );
       }
@@ -135,6 +139,7 @@ class FaucetVM {
       console.log(errorText);
       notificationStore.toast(errorText ?? "", { type: "error" });
     } finally {
+      this.setActionTokenAssetId(null);
       this._setLoading(false);
     }
   };

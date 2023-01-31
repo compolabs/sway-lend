@@ -9,7 +9,6 @@ import Img from "@components/Img";
 import sway from "@src/assets/tokens/sway.svg";
 import styled from "@emotion/styled";
 import SizedBox from "@components/SizedBox";
-import { useStores } from "@stores";
 
 interface IProps {
   onClose: () => void;
@@ -24,7 +23,6 @@ const Root = styled.div`
   justify-content: center;
 `;
 const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
-  const { accountStore } = useStores();
   const handleLogin = (loginType: LOGIN_TYPE) => () => {
     onLogin(loginType);
     rest.onClose();
@@ -36,12 +34,12 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
       type: LOGIN_TYPE.GENERATE_FROM_SEED,
       isActive: true,
     },
-    {
-      title: "Fuel wallet",
-      icon: fuel,
-      type: LOGIN_TYPE.FUEL_WALLET,
-      isActive: window.fuel != null,
-    },
+    // {
+    //   title: "Fuel wallet",
+    //   icon: fuel,
+    //   type: LOGIN_TYPE.FUEL_WALLET,
+    //   isActive: window.fuel != null,
+    // },
   ];
   return (
     <Dialog style={{ maxWidth: 360 }} {...rest}>
