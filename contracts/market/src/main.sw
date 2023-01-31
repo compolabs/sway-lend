@@ -142,6 +142,7 @@ storage {
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
+    // borrowers: StorageVec<Address> = StorageVec {},
     market_basic: MarketBasics = MarketBasics {
         base_supply_index: SCALE_18,
         base_borrow_index: SCALE_18,
@@ -786,6 +787,7 @@ fn withdraw_base_internal(amount: u64) {
     update_base_principal(caller, src_user, src_principal_new);
 
     if src_balance < I64::from(0) {
+        // storage.borrowers.push(caller);
         require(src_balance.flip().into() >= config.base_borrow_min, Error::BorrowTooSmall);
         require(is_borrow_collateralized(caller), Error::NotCollateralized);
     }
