@@ -1,6 +1,14 @@
 # Table of contents
 
-* [Sway Lend Protocol](README.md)
+## WELCOME
+
+* [Introduction](README.md)
+* [FAQ](welcome/faq/README.md)
+  * [Introduction to Aave](welcome/faq/introduction-to-aave.md)
+  * [Supplying & Earning](welcome/faq/supplying-and-earning.md)
+  * [Borrowing](welcome/faq/borrowing.md)
+  * [Liquidations](welcome/faq/liquidations.md)
+* [Team](welcome/team.md)
 
 ## Get started on Fuel
 
@@ -11,3 +19,9 @@
 
 * [Interest Rates](interest-rates.md)
 * [Collateral & Borrowing](collateral-and-borrowing.md)
+
+## Links
+
+* [Web App](https://swaylend.com)
+* [Github Repo](https://github.com/sway-gang/sway-lend)
+* [Copy of Github Repo](https://github.com/sway-gang/sway-lend)
