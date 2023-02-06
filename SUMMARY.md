@@ -4,7 +4,7 @@
 
 * [Introduction](README.md)
 * [FAQ](welcome/faq/README.md)
-  * [Introduction to Aave](welcome/faq/introduction-to-aave.md)
+  * [Introduction to Sway Lend](welcome/faq/introduction-to-sway-lend.md)
   * [Supplying & Earning](welcome/faq/supplying-and-earning.md)
   * [Borrowing](welcome/faq/borrowing.md)
   * [Liquidations](welcome/faq/liquidations.md)
@@ -24,4 +24,4 @@
 
 * [Web App](https://swaylend.com)
 * [Github Repo](https://github.com/sway-gang/sway-lend)
-* [Copy of Github Repo](https://github.com/sway-gang/sway-lend)
+* [Discord](https://discord.gg/Fwpqpk6vDB)
