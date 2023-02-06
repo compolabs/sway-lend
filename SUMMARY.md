@@ -10,10 +10,4 @@
 ***
 
 * [Interest Rates](interest-rates.md)
-
-## Collateral & Borrowing
-
-* [Supply](collateral-and-borrowing/supply.md)
-* [Withdraw or Borrow](collateral-and-borrowing/withdraw-or-borrow.md)
-* [Collateral Balance](collateral-and-borrowing/collateral-balance.md)
-* [Borrow Collateralization](collateral-and-borrowing/borrow-collateralization.md)
+* [Collateral & Borrowing](collateral-and-borrowing.md)
