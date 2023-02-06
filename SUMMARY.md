@@ -4,5 +4,5 @@
 
 ## Get started on Fuel
 
-* [💡 Create wallet](get-started-on-fuel/create-wallet.md)
-* [✨ Top up wallet](get-started-on-fuel/top-up-wallet.md)
+* [Create wallet](get-started-on-fuel/create-wallet.md)
+* [Top up wallet](get-started-on-fuel/top-up-wallet.md)
