@@ -1,28 +1,13 @@
-# Sway Lend Protocol
-The Sway Lend Protocol is an Fuel Network smart contract for supplying or borrowing assets. 
+---
+description: What is Sway Lend and how can you use it?
+---
 
-The Sway Lend alive in https://swaylend.com
+# Sway Lend Intro
 
-## Let's get started
-First, you need to clone the repository and open a terminal inside the folder with it
+Sway Lend is a decentralized protocol for lending and borrowing crypto.
 
-To start the frontend, run the commands
-The frontend will run on localhost:3000
-```
-cd frontend
-npm i
-npm start
-```
+**Suppliers** who provide assets receive passive income from the interest paid by borrowers.
 
-To run the main test case, run the following commands
-```
-cd contracts/market/
-forc build     
-cargo test --package market --test integration_tests -- local_tests::main_test::main_test --exact --nocapture
-```
+**Borrowers** can obtain assets without selling the assets they have. For example, if someone holds ETH, they can use it as collateral to borrow USC which they can then use to participate in the IDO of a new promising token.
 
-If you still have any questions, please message us on Discord
-https://discord.gg/eC97a9U2Pe
-
-Also subscribe to our Twitter to keep up with the latest news
-https://twitter.com/swaygangsters
+Sway Lend is built on the Fuel blockchain which provides fast transactions and extremely low network fees — just a few cents per transaction.
