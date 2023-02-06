@@ -74,7 +74,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           if (vm.alreadyMintedTokens.includes(t.assetId))
             return (
               <Button fixed disabled>
-                Already minted
+                Minted
               </Button>
             );
           return (

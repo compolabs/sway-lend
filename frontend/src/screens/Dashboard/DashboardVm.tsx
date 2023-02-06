@@ -482,9 +482,9 @@ class DashboardVm {
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
-      const error = JSON.parse(JSON.stringify(e));
-      const messageText = Object.keys(error?.logs[0])[0] ?? "Error message";
-      this.rootStore.notificationStore.toast(messageText, {
+      const error = JSON.parse(JSON.stringify(e)).toString();
+      // const messageText = Object.keys(error?.logs[0])[0] ?? "Error message";
+      this.rootStore.notificationStore.toast(error.error, {
         type: "error",
         title: "Oops..",
       });
