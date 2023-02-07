@@ -21,11 +21,12 @@
 
 ## Developers
 
+* [Contract overview](developers/contract-overview.md)
 * [Security](developers/security.md)
-* [Contract methods](developers/contract-methods.md)
 
-## Links
+## 🔗 Links
 
 * [Web App](https://app.swaylend.com/)
 * [Github Repo](https://github.com/sway-gang/sway-lend)
 * [Discord](https://discord.gg/Fwpqpk6vDB)
+* [Twitter](https://twitter.com/swaylend)
