@@ -30,7 +30,7 @@ export const SEED_ADDRESS =
   "fuel1pln6n26y4e8lrgcaqctp8mddhvgzgt44pc9ychark93ks9mk7yxqr63nle";
 export const CONTRACT_ADDRESSES = {
   priceOracle:
-    "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59",
+    "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff",
   market: "0xd46340b06d1c1fc8221205e8818759fe0cc5d23aceae3a26b5ecb39307674537",
 };
 
