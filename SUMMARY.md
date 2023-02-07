@@ -22,14 +22,10 @@
 ## Developers
 
 * [Security](developers/security.md)
-* [Protocol Contracts](developers/protocol-contracts.md)
+* [Contract methods](developers/contract-methods.md)
 
 ## Links
 
 * [Web App](https://swaylend.com)
 * [Github Repo](https://github.com/sway-gang/sway-lend)
 * [Discord](https://discord.gg/Fwpqpk6vDB)
-
-***
-
-* [Protocol rewards](protocol-rewards.md)
