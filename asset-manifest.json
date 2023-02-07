@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.bc417d97.css",
-    "main.js": "/static/js/main.14c85d60.js",
+    "main.js": "/static/js/main.b46e26e0.js",
     "static/media/Inter-Bold.ttf": "/static/media/Inter-Bold.88fa7ae373b07b41ecce.ttf",
     "static/media/Inter-SemiBold.ttf": "/static/media/Inter-SemiBold.4d56bb21f2399db8ad48.ttf",
     "static/media/Inter-Medium.ttf": "/static/media/Inter-Medium.6dcbc9bed1ec438907ee.ttf",
@@ -14,6 +14,7 @@
     "static/media/dashboard-dark.svg": "/static/media/dashboard-dark.90f93b370f32823c0f6aca5ef20d2149.svg",
     "static/media/usdc.svg": "/static/media/usdc.ade17eb5cef67a7b4b932510051494cc.svg",
     "static/media/bitcoin.svg": "/static/media/bitcoin.418ae0c4fea1a2b9413996ac86334673.svg",
+    "static/media/compound.svg": "/static/media/compound.89de33e3c065c14549ffe4ecbb522ee1.svg",
     "static/media/wallet-dark.svg": "/static/media/wallet-dark.cb5153e06c3bd026b7b3cbd1f689149f.svg",
     "static/media/wallet.svg": "/static/media/wallet.6566a171dca9e7bf2b53728d836608b0.svg",
     "static/media/sway.svg": "/static/media/sway.14f6d3554c0e8fbd3d3c2aff724858c0.svg",
@@ -46,10 +47,10 @@
     "static/media/minus-dark.svg": "/static/media/minus-dark.c3ca5ebfe858a417554fc3d9fd367533.svg",
     "static/media/minus.svg": "/static/media/minus.e47f224ef4a9b7653d92f6a5b4d9ed32.svg",
     "main.bc417d97.css.map": "/static/css/main.bc417d97.css.map",
-    "main.14c85d60.js.map": "/static/js/main.14c85d60.js.map"
+    "main.b46e26e0.js.map": "/static/js/main.b46e26e0.js.map"
   },
   "entrypoints": [
     "static/css/main.bc417d97.css",
-    "static/js/main.14c85d60.js"
+    "static/js/main.b46e26e0.js"
   ]
 }
