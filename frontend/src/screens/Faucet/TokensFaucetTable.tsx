@@ -74,7 +74,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           if (vm.alreadyMintedTokens.includes(t.assetId))
             return (
               <Button fixed disabled>
-                Already minted
+                Minted
               </Button>
             );
           return (
@@ -92,7 +92,11 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 }
               }}
             >
-              {vm.loading ? <Loading /> : "Mint"}
+              {vm.loading && vm.actionTokenAssetId === t.assetId ? (
+                <Loading />
+              ) : (
+                "Mint"
+              )}
             </Button>
           );
         })(),
