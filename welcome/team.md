@@ -19,5 +19,3 @@ Lidia is a full-stack developer and the brains behind the front end of Sway Lend
 ### [Shubhra](https://twitter.com/shubhrat)
 
 Shubhra is our marketing and community manager. She has a proven track record of building strong relationships with clients, partners, team members, and the community to deliver business outcomes in the edtech and software industries.
-
-### Vlad

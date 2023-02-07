@@ -3,11 +3,11 @@
 ## WELCOME
 
 * [Introduction](README.md)
+* [Team](welcome/team.md)
 * [FAQ](welcome/faq/README.md)
   * [Supplying & Earning](welcome/faq/supplying-and-earning.md)
   * [Borrowing](welcome/faq/borrowing.md)
   * [Liquidations](welcome/faq/liquidations.md)
-* [Team](welcome/team.md)
 
 ## Get started
 
@@ -21,7 +21,7 @@
 
 ## Developers
 
-* [Contract overview](developers/contract-overview/README.md)
+* [Contract overview](developers/contract-methods.md)
   * [Contract methods](developers/contract-overview/contract-methods.md)
   * [Contract storage](developers/contract-overview/contract-storage.md)
 * [Security](developers/security.md)

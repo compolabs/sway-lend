@@ -8,7 +8,9 @@ description: >-
 
 ### config: Option\<MarketConfiguration> = Option::None
 
-The `config` entity is used to store the market configuration for each individual market. It starts out as `None`, but you can initialize it by calling the `initialize` method and passing in an object of the `MarketConfiguration` type. This object contains information such as the addresses of the administrators who manage the market, the token that can be supplied and borrowed, and details about the pricing, interest rates, rewards, and more. The `MarketConfiguration` object has several fields, including:
+The `config` entity is used to store the market configuration for each individual market. It starts out as `None`, but you can initialize it by calling the `initialize` method and passing in an object of the `MarketConfiguration` type. This object contains information such as the addresses of the administrators who manage the market, the token that can be supplied and borrowed, and details about the pricing, interest rates, rewards, and more.&#x20;
+
+#### The `MarketConfiguration` object has several fields, including:
 
 * **governor** ([Address](https://fuellabs.github.io/fuels-rs/v0.35.1/types/address.html)): The address of the admin who can manage the market.
 * **pause\_guardian** ([Address](https://fuellabs.github.io/fuels-rs/v0.35.1/types/address.html)): The address of the admin who can pause the market.
@@ -29,3 +31,5 @@ The `config` entity is used to store the market configuration for each individua
 * **target\_reserves** (u64): The maximum number of protective reserves at which the sale of collateral occurs during liquidation.
 * **reward\_token** ([ContractId](https://fuellabs.github.io/fuels-rs/v0.35.1/types/contract-id.html)): The address of the token that is used to pay mining rewards.
 * **asset\_configs** (Vec\<AssetConfig>): A vector value that contains the configuration of collateral assets.
+
+#### The `AssetConfig` object has several fields, including:
