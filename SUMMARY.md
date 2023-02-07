@@ -21,7 +21,7 @@
 
 ## Developers
 
-* [Contract overview](developers/contract-overview.md)
+* [Contract overview](developers/contract-methods.md)
 * [Security](developers/security.md)
 
 ## 🔗 Links

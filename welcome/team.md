@@ -6,7 +6,7 @@ description: The Core Contributors Behind The Protocol
 
 ### [Vitali](https://twitter.com/dervoiedk)&#x20;
 
-Vitali is the CEO of Sway Lend, responsible for all business-related aspects of the project. He is the driving force behind integrations, grants, governance proposals, and more, ensuring that Sway Lend is at the forefront of the industry.
+Vitali is a seasoned fintech and crypto entrepreneur with a background in engineering and product development. He has a proven track record in driving growth strategies and has a deep understanding of the financial and technological landscape. With his diverse skill set and experience, Vitali brings a valuable perspective to the team, and his expertise is instrumental in shaping the direction of the project.
 
 ### [Alexey](https://twitter.com/mr\_chlenc)&#x20;
 
