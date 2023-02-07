@@ -27,6 +27,7 @@ const faucetAmounts: Record<string, number> = {
   BTC: 1,
   USDC: 10000,
   SWAY: 1000,
+  COMP: 1000,
 };
 
 class FaucetVM {
