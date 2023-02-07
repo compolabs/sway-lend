@@ -2,5 +2,5 @@
 description: Description of all involved in protocol code
 ---
 
-# Contract methods
+# Contract overview
 
