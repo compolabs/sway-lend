@@ -142,7 +142,6 @@ storage {
     totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
-    // borrowers: StorageVec<Address> = StorageVec {},
     market_basic: MarketBasics = MarketBasics {
         base_supply_index: SCALE_18,
         base_borrow_index: SCALE_18,

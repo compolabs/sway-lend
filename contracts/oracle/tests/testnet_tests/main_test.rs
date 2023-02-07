@@ -23,6 +23,13 @@ struct AssetConfig<'a> {
 async fn main_test() {
     let assets = vec![
         AssetConfig {
+            symbol: "COMP",
+            default_price: 50 * 10u64.pow(9),
+            asset_id: "0x13397cf760e15cd30194fa9d884cf4dd810c5d9e6459a4053e65f74f80b92f32",
+            coingeco_id: "compound-governance-token",
+            // decimals: 9,
+        },
+        AssetConfig {
             symbol: "SWAY",
             default_price: 50 * 10u64.pow(9),
             asset_id: "0x99075448d291a8f8f69e5f3d25a309c38ad38def9f709a69ae4a2aeaed1701fe",

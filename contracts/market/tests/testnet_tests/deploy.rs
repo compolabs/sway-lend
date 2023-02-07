@@ -1,11 +1,13 @@
 use std::{collections::HashMap, fs, str::FromStr};
 
 use dotenv::dotenv;
-use fuels::prelude::*;
+use fuels::prelude::{
+    Address, AssetId, Bech32ContractId, ContractId, Provider, WalletUnlocked, BASE_ASSET_ID,
+};
 
 use crate::utils::{
     local_tests_utils::{
-        market::{deploy_market_contract, market_abi_calls, abigen_bindings::market_contract_mod},
+        market::{abigen_bindings::market_contract_mod, deploy_market_contract, market_abi_calls},
         oracle::OracleContract,
         token::TokenContract,
         Asset, DeployTokenConfig,
@@ -36,7 +38,7 @@ async fn deploy() {
     //--------------- ORACLE ---------------
     let oracle_dapp_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
     let oracle = OracleContract::new(oracle_dapp_id, wallet.clone());
-    let price_feed = ContractId::from(oracle.get_contract_id());
+    let price_feed = ContractId::from(oracle.contract_id());
     //     //--------------- TOKENS ---------------
 
     let deploy_config_json_str = fs::read_to_string("tests/utils/local_tests_utils/tokens.json")
@@ -63,7 +65,7 @@ async fn deploy() {
             None
         };
         let contract_id = match instance {
-            Option::Some(instance) => ContractId::from(instance.get_contract_id()),
+            Option::Some(instance) => ContractId::from(instance.contract_id()),
             Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
                 .expect("Cannot parse BASE_ASSET_ID to contract id"),
         };
@@ -140,12 +142,17 @@ async fn deploy() {
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
 
-    market_abi_calls::initialize(&market_instance, &market_config, &asset_configs, Option::None)
-        .await
-        .expect("❌ Cannot initialize market");
+    market_abi_calls::initialize(
+        &market_instance,
+        &market_config,
+        &asset_configs,
+        Option::None,
+    )
+    .await
+    .expect("❌ Cannot initialize market");
     println!(
         "Market contract = {} {}",
-        market_instance.get_contract_id().hash(),
-        market_instance.get_contract_id()
+        market_instance.contract_id().hash(),
+        market_instance.contract_id()
     );
 }

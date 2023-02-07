@@ -19,36 +19,42 @@ const RPC: &str = "node-beta-2.fuel.network";
 async fn deploy() {
     let configs: Vec<DeployConfig> = vec![
         DeployConfig {
-            name: String::from("Sway token"),
-            symbol: String::from("SWAY"),
+            name: String::from("Compound"),
+            symbol: String::from("COMP"),
             decimals: 9,
             mint_amount: 1000,
         },
-        DeployConfig {
-            name: String::from("USD Coin"),
-            symbol: String::from("USDC"),
-            decimals: 6,
-            mint_amount: 10000,
-        },
+        // DeployConfig {
+        //     name: String::from("Sway token"),
+        //     symbol: String::from("SWAY"),
+        //     decimals: 9,
+        //     mint_amount: 1000,
+        // },
+        // DeployConfig {
+        //     name: String::from("USD Coin"),
+        //     symbol: String::from("USDC"),
+        //     decimals: 6,
+        //     mint_amount: 10000,
+        // },
        
-        DeployConfig {
-            name: String::from("Bitcoin"),
-            symbol: String::from("BTC"),
-            decimals: 8,
-            mint_amount: 1,
-        },
-        DeployConfig {
-            name: String::from("Uniswap"),
-            symbol: String::from("UNI"),
-            decimals: 9,
-            mint_amount: 1000,
-        },
-        DeployConfig {
-            name: String::from("Chainlink"),
-            symbol: String::from("LINK"),
-            decimals: 9,
-            mint_amount: 1000,
-        },
+        // DeployConfig {
+        //     name: String::from("Bitcoin"),
+        //     symbol: String::from("BTC"),
+        //     decimals: 8,
+        //     mint_amount: 1,
+        // },
+        // DeployConfig {
+        //     name: String::from("Uniswap"),
+        //     symbol: String::from("UNI"),
+        //     decimals: 9,
+        //     mint_amount: 1000,
+        // },
+        // DeployConfig {
+        //     name: String::from("Chainlink"),
+        //     symbol: String::from("LINK"),
+        //     decimals: 9,
+        //     mint_amount: 1000,
+        // },
     ];
 
     for config in configs {
