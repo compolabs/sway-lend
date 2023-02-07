@@ -31,7 +31,7 @@ export const SEED_ADDRESS =
 export const CONTRACT_ADDRESSES = {
   priceOracle:
     "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59",
-  market: "0x4dedaf6440ad4e2506c75cde1eeafa8d12716d0f00149ccf819ccb92e6483d64",
+  market: "0xd46340b06d1c1fc8221205e8818759fe0cc5d23aceae3a26b5ecb39307674537",
 };
 
 export interface IToken {
