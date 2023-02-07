@@ -4,7 +4,6 @@
 
 * [Introduction](README.md)
 * [FAQ](welcome/faq/README.md)
-  * [Introduction to Sway Lend](welcome/faq/introduction-to-sway-lend.md)
   * [Supplying & Earning](welcome/faq/supplying-and-earning.md)
   * [Borrowing](welcome/faq/borrowing.md)
   * [Liquidations](welcome/faq/liquidations.md)
