@@ -30,6 +30,16 @@ The `config` entity is used to store the market configuration for each individua
 * **base\_borrow\_min** (u64): The minimal value of the base borrow amount, with the same decimal as the base asset.
 * **target\_reserves** (u64): The maximum number of protective reserves at which the sale of collateral occurs during liquidation.
 * **reward\_token** ([ContractId](https://fuellabs.github.io/fuels-rs/v0.35.1/types/contract-id.html)): The address of the token that is used to pay mining rewards.
-* **asset\_configs** (Vec\<AssetConfig>): A vector value that contains the configuration of collateral assets.
+* **asset\_configs** (Vec<[AssetConfig](contract-storage.md#the-assetconfig-object-has-several-fields-including)>): A vector value that contains the configuration of collateral assets.
 
 #### The `AssetConfig` object has several fields, including:
+
+AssetConfig is used to store the configuration values for each individual collateral token in the market. It contains the following fields:
+
+* **asset** ([ContractId](https://fuellabs.github.io/fuels-rs/v0.35.1/types/contract-id.html)): The address of the token that can be used as collateral.
+* **price\_feed** ([ContractId](https://fuellabs.github.io/fuels-rs/v0.35.1/types/contract-id.html)): The address of the price oracle contract where you can check the token's market price in USD.
+* **decimals** (u8): The decimal of the token.
+* **borrow\_collateral\_factor** (u64): The amount you can borrow relative to the dollar value of the collateral asset.
+* **liquidate\_collateral\_factor** (u64): The ratio of the dollar value of the underlying asset to the dollar value of the collateral asset at which the debt will be liquidated.
+* **liquidation\_penalty** (u64): The amount of collateral that will be retained upon liquidation.
+* **supply\_cap** (u64): The maximum number of supply tokens per protocol.
