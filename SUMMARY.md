@@ -26,6 +26,6 @@
 
 ## Links
 
-* [Web App](https://swaylend.com)
+* [Web App](https://app.swaylend.com/)
 * [Github Repo](https://github.com/sway-gang/sway-lend)
 * [Discord](https://discord.gg/Fwpqpk6vDB)
