@@ -29,7 +29,7 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
   };
   const loginTypes = [
     {
-      title: "Generate wallet",
+      title: "Generate account",
       icon: fuel,
       type: LOGIN_TYPE.GENERATE_FROM_SEED,
       isActive: true,

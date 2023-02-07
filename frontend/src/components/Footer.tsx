@@ -3,6 +3,7 @@ import styled from "@emotion/styled";
 import DarkMode from "@components/Header/DarkMode";
 import Divider from "./Divider";
 import { Anchor } from "@components/Anchor";
+import SizedBox from "@components/SizedBox";
 
 interface IProps {}
 
@@ -42,9 +43,15 @@ const Footer: React.FC<IProps> = () => {
     <Root>
       <Divider />
       <Row>
-        <Anchor href="https://discord.gg/eC97a9U2Pe" type="secondary">
-          Need help?
-        </Anchor>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <Anchor href="https://docs.swaylend.com" type="secondary">
+            Docs
+          </Anchor>
+          <SizedBox width={12} />
+          <Anchor href="https://discord.gg/eC97a9U2Pe" type="secondary">
+            Need help?
+          </Anchor>
+        </div>
         <DarkMode />
       </Row>
     </Root>
