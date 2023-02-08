@@ -1,6 +1,6 @@
 # Table of contents
 
-## WELCOME
+## ⚡ WELCOME
 
 * [Introduction](README.md)
 * [Team](welcome/team.md)
@@ -9,7 +9,7 @@
   * [Borrowing](welcome/faq/borrowing.md)
   * [Liquidations](welcome/faq/liquidations.md)
 
-## Get started
+## 🎯 Get started
 
 * [Create wallet](get-started-on-fuel/create-wallet.md)
 * [Top up wallet](get-started-on-fuel/top-up-wallet.md)
@@ -19,7 +19,7 @@
 * [Interest Rates](interest-rates.md)
 * [Collateral & Borrowing](collateral-and-borrowing.md)
 
-## Developers
+## 🌴 Developers
 
 * [Contract overview](developers/contract-methods.md)
   * [Contract methods](developers/contract-overview/contract-methods.md)
