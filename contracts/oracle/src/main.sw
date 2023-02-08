@@ -65,6 +65,21 @@ impl Oracle for Contract {
         });
     }
 
+    #[storage(read, write)]
+    fn set_prices(prices: Vec<(ContractId, u64)>) {
+        validate_owner();
+        let mut i = 0;
+        while i < prices.len() {
+            let (asset_id, price) = prices.get(i).unwrap();
+            storage.prices.insert(asset_id, Price {
+                price,
+                asset_id,
+                last_update: timestamp(),
+            });
+            i += 1;
+        }
+    }
+
     #[storage(read)]
     fn get_price(asset_id: ContractId) -> Price {
         storage.prices.get(asset_id)

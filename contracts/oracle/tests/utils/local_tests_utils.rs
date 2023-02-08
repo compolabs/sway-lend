@@ -1,20 +1,23 @@
 use fuels::prelude::*;
-use rand::prelude::{Rng};
+use rand::prelude::Rng;
 
 use crate::utils::number_utils::parse_units;
 
-abigen!(OracleContract, "out/debug/oracle-abi.json");
 abigen!(
-    TokenContract,
-    "tests/artefacts/token/token_contract-abi.json"
+    Contract(name = "OracleContract", abi = "out/debug/oracle-abi.json"),
+    Contract(
+        name = "TokenContract",
+        abi = "tests/artefacts/token/token_contract-abi.json"
+    )
 );
 
 pub mod abi_calls {
-    use fuels::contract::contract::CallResponse;
+
+    use fuels::programs::call_response::FuelCallResponse;
 
     use super::*;
 
-    pub async fn initialize(contract: &OracleContract, owner: Address) -> CallResponse<()> {
+    pub async fn initialize(contract: &OracleContract, owner: Address) -> FuelCallResponse<()> {
         contract.methods().initialize(owner).call().await.unwrap()
     }
 
@@ -36,7 +39,7 @@ pub mod abi_calls {
         contract: &OracleContract,
         asset_id: ContractId,
         new_price: u64,
-    ) -> CallResponse<()> {
+    ) -> FuelCallResponse<()> {
         contract
             .methods()
             .set_price(asset_id, new_price)
@@ -47,7 +50,9 @@ pub mod abi_calls {
 }
 
 pub mod test_helpers {
-    use super::*;
+    use fuels::types::SizedAsciiString;
+
+    use super::{*, abigen_bindings::token_contract_mod};
 
     pub struct DeployTokenConfig {
         pub name: String,
@@ -111,9 +116,9 @@ pub mod test_helpers {
         name.push_str(" ".repeat(32 - deploy_config.name.len()).as_str());
         symbol.push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
 
-        let config: tokencontract_mod::Config = tokencontract_mod::Config {
-            name: fuels::core::types::SizedAsciiString::<32>::new(name).unwrap(),
-            symbol: fuels::core::types::SizedAsciiString::<8>::new(symbol).unwrap(),
+        let config: token_contract_mod::Config = token_contract_mod::Config {
+            name: SizedAsciiString::<32>::new(name).unwrap(),
+            symbol: SizedAsciiString::<8>::new(symbol).unwrap(),
             decimals,
         };
 

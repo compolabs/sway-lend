@@ -7,7 +7,9 @@ use crate::utils::local_tests_utils::*;
 use fuels::prelude::{abigen, Contract, StorageConfiguration, TxParameters, BASE_ASSET_ID};
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
+use fuels::tx::Salt;
 use fuels_types::Address;
+use rand::Rng;
 
 abigen!(Contract(
     name = "MarketContract",
@@ -46,7 +48,7 @@ pub mod market_abi_calls {
         market: &MarketContract,
         base_asset_id: AssetId,
         amount: u64,
-    ) -> Result<FuelCallResponse<()>, fuels_types::errors::Error> {
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
         let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
@@ -275,13 +277,17 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
 }
 
 pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
-    let id = Contract::deploy(
+    let mut rng = rand::thread_rng();
+    let salt = rng.gen::<[u8; 32]>();
+ 
+    let id = Contract::deploy_with_parameters(
         "./out/debug/market.bin",
         &wallet,
         TxParameters::new(Some(1), None, None),
         StorageConfiguration::with_storage_path(Some(
             "./out/debug/market-storage_slots.json".to_string(),
         )),
+        Salt::from(salt),
     )
     .await
     .unwrap();
@@ -301,7 +307,7 @@ pub async fn setup_market() -> (
 
     //--------------- ORACLE ---------------
     let oracle_instance = get_oracle_contract_instance(&wallets[0]).await;
-    let price_feed = ContractId::from(oracle_instance.get_contract_id());
+    let price_feed = ContractId::from(oracle_instance.contract_id());
     oracle_abi_calls::initialize(&oracle_instance, address).await;
     assert!(oracle_abi_calls::owner(&oracle_instance).await == address);
     // oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
@@ -329,7 +335,7 @@ pub async fn setup_market() -> (
             None
         };
         let contract_id = match instance {
-            Option::Some(instance) => ContractId::from(instance.get_contract_id()),
+            Option::Some(instance) => ContractId::from(instance.contract_id()),
             Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
                 .expect("Cannot parse BASE_ASSET_ID to contract id"),
         };

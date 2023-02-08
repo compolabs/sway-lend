@@ -49,7 +49,7 @@ pub mod token_abi_calls {
             .expect("❌ Cannot initialize token")
     }
     pub async fn config(c: &TokenContract) -> TokenInitializeConfig {
-        if c.get_contract_id().hash().to_string() == BASE_ASSET_ID.to_string() {
+        if c.contract_id().hash().to_string() == BASE_ASSET_ID.to_string() {
             let mut name = String::from("Etherium");
             let mut symbol = String::from("ETH");
             name.push_str(" ".repeat(32 - name.len()).as_str());

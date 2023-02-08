@@ -16,6 +16,9 @@ abi Oracle {
     #[storage(read, write)]
     fn set_price(asset_id: ContractId, price_value: u64);
 
+    #[storage(read, write)]
+    fn set_prices(prices: Vec<(ContractId, u64)>);
+
     #[storage(read)]
     fn get_price(asset_id: ContractId) -> Price;
 }

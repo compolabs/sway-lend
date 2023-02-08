@@ -1,4 +1,5 @@
-use fuels::tx::Address;
+
+use fuels::types::Address;
 
 use crate::utils::local_tests_utils::market::market_abi_calls;
 use crate::utils::local_tests_utils::oracle::oracle_abi_calls;
