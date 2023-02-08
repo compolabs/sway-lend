@@ -24,7 +24,10 @@
 * [Contract overview](developers/contract-methods.md)
   * [Contract methods](developers/contract-overview/contract-methods.md)
   * [Contract storage](developers/contract-overview/contract-storage.md)
-* [Security](developers/security.md)
+
+***
+
+* [Risks](risks.md)
 
 ## 🔗 Links
 
