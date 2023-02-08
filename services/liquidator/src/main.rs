@@ -13,8 +13,7 @@ abigen!(Contract(
 ));
 
 const RPC: &str = "node-beta-2.fuel.network";
-// const ORACLE_ADDRESS: &str = "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59";
-const MARKET_ADDRESS: &str = "0x4dedaf6440ad4e2506c75cde1eeafa8d12716d0f00149ccf819ccb92e6483d64";
+const MARKET_ADDRESS: &str = ""; 
 
 #[tokio::main]
 async fn main() {

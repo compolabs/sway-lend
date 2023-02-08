@@ -16,7 +16,7 @@ use crate::utils::{
 };
 
 const RPC: &str = "node-beta-2.fuel.network";
-const ORACLE_ADDRESS: &str = "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59";
+const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
 
 #[tokio::test]
 async fn deploy() {

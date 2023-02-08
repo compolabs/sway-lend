@@ -546,14 +546,14 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
 #[storage(read)]
 fn get_asset_config_by_asset_id_internal(asset: ContractId) -> AssetConfig {
     let mut out: Option<AssetConfig> = Option::None;
-    let mut i = 0;
-    while i < storage.asset_configs.len() {
-        let asset_config = storage.asset_configs.get(i).unwrap();
+    let mut index = 0;
+    while index < storage.asset_configs.len() {
+        let asset_config = storage.asset_configs.get(index).unwrap();
         if asset_config.asset == asset {
             out = Option::Some(asset_config);
             break;
         }
-        i += 1;
+        index += 1;
     }
     match out {
         Option::Some(v) => v,
@@ -614,13 +614,13 @@ fn absorb_internal(account: Address) {
     let config = get_config();
 
     let mut delta_value = U128::new(); // decimals 9
-    let mut i = 0;
-    while i < storage.asset_configs.len() {
-        let asset_config = storage.asset_configs.get(i).unwrap();
+    let mut index = 0;
+    while index < storage.asset_configs.len() {
+        let asset_config = storage.asset_configs.get(index).unwrap();
         let asset = asset_config.asset;
         let seize_amount = storage.user_collateral.get((account, asset)); // asset decimals
         if seize_amount == 0 {
-            i += 1;
+            index += 1;
             continue;
         }
         storage.user_collateral.insert((account, asset), 0);
@@ -633,7 +633,7 @@ fn absorb_internal(account: Address) {
         let asset_scale = 10.pow(asset_config.decimals);
         let penalty_scale = 10.pow(4);
         delta_value += U128::from_u64(seize_amount) * U128::from_u64(price) * U128::from_u64(liquidation_penalty) / U128::from_u64(asset_scale) / U128::from_u64(penalty_scale); // decimals 9
-        i += 1;
+        index += 1;
     }
 
     let base_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
@@ -869,10 +869,10 @@ impl Market for Contract {
     ) {
         require(storage.config.is_none(), Error::AlreadyInitialized);
         storage.config = Option::Some(config);
-        let mut i = 0;
-        while i < asset_configs.len() {
-            storage.asset_configs.push(asset_configs.get(i).unwrap());
-            i += 1;
+        let mut index = 0;
+        while index < asset_configs.len() {
+            storage.asset_configs.push(asset_configs.get(index).unwrap());
+            index += 1;
         }
         if debug_step.is_some() {
             storage.debug = true;
@@ -1011,10 +1011,10 @@ impl Market for Contract {
     fn absorb(accounts: Vec<Address>) {
         require(!is_absorb_paused(), Error::Paused);
         accrue_internal();
-        let mut i = 0;
-        while i < accounts.len() {
-            absorb_internal(accounts.get(0).unwrap());
-            i += 1;
+        let mut index = 0;
+        while index < accounts.len() {
+            absorb_internal(accounts.get(index).unwrap());
+            index += 1;
         }
     }
 

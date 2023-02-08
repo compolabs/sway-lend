@@ -22,7 +22,7 @@ mod success {
         };
 
         let bnb = get_token_contract_instance(&wallet, &config).await;
-        let asset_id = ContractId::from(bnb.get_contract_id());
+        let asset_id = ContractId::from(bnb.contract_id());
 
         initialize(&oracle, Address::from(wallet.address())).await;
 
