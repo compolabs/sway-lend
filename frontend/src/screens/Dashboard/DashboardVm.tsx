@@ -3,7 +3,6 @@ import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
-  CONTRACT_ADDRESSES,
   EXPLORER_URL,
   IToken,
   TOKENS_BY_ASSET_ID,
@@ -47,7 +46,14 @@ class DashboardVm {
     this.rootStore = rootStore;
     makeAutoObservable(this);
     this.updateMarketState().then(() => this.setInitialized(true));
-    reaction(() => this.rootStore.accountStore.address, this.updateMarketState);
+    setInterval(this.updateMarketState, 20 * 1000);
+    reaction(
+      () => [
+        this.rootStore.settingsStore.version,
+        this.rootStore.accountStore.address,
+      ],
+      () => this.updateMarketStateWhenVersionChanged()
+    );
   }
 
   loading: boolean = false;
@@ -104,11 +110,9 @@ class DashboardVm {
     const { accountStore } = this.rootStore;
     if (accountStore.address == null) return;
     const wallet = await accountStore.getWallet();
+    const { market } = this.rootStore.settingsStore.currentVersionConfig;
     if (wallet != null) {
-      const marketContract = MarketAbi__factory.connect(
-        CONTRACT_ADDRESSES.market,
-        wallet
-      );
+      const marketContract = MarketAbi__factory.connect(market, wallet);
       this.setMarketContractSigned(marketContract);
     }
   };
@@ -118,10 +122,8 @@ class DashboardVm {
     if (accountStore.address == null) return;
     const wallet = accountStore.walletToRead;
     if (wallet == null) return;
-    const marketContract = MarketAbi__factory.connect(
-      CONTRACT_ADDRESSES.market,
-      wallet
-    );
+    const { market } = this.rootStore.settingsStore.currentVersionConfig;
+    const marketContract = MarketAbi__factory.connect(market, wallet);
 
     return Promise.all([
       this.updateAccountBalances(marketContract),
@@ -132,6 +134,14 @@ class DashboardVm {
       this.updateCollateralsData(marketContract),
       this.updateTotalBaseTokenReserve(marketContract),
     ]);
+  };
+
+  updateMarketStateWhenVersionChanged = async () => {
+    //todo add delete update promise if price was changed again;
+    console.log("updateMarketStateWhenVersionChanged");
+    this.setInitialized(false);
+    await this.updateMarketState();
+    this.setInitialized(true);
   };
 
   updateAccountBalances = async (marketContract: MarketAbi) => {
@@ -161,10 +171,8 @@ class DashboardVm {
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const oracle = new Contract(
-      CONTRACT_ADDRESSES.priceOracle,
-      OracleAbi__factory.abi
-    );
+    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
       .txParams({ gasLimit: (1e8).toString() })
@@ -316,10 +324,8 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const oracle = new Contract(
-      CONTRACT_ADDRESSES.priceOracle,
-      OracleAbi__factory.abi
-    );
+    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
     return market.functions
       .withdraw_collateral(
         { value: this.actionTokenAssetId },
@@ -337,10 +343,8 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const oracle = new Contract(
-      CONTRACT_ADDRESSES.priceOracle,
-      OracleAbi__factory.abi
-    );
+    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
       .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
@@ -446,11 +450,9 @@ class DashboardVm {
       const { accountStore } = this.rootStore;
       if (accountStore.address == null) return;
       const wallet = await accountStore.getWallet();
+      const { market } = this.rootStore.settingsStore.currentVersionConfig;
       if (wallet != null) {
-        marketContract = MarketAbi__factory.connect(
-          CONTRACT_ADDRESSES.market,
-          wallet
-        );
+        marketContract = MarketAbi__factory.connect(market, wallet);
       }
     }
     if (marketContract == null) return;

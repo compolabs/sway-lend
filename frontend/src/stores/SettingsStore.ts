@@ -2,9 +2,11 @@ import RootStore from "@stores/RootStore";
 import { THEME_TYPE } from "@src/themes/ThemeProvider";
 import { makeAutoObservable } from "mobx";
 import { getCurrentBrowser } from "@src/utils/getCurrentBrowser";
+import { CONTRACT_ADDRESSES, IContractsConfig } from "@src/constants";
 
 export interface ISerializedSettingsStore {
   selectedTheme: THEME_TYPE | null;
+  version: string | null;
 }
 
 class SettingsStore {
@@ -16,8 +18,12 @@ class SettingsStore {
     if (initState != null) {
       initState.selectedTheme != null &&
         (this.selectedTheme = initState.selectedTheme);
+      initState.version != null && (this.version = initState.version);
     }
   }
+
+  version: string | null = null;
+  setVersion = (s: string) => (this.version = s);
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
 
@@ -30,6 +36,7 @@ class SettingsStore {
 
   serialize = (): ISerializedSettingsStore => ({
     selectedTheme: this.selectedTheme,
+    version: this.version,
   });
 
   walletModalOpened: boolean = false;
@@ -43,6 +50,14 @@ class SettingsStore {
     //https://fuels-wallet.vercel.app/docs/browser-support/
     const browser = getCurrentBrowser();
     return ["chrome", "firefox", "brave", "edge"].includes(browser);
+  }
+
+  get currentVersionConfig(): IContractsConfig {
+    if (this.version == null) {
+      console.log("version == null");
+      return CONTRACT_ADDRESSES["0.2"];
+    }
+    return CONTRACT_ADDRESSES[this.version];
   }
 }
 

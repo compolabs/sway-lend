@@ -161,6 +161,7 @@ class AccountStore {
     }
     return null;
   };
+
   get walletToRead(): WalletLocked | null {
     if (this.address == null) return null;
     return Wallet.fromAddress(this.address, new Provider(NODE_URL));
