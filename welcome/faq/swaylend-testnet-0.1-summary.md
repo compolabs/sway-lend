@@ -18,7 +18,9 @@ We would like to extend our sincerest gratitude to our community for taking the 
    \
    The SwayLend platform operates on the Compound smart contract architecture, where the market can be configured through various settings called in the initialization stage. One of these settings, the tokens asset\_configs field, determines how many specific collateral tokens can be used in the current market. With a large number of users, the platform's Total Value Locked (TVL) quickly reached almost 2 million, causing the supply\_cap limit to be reached.\
    \
-   To resolve this issue, the team is taking two actions. Firstly, the team will change the platform's configuration to a different setting. Secondly, an explanation icon and text will be added to the collaterals token table to better inform users about the issue.![](<../../.gitbook/assets/image (2).png>)\
+   To resolve this issue, the team is taking two actions. Firstly, the team will change the platform's configuration to a different setting. Secondly, an explanation icon and text will be added to the collaterals token table to better inform users about the issue.\
+   \
+   ![](<../../.gitbook/assets/image (2).png>)\
 
 4. **Toast Notifications**\
    ![](<../../.gitbook/assets/image (1).png>)\
