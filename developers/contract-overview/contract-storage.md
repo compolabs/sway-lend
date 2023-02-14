@@ -69,3 +69,16 @@ The `market_basic` value has the following fields:
 * **`total_borrow_base`** (u64): the total borrow of the underlying asset in the market
 * **`last_accrual_time`** (u64): the last time when rewards were accrued.
 
+### pause\_config: Option \<PauseConfiguration>
+
+The pause\_config value has the following fields:
+
+* **`supply_paused`** (bool)
+* **`withdraw_paused`** (bool)
+* **`absorb_paused`** (bool)
+* **`buy_pause`** (bool)
+* **`claim_paused`** (bool)\
+
+
+Each field in the `PauseConfiguration` struct represents whether a particular contract action (supply, withdraw, absorb, buy, or claim) is currently paused or not.
+
