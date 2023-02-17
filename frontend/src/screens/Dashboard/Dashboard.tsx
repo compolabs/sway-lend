@@ -48,7 +48,7 @@ const DashboardImpl: React.FC<IProps> = () => {
         {() => (
           <Root>
             <DashboardStats />
-            <SizedBox height={16} />
+            {/*<SizedBox height={16} />*/}
             <Text>{settingsStore.currentVersionConfig.market}</Text>
             <SizedBox height={16} />
             <MainContainer>

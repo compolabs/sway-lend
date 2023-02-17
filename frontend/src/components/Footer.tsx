@@ -9,6 +9,7 @@ import { useStores } from "@stores";
 import Select from "@components/Select";
 import Text from "@components/Text";
 import { Row } from "./Flex";
+import { observer } from "mobx-react-lite";
 
 interface IProps {}
 
@@ -19,6 +20,7 @@ const Root = styled.footer`
   box-sizing: border-box;
   padding: 0 16px;
   max-width: 1300px;
+  white-space: nowrap;
   @media (min-width: 880px) {
   }
 
@@ -27,6 +29,7 @@ const Root = styled.footer`
 const Container = styled.div`
   display: flex;
   width: 100%;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
@@ -60,27 +63,25 @@ const Footer: React.FC<IProps> = () => {
             Need help?
           </Anchor>
         </div>
-
-        <Row alignItems="center" justifyContent="flex-end">
+        <Row
+          mainAxisSize="fit-content"
+          alignItems="center"
+          justifyContent="flex-end"
+        >
           <Row
             mainAxisSize="fit-content"
             alignItems="center"
             justifyContent="center"
           >
             <Text fitContent weight={600}>
-              Version
+              version
             </Text>
             <SizedBox width={12} />
             <Select
               options={versionOptions}
-              selected={
-                settingsStore.version != null
-                  ? {
-                      title: settingsStore.version,
-                      key: settingsStore.version,
-                    }
-                  : undefined
-              }
+              selected={versionOptions.find(
+                ({ key }) => key === settingsStore.version
+              )}
               onSelect={({ key }) => settingsStore.setVersion(key)}
             />
           </Row>
@@ -91,4 +92,4 @@ const Footer: React.FC<IProps> = () => {
     </Root>
   );
 };
-export default Footer;
+export default observer(Footer);

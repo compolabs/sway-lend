@@ -21,7 +21,7 @@ export const TOKENS_BY_ASSET_ID: Record<string, IToken> = TOKENS_LIST.reduce(
   {}
 );
 
-export const NODE_URL = "https://node-beta-2.fuel.network/graphql";
+export const NODE_URL = "https://node-beta-1.fuel.network/graphql";
 export const EXPLORER_URL = "https://fuellabs.github.io/block-explorer-v2";
 export const FAUCET_URL = "https://faucet-beta-2.fuel.network";
 export const SEED =
@@ -40,6 +40,12 @@ export const CONTRACT_ADDRESSES: Record<string, IContractsConfig> = {
       "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff",
     market:
       "0xe367deeb25692058b0ac88107a893fbf508c59ec9128de0c33c6fec74f6d149e",
+  },
+  "0.3": {
+    priceOracle:
+      "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff",
+    market:
+      "0x5d830f954d17f1c001ea888fbe261027f68d93e025ca82f6e59061911433fb05",
   },
 };
 
