@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr};
 
 use fuels::{
     signers::WalletUnlocked,
@@ -104,6 +104,14 @@ pub async fn debug_state(
     );
     let supply_base = market_basic.total_supply_base as f64 * s_rate / 10u64.pow(6) as f64;
     let borrow_base = market_basic.total_borrow_base as f64 * b_rate / 10u64.pow(6) as f64;
+    let borrowers_amount = market.methods().get_borrowers_amount().simulate().await.unwrap().value;
+    let mut borrowers: Vec<Address> = vec![];
+    let mut i = 0;
+    while i < borrowers_amount {
+        let borrower = market.methods().get_borrower(i).simulate().await.unwrap().value;
+        borrowers.push(borrower);
+        i += 1;
+    }
     println!("🏦 Market\n  Total supply {supply_base} USDC | Total borrow {borrow_base} USDC",);
     println!(
         "  Total USDC balance = {usdc_balance} USDC | Total {collateral_symbol} balance = {collateral_balance} {collateral_symbol}"
@@ -115,6 +123,7 @@ pub async fn debug_state(
         format_units(total_collateral, collateral_decimals)
     );
     println!("  Utilization {utilization} | Last accrual time {last_accrual_time}",);
+    println!("  Borrowers amount {borrowers_amount}\n  {:?}", borrowers);
 
     let basic = market_abi_calls::get_user_basic(&market, alice_address).await;
     let sign = if basic.principal.negative { "-" } else { "+" };
