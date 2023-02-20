@@ -10,8 +10,8 @@ import useWindowSize from "@src/hooks/useWindowSize";
 import { Column } from "@src/components/Flex";
 import SwitchActions from "./SwitchActions";
 import ActionTab from "./ActionTab";
-// import SummaryCard from "./SummaryCard";
-// import AvailableToBorrow from "@screens/Dashboard/AvailableToBorrow";
+import Text from "@components/Text";
+import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -40,6 +40,7 @@ const MainContainer = styled.div`
   }
 `;
 const DashboardImpl: React.FC<IProps> = () => {
+  const { settingsStore } = useStores();
   const { width } = useWindowSize();
   return (
     <Layout>
@@ -47,6 +48,8 @@ const DashboardImpl: React.FC<IProps> = () => {
         {() => (
           <Root>
             <DashboardStats />
+            {/*<SizedBox height={16} />*/}
+            <Text>{settingsStore.currentVersionConfig.market}</Text>
             <SizedBox height={16} />
             <MainContainer>
               {width && width >= 880 ? (
@@ -60,8 +63,6 @@ const DashboardImpl: React.FC<IProps> = () => {
                     <SwitchActions />
                     <SizedBox height={16} />
                     <ActionTab />
-                    {/*<SizedBox height={16} />*/}
-                    {/*<SummaryCard />*/}
                   </Column>
                 </>
               ) : (
@@ -73,8 +74,6 @@ const DashboardImpl: React.FC<IProps> = () => {
                   <ActionTab />
                   <SizedBox height={16} />
                   <AssetsTable />
-                  {/*<SizedBox height={16} />*/}
-                  {/*<SummaryCard />*/}
                 </>
               )}
             </MainContainer>

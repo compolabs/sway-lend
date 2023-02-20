@@ -11,6 +11,7 @@ import Skeleton from "react-loading-skeleton";
 interface IProps {}
 
 const SummaryCard: React.FC<IProps> = () => {
+  //todo add skeleton when version is updating
   const vm = useDashboardVM();
   const stats = [
     {

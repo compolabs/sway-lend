@@ -34,12 +34,12 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
       type: LOGIN_TYPE.GENERATE_FROM_SEED,
       isActive: true,
     },
-    // {
-    //   title: "Fuel wallet",
-    //   icon: fuel,
-    //   type: LOGIN_TYPE.FUEL_WALLET,
-    //   isActive: window.fuel != null,
-    // },
+    {
+      title: "Fuel wallet",
+      icon: fuel,
+      type: LOGIN_TYPE.FUEL_WALLET,
+      isActive: window.fuel != null,
+    },
   ];
   return (
     <Dialog style={{ maxWidth: 360 }} {...rest}>
