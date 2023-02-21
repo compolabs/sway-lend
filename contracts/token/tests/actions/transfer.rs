@@ -5,8 +5,8 @@ use crate::{
 use fuels::prelude::*;
 use std::str::FromStr;
 
-const TOKEN_ADDRESS: &str = "0x2cffcbc96717e5a102db1d5da45c189248d00a070cd65a822096b9733d3b071e";
-const RECIPIEND_ADDRES: &str = "fuel1v3hdp7mpsy3mnsdy4jhwt4yk67n3yqgrn6mt0d4v3wvny2dn7f7sgf3ymm";
+const TOKEN_ADDRESS: &str = "0xd7d5e5c1220872e6f42b38f85ae80c6072b1b4723e7a7218bbf6717aca962536";
+const RECIPIEND_ADDRES: &str = "fuel1anfhx60xj8v3g8hm5rcux3gn3kjqjvhjagtpqmm8yytv80p4aqfqn74nlq";
 
 #[tokio::test]
 async fn transfer() {
@@ -32,7 +32,7 @@ async fn transfer() {
             recipient.address(),
             amount,
             asset_id,
-            TxParameters::new(Some(1), Some(1000000), None),
+            TxParameters::new(Some(1), Some(100000_000000), None),
         )
         .await
         .unwrap();
