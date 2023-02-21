@@ -172,7 +172,11 @@ class DashboardVm {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
+    const oracle = new Contract(
+      priceOracle,
+      OracleAbi__factory.abi,
+      this.rootStore.accountStore.provider
+    );
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
       .txParams({ gasLimit: (1e8).toString() })
@@ -325,7 +329,11 @@ class DashboardVm {
     )
       return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
+    const oracle = new Contract(
+      priceOracle,
+      OracleAbi__factory.abi,
+      this.rootStore.accountStore.provider
+    );
     return market.functions
       .withdraw_collateral(
         { value: this.actionTokenAssetId },
@@ -344,7 +352,11 @@ class DashboardVm {
     )
       return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(priceOracle, OracleAbi__factory.abi);
+    const oracle = new Contract(
+      priceOracle,
+      OracleAbi__factory.abi,
+      this.rootStore.accountStore.provider
+    );
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
       .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })

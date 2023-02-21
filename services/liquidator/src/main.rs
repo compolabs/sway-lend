@@ -47,6 +47,7 @@ async fn main() {
     loop {
         users.fetch().await;
         let list = users.list.clone();
+        println!("Total users {}", users.list.len());
         for user in list {
             if is_liquidatable(&market, user).await {
                 absorb(&market, vec![user]).await.unwrap();

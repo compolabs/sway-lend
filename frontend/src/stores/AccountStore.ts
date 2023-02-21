@@ -19,7 +19,7 @@ export interface ISerializedAccountStore {
 
 class AccountStore {
   public readonly rootStore: RootStore;
-
+  public provider = new Provider(NODE_URL);
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
@@ -53,9 +53,8 @@ class AccountStore {
       this.setAssetBalances([]);
       return;
     }
-    const provider = new Provider(NODE_URL);
     const address = Address.fromString(this.address);
-    const balances = await provider.getBalances(address);
+    const balances = await this.provider.getBalances(address);
     const assetBalances = TOKENS_LIST.map((asset) => {
       const t = balances.find(({ assetId }) => asset.assetId === assetId);
       const balance = t != null ? new BN(t.amount.toString()) : BN.ZERO;

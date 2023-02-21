@@ -5,7 +5,7 @@ use crate::{
 use fuels::prelude::*;
 use std::str::FromStr;
 
-const USDT_ADDRESS: &str = "0x2cffcbc96717e5a102db1d5da45c189248d00a070cd65a822096b9733d3b071e";
+const TOKEN_ADDRESS: &str = "0x2cffcbc96717e5a102db1d5da45c189248d00a070cd65a822096b9733d3b071e";
 const RECIPIEND_ADDRES: &str = "fuel1v3hdp7mpsy3mnsdy4jhwt4yk67n3yqgrn6mt0d4v3wvny2dn7f7sgf3ymm";
 
 #[tokio::test]
@@ -13,7 +13,7 @@ async fn transfer() {
     let (wallet, dapp, provider) = setup().await;
     let decimals = dapp.methods().decimals().simulate().await.unwrap().value;
     let symbol = dapp.methods().symbol().simulate().await.unwrap().value;
-    let asset_id = AssetId::from_str(USDT_ADDRESS).unwrap();
+    let asset_id = AssetId::from_str(TOKEN_ADDRESS).unwrap();
 
     println!("Decimals: {decimals}\nSymbol: {symbol}");
 
