@@ -2,13 +2,7 @@ import RootStore from "@stores/RootStore";
 import { makeAutoObservable } from "mobx";
 import BN from "@src/utils/BN";
 import { Provider, Wallet } from "fuels";
-import {
-  CONTRACT_ADDRESSES,
-  IToken,
-  NODE_URL,
-  SEED,
-  TOKENS_LIST,
-} from "@src/constants";
+import { IToken, NODE_URL, SEED, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
 class PricesStore {
