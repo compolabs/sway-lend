@@ -20,6 +20,7 @@ export interface ISerializedAccountStore {
 class AccountStore {
   public readonly rootStore: RootStore;
   public provider = new Provider(NODE_URL);
+
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
@@ -120,6 +121,7 @@ class AccountStore {
     }
     const account = await window.fuel.currentAccount();
     this.setAddress(account);
+    await this.addAssets();
   };
 
   getFormattedBalance = (token: IToken): string | null => {
@@ -174,6 +176,24 @@ class AccountStore {
   isWavesKeeperInstalled = false;
   setWavesKeeperInstalled = (state: boolean) =>
     (this.isWavesKeeperInstalled = state);
+
+  addAssets = async () => {
+    //todo add tokens if they are not added
+    const assets = TOKENS_LIST.filter(({ symbol }) => symbol != "ETH").map(
+      (t) => ({
+        name: t.name,
+        assetId: t.assetId,
+        imageUrl: window.location.origin + t.logo,
+        symbol: t.symbol,
+        isCustom: true,
+      })
+    );
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      const v = await window?.fuel.addAsset(asset);
+      console.log(v);
+    }
+  };
 }
 
 export default AccountStore;

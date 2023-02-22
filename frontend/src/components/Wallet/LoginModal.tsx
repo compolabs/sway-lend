@@ -28,12 +28,12 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
     rest.onClose();
   };
   const loginTypes = [
-    {
-      title: "Generate account",
-      icon: fuel,
-      type: LOGIN_TYPE.GENERATE_FROM_SEED,
-      isActive: true,
-    },
+    // {
+    //   title: "Generate account",
+    //   icon: fuel,
+    //   type: LOGIN_TYPE.GENERATE_FROM_SEED,
+    //   isActive: true,
+    // },
     {
       title: "Fuel wallet",
       icon: fuel,

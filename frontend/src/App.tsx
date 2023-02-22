@@ -19,6 +19,7 @@ const App: React.FC = () => {
   return (
     <Root>
       <Header />
+      {/*<TechnicalWork />*/}
       <Routes>
         <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />

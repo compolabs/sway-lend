@@ -2,7 +2,7 @@ import RootStore from "@stores/RootStore";
 import { THEME_TYPE } from "@src/themes/ThemeProvider";
 import { makeAutoObservable } from "mobx";
 import { getCurrentBrowser } from "@src/utils/getCurrentBrowser";
-import { CONTRACT_ADDRESSES, IContractsConfig } from "@src/constants";
+import { CONTRACT_ADDRESSES, IContractsConfig, NODE_URL } from "@src/constants";
 
 export interface ISerializedSettingsStore {
   selectedTheme: THEME_TYPE | null;
@@ -41,6 +41,9 @@ class SettingsStore {
 
   walletModalOpened: boolean = false;
   setWalletModalOpened = (s: boolean) => (this.walletModalOpened = s);
+
+  network: string = NODE_URL;
+  setNetwork = (s: string) => (this.network = s);
 
   loginModalOpened: boolean = false;
   setLoginModalOpened = (s: boolean) => (this.loginModalOpened = s);
