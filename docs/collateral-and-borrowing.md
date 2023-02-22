@@ -19,10 +19,3 @@ Balance = Principal * BaseSupplyIndex [Principal > 0]
 Balance = Principal * BaseBorrowIndex [Principal < 0]
 ```
 
-### Supply
-
-### Withdraw or Borrow <a href="#withdraw-or-borrow" id="withdraw-or-borrow"></a>
-
-### Collateral Balance <a href="#collateral-balance" id="collateral-balance"></a>
-
-### Borrow Collateralization <a href="#borrow-collateralization" id="borrow-collateralization"></a>
