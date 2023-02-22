@@ -1,5 +1,5 @@
 use dotenv::dotenv;
-use fuels::prelude::{abigen, Address, Bech32ContractId, ContractId, Provider, WalletUnlocked};
+use fuels::prelude::{abigen, Address, Bech32ContractId, ContractId, Provider, WalletUnlocked, SettableContract};
 use serenity::model::prelude::ChannelId;
 use serenity::prelude::*;
 use std::{env, str::FromStr, thread::sleep, time::Duration};
@@ -10,13 +10,20 @@ use utils::{
     print_swaygang_sign::print_swaygang_sign,
 };
 
-abigen!(Contract(
-    name = "MarketContract",
-    abi = "src/artefacts/market/market-abi.json"
-));
+abigen!(
+    Contract(
+        name = "MarketContract",
+        abi = "src/artefacts/market-abi.json"
+    ),
+    Contract(
+        name = "OracleContract",
+        abi = "src/artefacts/oracle-abi.json"
+    )
+);
 
 const RPC: &str = "node-beta-2.fuel.network";
 const MARKET_ADDRESS: &str = "0x2c290844d5b996b32cdf10de4a5294868efc3608e966a809bb03b86b2fecb2c4";
+const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
 
 #[tokio::main]
 async fn main() {
@@ -31,9 +38,13 @@ async fn main() {
 
     let bech32_id = Bech32ContractId::from(ContractId::from_str(MARKET_ADDRESS).unwrap());
     let market = MarketContract::new(bech32_id.clone(), wallet.clone());
+
     let mut users = Users::new(MarketContract::new(bech32_id, wallet.clone()));
     users.fetch().await;
 
+    let bech32_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
+    let oracle = OracleContract::new(bech32_id, wallet.clone());
+    let contracts:[&dyn SettableContract; 1] = [&oracle];
     //discord
     let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
     let client = Client::builder(&token, GatewayIntents::default())
@@ -49,8 +60,8 @@ async fn main() {
         let list = users.list.clone();
         println!("Total users {}", users.list.len());
         for user in list {
-            if is_liquidatable(&market, user).await {
-                absorb(&market, vec![user]).await.unwrap();
+            if is_liquidatable(&market, &contracts, user).await {
+                absorb(&market, &contracts, vec![user]).await.unwrap();
                 channel
                     .say(
                         client.cache_and_http.http.clone(),
@@ -60,7 +71,7 @@ async fn main() {
                     .unwrap();
             }
         }
-        sleep(Duration::from_secs(60));
+        sleep(Duration::from_secs(10));
     }
 }
 
@@ -86,7 +97,6 @@ impl Users {
             .await
             .unwrap()
             .value;
-        println!("amount = {:?}", amount);
         let mut index = self.last_check_borrowers_amount;
         while index < amount {
             let borrower = methods.get_borrower(index).simulate().await.unwrap().value;
@@ -96,3 +106,4 @@ impl Users {
         self.last_check_borrowers_amount = amount;
     }
 }
+
