@@ -6,7 +6,7 @@ pub mod market_abi_calls {
         types::Address,
     };
 
-    use crate::MarketContract;
+    use crate::{MarketContract};
 
     pub async fn absorb(
         market: &MarketContract,
@@ -26,7 +26,7 @@ pub mod market_abi_calls {
         market: &MarketContract,
         contract_ids: &[&dyn SettableContract],
         address: Address,
-    ) -> bool {
+    ) -> Result<FuelCallResponse<bool>, fuels::types::errors::Error> {
         let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         market
             .methods()
@@ -36,7 +36,5 @@ pub mod market_abi_calls {
             // .estimate_tx_dependencies(None).await.unwrap()
             .simulate()
             .await
-            .unwrap()
-            .value
     }
 }

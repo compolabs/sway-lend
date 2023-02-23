@@ -1,14 +1,13 @@
 use dotenv::dotenv;
-use fuels::prelude::{abigen, Address, Bech32ContractId, ContractId, Provider, WalletUnlocked, SettableContract};
+use fuels::prelude::{
+    abigen, Address, Bech32ContractId, ContractId, Provider, SettableContract, WalletUnlocked,
+};
 use serenity::model::prelude::ChannelId;
 use serenity::prelude::*;
-use std::{env, str::FromStr, thread::sleep, time::Duration};
+use std::{env, fmt::format, str::FromStr, thread::sleep, time::Duration};
 
 mod utils;
-use utils::{
-    market_abi_calls::market_abi_calls::{absorb, is_liquidatable},
-    print_swaygang_sign::print_swaygang_sign,
-};
+use utils::{market_abi_calls::market_abi_calls, print_swaygang_sign::print_swaygang_sign};
 
 abigen!(
     Contract(
@@ -44,7 +43,7 @@ async fn main() {
 
     let bech32_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
     let oracle = OracleContract::new(bech32_id, wallet.clone());
-    let contracts:[&dyn SettableContract; 1] = [&oracle];
+    let contracts: [&dyn SettableContract; 1] = [&oracle];
     //discord
     let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
     let client = Client::builder(&token, GatewayIntents::default())
@@ -58,18 +57,32 @@ async fn main() {
     loop {
         users.fetch().await;
         let list = users.list.clone();
-        println!("Total users {}", users.list.len());
-        for user in list {
-            if is_liquidatable(&market, &contracts, user).await {
-                absorb(&market, &contracts, vec![user]).await.unwrap();
+        // println!("Total users {}", list.len());
+        let mut index = 0;
+        while index < list.len() {
+            let user = list[index];
+            let res = market_abi_calls::is_liquidatable(&market, &contracts, user).await;
+            if res.is_err() {
+                println!("error = {:?}", res.err());
+                continue;
+            }
+            let is_liquidatable = res.unwrap().value;
+            if is_liquidatable {
+                let _res = market_abi_calls::absorb(&market, &contracts, vec![user])
+                    .await
+                    .unwrap();
+                
+                // let tx_link =
+                    // format!("https://fuellabs.github.io/block-explorer-v2/transaction/{}");
                 channel
                     .say(
                         client.cache_and_http.http.clone(),
-                        format!("🔥 {user} has been liquidated."),
+                        format!("🔥 0x{user} has been liquidated."),
                     )
                     .await
                     .unwrap();
             }
+            index += 1;
         }
         sleep(Duration::from_secs(10));
     }
@@ -106,4 +119,3 @@ impl Users {
         self.last_check_borrowers_amount = amount;
     }
 }
-
