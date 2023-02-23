@@ -4,7 +4,6 @@ import { THEME_TYPE } from "@src/themes/ThemeProvider";
 import { Theme, toast } from "react-toastify";
 import { ToastOptions } from "react-toastify/dist/types";
 import getAlert from "@src/utils/alertUtil";
-// import axios from "axios";
 
 export type TNotifyOptions = ToastOptions & {
   link?: string;
@@ -27,6 +26,7 @@ class NotificationStore {
         : "light";
 
     toast(getAlert(content, options) ?? content, {
+      autoClose: 1500,
       ...options,
       theme,
     });

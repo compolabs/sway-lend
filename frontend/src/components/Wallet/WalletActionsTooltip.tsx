@@ -8,6 +8,7 @@ import { useStores } from "@stores";
 import { EXPLORER_URL } from "@src/constants";
 import SizedBox from "@components/SizedBox";
 import { LOGIN_TYPE } from "@stores/AccountStore";
+import { Mnemonic } from "@fuel-ts/mnemonic";
 
 interface IProps {}
 
@@ -36,6 +37,9 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
     });
   };
   const handleCopySeed = () => {
+    if (accountStore.seed == null) return;
+    const mn = Mnemonic.seedToExtendedKey(accountStore.seed);
+    console.log(mn);
     accountStore.seed && copy(accountStore.seed);
     notificationStore.toast("Don't share it with anyone", {
       type: "success",
