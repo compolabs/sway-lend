@@ -57,7 +57,7 @@ async fn main() {
     loop {
         users.fetch().await;
         let list = users.list.clone();
-        println!("Total users {}", list.len());
+        // println!("Total users {}", list.len());
         let mut index = 0;
         while index < list.len() {
             let user = list[index];
@@ -68,7 +68,7 @@ async fn main() {
             }
             let is_liquidatable = res.unwrap().value;
             if is_liquidatable {
-                let res = market_abi_calls::absorb(&market, &contracts, vec![user])
+                let _res = market_abi_calls::absorb(&market, &contracts, vec![user])
                     .await
                     .unwrap();
                 
