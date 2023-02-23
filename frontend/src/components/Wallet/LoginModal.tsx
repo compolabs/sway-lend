@@ -28,18 +28,18 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
     rest.onClose();
   };
   const loginTypes = [
-    {
-      title: "Generate account",
-      icon: fuel,
-      type: LOGIN_TYPE.GENERATE_FROM_SEED,
-      isActive: true,
-    },
     // {
-    //   title: "Fuel wallet",
+    //   title: "Generate account",
     //   icon: fuel,
-    //   type: LOGIN_TYPE.FUEL_WALLET,
-    //   isActive: window.fuel != null,
+    //   type: LOGIN_TYPE.GENERATE_FROM_SEED,
+    //   isActive: true,
     // },
+    {
+      title: "Fuel wallet",
+      icon: fuel,
+      type: LOGIN_TYPE.FUEL_WALLET,
+      isActive: window.fuel != null,
+    },
   ];
   return (
     <Dialog style={{ maxWidth: 360 }} {...rest}>

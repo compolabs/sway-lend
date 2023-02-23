@@ -2,9 +2,9 @@ import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
-import { TokenAbi__factory } from "@src/contracts";
 import { EXPLORER_URL, TOKENS_BY_ASSET_ID, TOKENS_LIST } from "@src/constants";
 import BN from "@src/utils/BN";
+import { TokenContractAbi__factory } from "@src/contracts";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -56,7 +56,7 @@ class FaucetVM {
     const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
     try {
       const tokensContracts = tokens.map((b) =>
-        TokenAbi__factory.connect(b.assetId, walletToRead)
+        TokenContractAbi__factory.connect(b.assetId, walletToRead)
       );
       const response = await Promise.all(
         tokensContracts.map((v) =>
@@ -114,7 +114,7 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
-    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
+    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
 
     try {
       const { transactionResult } = await tokenContract.functions

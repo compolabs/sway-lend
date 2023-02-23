@@ -4,6 +4,12 @@ import DarkMode from "@components/Header/DarkMode";
 import Divider from "./Divider";
 import { Anchor } from "@components/Anchor";
 import SizedBox from "@components/SizedBox";
+import { CONTRACT_ADDRESSES } from "@src/constants";
+import { useStores } from "@stores";
+import Select from "@components/Select";
+import Text from "@components/Text";
+import { Row } from "./Flex";
+import { observer } from "mobx-react-lite";
 
 interface IProps {}
 
@@ -13,16 +19,17 @@ const Root = styled.footer`
   align-items: center;
   box-sizing: border-box;
   padding: 0 16px;
-  //todo add mobile
   max-width: 1300px;
+  white-space: nowrap;
   @media (min-width: 880px) {
   }
 
   width: 100%;
 `;
-const Row = styled.div`
+const Container = styled.div`
   display: flex;
   width: 100%;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
   padding: 16px 0;
@@ -37,12 +44,16 @@ const Row = styled.div`
     color: ${({ theme }) => theme.colors?.neutral4};
   }
 `;
-
+const versionOptions = Object.keys(CONTRACT_ADDRESSES).map((v) => ({
+  title: v,
+  key: v,
+}));
 const Footer: React.FC<IProps> = () => {
+  const { settingsStore } = useStores();
   return (
     <Root>
       <Divider />
-      <Row>
+      <Container>
         <div style={{ display: "flex", flexDirection: "row" }}>
           <Anchor href="https://docs.swaylend.com" type="secondary">
             Docs
@@ -52,9 +63,33 @@ const Footer: React.FC<IProps> = () => {
             Need help?
           </Anchor>
         </div>
-        <DarkMode />
-      </Row>
+        <Row
+          mainAxisSize="fit-content"
+          alignItems="center"
+          justifyContent="flex-end"
+        >
+          <Row
+            mainAxisSize="fit-content"
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Text fitContent weight={600}>
+              version
+            </Text>
+            <SizedBox width={12} />
+            <Select
+              options={versionOptions}
+              selected={versionOptions.find(
+                ({ key }) => key === settingsStore.version
+              )}
+              onSelect={({ key }) => settingsStore.setVersion(key)}
+            />
+          </Row>
+          <SizedBox width={12} />
+          <DarkMode />
+        </Row>
+      </Container>
     </Root>
   );
 };
-export default Footer;
+export default observer(Footer);

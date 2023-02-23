@@ -19,6 +19,7 @@ export interface ISerializedAccountStore {
 
 class AccountStore {
   public readonly rootStore: RootStore;
+  public provider = new Provider(NODE_URL);
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
@@ -53,9 +54,8 @@ class AccountStore {
       this.setAssetBalances([]);
       return;
     }
-    const provider = new Provider(NODE_URL);
     const address = Address.fromString(this.address);
-    const balances = await provider.getBalances(address);
+    const balances = await this.provider.getBalances(address);
     const assetBalances = TOKENS_LIST.map((asset) => {
       const t = balances.find(({ assetId }) => asset.assetId === assetId);
       const balance = t != null ? new BN(t.amount.toString()) : BN.ZERO;
@@ -121,6 +121,7 @@ class AccountStore {
     }
     const account = await window.fuel.currentAccount();
     this.setAddress(account);
+    await this.addAssets();
   };
 
   getFormattedBalance = (token: IToken): string | null => {
@@ -161,6 +162,7 @@ class AccountStore {
     }
     return null;
   };
+
   get walletToRead(): WalletLocked | null {
     if (this.address == null) return null;
     return Wallet.fromAddress(this.address, new Provider(NODE_URL));
@@ -174,6 +176,24 @@ class AccountStore {
   isWavesKeeperInstalled = false;
   setWavesKeeperInstalled = (state: boolean) =>
     (this.isWavesKeeperInstalled = state);
+
+  addAssets = async () => {
+    //todo add tokens if they are not added
+    const assets = TOKENS_LIST.filter(({ symbol }) => symbol != "ETH").map(
+      (t) => ({
+        name: t.name,
+        assetId: t.assetId,
+        imageUrl: window.location.origin + t.logo,
+        symbol: t.symbol,
+        isCustom: true,
+      })
+    );
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      const v = await window?.fuel.addAsset(asset);
+      console.log(v);
+    }
+  };
 }
 
 export default AccountStore;

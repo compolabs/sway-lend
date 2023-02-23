@@ -2,13 +2,7 @@ import RootStore from "@stores/RootStore";
 import { makeAutoObservable } from "mobx";
 import BN from "@src/utils/BN";
 import { Provider, Wallet } from "fuels";
-import {
-  CONTRACT_ADDRESSES,
-  IToken,
-  NODE_URL,
-  SEED,
-  TOKENS_LIST,
-} from "@src/constants";
+import { IToken, NODE_URL, SEED, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
 class PricesStore {
@@ -42,9 +36,11 @@ class PricesStore {
     const { address } = this.rootStore.accountStore;
     if (address == null) return;
     const checkWallet = Wallet.fromSeed(SEED, "", new Provider(NODE_URL));
+    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+
     try {
       const oracleContracts = TOKENS_LIST.map((b) =>
-        OracleAbi__factory.connect(CONTRACT_ADDRESSES.priceOracle, checkWallet)
+        OracleAbi__factory.connect(priceOracle, checkWallet)
       );
       const ids = TOKENS_LIST.map((t) => {
         return { value: t.assetId };

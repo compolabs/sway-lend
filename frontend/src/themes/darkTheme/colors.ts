@@ -18,17 +18,6 @@ const colors = {
 // eslint-disable-next-line
 export default {
   ...colors,
-  primary800: colors.neutral0,
-  primary650: "#C6C9F4",
-
-  primary300: "#8182C5",
-  primary100: "#363970",
-  primary50: "#181931",
-  white: "#232345",
-  success100: "#1C2F37",
-  error100: "#3A2A3D",
-  attention100: "#3A303F",
-
   mainBackground: colors.neutral6,
   text: colors.neutral2,
   disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",

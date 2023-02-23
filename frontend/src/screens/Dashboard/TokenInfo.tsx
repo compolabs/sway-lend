@@ -42,10 +42,15 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     stats.borrow_collateral_factor.toString(),
     4
   ).toFormat(2);
+  const supplyCap = BN.formatUnits(
+    stats.supply_cap.toString(),
+    token.decimals
+  ).toFormat(2);
   const tokenData = [
     { title: "Oracle price", value: price },
     { title: "Collateral factor", value: collFactor + "%" },
     { title: "Liquidation penalty", value: penalty + "%" },
+    { title: "Supply cap", value: `${supplyCap} ${token.symbol}` },
     {
       title: "Wallet balance",
       value: `${accountStore.getFormattedBalance(token)}  ${token.symbol}`,
