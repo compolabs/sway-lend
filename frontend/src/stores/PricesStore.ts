@@ -1,5 +1,5 @@
 import RootStore from "@stores/RootStore";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, reaction } from "mobx";
 import BN from "@src/utils/BN";
 import { Provider, Wallet } from "fuels";
 import { IToken, NODE_URL, SEED, TOKENS_LIST } from "@src/constants";
@@ -13,6 +13,13 @@ class PricesStore {
     makeAutoObservable(this);
     this.updateTokenPrices().then();
     setInterval(this.updateTokenPrices, 60 * 1000);
+    reaction(
+      () => [
+        this.rootStore.settingsStore.version,
+        this.rootStore.accountStore.address,
+      ],
+      () => this.updateTokenPrices()
+    );
   }
 
   tokensPrices: Record<string, BN> | null = null;

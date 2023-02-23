@@ -1,5 +1,5 @@
 import RootStore from "@stores/RootStore";
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction, when } from "mobx";
 import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
@@ -29,12 +29,18 @@ class AccountStore {
       this.setAddress(initState.address);
       this.setSeed(initState.seed);
     }
+    // when(() => window?.fuel != null, this.subscribeToWalletUpdate);
+    new Promise((r) => setTimeout(r, 1000)).then(() =>
+      this.subscribeToWalletUpdate()
+    );
+    // this.subscribeToWalletUpdate();
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
       () => this.address,
       () => Promise.all([this.updateAccountBalances()])
     );
+    // setInterval(() => console.log("window?.fuel?.on", window?.fuel?.on), 1000);
   }
 
   public address: string | null = null;
@@ -121,7 +127,6 @@ class AccountStore {
     }
     const account = await window.fuel.currentAccount();
     this.setAddress(account);
-    await this.addAssets();
   };
 
   getFormattedBalance = (token: IToken): string | null => {
@@ -173,27 +178,21 @@ class AccountStore {
     return { value: Address.fromString(this.address).toB256() };
   }
 
+  // fuel?.on(fuel.events.accounts, handleAccountsEvent);
+  subscribeToWalletUpdate = () => {
+    if (window?.fuel == null) {
+      console.log("window?.fuel == null");
+      return;
+    }
+    console.log("subscribeToWalletUpdate");
+    window?.fuel?.on(window?.fuel.events.accounts, (value: any) => {
+      console.log("accounts", value);
+    });
+  };
+
   isWavesKeeperInstalled = false;
   setWavesKeeperInstalled = (state: boolean) =>
     (this.isWavesKeeperInstalled = state);
-
-  addAssets = async () => {
-    //todo add tokens if they are not added
-    const assets = TOKENS_LIST.filter(({ symbol }) => symbol != "ETH").map(
-      (t) => ({
-        name: t.name,
-        assetId: t.assetId,
-        imageUrl: window.location.origin + t.logo,
-        symbol: t.symbol,
-        isCustom: true,
-      })
-    );
-    for (let i = 0; i < assets.length; i++) {
-      const asset = assets[i];
-      const v = await window?.fuel.addAsset(asset);
-      console.log(v);
-    }
-  };
 }
 
 export default AccountStore;

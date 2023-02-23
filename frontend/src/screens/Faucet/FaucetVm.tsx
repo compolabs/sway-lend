@@ -2,9 +2,16 @@ import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
-import { EXPLORER_URL, TOKENS_BY_ASSET_ID, TOKENS_LIST } from "@src/constants";
+import {
+  EXPLORER_URL,
+  TOKENS_BY_ASSET_ID,
+  TOKENS_BY_SYMBOL,
+  TOKENS_LIST,
+} from "@src/constants";
 import BN from "@src/utils/BN";
 import { TokenContractAbi__factory } from "@src/contracts";
+import { LOGIN_TYPE } from "@stores/AccountStore";
+import { Asset } from "@fuel-wallet/types";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -44,7 +51,10 @@ class FaucetVM {
     this.rootStore = rootStore;
     this.checkTokensThatAlreadyBeenMinted().then();
     reaction(
-      () => this.rootStore.accountStore.address,
+      () => [
+        this.rootStore.settingsStore.version,
+        this.rootStore.accountStore.address,
+      ],
       () => this.checkTokensThatAlreadyBeenMinted()
     );
     makeAutoObservable(this);
@@ -109,6 +119,14 @@ class FaucetVM {
 
   mint = async (assetId?: string) => {
     if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
+    const addedAssets: Array<Asset> = await window?.fuel.assets();
+    if (
+      addedAssets != null &&
+      !addedAssets.some((v) => v.assetId === assetId) &&
+      this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET
+    ) {
+      await this.addAsset(assetId);
+    }
     this._setLoading(true);
     this.setActionTokenAssetId(assetId);
     const { accountStore, notificationStore } = this.rootStore;
@@ -143,5 +161,18 @@ class FaucetVM {
       this.setActionTokenAssetId(null);
       this._setLoading(false);
     }
+  };
+
+  addAsset = async (assetId: string) => {
+    if (assetId === TOKENS_BY_SYMBOL.ETH.assetId || window.fuel == null) return;
+    const token = TOKENS_BY_ASSET_ID[assetId];
+    const asset = {
+      name: token.name,
+      assetId: token.assetId,
+      imageUrl: window.location.origin + token.logo,
+      symbol: token.symbol,
+      isCustom: true,
+    };
+    return window?.fuel.addAsset(asset);
   };
 }
