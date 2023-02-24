@@ -22,7 +22,7 @@ class SettingsStore {
     }
   }
 
-  version: string | null = null;
+  version: string = "0.2.0";
   setVersion = (s: string) => (this.version = s);
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
