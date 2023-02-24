@@ -62,7 +62,6 @@ const TokenRowSkeleton = () => (
 );
 const AssetsTable: React.FC<IProps> = () => {
   const { accountStore } = useStores();
-  //todo check attention sign
   const vm = useDashboardVM();
   const handleAssetClick = (action: ACTION_TYPE, assetId: string) => {
     vm.setTokenAmount(null);
