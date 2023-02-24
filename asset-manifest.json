@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.bc417d97.css",
-    "main.js": "/static/js/main.25a187b3.js",
+    "main.js": "/static/js/main.9c240385.js",
     "static/media/Inter-Bold.ttf": "/static/media/Inter-Bold.88fa7ae373b07b41ecce.ttf",
     "static/media/Inter-SemiBold.ttf": "/static/media/Inter-SemiBold.4d56bb21f2399db8ad48.ttf",
     "static/media/Inter-Medium.ttf": "/static/media/Inter-Medium.6dcbc9bed1ec438907ee.ttf",
@@ -9,7 +9,6 @@
     "static/media/uni.svg": "/static/media/uni.6391a5f3e78c0e2f99a71c47e7e9c78d.svg",
     "static/media/dark-logo.svg": "/static/media/dark-logo.2d2863232badd69063284244232e31d1.svg",
     "static/media/logo.svg": "/static/media/logo.3940e9a12876eb8016bff312cf831949.svg",
-    "static/media/404.svg": "/static/media/404.afcf45cf292608e1bc26d2978ebc9775.svg",
     "static/media/notFound.svg": "/static/media/notFound.366d06bae881922b4ed3d4b74abe974a.svg",
     "static/media/dashboard.svg": "/static/media/dashboard.78aa0f3fbf51d8049c996894270eb9cc.svg",
     "static/media/dashboard-dark.svg": "/static/media/dashboard-dark.90f93b370f32823c0f6aca5ef20d2149.svg",
@@ -19,7 +18,6 @@
     "static/media/wallet-dark.svg": "/static/media/wallet-dark.cb5153e06c3bd026b7b3cbd1f689149f.svg",
     "static/media/wallet.svg": "/static/media/wallet.6566a171dca9e7bf2b53728d836608b0.svg",
     "static/media/sway.svg": "/static/media/sway.14f6d3554c0e8fbd3d3c2aff724858c0.svg",
-    "static/media/fuelLogo.svg": "/static/media/fuelLogo.88554e74185d4ee737ea2619c8e08eef.svg",
     "static/media/ethereum.svg": "/static/media/ethereum.eba924eeaba637abfcc634f7f6ff5fef.svg",
     "static/media/analytics-dark.svg": "/static/media/analytics-dark.04ed2590d9d462e03310cec57d2d24eb.svg",
     "static/media/analytics.svg": "/static/media/analytics.132bfbb80fdad6af46a98dd6c1d9a4fb.svg",
@@ -27,10 +25,11 @@
     "static/media/coins.svg": "/static/media/coins.74df5b17a9f5d697d422b28b3138536a.svg",
     "static/media/chainlink.svg": "/static/media/chainlink.c01708bfc8ccdfb1676e47a8f3419a63.svg",
     "static/media/usdt.svg": "/static/media/usdt.b075b38c384b28460c9e8d7758e57773.svg",
+    "index.html": "/index.html",
     "static/media/sun.svg": "/static/media/sun.134ac9a903cb60cd04bfd1c0262ec731.svg",
     "static/media/BNB.svg": "/static/media/BNB.2b5bc0cd84912d20ca0de74170009610.svg",
     "static/media/BUSD.svg": "/static/media/BUSD.b8ba31028c9a61298ffb999f0740d766.svg",
-    "index.html": "/index.html",
+    "static/media/attention.svg": "/static/media/attention.cff8ebd69a03c5dba673297cb3295107.svg",
     "static/media/success.svg": "/static/media/success.d4aa5ac2cf87bf6b3626a89ee8adda18.svg",
     "static/media/sun-dark.svg": "/static/media/sun-dark.e531c1cc41e5e91d07b5feabe7737ab1.svg",
     "static/media/error.svg": "/static/media/error.c3fd708d211c86eb584ae02e52aa0a3c.svg",
@@ -48,10 +47,10 @@
     "static/media/minus-dark.svg": "/static/media/minus-dark.c3ca5ebfe858a417554fc3d9fd367533.svg",
     "static/media/minus.svg": "/static/media/minus.e47f224ef4a9b7653d92f6a5b4d9ed32.svg",
     "main.bc417d97.css.map": "/static/css/main.bc417d97.css.map",
-    "main.25a187b3.js.map": "/static/js/main.25a187b3.js.map"
+    "main.9c240385.js.map": "/static/js/main.9c240385.js.map"
   },
   "entrypoints": [
     "static/css/main.bc417d97.css",
-    "static/js/main.25a187b3.js"
+    "static/js/main.9c240385.js"
   ]
 }
