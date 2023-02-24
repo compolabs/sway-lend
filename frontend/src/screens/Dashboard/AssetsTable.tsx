@@ -117,6 +117,7 @@ const AssetsTable: React.FC<IProps> = () => {
                     </Text>
                     <SizedBox width={4} />
                     {accountStore.address != null &&
+                      vm.collateralBalances != null &&
                       collateralCapacityLeft.eq(0) && (
                         <img alt="att" src={attention} />
                       )}

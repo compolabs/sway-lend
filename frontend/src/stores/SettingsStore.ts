@@ -57,7 +57,7 @@ class SettingsStore {
 
   get currentVersionConfig(): IContractsConfig {
     if (this.version == null) {
-      return CONTRACT_ADDRESSES["0.2"];
+      return CONTRACT_ADDRESSES["0.2.0"];
     }
     return CONTRACT_ADDRESSES[this.version];
   }
