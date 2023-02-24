@@ -11,6 +11,7 @@ import useCollapse from "@components/Collapse";
 import SummaryCard from "@screens/Dashboard/SummaryCard";
 import Card from "@src/components/Card";
 import { useStores } from "@stores";
+import Notification from "@components/Notification";
 
 interface IProps {}
 
@@ -68,6 +69,12 @@ const InputCard: React.FC<IProps> = () => {
           </Row>
         )}
       </Card>
+      {vm.notification != null && (
+        <>
+          <SizedBox height={16} />
+          <Notification type="warning" text={vm.notification} />
+        </>
+      )}
       <SizedBox height={16} />
       <SummaryCard />
     </div>

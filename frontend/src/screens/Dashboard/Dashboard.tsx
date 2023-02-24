@@ -10,8 +10,6 @@ import useWindowSize from "@src/hooks/useWindowSize";
 import { Column } from "@src/components/Flex";
 import SwitchActions from "./SwitchActions";
 import ActionTab from "./ActionTab";
-import Text from "@components/Text";
-import { useStores } from "@stores";
 
 interface IProps {}
 
@@ -40,7 +38,6 @@ const MainContainer = styled.div`
   }
 `;
 const DashboardImpl: React.FC<IProps> = () => {
-  const { settingsStore } = useStores();
   const { width } = useWindowSize();
   return (
     <Layout>
@@ -48,8 +45,6 @@ const DashboardImpl: React.FC<IProps> = () => {
         {() => (
           <Root>
             <DashboardStats />
-            {/*<SizedBox height={16} />*/}
-            <Text>{settingsStore.currentVersionConfig.market}</Text>
             <SizedBox height={16} />
             <MainContainer>
               {width && width >= 880 ? (

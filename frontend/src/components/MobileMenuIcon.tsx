@@ -62,7 +62,7 @@ const Root = styled.div`
       }
 
       &:last-of-type {
-        bottom: 0;
+        bottom: 1px;
       }
     }
 

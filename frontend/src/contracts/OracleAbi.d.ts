@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.32.0
+  Fuels version: 0.27.0
   Forc version: 0.32.2
-  Fuel-Core version: 0.17.2
+  Fuel-Core version: 0.15.1
 */
 
 import type {
@@ -18,19 +18,33 @@ import type {
   BigNumberish,
   InvokeFunction,
   BN,
-} from 'fuels';
+} from "fuels";
 
 import type { Enum } from "./common";
 
-export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
-export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
+export type IdentityInput = Enum<{
+  Address: AddressInput;
+  ContractId: ContractIdInput;
+}>;
+export type IdentityOutput = Enum<{
+  Address: AddressOutput;
+  ContractId: ContractIdOutput;
+}>;
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
-export type PriceInput = { asset_id: ContractIdInput, price: BigNumberish, last_update: BigNumberish };
-export type PriceOutput = { asset_id: ContractIdOutput, price: BN, last_update: BN };
+export type PriceInput = {
+  asset_id: ContractIdInput;
+  price: BigNumberish;
+  last_update: BigNumberish;
+};
+export type PriceOutput = {
+  asset_id: ContractIdOutput;
+  price: BN;
+  last_update: BN;
+};
 
 interface OracleAbiInterface extends Interface {
   functions: {
@@ -40,15 +54,33 @@ interface OracleAbiInterface extends Interface {
     set_price: FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: 'get_price', values: [ContractIdInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'initialize', values: [AddressInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'owner', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'set_price', values: [ContractIdInput, BigNumberish]): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "get_price",
+    values: [ContractIdInput]
+  ): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "initialize",
+    values: [AddressInput]
+  ): Uint8Array;
+  encodeFunctionData(functionFragment: "owner", values: []): Uint8Array;
+  encodeFunctionData(
+    functionFragment: "set_price",
+    values: [ContractIdInput, BigNumberish]
+  ): Uint8Array;
 
-  decodeFunctionData(functionFragment: 'get_price', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'initialize', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'owner', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'set_price', data: BytesLike): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "get_price",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "initialize",
+    data: BytesLike
+  ): DecodedValue;
+  decodeFunctionData(functionFragment: "owner", data: BytesLike): DecodedValue;
+  decodeFunctionData(
+    functionFragment: "set_price",
+    data: BytesLike
+  ): DecodedValue;
 }
 
 export class OracleAbi extends Contract {
@@ -57,6 +89,9 @@ export class OracleAbi extends Contract {
     get_price: InvokeFunction<[asset_id: ContractIdInput], PriceOutput>;
     initialize: InvokeFunction<[owner: AddressInput], void>;
     owner: InvokeFunction<[], IdentityOutput>;
-    set_price: InvokeFunction<[asset_id: ContractIdInput, price: BigNumberish], void>;
+    set_price: InvokeFunction<
+      [asset_id: ContractIdInput, price: BigNumberish],
+      void
+    >;
   };
 }

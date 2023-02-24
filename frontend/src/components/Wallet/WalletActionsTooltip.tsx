@@ -37,10 +37,8 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
     });
   };
   const handleCopySeed = () => {
-    if (accountStore.seed == null) return;
-    const mn = Mnemonic.seedToExtendedKey(accountStore.seed);
-    console.log(mn);
-    accountStore.seed && copy(accountStore.seed);
+    if (accountStore.mnemonicPhrase == null) return;
+    copy(accountStore.mnemonicPhrase);
     notificationStore.toast("Don't share it with anyone", {
       type: "success",
       title: "Your seed was copied",

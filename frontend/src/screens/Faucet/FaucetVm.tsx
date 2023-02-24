@@ -9,7 +9,7 @@ import {
   TOKENS_LIST,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import { TokenContractAbi__factory } from "@src/contracts";
+import { TokenAbi__factory } from "@src/contracts";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import { Asset } from "@fuel-wallet/types";
 
@@ -49,16 +49,24 @@ class FaucetVM {
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-    this.checkTokensThatAlreadyBeenMinted().then();
+    this.checkTokensThatAlreadyBeenMinted().then(() =>
+      this.setInitialized(true)
+    );
     reaction(
       () => [
         this.rootStore.settingsStore.version,
         this.rootStore.accountStore.address,
       ],
-      () => this.checkTokensThatAlreadyBeenMinted()
+      () => this.updateFaucetStateWhenVersionChanged()
     );
     makeAutoObservable(this);
   }
+
+  updateFaucetStateWhenVersionChanged = async () => {
+    this.setInitialized(false);
+    await this.checkTokensThatAlreadyBeenMinted();
+    this.setInitialized(true);
+  };
 
   checkTokensThatAlreadyBeenMinted = async () => {
     const { walletToRead, addressInput } = this.rootStore.accountStore;
@@ -66,7 +74,7 @@ class FaucetVM {
     const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
     try {
       const tokensContracts = tokens.map((b) =>
-        TokenContractAbi__factory.connect(b.assetId, walletToRead)
+        TokenAbi__factory.connect(b.assetId, walletToRead)
       );
       const response = await Promise.all(
         tokensContracts.map((v) =>
@@ -88,6 +96,9 @@ class FaucetVM {
 
   actionTokenAssetId: string | null = null;
   setActionTokenAssetId = (l: string | null) => (this.actionTokenAssetId = l);
+
+  initialized: boolean = false;
+  private setInitialized = (l: boolean) => (this.initialized = l);
 
   get faucetTokens() {
     const { accountStore, pricesStore } = this.rootStore;
@@ -132,7 +143,7 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
-    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
+    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
     try {
       const { transactionResult } = await tokenContract.functions

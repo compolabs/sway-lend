@@ -1,5 +1,5 @@
 import RootStore from "@stores/RootStore";
-import { makeAutoObservable, reaction, when } from "mobx";
+import { makeAutoObservable, reaction } from "mobx";
 import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
@@ -9,12 +9,13 @@ import { Mnemonic } from "@fuel-ts/mnemonic";
 export enum LOGIN_TYPE {
   FUEL_WALLET = "FUEL_WALLET",
   GENERATE_FROM_SEED = "GENERATE_FROM_SEED",
+  PASTE_SEED = "PASTE_SEED",
 }
 
 export interface ISerializedAccountStore {
   address: string | null;
   loginType: LOGIN_TYPE | null;
-  seed: string | null;
+  mnemonicPhrase: string | null;
 }
 
 class AccountStore {
@@ -27,27 +28,30 @@ class AccountStore {
     if (initState) {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
-      this.setSeed(initState.seed);
+      this.setMnemonicPhrase(initState.mnemonicPhrase);
+      if (initState.loginType === LOGIN_TYPE.FUEL_WALLET) {
+        document.addEventListener("FuelLoaded", this.onFuelLoaded);
+      }
     }
-    // when(() => window?.fuel != null, this.subscribeToWalletUpdate);
-    new Promise((r) => setTimeout(r, 1000)).then(() =>
-      this.subscribeToWalletUpdate()
-    );
-    // this.subscribeToWalletUpdate();
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
       () => this.address,
       () => Promise.all([this.updateAccountBalances()])
     );
-    // setInterval(() => console.log("window?.fuel?.on", window?.fuel?.on), 1000);
   }
+
+  onFuelLoaded = () => {
+    if (window.fuel == null) return;
+    window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
+  };
+  handleAccEvent = (account: string) => this.setAddress(account);
 
   public address: string | null = null;
   setAddress = (address: string | null) => (this.address = address);
 
-  public seed: string | null = null;
-  setSeed = (seed: string | null) => (this.seed = seed);
+  public mnemonicPhrase: string | null = null;
+  setMnemonicPhrase = (seed: string | null) => (this.mnemonicPhrase = seed);
 
   public loginType: LOGIN_TYPE | null = null;
   setLoginType = (loginType: LOGIN_TYPE | null) => (this.loginType = loginType);
@@ -94,17 +98,19 @@ class AccountStore {
   serialize = (): ISerializedAccountStore => ({
     address: this.address,
     loginType: this.loginType,
-    seed: this.seed,
+    mnemonicPhrase: this.mnemonicPhrase,
   });
 
-  login = async (loginType: LOGIN_TYPE) => {
+  login = async (loginType: LOGIN_TYPE, phrase?: string) => {
     this.setLoginType(loginType);
     switch (loginType) {
       case LOGIN_TYPE.FUEL_WALLET:
         await this.loginWithFuelWallet();
+        await this.onFuelLoaded();
         break;
       case LOGIN_TYPE.GENERATE_FROM_SEED:
-        await this.generateAccountWithSeed();
+      case LOGIN_TYPE.PASTE_SEED:
+        await this.loginWithMnemonicPhrase(phrase);
         break;
       default:
         return;
@@ -112,7 +118,7 @@ class AccountStore {
   };
   disconnect = async () => {
     this.setAddress(null);
-    this.setSeed(null);
+    this.setMnemonicPhrase(null);
     this.setLoginType(null);
   };
 
@@ -146,14 +152,17 @@ class AccountStore {
     return this.address != null;
   }
 
-  generateAccountWithSeed = () => {
-    const mn = Mnemonic.generate();
-    const seed = Mnemonic.mnemonicToSeed(mn);
+  loginWithMnemonicPhrase = (mnemonicPhrase?: string) => {
+    const mnemonic =
+      mnemonicPhrase == null ? Mnemonic.generate(16) : mnemonicPhrase;
+    const seed = Mnemonic.mnemonicToSeed(mnemonic);
     const wallet = Wallet.fromPrivateKey(seed, NODE_URL);
     this.setAddress(wallet.address.toAddress());
-    this.setSeed(seed);
+    this.setMnemonicPhrase(mnemonic);
     this.rootStore.settingsStore.setLoginModalOpened(false);
-    this.rootStore.notificationStore.toast("Go to faucet page to mint ETH");
+    if (mnemonicPhrase == null) {
+      this.rootStore.notificationStore.toast("Go to faucet page to mint ETH");
+    }
   };
 
   getWallet = async (): Promise<WalletLocked | WalletUnlocked | null> => {
@@ -162,8 +171,10 @@ class AccountStore {
       case LOGIN_TYPE.FUEL_WALLET:
         return window.fuel?.getWallet(this.address);
       case LOGIN_TYPE.GENERATE_FROM_SEED:
-        if (this.seed == null) return null;
-        return Wallet.fromPrivateKey(this.seed, new Provider(NODE_URL));
+      case LOGIN_TYPE.PASTE_SEED:
+        if (this.mnemonicPhrase == null) return null;
+        const seed = Mnemonic.mnemonicToSeed(this.mnemonicPhrase);
+        return Wallet.fromPrivateKey(seed, new Provider(NODE_URL));
     }
     return null;
   };
@@ -177,22 +188,6 @@ class AccountStore {
     if (this.address == null) return null;
     return { value: Address.fromString(this.address).toB256() };
   }
-
-  // fuel?.on(fuel.events.accounts, handleAccountsEvent);
-  subscribeToWalletUpdate = () => {
-    if (window?.fuel == null) {
-      console.log("window?.fuel == null");
-      return;
-    }
-    console.log("subscribeToWalletUpdate");
-    window?.fuel?.on(window?.fuel.events.accounts, (value: any) => {
-      console.log("accounts", value);
-    });
-  };
-
-  isWavesKeeperInstalled = false;
-  setWavesKeeperInstalled = (state: boolean) =>
-    (this.isWavesKeeperInstalled = state);
 }
 
 export default AccountStore;

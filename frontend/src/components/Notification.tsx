@@ -18,7 +18,7 @@ const Root = styled.div<{ type: "warning" | "info" | "error" }>`
     (() => {
       switch (type) {
         case "warning":
-          return `background: ${theme.colors.tokenTooltip.background};`;
+          return `background: ${theme.colors.secondary2};`;
         case "info":
           return `background: ${theme.colors.primary01};`;
         case "error":
@@ -43,7 +43,6 @@ const Notification: React.FC<IProps> = ({ text, type, ...rest }) => {
       case "error":
         return error;
       case "info":
-        // return info;
         return warning;
       case "warning":
         return warning;
@@ -57,7 +56,7 @@ const Notification: React.FC<IProps> = ({ text, type, ...rest }) => {
       <SizedBox width={10} />
       <Column justifyContent="center" mainAxisSize="stretch">
         {typeof text === "string" ? (
-          <Text style={{ height: "100%" }} size="medium">
+          <Text style={{ height: "100%" }} size="small">
             {text}
           </Text>
         ) : (
