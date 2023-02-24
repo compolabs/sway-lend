@@ -53,10 +53,7 @@ class FaucetVM {
       this.setInitialized(true)
     );
     reaction(
-      () => [
-        this.rootStore.settingsStore.version,
-        this.rootStore.accountStore.address,
-      ],
+      () => [this.rootStore.accountStore.address],
       () => this.updateFaucetStateWhenVersionChanged()
     );
     makeAutoObservable(this);
@@ -68,30 +65,47 @@ class FaucetVM {
     this.setInitialized(true);
   };
 
+  rejectUpdateStatePromise?: () => void;
+  setRejectUpdateStatePromise = (v: any) => (this.rejectUpdateStatePromise = v);
+
   checkTokensThatAlreadyBeenMinted = async () => {
     const { walletToRead, addressInput } = this.rootStore.accountStore;
     if (walletToRead == null || addressInput == null) return;
     const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
-    try {
-      const tokensContracts = tokens.map((b) =>
-        TokenAbi__factory.connect(b.assetId, walletToRead)
-      );
-      const response = await Promise.all(
-        tokensContracts.map((v) =>
-          v.functions.already_minted(addressInput).get()
+    if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
+
+    const tokensContracts = tokens.map((b) =>
+      TokenAbi__factory.connect(b.assetId, walletToRead)
+    );
+    const promise = new Promise((resolve, reject) => {
+      this.rejectUpdateStatePromise = reject;
+      resolve(
+        Promise.all(
+          tokensContracts.map((v) =>
+            v.functions.already_minted(addressInput).get()
+          )
         )
       );
-      if (response.length > 0) {
-        const v = response.reduce(
-          (acc, v, index) =>
-            v.value ? [...acc, tokens[index].assetId] : [...acc],
-          [] as string[]
-        );
-        this.setAlreadyMintedTokens(v);
-      }
-    } catch (e) {
-      console.log(e);
-    }
+    });
+    return promise
+      .catch((v) => {
+        console.log("update data error", v);
+      })
+      .then((value: any) => {
+        //todo change any to type
+        if (value.length > 0) {
+          const v = value.reduce(
+            (acc: any, v: any, index: number) =>
+              v.value ? [...acc, tokens[index].assetId] : [...acc],
+            [] as string[]
+          );
+          this.setAlreadyMintedTokens(v);
+        }
+      })
+      .finally(() => {
+        this.setInitialized(true);
+        this.setRejectUpdateStatePromise(undefined);
+      });
   };
 
   actionTokenAssetId: string | null = null;

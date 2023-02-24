@@ -16,7 +16,7 @@ const Root = styled.div<{ fixed?: boolean }>`
   background: ${({ theme }) => `${theme.colors.tooltip.background}`};
   //max-width: 320px;
   //min-width: 160px;
-  z-index: 2;
+  z-index: 10;
   width: max-content;
   box-sizing: border-box;
   padding: 0 16px;

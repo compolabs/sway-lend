@@ -159,6 +159,7 @@ class DashboardVm {
       })
       .finally(() => {
         this.setInitialized(true);
+        this.setRejectUpdateStatePromise(undefined);
       });
   };
 
