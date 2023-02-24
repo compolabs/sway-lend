@@ -57,8 +57,7 @@ class SettingsStore {
 
   get currentVersionConfig(): IContractsConfig {
     if (this.version == null) {
-      console.log("version == null");
-      return CONTRACT_ADDRESSES["0.3"];
+      return CONTRACT_ADDRESSES["0.2.0"];
     }
     return CONTRACT_ADDRESSES[this.version];
   }

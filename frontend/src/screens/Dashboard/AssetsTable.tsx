@@ -12,6 +12,7 @@ import Tooltip from "@components/Tooltip";
 import TokenInfo from "@screens/Dashboard/TokenInfo";
 import Skeleton from "react-loading-skeleton";
 import BN from "@src/utils/BN";
+import attention from "@src/assets/icons/attention.svg";
 
 interface IProps {}
 
@@ -80,8 +81,16 @@ const AssetsTable: React.FC<IProps> = () => {
         </Text>
       </Header>
       {vm.collaterals.map((token) => {
+        if (!vm.initialized) return <TokenRowSkeleton key={token.assetId} />;
+        const supplyCap =
+          vm.assetsConfigs == null
+            ? BN.ZERO
+            : new BN(vm.assetsConfigs[token.assetId].supply_cap.toString());
+        const collateralReserve =
+          vm.collateralReserves == null
+            ? BN.ZERO
+            : vm.collateralReserves[token.assetId];
         const userBalance = accountStore.getBalance(token);
-        const canSupply = userBalance != null && userBalance.gt(0);
         const walletBalance = accountStore.getFormattedBalance(token);
         const protocolBalance =
           vm.collateralBalances != null
@@ -92,8 +101,8 @@ const AssetsTable: React.FC<IProps> = () => {
           protocolBalance,
           token.decimals
         ).toFormat(2);
-
-        if (!vm.initialized) return <TokenRowSkeleton key={token.assetId} />;
+        const collateralCapacityLeft = supplyCap.minus(collateralReserve);
+        const canSupply = userBalance != null && userBalance.gt(0);
         return (
           <TokenRow key={token.assetId}>
             <Tooltip content={<TokenInfo assetId={token.assetId} />}>
@@ -101,7 +110,17 @@ const AssetsTable: React.FC<IProps> = () => {
                 <TokenIcon size="small" src={token.logo} />
                 <SizedBox width={20} />
                 <Column>
-                  <Text weight={600}>{token.name}</Text>
+                  <Row alignItems="center">
+                    <Text weight={600} fitContent>
+                      {token.name}
+                    </Text>
+                    <SizedBox width={4} />
+                    {accountStore.address != null &&
+                      vm.collateralBalances != null &&
+                      collateralCapacityLeft.eq(0) && (
+                        <img alt="att" src={attention} />
+                      )}
+                  </Row>
                   <Text size="small" weight={600} type="secondary">
                     {accountStore.isLoggedIn
                       ? `${token.symbol} • ${walletBalance} in wallet`
