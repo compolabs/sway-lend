@@ -109,6 +109,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
     );
   }, [
     accountStore.address,
+    accountStore.balances,
     accountStore.isLoggedIn,
     settingsStore,
     vm.loading,

@@ -8,7 +8,6 @@ import { useStores } from "@stores";
 import { EXPLORER_URL } from "@src/constants";
 import SizedBox from "@components/SizedBox";
 import { LOGIN_TYPE } from "@stores/AccountStore";
-import { Mnemonic } from "@fuel-ts/mnemonic";
 
 interface IProps {}
 
