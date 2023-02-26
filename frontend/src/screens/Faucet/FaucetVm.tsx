@@ -87,11 +87,12 @@ class FaucetVM {
         )
       );
     });
-    return promise
+    promise
       .catch((v) => {
         console.log("update data error", v);
       })
       .then((value: any) => {
+        console.log("value");
         //todo change any to type
         if (value.length > 0) {
           const v = value.reduce(
