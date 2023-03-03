@@ -93,7 +93,7 @@ async fn deploy_token_contract(mut deploy_config: DeployConfig) {
         &wallet,
         TxParameters::new(Some(10), None, None),
         StorageConfiguration::default(),
-        Configurables::new(vec![]),
+        Configurables::default(),
         Salt::from(salt),
     )
     .await;
