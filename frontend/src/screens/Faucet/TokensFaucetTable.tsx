@@ -85,7 +85,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           return (
             <Button
               fixed
-              disabled={vm.loading}
+              disabled={vm.loading || !vm.initialized}
               onClick={() => {
                 if (t.symbol === "ETH") {
                   window.open(

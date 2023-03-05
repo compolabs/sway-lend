@@ -89,11 +89,9 @@ class FaucetVM {
     });
     promise
       .catch((v) => {
-        console.log("update data error", v);
+        console.log("update faucet data error", v);
       })
       .then((value: any) => {
-        console.log("value");
-        //todo change any to type
         if (value.length > 0) {
           const v = value.reduce(
             (acc: any, v: any, index: number) =>
@@ -144,14 +142,18 @@ class FaucetVM {
   }
 
   mint = async (assetId?: string) => {
-    if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
-    const addedAssets: Array<Asset> = await window?.fuel.assets();
-    if (
-      addedAssets != null &&
-      !addedAssets.some((v) => v.assetId === assetId) &&
-      this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET
-    ) {
-      await this.addAsset(assetId);
+    if (assetId == null || this.alreadyMintedTokens.includes(assetId)) {
+      console.log("return 1");
+      return;
+    }
+    if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
+      const addedAssets: Array<Asset> = await window?.fuel.assets();
+      if (
+        addedAssets != null &&
+        !addedAssets.some((v) => v.assetId === assetId)
+      ) {
+        await this.addAsset(assetId);
+      }
     }
     this._setLoading(true);
     this.setActionTokenAssetId(assetId);
