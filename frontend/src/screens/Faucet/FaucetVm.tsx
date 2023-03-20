@@ -2,9 +2,16 @@ import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
 import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
-import { EXPLORER_URL, TOKENS_BY_ASSET_ID, TOKENS_LIST } from "@src/constants";
+import {
+  EXPLORER_URL,
+  TOKENS_BY_ASSET_ID,
+  TOKENS_BY_SYMBOL,
+  TOKENS_LIST,
+} from "@src/constants";
 import BN from "@src/utils/BN";
-import { TokenContractAbi__factory } from "@src/contracts";
+import { TokenAbi__factory } from "@src/contracts";
+import { LOGIN_TYPE } from "@stores/AccountStore";
+import { Asset } from "@fuel-wallet/types";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -44,41 +51,66 @@ class FaucetVM {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     this.checkTokensThatAlreadyBeenMinted().then();
-    // reaction(
-    //   () => this.rootStore.accountStore.address,
-    //   () => this.checkTokensThatAlreadyBeenMinted()
-    // );
+    reaction(
+      () => this.rootStore.accountStore.address,
+      () => this.checkTokensThatAlreadyBeenMinted()
+    );
     makeAutoObservable(this);
   }
+
+  updateFaucetStateWhenVersionChanged = async () => {
+    this.setInitialized(false);
+    await this.checkTokensThatAlreadyBeenMinted();
+    this.setInitialized(true);
+  };
+
+  rejectUpdateStatePromise?: () => void;
+  setRejectUpdateStatePromise = (v: any) => (this.rejectUpdateStatePromise = v);
 
   checkTokensThatAlreadyBeenMinted = async () => {
     const { walletToRead, addressInput } = this.rootStore.accountStore;
     if (walletToRead == null || addressInput == null) return;
     const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
-    try {
-      const tokensContracts = tokens.map((b) =>
-        TokenContractAbi__factory.connect(b.assetId, walletToRead)
-      );
-      const response = await Promise.all(
-        tokensContracts.map((v) =>
-          v.functions.already_minted(addressInput).get()
+    if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
+
+    const tokensContracts = tokens.map((b) =>
+      TokenAbi__factory.connect(b.assetId, walletToRead)
+    );
+    const promise = new Promise((resolve, reject) => {
+      this.rejectUpdateStatePromise = reject;
+      resolve(
+        Promise.all(
+          tokensContracts.map((v) =>
+            v.functions.already_minted(addressInput).get()
+          )
         )
       );
-      if (response.length > 0) {
-        const v = response.reduce(
-          (acc, v, index) =>
-            v.value ? [...acc, tokens[index].assetId] : [...acc],
-          [] as string[]
-        );
-        this.setAlreadyMintedTokens(v);
-      }
-    } catch (e) {
-      console.log(e);
-    }
+    });
+    promise
+      .catch((v) => {
+        console.log("update faucet data error", v);
+      })
+      .then((value: any) => {
+        if (value.length > 0) {
+          const v = value.reduce(
+            (acc: any, v: any, index: number) =>
+              v.value ? [...acc, tokens[index].assetId] : [...acc],
+            [] as string[]
+          );
+          this.setAlreadyMintedTokens(v);
+        }
+      })
+      .finally(() => {
+        this.setInitialized(true);
+        this.setRejectUpdateStatePromise(undefined);
+      });
   };
 
   actionTokenAssetId: string | null = null;
   setActionTokenAssetId = (l: string | null) => (this.actionTokenAssetId = l);
+
+  initialized: boolean = false;
+  private setInitialized = (l: boolean) => (this.initialized = l);
 
   get faucetTokens() {
     const { accountStore, pricesStore } = this.rootStore;
@@ -109,13 +141,25 @@ class FaucetVM {
   }
 
   mint = async (assetId?: string) => {
-    if (assetId == null || this.alreadyMintedTokens.includes(assetId)) return;
+    if (assetId == null || this.alreadyMintedTokens.includes(assetId)) {
+      console.log("return 1");
+      return;
+    }
+    if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
+      const addedAssets: Array<Asset> = await window?.fuel.assets();
+      if (
+        addedAssets != null &&
+        !addedAssets.some((v) => v.assetId === assetId)
+      ) {
+        await this.addAsset(assetId);
+      }
+    }
     this._setLoading(true);
     this.setActionTokenAssetId(assetId);
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
-    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
+    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
 
     try {
       const { transactionResult } = await tokenContract.functions
@@ -144,5 +188,18 @@ class FaucetVM {
       this.setActionTokenAssetId(null);
       this._setLoading(false);
     }
+  };
+
+  addAsset = async (assetId: string) => {
+    if (assetId === TOKENS_BY_SYMBOL.ETH.assetId || window.fuel == null) return;
+    const token = TOKENS_BY_ASSET_ID[assetId];
+    const asset = {
+      name: token.name,
+      assetId: token.assetId,
+      imageUrl: window.location.origin + token.logo,
+      symbol: token.symbol,
+      isCustom: true,
+    };
+    return window?.fuel.addAsset(asset);
   };
 }

@@ -18,7 +18,7 @@ const Root = styled.div`
   flex-direction: column;
   background: ${({ theme }) => theme.colors.tokenTooltip.background};
   padding: 16px;
-  width: 250px;
+  width: 300px;
   box-sizing: border-box;
 `;
 const Container = styled(Column)`
@@ -31,7 +31,7 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
   const { accountStore, pricesStore } = useStores();
   const vm = useDashboardVM();
   const token = TOKENS_BY_ASSET_ID[assetId];
-  if (vm.collateralsData == null) return null;
+  if (vm.collateralsData == null || vm.collateralReserves == null) return null;
   const stats = vm.collateralsData[assetId];
   const price = pricesStore.getFormattedTokenPrice(token);
   const penalty = BN.formatUnits(
@@ -46,11 +46,20 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     stats.supply_cap.toString(),
     token.decimals
   ).toFormat(2);
+  const collateralCapacityLeftPercent = new BN(100)
+    .times(vm.collateralReserves[token.assetId])
+    .div(stats.supply_cap.toString())
+    .toFormat(3);
+
   const tokenData = [
     { title: "Oracle price", value: price },
     { title: "Collateral factor", value: collFactor + "%" },
     { title: "Liquidation penalty", value: penalty + "%" },
     { title: "Supply cap", value: `${supplyCap} ${token.symbol}` },
+    {
+      title: "Collateral Utilization rate",
+      value: `${collateralCapacityLeftPercent} %`,
+    },
     {
       title: "Wallet balance",
       value: `${accountStore.getFormattedBalance(token)}  ${token.symbol}`,

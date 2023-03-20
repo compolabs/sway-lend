@@ -22,7 +22,7 @@ class SettingsStore {
     }
   }
 
-  version: string | null = null;
+  version: string = "0.2.0";
   setVersion = (s: string) => (this.version = s);
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
@@ -57,8 +57,7 @@ class SettingsStore {
 
   get currentVersionConfig(): IContractsConfig {
     if (this.version == null) {
-      console.log("version == null");
-      return CONTRACT_ADDRESSES["0.3"];
+      return CONTRACT_ADDRESSES["0.2.0"];
     }
     return CONTRACT_ADDRESSES[this.version];
   }
