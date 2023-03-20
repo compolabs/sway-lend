@@ -13,10 +13,10 @@ use crate::utils::{local_tests_utils::market, number_utils::parse_units};
 #[tokio::test]
 async fn main_test() {
     let coefficient = 10u64.pow(0);
-    // do_main_test(coefficient, "UNI", 5, 0.1).await;
-    // do_main_test(coefficient, "ETH", 2000, 0.2).await;
-    // do_main_test(coefficient, "SWAY", 50, 0.1).await;
-    // do_main_test(coefficient, "LINK", 5, 0.15).await;
+    do_main_test(coefficient, "UNI", 5, 0.1).await;
+    do_main_test(coefficient, "ETH", 2000, 0.2).await;
+    do_main_test(coefficient, "SWAY", 50, 0.1).await;
+    do_main_test(coefficient, "LINK", 5, 0.15).await;
     do_main_test(coefficient, "BTC", 20000, 0.1).await;
 }
 
