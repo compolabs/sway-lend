@@ -1,5 +1,5 @@
 use fuels::{
-    prelude::{abigen, Contract, SettableContract, StorageConfiguration, TxParameters},
+    prelude::{abigen, Contract, DeployConfiguration, SettableContract, TxParameters},
     signers::WalletUnlocked,
 };
 
@@ -74,8 +74,8 @@ pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleCont
     let id = Contract::deploy(
         "./tests/artefacts/oracle/oracle.bin",
         &wallet,
-        TxParameters::new(Some(0), Some(100_000_000), Some(0)),
-        StorageConfiguration::default(),
+        DeployConfiguration::default()
+            .set_tx_parameters(TxParameters::default().set_gas_limit(100_000_000)),
     )
     .await
     .unwrap();

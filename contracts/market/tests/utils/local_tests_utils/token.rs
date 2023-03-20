@@ -1,11 +1,12 @@
+use std::io::Write;
+
 use crate::utils::number_utils::parse_units;
 use fuels::{
-    prelude::{abigen, Contract, StorageConfiguration, TxParameters},
+    prelude::{abigen, Contract, DeployConfiguration},
     signers::WalletUnlocked,
-    tx::{Address, Salt},
+    tx::Address,
     types::SizedAsciiString,
 };
-use rand::prelude::Rng;
 
 use super::DeployTokenConfig;
 
@@ -74,15 +75,14 @@ pub async fn get_token_contract_instance(
     let mut symbol = deploy_config.symbol.clone();
     let decimals = deploy_config.decimals;
 
-    let mut rng = rand::thread_rng();
-    let salt = rng.gen::<[u8; 32]>();
+    let mut salt: [u8; 32] = [0; 32];
+    let mut temp: &mut [u8] = &mut salt;
+    temp.write(symbol.clone().as_bytes()).unwrap();
 
-    let id = Contract::deploy_with_parameters(
+    let id = Contract::deploy(
         "./tests/artefacts/token/token_contract.bin",
         &wallet,
-        TxParameters::default(),
-        StorageConfiguration::default(),
-        Salt::from(salt),
+        DeployConfiguration::default().set_salt(salt),
     )
     .await
     .unwrap();

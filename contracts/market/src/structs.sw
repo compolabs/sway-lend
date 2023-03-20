@@ -51,6 +51,17 @@ pub struct UserBasic {
     reward_claimed: u64,	// decimals: native_asset_decimal
 }
 
+impl UserBasic {
+    pub fn default() -> Self {
+        UserBasic {
+            principal: I64::new(),
+            base_tracking_index: 0,
+            base_tracking_accrued: 0,
+            reward_claimed: 0,
+        }
+     }
+}
+
 pub struct MarketBasics {
     base_supply_index: u64,// decimals	18
     base_borrow_index: u64,// decimals	18
