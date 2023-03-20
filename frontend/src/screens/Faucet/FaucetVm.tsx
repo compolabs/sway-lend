@@ -20,14 +20,15 @@ export const FaucetVMProvider: React.FC<IProps> = ({ children }) => {
 
 export const useFaucetVM = () => useVM(ctx);
 
+//todo change
 const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
-  LINK: 1000,
-  UNI: 1000,
-  BTC: 1,
-  USDC: 10000,
-  SWAY: 1000,
-  COMP: 1000,
+  LINK: 60,
+  UNI: 60,
+  BTC: 0.01,
+  USDC: 300,
+  SWAY: 5,
+  COMP: 5,
 };
 
 class FaucetVM {
@@ -43,10 +44,10 @@ class FaucetVM {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     this.checkTokensThatAlreadyBeenMinted().then();
-    reaction(
-      () => this.rootStore.accountStore.address,
-      () => this.checkTokensThatAlreadyBeenMinted()
-    );
+    // reaction(
+    //   () => this.rootStore.accountStore.address,
+    //   () => this.checkTokensThatAlreadyBeenMinted()
+    // );
     makeAutoObservable(this);
   }
 

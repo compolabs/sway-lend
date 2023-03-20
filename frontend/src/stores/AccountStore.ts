@@ -188,11 +188,7 @@ class AccountStore {
         isCustom: true,
       })
     );
-    for (let i = 0; i < assets.length; i++) {
-      const asset = assets[i];
-      const v = await window?.fuel.addAsset(asset);
-      console.log(v);
-    }
+    await window?.fuel.addAsset(assets);
   };
 }
 
