@@ -5,6 +5,7 @@ import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
 import { Mnemonic } from "@fuel-ts/mnemonic";
+import { FuelProviderConfig } from "@fuel-wallet/sdk";
 
 export enum LOGIN_TYPE {
   FUEL_WALLET = "FUEL_WALLET",
@@ -44,8 +45,22 @@ class AccountStore {
   onFuelLoaded = () => {
     if (window.fuel == null) return;
     window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
+    window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
   };
   handleAccEvent = (account: string) => this.setAddress(account);
+  handleNetworkEvent = (network: FuelProviderConfig) => {
+    if (network.url !== NODE_URL) {
+      this.rootStore.notificationStore.toast(
+        `Please change network url to beta 3`,
+        {
+          link: NODE_URL,
+          linkTitle: "Go to Beta 3",
+          type: "error",
+          title: "Attention",
+        }
+      );
+    }
+  };
 
   public address: string | null = null;
   setAddress = (address: string | null) => (this.address = address);
@@ -132,7 +147,30 @@ class AccountStore {
       return;
     }
     const account = await window.fuel.currentAccount();
+    const provider = await fuel.getProvider();
+    if (provider.url !== NODE_URL) {
+      this.rootStore.notificationStore.toast(
+        `Please change network url to beta 3`,
+        {
+          link: NODE_URL,
+          linkTitle: "Go to Beta 3",
+          type: "error",
+          title: "Attention",
+        }
+      );
+    }
     this.setAddress(account);
+    // if (network.url !== NODE_URL) {
+    //   this.rootStore.notificationStore.toast(
+    //       `Please change network url to beta 3`,
+    //       {
+    //         link: NODE_URL,
+    //         linkTitle: "Go to Beta 3",
+    //         type: "error",
+    //         title: "Attention",
+    //       }
+    //   );
+    // }
   };
 
   getFormattedBalance = (token: IToken): string | null => {
