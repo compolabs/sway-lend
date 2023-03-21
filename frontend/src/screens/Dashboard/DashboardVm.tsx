@@ -86,6 +86,9 @@ class DashboardVm {
   baseTokenReserve: BN | null = null;
   setBaseTokenReserve = (l: BN | null) => (this.baseTokenReserve = l);
 
+  totalLiquidity: BN | null = null;
+  setTotalLiquidity = (l: BN | null) => (this.totalLiquidity = l);
+
   marketBasic: MarketBasicsOutput | null = null;
   setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
 
@@ -150,6 +153,7 @@ class DashboardVm {
           this.updateUserCollateralBalances(marketContract),
           this.updateCollateralsData(marketContract),
           this.updateTotalBaseTokenReserve(marketContract),
+          this.updateTotalLiquidity(marketContract),
         ])
       );
     });
@@ -236,6 +240,19 @@ class DashboardVm {
       .balance_of({ value: this.baseToken.assetId })
       .get();
     this.setBaseTokenReserve(new BN(value.toString()));
+  };
+  updateTotalLiquidity = async (marketContract: MarketAbi) => {
+    const result = await marketContract.functions
+      .balance_of({ value: this.baseToken.assetId })
+      .get();
+    const result2 = await marketContract.functions.get_reserves().get();
+    // const liq = BN.formatUnits(
+    //     new BN(result.value.toString()).minus(result2.value.value.toString()),
+    //     this.baseToken.decimals
+    // );
+    this.setTotalLiquidity(
+      new BN(result.value.toString()).minus(result2.value.value.toString())
+    );
   };
 
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
@@ -724,14 +741,6 @@ class DashboardVm {
     return rate.times(coefficient).toFormat(2) + "%";
   }
 
-  get totalLiquidity() {
-    if (this.marketBasic == null) return null;
-    const { total_borrow_base, total_supply_base } = this.marketBasic;
-    const value = new BN(total_supply_base.toString()).minus(
-      total_borrow_base.toString()
-    );
-    return "$" + BN.formatUnits(value, this.baseToken.decimals).toFormat(2);
-  }
 
   // calcPositionSummary = async () => {
   //   if (!this.initialized) return;
