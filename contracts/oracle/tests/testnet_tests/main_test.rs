@@ -10,7 +10,7 @@ use crate::utils::{
     testnet_tests_utils::setup_wallet,
 };
 
-const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
+const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
 #[derive(Debug)]
 struct AssetConfig<'a> {
     symbol: &'a str,
@@ -25,37 +25,37 @@ async fn main_test() {
         AssetConfig {
             symbol: "COMP",
             default_price: 50 * 10u64.pow(9),
-            asset_id: "0x13397cf760e15cd30194fa9d884cf4dd810c5d9e6459a4053e65f74f80b92f32",
+            asset_id: "0x6c0a715375b510e1ef562bb5b3a7afb2c9b4a7380251e3f295e3225410b96488",
             coingeco_id: "compound-governance-token",
         },
         AssetConfig {
             symbol: "SWAY",
             default_price: 50 * 10u64.pow(9),
-            asset_id: "0x99075448d291a8f8f69e5f3d25a309c38ad38def9f709a69ae4a2aeaed1701fe",
+            asset_id: "0x89eac25d412c5c1b63d212deacc109dcff804eff70101fe0fc72167bc7884aa2",
             coingeco_id: "compound-governance-token",
         },
         AssetConfig {
             symbol: "BTC",
             default_price: 19000 * 10u64.pow(9),
-            asset_id: "0xdd17dda6eeee55f6d327020e6d61b9fa7b3c2ab205c46cdca690a46966f4e1c7",
+            asset_id: "0xf7d6d3344dd36493d7e6b02b16a679778ad24539e2698af02558868a6f2feb81",
             coingeco_id: "bitcoin",
         },
         AssetConfig {
             symbol: "USDC",
             default_price: 1 * 10u64.pow(9),
-            asset_id: "0xd7d5e5c1220872e6f42b38f85ae80c6072b1b4723e7a7218bbf6717aca962536",
+            asset_id: "0x56fb8789a590ea9c12af6fe6dc2b43f347700b049d4f823fd4476c6f366af201",
             coingeco_id: "usd-coin",
         },
         AssetConfig {
             symbol: "UNI",
             default_price: 5 * 10u64.pow(9),
-            asset_id: "0x76c4fda9074c4509eaf2652f82bace86e2c7a21bf9faff7bf6228034ebc0f8a2",
+            asset_id: "0x5381bbd1cff41519062c8531ec30e8ea1a2d752e59e4ac884068d3821e9f0093",
             coingeco_id: "uniswap",
         },
         AssetConfig {
             symbol: "LINK",
             default_price: 5 * 10u64.pow(9),
-            asset_id: "0x71be783354a9bccfa9de0e7edf291797775e4a730d0922a9675258dbb47f557b",
+            asset_id: "0x2018850b249a9c531a51d52465290d7bfc9f18838a5c4c6f476bff9553a8f7e9",
             coingeco_id: "chainlink",
         },
         AssetConfig {
@@ -67,7 +67,7 @@ async fn main_test() {
     ];
 
     let (wallet, _provider) = setup_wallet().await;
-    let tx_params = TxParameters::new(Some(1), None, None);
+    let tx_params = TxParameters::default().set_gas_price(1);
     let oracle_dapp_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
     let oracle = OracleContract::new(oracle_dapp_id, wallet.clone());
     let methods = oracle.methods();
@@ -101,6 +101,11 @@ async fn main_test() {
 
         message += format!("1 {symbol} = ${} ({})\n", format_units(price, 9), price).as_str();
     }
-    let _res = methods.set_prices(prices).tx_params(tx_params).call().await.unwrap();
+    let _res = methods
+        .set_prices(prices)
+        .tx_params(tx_params)
+        .call()
+        .await
+        .unwrap();
     println!("{message}");
 }

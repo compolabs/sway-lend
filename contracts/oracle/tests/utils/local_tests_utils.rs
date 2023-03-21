@@ -1,5 +1,4 @@
 use fuels::prelude::*;
-use rand::prelude::Rng;
 
 use crate::utils::number_utils::parse_units;
 
@@ -50,9 +49,11 @@ pub mod abi_calls {
 }
 
 pub mod test_helpers {
+    use std::io::Write;
+
     use fuels::types::SizedAsciiString;
 
-    use super::{*, abigen_bindings::token_contract_mod};
+    use super::{abigen_bindings::token_contract_mod, *};
 
     pub struct DeployTokenConfig {
         pub name: String,
@@ -79,8 +80,7 @@ pub mod test_helpers {
         let id = Contract::deploy(
             "./out/debug/oracle.bin",
             &wallet,
-            TxParameters::default(),
-            StorageConfiguration::default(),
+            DeployConfiguration::default(),
         )
         .await
         .unwrap();
@@ -96,15 +96,14 @@ pub mod test_helpers {
         let mut symbol = deploy_config.symbol.clone();
         let decimals = deploy_config.decimals;
 
-        let mut rng = rand::thread_rng();
-        let salt = rng.gen::<[u8; 32]>();
+        let mut salt: [u8; 32] = [0; 32];
+        let mut temp: &mut [u8] = &mut salt;
+        temp.write(symbol.clone().as_bytes()).unwrap();
 
-        let id = Contract::deploy_with_parameters(
+        let id = Contract::deploy(
             "./tests/artefacts/token/token_contract.bin",
             &wallet,
-            TxParameters::default(),
-            StorageConfiguration::default(),
-            Salt::from(salt),
+            DeployConfiguration::default().set_salt(salt),
         )
         .await
         .unwrap();

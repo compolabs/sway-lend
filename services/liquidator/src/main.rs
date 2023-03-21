@@ -20,7 +20,7 @@ abigen!(
     )
 );
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 const MARKET_ADDRESS: &str = "0x2c290844d5b996b32cdf10de4a5294868efc3608e966a809bb03b86b2fecb2c4";
 const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
 

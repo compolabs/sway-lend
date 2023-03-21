@@ -1,7 +1,7 @@
 use dotenv::dotenv;
 use fuels::prelude::*;
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 
 pub async fn setup_wallet() -> (WalletUnlocked, Provider) {
     let provider = match Provider::connect(RPC).await {

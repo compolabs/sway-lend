@@ -1,22 +1,24 @@
+use std::io::Write;
+
 use dotenv::dotenv;
 use fuels::{prelude::*, types::SizedAsciiString};
-use rand::prelude::{Rng};
+use rand::Rng;
 
-use crate::{actions::deploy::abigen_bindings::token_contract_mod};
+use crate::actions::deploy::abigen_bindings::token_contract_mod;
 
 abigen!(Contract(
     name = "TokenContract",
     abi = "out/debug/token_contract-abi.json"
 ));
 
-struct DeployConfig {
+pub struct DeployConfig {
     name: String,
     symbol: String,
     decimals: u8,
     mint_amount: f64,
 }
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 
 #[tokio::test]
 async fn deploy() {
@@ -39,7 +41,6 @@ async fn deploy() {
             decimals: 6,
             mint_amount: 300.0,
         },
-       
         DeployConfig {
             name: String::from("Bitcoin"),
             symbol: String::from("BTC"),
@@ -50,13 +51,13 @@ async fn deploy() {
             name: String::from("Uniswap"),
             symbol: String::from("UNI"),
             decimals: 9,
-            mint_amount: 60.0,
+            mint_amount: 50.0,
         },
         DeployConfig {
             name: String::from("Chainlink"),
             symbol: String::from("LINK"),
             decimals: 9,
-            mint_amount: 60.0,
+            mint_amount: 50.0,
         },
     ];
 
@@ -78,25 +79,20 @@ async fn deploy_token_contract(mut deploy_config: DeployConfig) {
         Err(error) => panic!("❌ Cannot find .env file: {:#?}", error),
     };
 
-    deploy_config
-        .name
-        .push_str(" ".repeat(32 - deploy_config.name.len()).as_str());
-    deploy_config
-        .symbol
-        .push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
-
     let wallet = WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider));
+
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
-    let token_contract_id = Contract::deploy_with_parameters(
+
+    let token_contract_id = Contract::deploy(
         "out/debug/token_contract.bin",
         &wallet,
-        TxParameters::new(Some(10), None, None),
-        StorageConfiguration::default(),
-        Configurables::default(),
-        Salt::from(salt),
+        DeployConfiguration::default()
+            .set_tx_parameters(TxParameters::default().set_gas_price(1))
+            .set_salt(salt),
     )
     .await;
+
     let token_contract_id = match token_contract_id {
         Ok(id) => id,
         Err(error) => panic!("❌ Problem deploing the dapp: {:#?}", error),
@@ -105,18 +101,30 @@ async fn deploy_token_contract(mut deploy_config: DeployConfig) {
     let instance = TokenContract::new(token_contract_id.clone(), wallet.clone());
     let methods = instance.methods();
 
-    let mint_amount = (deploy_config.mint_amount * 10f64.powf(deploy_config.decimals as f64)) as u64;
-    let config: token_contract_mod::TokenInitializeConfig = token_contract_mod::TokenInitializeConfig {
-        name: SizedAsciiString::<32>::new(deploy_config.name).unwrap(),
-        symbol: SizedAsciiString::<8>::new(deploy_config.symbol).unwrap(),
-        decimals: deploy_config.decimals,
-    };
+    deploy_config
+        .name
+        .push_str(" ".repeat(32 - deploy_config.name.len()).as_str());
+    deploy_config
+        .symbol
+        .push_str(" ".repeat(8 - deploy_config.symbol.len()).as_str());
+
+    let mint_amount =
+        (deploy_config.mint_amount * 10f64.powf(deploy_config.decimals as f64)) as u64;
+    let config: token_contract_mod::TokenInitializeConfig =
+        token_contract_mod::TokenInitializeConfig {
+            name: SizedAsciiString::<32>::new(deploy_config.name).unwrap(),
+            symbol: SizedAsciiString::<8>::new(deploy_config.symbol).unwrap(),
+            decimals: deploy_config.decimals,
+        };
     let _res = methods
         .initialize(config, mint_amount, Address::from(wallet.address()))
-        .tx_params(TxParameters::new(Some(1), Some(1000000), None))
+        .tx_params(TxParameters::default().set_gas_price(1))
         .call()
         .await;
     println!("{} Initialize\n", if _res.is_ok() { "✅" } else { "❌" });
+    if _res.is_err() {
+        println!("Error = {:?}", _res.err().unwrap());
+    }
 
     let conf = methods.config().simulate().await.unwrap().value;
     println!("ownerAddress: {}", wallet.address());

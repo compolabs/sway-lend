@@ -13,7 +13,7 @@ abigen!(Contract(
     abi = "out/debug/token_contract-abi.json"
 ));
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 const AMOUNT: u64 = 100_000;
 const TOKEN_ADDRESS: &str = "0xd7d5e5c1220872e6f42b38f85ae80c6072b1b4723e7a7218bbf6717aca962536";
 const RECIPIEND_ADDRES: &str = "fuel1anfhx60xj8v3g8hm5rcux3gn3kjqjvhjagtpqmm8yytv80p4aqfqn74nlq";
