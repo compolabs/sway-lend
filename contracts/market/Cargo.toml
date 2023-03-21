@@ -3,7 +3,7 @@ name = "market"
 description = "A cargo-generate template for Rust + Sway integration testing."
 version = "0.1.0"
 edition = "2021"
-authors = ["alexey <alexnagornnyy.an@gmail.com>"]
+authors = ["Alex Nagorny <alex@swaygang.com>"]
 license = "Apache-2.0"
 
 [dev-dependencies]

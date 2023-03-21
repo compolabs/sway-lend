@@ -46,7 +46,7 @@ pub mod market_abi_calls {
         contract
             .methods()
             .initialize(config.clone(), assets.clone(), step)
-            // .tx_params(TX_PARAMS)
+            .tx_params(TxParameters::default().set_gas_price(1))
             .call()
             .await
     }

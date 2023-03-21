@@ -1,12 +1,4 @@
 contract;
-/*   
-███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
-██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
-███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
-╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
-███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
-╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
-*/
 
 use std::{
     address::Address,
@@ -15,13 +7,12 @@ use std::{
         msg_sender,
     },
     block::timestamp,
+    constants::ZERO_B256,
     logging::log,
     result::Result,
     revert::require,
 };
 use oracle_abi::*;
-
-const ZERO_B256 = 0x0000000000000000000000000000000000000000000000000000000000000000;
 
 storage {
     prices: StorageMap<ContractId, Price> = StorageMap {},
@@ -82,6 +73,10 @@ impl Oracle for Contract {
 
     #[storage(read)]
     fn get_price(asset_id: ContractId) -> Price {
-        storage.prices.get(asset_id)
+        storage.prices.get(asset_id).unwrap_or(Price {
+            price: 0,
+            asset_id,
+            last_update: 0,
+        })
     }
 }
