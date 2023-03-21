@@ -1,7 +1,7 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
-import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
+import { IToken, NODE_URL, ROUTES, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
 import { Mnemonic } from "@fuel-ts/mnemonic";
@@ -191,7 +191,12 @@ class AccountStore {
     this.setMnemonicPhrase(mnemonic);
     this.rootStore.settingsStore.setLoginModalOpened(false);
     if (mnemonicPhrase == null) {
-      this.rootStore.notificationStore.toast("Go to faucet page to mint ETH");
+      this.rootStore.notificationStore.toast("First you need to mint ETH", {
+        link: `${window.location.origin}/#${ROUTES.FAUCET}`,
+        linkTitle: "Go to Faucet",
+        type: "info",
+        title: "Attention",
+      });
     }
   };
 
