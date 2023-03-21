@@ -8,6 +8,7 @@
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "@fuel-ts/contract": "^0.35.0",
+    "@fuel-ts/mnemonic": "^0.35.0",
     "@fuel-ts/wallet": "^0.35.0",
     "@fuel-wallet/sdk": "^0.7.1",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",

@@ -9,7 +9,7 @@ import {
   TOKENS_LIST,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import { TokenAbi__factory } from "@src/contracts";
+import { TokenContractAbi__factory } from "@src/contracts";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import { Asset } from "@fuel-wallet/types";
 
@@ -30,8 +30,8 @@ export const useFaucetVM = () => useVM(ctx);
 //todo change
 const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
-  LINK: 60,
-  UNI: 60,
+  LINK: 50,
+  UNI: 50,
   BTC: 0.01,
   USDC: 300,
   SWAY: 5,
@@ -74,7 +74,7 @@ class FaucetVM {
     if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
 
     const tokensContracts = tokens.map((b) =>
-      TokenAbi__factory.connect(b.assetId, walletToRead)
+      TokenContractAbi__factory.connect(b.assetId, walletToRead)
     );
     const promise = new Promise((resolve, reject) => {
       this.rejectUpdateStatePromise = reject;
@@ -159,7 +159,7 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
-    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
+    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
 
     try {
       const { transactionResult } = await tokenContract.functions

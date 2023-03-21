@@ -40,21 +40,20 @@ class PricesStore {
   updateTokenPrices = async () => {
     //todo fix to one type of call and new  oracleContracts.get_prices
     //todo fix without seed
-    const { address } = this.rootStore.accountStore;
-    if (address == null) return;
     const checkWallet = Wallet.fromSeed(SEED, "", new Provider(NODE_URL));
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-
     try {
-      const oracleContracts = TOKENS_LIST.map((b) =>
-        OracleAbi__factory.connect(priceOracle, checkWallet)
+      const oracleContract = OracleAbi__factory.connect(
+        priceOracle,
+        checkWallet
       );
-      const ids = TOKENS_LIST.map((t) => {
-        return { value: t.assetId };
-      });
+
+      //todo change to locked wallet
       const response = await Promise.all(
-        oracleContracts.map((v, index) =>
-          v.functions.get_price(ids[index]).simulate()
+        TOKENS_LIST.map((token) =>
+          oracleContract.functions
+            .get_price({ value: token.assetId })
+            .simulate()
         )
       );
       if (response.length > 0) {

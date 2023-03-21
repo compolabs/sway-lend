@@ -26,15 +26,13 @@ export const EXPLORER_URL =
   "https://fuellabs.github.io/block-explorer-v2/beta-3";
 export const FAUCET_URL = "https://faucet-beta-3.fuel.network";
 export const SEED =
-  "0x3c930502838f1da408d93665b78c4fc00b884c0128fff900d05b4def71a3da4335d029828ba0a62c26f3563bcd52b0deec84d1014373a1722610d411611c3771";
-export const SEED_ADDRESS =
-  "fuel1pln6n26y4e8lrgcaqctp8mddhvgzgt44pc9ychark93ks9mk7yxqr63nle";
+  "0x1586034a5486b0af22458ed29106865fee519b341bd260a2d9baad1d2a5c0d5b1505692de3ce6324ba5f306460d7db9a00ffebd5cefccf305da14c6c8fdde0f0";
 export const CONTRACT_ADDRESSES: Record<string, IContractsConfig> = {
-  "0.1": {
+  "0.1.0": {
     priceOracle:
-      "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff",
+      "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5",
     market:
-      "0xe367deeb25692058b0ac88107a893fbf508c59ec9128de0c33c6fec74f6d149e",
+      "0xc374a665ae714f3d88f4d744d3b0970cfee63edfd93b64b1e3df5a881d0fcaa0",
   },
 };
 
