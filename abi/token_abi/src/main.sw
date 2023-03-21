@@ -3,7 +3,9 @@ library token_abi;
 abi Token {
     // Initialize contract
     #[storage(read, write)]
-    fn initialize(config: TokenInitializeConfig, mint_amount: u64, address: Address);
+    fn initialize(
+        // config: TokenInitializeConfig, 
+        mint_amount: u64, address: Address);
 
     #[storage(read, write)]
     fn add_reward_admin(address: Address);
@@ -52,8 +54,8 @@ abi Token {
 }
 
 pub struct TokenInitializeConfig {
-    name: str[32],
-    symbol: str[8],
+    name: Vec<u8>,
+    symbol: Vec<u8>,
     decimals: u8,
 }
 

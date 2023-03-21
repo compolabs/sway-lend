@@ -22,12 +22,20 @@ use std::{
 };
 use token_abi::*;
 
-storage {
+configurable {
     config: TokenInitializeConfig = TokenInitializeConfig {
-        name: "                                ",
-        symbol: "        ",
-        decimals: 1u8,
+        name: Vec<u8> = Vec::new(),
+        symbol: Vec<u8> = Vec::new(),
+        decimals: u8 = 9,
     },
+}
+
+storage {
+    // config: TokenInitializeConfig = TokenInitializeConfig {
+    //     name: NAME,
+    //     symbol: SYMBOL,
+    //     decimals: DECIMALS,
+    // },
     owner: Address = Address::from(ZERO_B256),
     reward_admins: StorageMap<Address, bool> = StorageMap {},
     mint_amount: u64 = 0,
@@ -62,14 +70,14 @@ impl Token for Contract {
     //////////////////////////////////////
     #[storage(read, write)]
     fn initialize(
-        config: TokenInitializeConfig,
+        // config: TokenInitializeConfig,
         mint_amount: u64,
         owner: Address,
     ) {
         require(storage.owner.into() == ZERO_B256, Error::CannotReinitialize);
         storage.owner = owner;
         storage.mint_amount = mint_amount;
-        storage.config = config;
+        // storage.config = config;
     }
 
     #[storage(read, write)]
@@ -159,7 +167,7 @@ impl Token for Contract {
     }
     #[storage(read)]
     fn config() -> TokenInitializeConfig {
-        storage.config
+        configurable.config
     }
 
     #[storage(read)]
