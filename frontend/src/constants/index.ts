@@ -32,7 +32,7 @@ export const CONTRACT_ADDRESSES: Record<string, IContractsConfig> = {
     priceOracle:
       "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5",
     market:
-      "0xc374a665ae714f3d88f4d744d3b0970cfee63edfd93b64b1e3df5a881d0fcaa0",
+      "0xb8fcd5c31c58bd6052e410575fbab97173a2ae632eadc9958676b37e8761ac9a",
   },
 };
 

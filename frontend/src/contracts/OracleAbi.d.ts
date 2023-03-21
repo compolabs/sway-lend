@@ -20,10 +20,7 @@ import type {
   InvokeFunction,
 } from 'fuels';
 
-import type { Enum } from "./common";
-
-export type IdentityInput = Enum<{ Address: AddressInput, ContractId: ContractIdInput }>;
-export type IdentityOutput = Enum<{ Address: AddressOutput, ContractId: ContractIdOutput }>;
+import type { Vec } from "./common";
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
@@ -38,17 +35,20 @@ interface OracleAbiInterface extends Interface {
     initialize: FunctionFragment;
     owner: FunctionFragment;
     set_price: FunctionFragment;
+    set_prices: FunctionFragment;
   };
 
   encodeFunctionData(functionFragment: 'get_price', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'initialize', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'owner', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'set_price', values: [ContractIdInput, BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'set_prices', values: [Vec<[ContractIdInput, BigNumberish]>]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'get_price', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'initialize', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'owner', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'set_price', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'set_prices', data: BytesLike): DecodedValue;
 }
 
 export class OracleAbi extends Contract {
@@ -56,7 +56,8 @@ export class OracleAbi extends Contract {
   functions: {
     get_price: InvokeFunction<[asset_id: ContractIdInput], PriceOutput>;
     initialize: InvokeFunction<[owner: AddressInput], void>;
-    owner: InvokeFunction<[], IdentityOutput>;
+    owner: InvokeFunction<[], AddressOutput>;
     set_price: InvokeFunction<[asset_id: ContractIdInput, price: BigNumberish], void>;
+    set_prices: InvokeFunction<[prices: Vec<[ContractIdInput, BigNumberish]>], void>;
   };
 }

@@ -506,7 +506,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -521,7 +530,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -536,7 +553,8 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": null
     },
     {
       "inputs": [
@@ -561,7 +579,19 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
+        }
+      ]
     },
     {
       "inputs": [
@@ -581,7 +611,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -590,7 +628,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -605,7 +652,15 @@ const _abi = {
         "name": "",
         "type": 9,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -620,7 +675,55 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "index",
+          "type": 18,
+          "typeArguments": null
+        }
+      ],
+      "name": "get_borrower",
+      "output": {
+        "name": "",
+        "type": 8,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_borrowers_amount",
+      "output": {
+        "name": "",
+        "type": 18,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -635,7 +738,15 @@ const _abi = {
         "name": "",
         "type": 11,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -644,7 +755,15 @@ const _abi = {
         "name": "",
         "type": 13,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -653,7 +772,15 @@ const _abi = {
         "name": "",
         "type": 12,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -668,7 +795,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -677,7 +812,15 @@ const _abi = {
         "name": "",
         "type": 11,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -692,7 +835,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -707,7 +858,15 @@ const _abi = {
         "name": "",
         "type": 16,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -727,7 +886,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -742,7 +909,15 @@ const _abi = {
         "name": "",
         "type": 1,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -751,7 +926,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -788,7 +971,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -803,7 +995,15 @@ const _abi = {
         "name": "",
         "type": 3,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -818,7 +1018,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "write",
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -838,7 +1047,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
@@ -847,7 +1064,20 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
+        }
+      ]
     },
     {
       "inputs": [],
@@ -856,7 +1086,20 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "payable",
+          "arguments": []
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -871,7 +1114,15 @@ const _abi = {
         "name": "",
         "type": 18,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -886,7 +1137,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -906,7 +1166,16 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
@@ -926,7 +1195,15 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     }
   ],
   "loggedTypes": [
@@ -1115,7 +1392,8 @@ const _abi = {
       }
     }
   ],
-  "messagesTypes": []
+  "messagesTypes": [],
+  "configurables": []
 }
 
 export class MarketAbi__factory {
