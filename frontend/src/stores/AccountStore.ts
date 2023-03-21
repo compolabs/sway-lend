@@ -51,10 +51,10 @@ class AccountStore {
   handleNetworkEvent = (network: FuelProviderConfig) => {
     if (network.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
-        `Please change network url to beta 3`,
+        `Please change network url to Testnet Beta 3`,
         {
           link: NODE_URL,
-          linkTitle: "Go to Beta 3",
+          linkTitle: "Go to Testnet Beta 3",
           type: "error",
           title: "Attention",
         }
@@ -132,6 +132,9 @@ class AccountStore {
     }
   };
   disconnect = async () => {
+    if (this.loginType === LOGIN_TYPE.FUEL_WALLET) {
+      await window.fuel.disconnect();
+    }
     this.setAddress(null);
     this.setMnemonicPhrase(null);
     this.setLoginType(null);
@@ -160,17 +163,6 @@ class AccountStore {
       );
     }
     this.setAddress(account);
-    // if (network.url !== NODE_URL) {
-    //   this.rootStore.notificationStore.toast(
-    //       `Please change network url to beta 3`,
-    //       {
-    //         link: NODE_URL,
-    //         linkTitle: "Go to Beta 3",
-    //         type: "error",
-    //         title: "Attention",
-    //       }
-    //   );
-    // }
   };
 
   getFormattedBalance = (token: IToken): string | null => {
@@ -230,20 +222,6 @@ class AccountStore {
   isWavesKeeperInstalled = false;
   setWavesKeeperInstalled = (state: boolean) =>
     (this.isWavesKeeperInstalled = state);
-
-  addAssets = async () => {
-    //todo add tokens if they are not added
-    const assets = TOKENS_LIST.filter(({ symbol }) => symbol != "ETH").map(
-      (t) => ({
-        name: t.name,
-        assetId: t.assetId,
-        imageUrl: window.location.origin + t.logo,
-        symbol: t.symbol,
-        isCustom: true,
-      })
-    );
-    await window?.fuel.addAsset(assets);
-  };
 }
 
 export default AccountStore;

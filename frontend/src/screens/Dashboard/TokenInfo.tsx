@@ -46,10 +46,10 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     stats.supply_cap.toString(),
     token.decimals
   ).toFormat(2);
-  const collateralCapacityLeftPercent = new BN(100)
-    .times(vm.collateralReserves[token.assetId])
-    .div(stats.supply_cap.toString())
-    .toFormat(3);
+  const collateralAmount = BN.formatUnits(
+    vm.collateralReserves[token.assetId],
+    token.decimals
+  ).toFormat(2);
 
   const tokenData = [
     { title: "Oracle price", value: price },
@@ -57,8 +57,8 @@ const TokenInfo: React.FC<IProps> = ({ assetId }) => {
     { title: "Liquidation penalty", value: penalty + "%" },
     { title: "Supply cap", value: `${supplyCap} ${token.symbol}` },
     {
-      title: "Collateral Utilization rate",
-      value: `${collateralCapacityLeftPercent} %`,
+      title: "Total supplied",
+      value: `${collateralAmount} ${token.symbol}`,
     },
     {
       title: "Wallet balance",

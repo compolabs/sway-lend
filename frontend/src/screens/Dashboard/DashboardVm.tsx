@@ -435,8 +435,7 @@ class DashboardVm {
     if (
       this.actionTokenAssetId == null ||
       this.maxBorrowBaseTokenAmount == null ||
-      this.baseTokenReserve == null ||
-      this.currentAssetCollateralCapacityLeft == null
+      this.baseTokenReserve == null
     )
       return null;
 
@@ -448,8 +447,14 @@ class DashboardVm {
       if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
         balance = balance.minus(500);
       }
-      if (tokenBalance?.balance?.gt(this.currentAssetCollateralCapacityLeft)) {
-        balance = this.currentAssetCollateralCapacityLeft;
+
+      if (
+        this.actionTokenAssetId !== this.baseToken.assetId &&
+        tokenBalance?.balance?.gt(
+          this.currentAssetCollateralCapacityLeft ?? BN.ZERO
+        )
+      ) {
+        balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
       }
       this.setTokenAmount(balance);
     }
