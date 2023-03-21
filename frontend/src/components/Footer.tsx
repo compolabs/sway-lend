@@ -6,8 +6,8 @@ import { Anchor } from "@components/Anchor";
 import SizedBox from "@components/SizedBox";
 import { CONTRACT_ADDRESSES } from "@src/constants";
 import { useStores } from "@stores";
-import Select from "@components/Select";
-import Text from "@components/Text";
+// import Select from "@components/Select";
+// import Text from "@components/Text";
 import { Row } from "./Flex";
 import { observer } from "mobx-react-lite";
 
@@ -68,24 +68,24 @@ const Footer: React.FC<IProps> = () => {
           alignItems="center"
           justifyContent="flex-end"
         >
-          <Row
-            mainAxisSize="fit-content"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Text fitContent weight={600}>
-              version
-            </Text>
-            <SizedBox width={12} />
-            <Select
-              options={versionOptions}
-              selected={versionOptions.find(
-                ({ key }) => key === settingsStore.version
-              )}
-              onSelect={({ key }) => settingsStore.setVersion(key)}
-            />
-          </Row>
-          <SizedBox width={12} />
+          {/*<Row*/}
+          {/*  mainAxisSize="fit-content"*/}
+          {/*  alignItems="center"*/}
+          {/*  justifyContent="center"*/}
+          {/*>*/}
+          {/*  <Text fitContent weight={600}>*/}
+          {/*    version*/}
+          {/*  </Text>*/}
+          {/*  <SizedBox width={12} />*/}
+          {/*  <Select*/}
+          {/*    options={versionOptions}*/}
+          {/*    selected={versionOptions.find(*/}
+          {/*      ({ key }) => key === settingsStore.version*/}
+          {/*    )}*/}
+          {/*    onSelect={({ key }) => settingsStore.setVersion(key)}*/}
+          {/*  />*/}
+          {/*</Row>*/}
+          {/*<SizedBox width={12} />*/}
           <DarkMode />
         </Row>
       </Container>

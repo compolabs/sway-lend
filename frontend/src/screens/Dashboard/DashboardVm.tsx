@@ -52,9 +52,12 @@ class DashboardVm {
         this.rootStore.settingsStore.version,
         this.rootStore.accountStore.address,
       ],
-      () => this.updateMarketStateWhenVersionChanged()
+      () => this.updateMarketStateWhenVersionOrAddressChanged()
     );
   }
+
+  rejectUpdateStatePromise?: () => void;
+  setRejectUpdateStatePromise = (v: any) => (this.rejectUpdateStatePromise = v);
 
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
@@ -102,6 +105,14 @@ class DashboardVm {
   setCollateralBalances = (l: Record<string, BN> | null) =>
     (this.collateralBalances = l);
 
+  collateralReserves: Record<string, BN> | null = null;
+  setCollateralReserves = (l: Record<string, BN> | null) =>
+    (this.collateralReserves = l);
+
+  assetsConfigs: Record<string, AssetConfigOutput> | null = null;
+  setAssetsConfigs = (l: Record<string, AssetConfigOutput> | null) =>
+    (this.assetsConfigs = l);
+
   collateralsData: Record<string, AssetConfigOutput> | null = null;
   setCollateralData = (l: Record<string, AssetConfigOutput> | null) =>
     (this.collateralsData = l);
@@ -124,24 +135,83 @@ class DashboardVm {
     if (wallet == null) return;
     const { market } = this.rootStore.settingsStore.currentVersionConfig;
     const marketContract = MarketAbi__factory.connect(market, wallet);
+    if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
 
-    return Promise.all([
-      this.updateAccountBalances(marketContract),
-      this.updateSupplyAndBorrowRates(marketContract),
-      this.updateMarketBasic(marketContract),
-      this.updateMaxBorrowAmount(marketContract),
-      this.updateUserCollateralBalances(marketContract),
-      this.updateCollateralsData(marketContract),
-      this.updateTotalBaseTokenReserve(marketContract),
-    ]);
+    const promise = new Promise((resolve, reject) => {
+      this.rejectUpdateStatePromise = reject;
+      resolve(
+        Promise.all([
+          this.getAssetsConfig(marketContract),
+          this.updateTotalCollateralInfo(marketContract),
+          this.updateAccountBalances(marketContract),
+          this.updateSupplyAndBorrowRates(marketContract),
+          this.updateMarketBasic(marketContract),
+          this.updateMaxBorrowAmount(marketContract),
+          this.updateUserCollateralBalances(marketContract),
+          this.updateCollateralsData(marketContract),
+          this.updateTotalBaseTokenReserve(marketContract),
+        ])
+      );
+    });
+    promise
+      .catch((v) => {
+        console.log("update data error", v);
+      })
+      .finally(() => {
+        this.setInitialized(true);
+        this.setRejectUpdateStatePromise(undefined);
+      });
   };
 
-  updateMarketStateWhenVersionChanged = async () => {
-    //todo add delete update promise if price was changed again;
-    console.log("updateMarketStateWhenVersionChanged");
+  getAssetsConfig = async (marketContract: MarketAbi) => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (addressInput == null) return;
+    const collaterals = this.collaterals;
+
+    const functions = collaterals.map((b) =>
+      marketContract.functions
+        .get_asset_config_by_asset_id({ value: b.assetId })
+        .get()
+    );
+    const data = await Promise.all(functions);
+    if (data.length > 0) {
+      const v = data.reduce((acc, res, index) => {
+        if (res == null) return acc;
+        const assetId = collaterals[index].assetId;
+        return { ...acc, [assetId]: res.value };
+      }, {});
+      this.setAssetsConfigs(v);
+    }
+  };
+  updateTotalCollateralInfo = async (marketContract: MarketAbi) => {
+    const { addressInput } = this.rootStore.accountStore;
+    if (addressInput == null) return;
+    const collaterals = this.collaterals;
+
+    const functions = collaterals.map((b) =>
+      marketContract.functions.totals_collateral({ value: b.assetId }).get()
+    );
+    const data = await Promise.all(functions);
+    if (data.length > 0) {
+      const v = data.reduce((acc, res, index) => {
+        if (res == null) return acc;
+        const assetId = collaterals[index].assetId;
+        return { ...acc, [assetId]: new BN(res.value.toString()) };
+      }, {});
+      this.setCollateralReserves(v);
+    }
+  };
+
+  updateMarketStateWhenVersionOrAddressChanged = async () => {
+    if (this.rootStore.accountStore.address == null) {
+      this.resetData();
+      this.setInitialized(true);
+      return;
+    }
     this.setInitialized(false);
+    this.setAction(null);
+    this.setActionTokenAssetId(null);
     await this.updateMarketState();
-    this.setInitialized(true);
   };
 
   updateAccountBalances = async (marketContract: MarketAbi) => {
@@ -249,9 +319,6 @@ class DashboardVm {
     TOKENS_BY_SYMBOL.LINK,
     TOKENS_BY_SYMBOL.UNI,
   ];
-
-  // marketContract: MarketAbi | null = null;
-  // setMarketContract = (v: MarketAbi | null) => (this.marketContract = v);
 
   marketContractSigned: MarketAbi | null = null;
   setMarketContractSigned = (v: MarketAbi | null) =>
@@ -368,9 +435,11 @@ class DashboardVm {
     if (
       this.actionTokenAssetId == null ||
       this.maxBorrowBaseTokenAmount == null ||
-      this.baseTokenReserve == null
+      this.baseTokenReserve == null ||
+      this.currentAssetCollateralCapacityLeft == null
     )
       return null;
+
     if (this.action === ACTION_TYPE.SUPPLY) {
       const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
         this.actionTokenAssetId
@@ -378,6 +447,9 @@ class DashboardVm {
       let balance = tokenBalance?.balance ?? BN.ZERO;
       if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
         balance = balance.minus(500);
+      }
+      if (tokenBalance?.balance?.gt(this.currentAssetCollateralCapacityLeft)) {
+        balance = this.currentAssetCollateralCapacityLeft;
       }
       this.setTokenAmount(balance);
     }
@@ -407,6 +479,29 @@ class DashboardVm {
         ? this.setTokenAmount(this.borrowedBalance)
         : this.setTokenAmount(balance?.balance ?? BN.ZERO);
     }
+  }
+
+  get currentAssetConfig() {
+    if (this.actionTokenAssetId == null || this.assetsConfigs == null)
+      return null;
+    return this.assetsConfigs[this.actionTokenAssetId];
+  }
+
+  get currentAssetCollateralReserve() {
+    if (this.actionTokenAssetId == null || this.collateralReserves == null)
+      return null;
+    return this.collateralReserves[this.actionTokenAssetId];
+  }
+
+  get currentAssetCollateralCapacityLeft() {
+    if (
+      this.currentAssetCollateralReserve == null ||
+      this.currentAssetConfig == null
+    )
+      return null;
+    return new BN(this.currentAssetConfig.supply_cap.toString()).minus(
+      this.currentAssetCollateralReserve
+    );
   }
 
   get tokenInputBalance(): string {
@@ -534,6 +629,9 @@ class DashboardVm {
           this.actionTokenAssetId
         );
         if (balance == null) return false;
+        if (this.currentAssetCollateralCapacityLeft?.eq(0)) return false;
+        if (this.tokenAmount.gt(this.currentAssetCollateralCapacityLeft ?? 0))
+          return false;
         return balance.balance?.gte(this.tokenAmount);
       }
     }
@@ -788,4 +886,27 @@ class DashboardVm {
       .plus(collateralBalances)
       .toFormat(2);
   }
+
+  get notification() {
+    if (this.action == null) return null;
+    if (this.action !== ACTION_TYPE.SUPPLY) return null;
+    if (this.currentAssetCollateralCapacityLeft == null) return null;
+    if (this.currentAssetCollateralCapacityLeft.eq(0)) {
+      return `You can't supply more ${this.actionToken.symbol} because supply capacity is reached`;
+    }
+    return null;
+  }
+
+  resetData = () => {
+    this.setCollateralReserves(null);
+    this.setSuppliedBalance(null);
+    this.setBorrowedBalance(null);
+    this.setBorrowRate(null);
+    this.setSupplyRate(null);
+    this.setMarketBasic(null);
+    this.setMaxBorrowBaseTokenAmount(null);
+    this.setCollateralBalances(null);
+    this.setCollateralData(null);
+    this.setBaseTokenReserve(null);
+  };
 }

@@ -3,7 +3,7 @@ const colors = {
   neutral1: "#F0F2FA",
   neutral2: "#E3E9F9",
   neutral3: "#DFE5FA",
-  neutral4: "#fff",
+  neutral4: "#9A9ABD",
   neutral5: "#313A45",
   neutral6: "#1F262B",
   neutral7: "#1A1D1F",
@@ -100,6 +100,10 @@ export default {
     boxShadow:
       "0px 0px 14px -4px rgba(227, 233, 249, 0.05), 0px 32px 48px -8px rgba(227, 233, 249, 0.1)",
     background: colors.neutral7,
+    warningBackground: "rgb(150 93 85 / 60%)",
+  },
+  textArea: {
+    borderColor: colors.neutral5,
   },
   tokenDescGradient:
     "linear-gradient(180deg, rgba(248, 248, 255, 0) 0%, #181931 100%)",

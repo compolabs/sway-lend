@@ -70,7 +70,12 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 Connect wallet
               </Button>
             );
-          //todo add loading state
+          if (!vm.initialized)
+            return (
+              <Button fixed disabled>
+                <Loading />
+              </Button>
+            );
           if (vm.alreadyMintedTokens.includes(t.assetId))
             return (
               <Button fixed disabled>
@@ -80,7 +85,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           return (
             <Button
               fixed
-              disabled={vm.loading}
+              disabled={vm.loading || !vm.initialized}
               onClick={() => {
                 if (t.symbol === "ETH") {
                   window.open(
@@ -104,6 +109,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
     );
   }, [
     accountStore.address,
+    accountStore.balances,
     accountStore.isLoggedIn,
     settingsStore,
     vm.loading,
