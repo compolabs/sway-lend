@@ -741,7 +741,6 @@ class DashboardVm {
     return rate.times(coefficient).toFormat(2) + "%";
   }
 
-
   // calcPositionSummary = async () => {
   //   if (!this.initialized) return;
   //   if (
