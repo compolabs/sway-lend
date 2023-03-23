@@ -35,7 +35,7 @@ class AccountStore {
       }
     }
     this.updateAccountBalances().then();
-    setInterval(this.updateAccountBalances, 60 * 1000);
+    setInterval(this.updateAccountBalances, 20 * 1000);
     reaction(
       () => this.address,
       () => Promise.all([this.updateAccountBalances()])
@@ -223,7 +223,6 @@ class AccountStore {
     if (this.address == null) return null;
     return { value: Address.fromString(this.address).toB256() };
   }
-
 }
 
 export default AccountStore;
