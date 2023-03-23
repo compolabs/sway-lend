@@ -14,4 +14,8 @@ To interact with the [Sway Lend](https://app.swaylend.com) platform, you'll firs
 Please make sure that your Fuel Wallet is connected to the latest testnet beta 3 in order to sign transactions successfully. If your wallet is not connected to the latest testnet beta 3, you won't be able to sign transactions. Link is [https://beta-3.fuel.network/graphql](https://beta-3.fuel.network/graphql)
 {% endhint %}
 
+{% hint style="info" %}
+If a user creates a new account in Fuel Wallet after connecting to SwayLend app, they must disconnect and reconnect their wallet to grant access to the newly created account.
+{% endhint %}
+
 Once you have connected your wallet, you'll be ready to start using the Sway Lend platform.
