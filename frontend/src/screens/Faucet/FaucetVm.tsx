@@ -27,7 +27,6 @@ export const FaucetVMProvider: React.FC<IProps> = ({ children }) => {
 
 export const useFaucetVM = () => useVM(ctx);
 
-//todo change
 const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
   LINK: 50,

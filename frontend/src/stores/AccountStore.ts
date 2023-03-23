@@ -223,24 +223,6 @@ class AccountStore {
     if (this.address == null) return null;
     return { value: Address.fromString(this.address).toB256() };
   }
-
-  isWavesKeeperInstalled = false;
-  setWavesKeeperInstalled = (state: boolean) =>
-    (this.isWavesKeeperInstalled = state);
-
-  addAssets = async () => {
-    //todo add tokens if they are not added
-    const assets = TOKENS_LIST.filter(({ symbol }) => symbol != "ETH").map(
-      (t) => ({
-        name: t.name,
-        assetId: t.assetId,
-        imageUrl: window.location.origin + t.logo,
-        symbol: t.symbol,
-        isCustom: true,
-      })
-    );
-    await window?.fuel.addAsset(assets);
-  };
 }
 
 export default AccountStore;
