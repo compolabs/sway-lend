@@ -4,7 +4,7 @@ use std::str::FromStr;
 
 abigen!(UsdtContract, "out/debug/token_contract-abi.json");
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 const USDT_ADDRESS: &str = "0x2cffcbc96717e5a102db1d5da45c189248d00a070cd65a822096b9733d3b071e";
 
 pub async fn setup() -> (WalletUnlocked, UsdtContract, Provider) {

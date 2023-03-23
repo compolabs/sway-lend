@@ -57,6 +57,7 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
   const loginTypes = [
     {
       title: "Generate account",
+      type: LOGIN_TYPE.GENERATE_FROM_SEED,
       isActive: true,
       onClick: handleLogin(LOGIN_TYPE.GENERATE_FROM_SEED),
     },

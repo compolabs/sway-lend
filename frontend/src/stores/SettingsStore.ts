@@ -22,7 +22,7 @@ class SettingsStore {
     }
   }
 
-  version: string = "0.2.0";
+  version: string = "0.1.0";
   setVersion = (s: string) => (this.version = s);
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
@@ -49,16 +49,11 @@ class SettingsStore {
   setLoginModalOpened = (s: boolean) => (this.loginModalOpened = s);
 
   get doesBrowserSupportsFuelWallet(): boolean {
-    //todo
-    //https://fuels-wallet.vercel.app/docs/browser-support/
     const browser = getCurrentBrowser();
     return ["chrome", "firefox", "brave", "edge"].includes(browser);
   }
 
   get currentVersionConfig(): IContractsConfig {
-    if (this.version == null) {
-      return CONTRACT_ADDRESSES["0.2.0"];
-    }
     return CONTRACT_ADDRESSES[this.version];
   }
 }

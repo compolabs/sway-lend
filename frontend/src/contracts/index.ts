@@ -4,15 +4,15 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.29.1
-  Forc version: 0.32.2
-  Fuel-Core version: 0.15.1
+  Fuels version: 0.35.0
+  Forc version: 0.35.3
+  Fuel-Core version: 0.17.3
 */
 
-export type { TokenAbi } from "./TokenAbi";
+export type { TokenContractAbi } from "./TokenContractAbi";
 export type { OracleAbi } from "./OracleAbi";
 export type { MarketAbi } from "./MarketAbi";
 
-export { TokenAbi__factory } from "./factories/TokenAbi__factory";
+export { TokenContractAbi__factory } from "./factories/TokenContractAbi__factory";
 export { OracleAbi__factory } from "./factories/OracleAbi__factory";
 export { MarketAbi__factory } from "./factories/MarketAbi__factory";

@@ -1,12 +1,4 @@
 contract;
-/*   
-    ███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
-    ██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
-    ███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
-    ╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
-    ███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
-    ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
-*/
 
 use std::{
     address::*,
@@ -14,9 +6,15 @@ use std::{
         AuthError,
         msg_sender,
     },
+    call_frames::{
+        contract_id,
+        msg_asset_id,
+    },
     constants::ZERO_B256,
-    call_frames::{contract_id, msg_asset_id},
-    context::{balance_of, msg_amount},
+    context::{
+        balance_of,
+        msg_amount,
+    },
     contract_id::ContractId,
     revert::require,
     storage::*,
@@ -25,22 +23,22 @@ use std::{
 use token_abi::*;
 
 storage {
-config: TokenInitializeConfig = TokenInitializeConfig {
-name: "                                ",
-symbol: "        ",
-decimals: 1u8,
-},
-owner: Address = Address::from(ZERO_B256),
-reward_admins: StorageMap<Address, bool> = StorageMap {},
-mint_amount: u64 = 0,
-mint_list: StorageMap<Address, bool> = StorageMap {},
+    config: TokenInitializeConfig = TokenInitializeConfig {
+        name: "                                ",
+        symbol: "        ",
+        decimals: 1u8,
+    },
+    owner: Address = Address::from(ZERO_B256),
+    reward_admins: StorageMap<Address, bool> = StorageMap {},
+    mint_amount: u64 = 0,
+    mint_list: StorageMap<Address, bool> = StorageMap {},
 }
 
 enum Error {
     AddressAlreadyMint: (),
-CannotReinitialize: (),
-MintIsClosed: (),
-NotOwner: (),
+    CannotReinitialize: (),
+    MintIsClosed: (),
+    NotOwner: (),
 }
 
 pub fn get_msg_sender_address_or_panic() -> Address {
@@ -63,7 +61,11 @@ impl Token for Contract {
     // Owner methods
     //////////////////////////////////////
     #[storage(read, write)]
-    fn initialize(config: TokenInitializeConfig, mint_amount: u64, owner: Address) {
+    fn initialize(
+        config: TokenInitializeConfig,
+        mint_amount: u64,
+        owner: Address,
+    ) {
         require(storage.owner.into() == ZERO_B256, Error::CannotReinitialize);
         storage.owner = owner;
         storage.mint_amount = mint_amount;
@@ -71,21 +73,21 @@ impl Token for Contract {
     }
 
     #[storage(read, write)]
-    fn add_reward_admin(address: Address){
+    fn add_reward_admin(address: Address) {
         validate_owner();
         storage.reward_admins.insert(address, true);
     }
 
     #[storage(read, write)]
-    fn delete_reward_admin(address: Address){
+    fn delete_reward_admin(address: Address) {
         validate_owner();
         storage.reward_admins.insert(address, false);
     }
 
     #[storage(read)]
-    fn is_reward_admin(address: Address) -> bool{
+    fn is_reward_admin(address: Address) -> bool {
         validate_owner();
-        storage.reward_admins.get(address)
+        storage.reward_admins.get(address).is_some() && storage.reward_admins.get(address).unwrap()
     }
 
     #[storage(read, write)]
@@ -103,7 +105,7 @@ impl Token for Contract {
     #[storage(read)]
     fn mint_and_transfer(amount: u64, recipient: Address) {
         let sender = get_msg_sender_address_or_panic();
-        require(storage.reward_admins.get(sender) || storage.owner == sender, Error::NotOwner);
+        require(storage.owner == sender || (storage.reward_admins.get(sender).is_some() && storage.reward_admins.get(sender).unwrap()), Error::NotOwner);
         mint_to_address(amount, recipient);
     }
 
@@ -134,7 +136,7 @@ impl Token for Contract {
 
         // Enable a address to mint only once
         let sender = get_msg_sender_address_or_panic();
-        require(storage.mint_list.get(sender) == false, Error::AddressAlreadyMint);
+        require(storage.mint_list.get(sender).is_none() || !storage.mint_list.get(sender).unwrap(), Error::AddressAlreadyMint);
 
         storage.mint_list.insert(sender, true);
         mint_to_address(storage.mint_amount, sender);
@@ -161,8 +163,8 @@ impl Token for Contract {
     }
 
     #[storage(read)]
-    fn already_minted(address: Address) -> bool{
-        storage.mint_list.get(address)
+    fn already_minted(address: Address) -> bool {
+        return !storage.mint_list.get(address).is_none() && storage.mint_list.get(address).unwrap();
     }
 
     fn caller() -> Address {

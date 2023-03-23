@@ -1,12 +1,12 @@
 [package]
 name = "oracle"
 version = "0.0.0"
-authors = ["Fuel Labs <contact@fuel.sh>"]
+authors = ["Alex Nagorny <alex@swaygang.com>"]
 edition = "2021"
 license = "Apache-2.0"
 
 [dev-dependencies]
-fuels = { version = "0.35.1", features = ["fuel-core-lib"] }
+fuels = { version = "0.38.1", features = ["fuel-core-lib"] }
 tokio = { version = "1.12", features = ["rt", "macros"] }
 
 [[test]]

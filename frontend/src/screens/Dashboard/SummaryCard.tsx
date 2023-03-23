@@ -7,6 +7,7 @@ import Card from "@components/Card";
 import { useDashboardVM } from "@screens/Dashboard/DashboardVm";
 import { observer } from "mobx-react-lite";
 import Skeleton from "react-loading-skeleton";
+import BN from "@src/utils/BN";
 
 interface IProps {}
 
@@ -26,7 +27,10 @@ const SummaryCard: React.FC<IProps> = () => {
     },
     {
       title: "Total liquidity",
-      value: vm.totalLiquidity,
+      value: BN.formatUnits(
+        vm.totalLiquidity ?? 0,
+        vm.baseToken.decimals
+      ).toFormat(2),
       changeValue: null,
     },
   ];

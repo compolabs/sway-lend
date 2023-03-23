@@ -14,7 +14,7 @@ abigen!(Contract(
     abi = "src/artefacts/oracle/oracle-abi.json"
 ));
 
-const RPC: &str = "node-beta-2.fuel.network";
+const RPC: &str = "beta-3.fuel.network";
 const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
 
 #[tokio::main]

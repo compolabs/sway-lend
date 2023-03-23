@@ -9,7 +9,7 @@ import {
   TOKENS_LIST,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import { TokenAbi__factory } from "@src/contracts";
+import { TokenContractAbi__factory } from "@src/contracts";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import { Asset } from "@fuel-wallet/types";
 
@@ -29,12 +29,12 @@ export const useFaucetVM = () => useVM(ctx);
 
 const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
-  LINK: 1000,
-  UNI: 1000,
-  BTC: 1,
-  USDC: 10000,
-  SWAY: 1000,
-  COMP: 1000,
+  LINK: 50,
+  UNI: 50,
+  BTC: 0.01,
+  USDC: 300,
+  SWAY: 5,
+  COMP: 5,
 };
 
 class FaucetVM {
@@ -49,12 +49,10 @@ class FaucetVM {
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-    this.checkTokensThatAlreadyBeenMinted().then(() =>
-      this.setInitialized(true)
-    );
+    this.checkTokensThatAlreadyBeenMinted().then();
     reaction(
-      () => [this.rootStore.accountStore.address],
-      () => this.updateFaucetStateWhenVersionChanged()
+      () => this.rootStore.accountStore.address,
+      () => this.checkTokensThatAlreadyBeenMinted()
     );
     makeAutoObservable(this);
   }
@@ -75,7 +73,7 @@ class FaucetVM {
     if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
 
     const tokensContracts = tokens.map((b) =>
-      TokenAbi__factory.connect(b.assetId, walletToRead)
+      TokenContractAbi__factory.connect(b.assetId, walletToRead)
     );
     const promise = new Promise((resolve, reject) => {
       this.rejectUpdateStatePromise = reject;
@@ -160,7 +158,7 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const wallet = await accountStore.getWallet();
     if (wallet == null) return;
-    const tokenContract = TokenAbi__factory.connect(assetId, wallet);
+    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
 
     try {
       const { transactionResult } = await tokenContract.functions

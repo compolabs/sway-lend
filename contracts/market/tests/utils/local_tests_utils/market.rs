@@ -4,10 +4,11 @@ use std::{collections::HashMap, str::FromStr};
 use super::oracle::OracleContract;
 use crate::utils::local_tests_utils::oracle::{get_oracle_contract_instance, oracle_abi_calls};
 use crate::utils::local_tests_utils::*;
-use fuels::prelude::{abigen, Contract, StorageConfiguration, TxParameters, BASE_ASSET_ID};
+use fuels::prelude::{
+    abigen, Contract, DeployConfiguration, StorageConfiguration, TxParameters, BASE_ASSET_ID,
+};
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
-use fuels::tx::Salt;
 use fuels_types::Address;
 use rand::Rng;
 
@@ -16,10 +17,17 @@ abigen!(Contract(
     abi = "out/debug/market-abi.json"
 ));
 
+// const TX_PARAMS: TxParameters = TxParameters::default()
+// {
+//     gas_price: 1,
+//     gas_limit: 100_000_000,
+//     maturity: 0,
+// };
+
 // TODO: Make it a class not to pass a contract instance in the arguments
 pub mod market_abi_calls {
 
-    use fuels::prelude::{CallParameters, SettableContract, TxParameters};
+    use fuels::prelude::{CallParameters, SettableContract};
     use fuels_types::Address;
 
     use super::{abigen_bindings::market_contract_mod::AssetConfig, *};
@@ -35,11 +43,10 @@ pub mod market_abi_calls {
         assets: &Vec<AssetConfig>,
         step: Option<u64>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
         contract
             .methods()
             .initialize(config.clone(), assets.clone(), step)
-            .tx_params(tx_params)
+            .tx_params(TxParameters::default().set_gas_price(1))
             .call()
             .await
     }
@@ -49,14 +56,20 @@ pub mod market_abi_calls {
         base_asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let call_params = CallParameters::new(Some(amount), Some(base_asset_id), None);
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let call_params = CallParameters::default()
+            .set_amount(amount)
+            .set_asset_id(base_asset_id);
+
+        let tx_params = TxParameters::default()
+            .set_gas_limit(100_000_000)
+            .set_gas_price(1);
+
         market
             .methods()
             .supply_base()
             .tx_params(tx_params)
             .call_params(call_params)
-            .append_variable_outputs(1)
+            .unwrap()
             .call()
             .await
     }
@@ -66,7 +79,9 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let tx_params = TxParameters::default()
+            .set_gas_limit(100_000_000)
+            .set_gas_price(1);
         market
             .methods()
             .withdraw_base(amount)
@@ -83,7 +98,9 @@ pub mod market_abi_calls {
         asset: ContractId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
+        let tx_params = TxParameters::default()
+            .set_gas_limit(100_000_000)
+            .set_gas_price(1);
         market
             .methods()
             .withdraw_collateral(asset, amount)
@@ -99,12 +116,15 @@ pub mod market_abi_calls {
         asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let call_params = CallParameters::new(Some(amount), Some(asset_id), None);
+        let call_params = CallParameters::default()
+            .set_amount(amount)
+            .set_asset_id(asset_id);
         market
             .methods()
             .supply_collateral()
             .call_params(call_params)
-            .append_variable_outputs(1)
+            // .append_variable_outputs(1)
+            .unwrap()
             .call()
             .await
     }
@@ -127,12 +147,10 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> u64 {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
-
         let res = market
             .methods()
             .available_to_borrow(address)
-            .tx_params(tx_params)
+            // .tx_params(TX_PARAMS)
             .set_contracts(contract_ids)
             .simulate()
             .await;
@@ -140,11 +158,10 @@ pub mod market_abi_calls {
     }
 
     pub async fn get_user_supply_borrow(market: &MarketContract, address: Address) -> (u64, u64) {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         market
             .methods()
             .get_user_supply_borrow(address)
-            .tx_params(tx_params)
+            // .tx_params(TX_PARAMS)
             .simulate()
             .await
             .unwrap()
@@ -163,9 +180,14 @@ pub mod market_abi_calls {
         res.unwrap().value
     }
     pub async fn get_utilization(market: &MarketContract) -> u64 {
-        let p = TxParameters::new(Some(0), Some(100_000_000), Some(0));
-        let res = market.methods().get_utilization().tx_params(p).simulate();
-        res.await.unwrap().value
+        market
+            .methods()
+            .get_utilization()
+            // .tx_params(TX_PARAMS)
+            .simulate()
+            .await
+            .unwrap()
+            .value
     }
     pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
         let res = market.methods().balance_of(asset_id).simulate().await;
@@ -185,11 +207,10 @@ pub mod market_abi_calls {
         asset: ContractId,
         collateral_amount: u64,
     ) -> u64 {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market
             .methods()
             .collateral_value_to_sell(asset, collateral_amount);
-        res.tx_params(tx_params)
+        res //.tx_params(TX_PARAMS)
             .set_contracts(contract_ids)
             .simulate()
             .await
@@ -205,11 +226,18 @@ pub mod market_abi_calls {
         min_amount: u64,
         recipient: Address,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
+        let call_params = CallParameters::default()
+            .set_amount(amount)
+            .set_asset_id(base_asset_id);
+        // let tx_params = TxParameters::default()
+        //     .set_gas_limit(100_000_000)
+        //     .set_gas_price(1);
         market
             .methods()
             .buy_collateral(asset, min_amount, recipient)
-            .tx_params(TxParameters::new(Some(0), Some(100_000_000), Some(0)))
-            .call_params(CallParameters::new(Some(amount), Some(base_asset_id), None))
+            // .tx_params(tx_params)
+            .call_params(call_params)
+            .unwrap()
             .estimate_tx_dependencies(None)
             .await
             .unwrap()
@@ -226,7 +254,7 @@ pub mod market_abi_calls {
             .methods()
             .absorb(addresses)
             .set_contracts(contract_ids)
-            .tx_params(TxParameters::new(Some(0), Some(100_000_000), None))
+            // .tx_params(TX_PARAMS)
             .call()
             .await
     }
@@ -236,10 +264,9 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> bool {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().is_liquidatable(address);
         res.set_contracts(contract_ids)
-            .tx_params(tx_params)
+            // .tx_params(TX_PARAMS)
             .simulate()
             .await
             .unwrap()
@@ -247,22 +274,26 @@ pub mod market_abi_calls {
     }
 
     pub async fn get_collateral_reserves(market: &MarketContract, asset: ContractId) -> I64 {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().get_collateral_reserves(asset);
-        res.tx_params(tx_params).simulate().await.unwrap().value
+        res
+            // .tx_params(TX_PARAMS)
+            .simulate()
+            .await
+            .unwrap()
+            .value
     }
     pub async fn get_reserves(market: &MarketContract) -> I64 {
-        let tx_params = TxParameters::new(Some(0), Some(100_000_000), Some(0));
         let res = market.methods().get_reserves();
-        res.tx_params(tx_params).simulate().await.unwrap().value
+        res
+            // .tx_params(TX_PARAMS)
+            .simulate()
+            .await
+            .unwrap()
+            .value
     }
 }
 
 async fn init_wallets() -> Vec<WalletUnlocked> {
-    // let chain_config = ChainConfig::default();
-    // chain_config
-    // .transaction_parameters
-    // .with_max_gas_per_tx(500_000_000);
     launch_custom_provider_and_get_wallets(
         WalletsConfig::new(
             Some(4),                     /* Single wallet */
@@ -271,7 +302,6 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
         ),
         None,
         None,
-        // Some(chain_config),
     )
     .await
 }
@@ -279,18 +309,16 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
 pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
- 
-    let id = Contract::deploy_with_parameters(
-        "./out/debug/market.bin",
-        &wallet,
-        TxParameters::new(Some(1), None, None),
-        StorageConfiguration::with_storage_path(Some(
-            "./out/debug/market-storage_slots.json".to_string(),
-        )),
-        Salt::from(salt),
-    )
-    .await
-    .unwrap();
+    let storage_path = String::from("./out/debug/market-storage_slots.json");
+
+    let deploy_config: DeployConfiguration = DeployConfiguration::default()
+        .set_storage_configuration(StorageConfiguration::default().set_storage_path(storage_path))
+        .set_salt(salt)
+        .set_tx_parameters(TxParameters::default().set_gas_price(1));
+
+    let id = Contract::deploy("./out/debug/market.bin", &wallet, deploy_config)
+        .await
+        .unwrap();
 
     MarketContract::new(id, wallet.clone())
 }

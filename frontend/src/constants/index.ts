@@ -21,25 +21,18 @@ export const TOKENS_BY_ASSET_ID: Record<string, IToken> = TOKENS_LIST.reduce(
   {}
 );
 
-export const NODE_URL = "https://node-beta-2.fuel.network/graphql";
-export const EXPLORER_URL = "https://fuellabs.github.io/block-explorer-v2";
-export const FAUCET_URL = "https://faucet-beta-2.fuel.network";
+export const NODE_URL = "https://beta-3.fuel.network/graphql";
+export const EXPLORER_URL =
+  "https://fuellabs.github.io/block-explorer-v2/beta-3/#";
+export const FAUCET_URL = "https://faucet-beta-3.fuel.network";
 export const SEED =
-  "0x3c930502838f1da408d93665b78c4fc00b884c0128fff900d05b4def71a3da4335d029828ba0a62c26f3563bcd52b0deec84d1014373a1722610d411611c3771";
-export const SEED_ADDRESS =
-  "fuel1pln6n26y4e8lrgcaqctp8mddhvgzgt44pc9ychark93ks9mk7yxqr63nle";
+  "0x1586034a5486b0af22458ed29106865fee519b341bd260a2d9baad1d2a5c0d5b1505692de3ce6324ba5f306460d7db9a00ffebd5cefccf305da14c6c8fdde0f0";
 export const CONTRACT_ADDRESSES: Record<string, IContractsConfig> = {
   "0.1.0": {
     priceOracle:
-      "0xde764394c83bb3c8a3aec5f75f383ff86e64728964fab4469df5910ca01b1a59",
+      "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5",
     market:
-      "0xd46340b06d1c1fc8221205e8818759fe0cc5d23aceae3a26b5ecb39307674537",
-  },
-  "0.2.0": {
-    priceOracle:
-      "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff",
-    market:
-      "0x2c290844d5b996b32cdf10de4a5294868efc3608e966a809bb03b86b2fecb2c4",
+      "0xb8fcd5c31c58bd6052e410575fbab97173a2ae632eadc9958676b37e8761ac9a",
   },
 };
 

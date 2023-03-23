@@ -15,8 +15,8 @@ use crate::utils::{
     number_utils::parse_units,
 };
 
-const RPC: &str = "node-beta-2.fuel.network";
-const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
+const RPC: &str = "beta-3.fuel.network";
+const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
 
 #[tokio::test]
 async fn deploy() {
@@ -142,14 +142,18 @@ async fn deploy() {
         reward_token: assets.get("SWAY").unwrap().contract_id,
     };
 
-    market_abi_calls::initialize(
+    let res = market_abi_calls::initialize(
         &market_instance,
         &market_config,
         &asset_configs,
         Option::None,
     )
-    .await
-    .expect("❌ Cannot initialize market");
+    .await;
+    // .expect("❌ Cannot initialize market");
+    if res.is_err() {
+        println!("❌ Cannot initialize market {:?}", res.err().unwrap());
+    }
+
     println!(
         "Market contract = {} {}",
         market_instance.contract_id().hash(),

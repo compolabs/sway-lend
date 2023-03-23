@@ -10,7 +10,7 @@ pub mod oracle_abi_calls {
         oracle: &OracleContract,
         prices: Vec<(ContractId, u64)>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::new(Some(1), Some(1_000_000), None);
+        let tx_params = TxParameters::default().set_gas_price(1);
         oracle
             .methods()
             .set_prices(prices)
