@@ -8,7 +8,6 @@
   * [Supplying & Earning](welcome/faq/supplying-and-earning.md)
   * [Borrowing](welcome/faq/borrowing.md)
   * [Liquidations](welcome/faq/liquidations.md)
-  * [SwayLend testnet 0.1 summary](welcome/faq/swaylend-testnet-0.1-summary.md)
 
 ## 🎯 Get started
 

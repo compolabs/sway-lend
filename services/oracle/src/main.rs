@@ -15,7 +15,7 @@ abigen!(Contract(
 ));
 
 const RPC: &str = "beta-3.fuel.network";
-const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
+const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
 
 #[tokio::main]
 async fn main() {

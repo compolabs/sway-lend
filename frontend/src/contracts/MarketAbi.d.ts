@@ -52,6 +52,8 @@ interface MarketAbiInterface extends Interface {
     debug_increment_timestamp: FunctionFragment;
     get_asset_config_by_asset_id: FunctionFragment;
     get_borrow_rate: FunctionFragment;
+    get_borrower: FunctionFragment;
+    get_borrowers_amount: FunctionFragment;
     get_collateral_reserves: FunctionFragment;
     get_configuration: FunctionFragment;
     get_market_basics: FunctionFragment;
@@ -82,6 +84,8 @@ interface MarketAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'debug_increment_timestamp', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrow_rate', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_borrower', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_borrowers_amount', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_collateral_reserves', values: [ContractIdInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_configuration', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_market_basics', values: []): Uint8Array;
@@ -111,6 +115,8 @@ interface MarketAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'debug_increment_timestamp', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_borrow_rate', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_borrower', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_borrowers_amount', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_collateral_reserves', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_configuration', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_market_basics', data: BytesLike): DecodedValue;
@@ -144,6 +150,8 @@ export class MarketAbi extends Contract {
     debug_increment_timestamp: InvokeFunction<[], void>;
     get_asset_config_by_asset_id: InvokeFunction<[asset: ContractIdInput], AssetConfigOutput>;
     get_borrow_rate: InvokeFunction<[utilization: BigNumberish], BN>;
+    get_borrower: InvokeFunction<[index: BigNumberish], AddressOutput>;
+    get_borrowers_amount: InvokeFunction<[], BN>;
     get_collateral_reserves: InvokeFunction<[asset: ContractIdInput], I64Output>;
     get_configuration: InvokeFunction<[], MarketConfigurationOutput>;
     get_market_basics: InvokeFunction<[], MarketBasicsOutput>;

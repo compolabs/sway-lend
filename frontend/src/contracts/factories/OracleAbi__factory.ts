@@ -23,80 +23,58 @@ const _abi = {
     },
     {
       "typeId": 1,
+      "type": "(_, _)",
+      "components": [
+        {
+          "name": "__tuple_element",
+          "type": 8,
+          "typeArguments": null
+        },
+        {
+          "name": "__tuple_element",
+          "type": 12,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 2,
       "type": "b256",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 2,
-      "type": "enum Identity",
-      "components": [
-        {
-          "name": "Address",
-          "type": 5,
-          "typeArguments": null
-        },
-        {
-          "name": "ContractId",
-          "type": 6,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
       "typeId": 3,
-      "type": "str[13]",
+      "type": "generic T",
       "components": null,
       "typeParameters": null
     },
     {
       "typeId": 4,
-      "type": "str[19]",
+      "type": "raw untyped ptr",
       "components": null,
       "typeParameters": null
     },
     {
       "typeId": 5,
-      "type": "struct Address",
-      "components": [
-        {
-          "name": "value",
-          "type": 1,
-          "typeArguments": null
-        }
-      ],
+      "type": "str[13]",
+      "components": null,
       "typeParameters": null
     },
     {
       "typeId": 6,
-      "type": "struct ContractId",
-      "components": [
-        {
-          "name": "value",
-          "type": 1,
-          "typeArguments": null
-        }
-      ],
+      "type": "str[19]",
+      "components": null,
       "typeParameters": null
     },
     {
       "typeId": 7,
-      "type": "struct Price",
+      "type": "struct Address",
       "components": [
         {
-          "name": "asset_id",
-          "type": 6,
-          "typeArguments": null
-        },
-        {
-          "name": "price",
-          "type": 8,
-          "typeArguments": null
-        },
-        {
-          "name": "last_update",
-          "type": 8,
+          "name": "value",
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -104,6 +82,84 @@ const _abi = {
     },
     {
       "typeId": 8,
+      "type": "struct ContractId",
+      "components": [
+        {
+          "name": "value",
+          "type": 2,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 9,
+      "type": "struct Price",
+      "components": [
+        {
+          "name": "asset_id",
+          "type": 8,
+          "typeArguments": null
+        },
+        {
+          "name": "price",
+          "type": 12,
+          "typeArguments": null
+        },
+        {
+          "name": "last_update",
+          "type": 12,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 10,
+      "type": "struct RawVec",
+      "components": [
+        {
+          "name": "ptr",
+          "type": 4,
+          "typeArguments": null
+        },
+        {
+          "name": "cap",
+          "type": 12,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": [
+        3
+      ]
+    },
+    {
+      "typeId": 11,
+      "type": "struct Vec",
+      "components": [
+        {
+          "name": "buf",
+          "type": 10,
+          "typeArguments": [
+            {
+              "name": "",
+              "type": 3,
+              "typeArguments": null
+            }
+          ]
+        },
+        {
+          "name": "len",
+          "type": 12,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": [
+        3
+      ]
+    },
+    {
+      "typeId": 12,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -114,22 +170,30 @@ const _abi = {
       "inputs": [
         {
           "name": "asset_id",
-          "type": 6,
+          "type": 8,
           "typeArguments": null
         }
       ],
       "name": "get_price",
       "output": {
         "name": "",
-        "type": 7,
+        "type": 9,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
         {
           "name": "owner",
-          "type": 5,
+          "type": 7,
           "typeArguments": null
         }
       ],
@@ -138,27 +202,44 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     },
     {
       "inputs": [],
       "name": "owner",
       "output": {
         "name": "",
-        "type": 2,
+        "type": 7,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read"
+          ]
+        }
+      ]
     },
     {
       "inputs": [
         {
           "name": "asset_id",
-          "type": 6,
+          "type": 8,
           "typeArguments": null
         },
         {
           "name": "price",
-          "type": 8,
+          "type": 12,
           "typeArguments": null
         }
       ],
@@ -167,7 +248,46 @@ const _abi = {
         "name": "",
         "type": 0,
         "typeArguments": null
-      }
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "prices",
+          "type": 11,
+          "typeArguments": [
+            {
+              "name": "",
+              "type": 1,
+              "typeArguments": null
+            }
+          ]
+        }
+      ],
+      "name": "set_prices",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
     }
   ],
   "loggedTypes": [
@@ -175,7 +295,7 @@ const _abi = {
       "logId": 0,
       "loggedType": {
         "name": "",
-        "type": 4,
+        "type": 6,
         "typeArguments": null
       }
     },
@@ -183,12 +303,21 @@ const _abi = {
       "logId": 1,
       "loggedType": {
         "name": "",
-        "type": 3,
+        "type": 5,
+        "typeArguments": null
+      }
+    },
+    {
+      "logId": 2,
+      "loggedType": {
+        "name": "",
+        "type": 5,
         "typeArguments": null
       }
     }
   ],
-  "messagesTypes": []
+  "messagesTypes": [],
+  "configurables": []
 }
 
 export class OracleAbi__factory {

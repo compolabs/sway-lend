@@ -37,6 +37,7 @@ interface TokenContractAbiInterface extends Interface {
     add_reward_admin: FunctionFragment;
     already_minted: FunctionFragment;
     burn_coins: FunctionFragment;
+    caller: FunctionFragment;
     config: FunctionFragment;
     delete_reward_admin: FunctionFragment;
     get_balance: FunctionFragment;
@@ -55,6 +56,7 @@ interface TokenContractAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'add_reward_admin', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'already_minted', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'burn_coins', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'caller', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'config', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'delete_reward_admin', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_balance', values: []): Uint8Array;
@@ -72,6 +74,7 @@ interface TokenContractAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'add_reward_admin', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'already_minted', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'burn_coins', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'caller', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'config', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'delete_reward_admin', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_balance', data: BytesLike): DecodedValue;
@@ -93,6 +96,7 @@ export class TokenContractAbi extends Contract {
     add_reward_admin: InvokeFunction<[address: AddressInput], void>;
     already_minted: InvokeFunction<[address: AddressInput], boolean>;
     burn_coins: InvokeFunction<[burn_amount: BigNumberish], void>;
+    caller: InvokeFunction<[], AddressOutput>;
     config: InvokeFunction<[], TokenInitializeConfigOutput>;
     delete_reward_admin: InvokeFunction<[address: AddressInput], void>;
     get_balance: InvokeFunction<[], BN>;
