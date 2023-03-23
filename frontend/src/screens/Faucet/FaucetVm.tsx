@@ -69,15 +69,12 @@ class FaucetVM {
   checkTokensThatAlreadyBeenMinted = async () => {
     const { walletToRead, addressInput } = this.rootStore.accountStore;
     if (walletToRead == null || addressInput == null) return;
-    // const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
-    const tokens = [TOKENS_BY_SYMBOL.USDC];
+    const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
     if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
-    console.log("checkTokensThatAlreadyBeenMinted");
 
     const tokensContracts = tokens.map((b) =>
       TokenContractAbi__factory.connect(b.assetId, walletToRead)
     );
-    console.time("alreadyMinted");
     const promise = new Promise((resolve, reject) => {
       this.rejectUpdateStatePromise = reject;
       resolve(
@@ -104,7 +101,6 @@ class FaucetVM {
       })
       .finally(() => {
         this.setInitialized(true);
-        console.timeEnd("alreadyMinted");
         this.setRejectUpdateStatePromise(undefined);
       });
   };
