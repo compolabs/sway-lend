@@ -5,8 +5,8 @@ use crate::{
 use fuels::prelude::*;
 use std::str::FromStr;
 
-const TOKEN_ADDRESS: &str = "0xd7d5e5c1220872e6f42b38f85ae80c6072b1b4723e7a7218bbf6717aca962536";
-const RECIPIEND_ADDRES: &str = "fuel1anfhx60xj8v3g8hm5rcux3gn3kjqjvhjagtpqmm8yytv80p4aqfqn74nlq";
+const TOKEN_ADDRESS: &str = "";
+const RECIPIEND_ADDRES: &str = "";
 
 #[tokio::test]
 async fn transfer() {

@@ -6,7 +6,7 @@ pub mod market_abi_calls {
         types::Address,
     };
 
-    use crate::{MarketContract};
+    use crate::MarketContract;
 
     pub async fn absorb(
         market: &MarketContract,
@@ -17,7 +17,7 @@ pub mod market_abi_calls {
             .methods()
             .absorb(addresses)
             .set_contracts(contract_ids)
-            .tx_params(TxParameters::new(Some(1), Some(100_000_000), None))
+            .tx_params(TxParameters::default().set_gas_price(1))
             .call()
             .await
     }
@@ -27,7 +27,7 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> Result<FuelCallResponse<bool>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::new(Some(1), Some(100_000_000), Some(0));
+        let tx_params = TxParameters::default().set_gas_price(1);
         market
             .methods()
             .is_liquidatable(address)

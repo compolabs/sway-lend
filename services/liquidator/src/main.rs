@@ -4,7 +4,7 @@ use fuels::prelude::{
 };
 use serenity::model::prelude::ChannelId;
 use serenity::prelude::*;
-use std::{env, fmt::format, str::FromStr, thread::sleep, time::Duration};
+use std::{env, str::FromStr, thread::sleep, time::Duration};
 
 mod utils;
 use utils::{market_abi_calls::market_abi_calls, print_swaygang_sign::print_swaygang_sign};
@@ -21,8 +21,8 @@ abigen!(
 );
 
 const RPC: &str = "beta-3.fuel.network";
-const MARKET_ADDRESS: &str = "0x2c290844d5b996b32cdf10de4a5294868efc3608e966a809bb03b86b2fecb2c4";
-const ORACLE_ADDRESS: &str = "0x4bf2826201fb74fc479a6a785cb70f2ce8e45b67010acfd47906993d130a21ff";
+const MARKET_ADDRESS: &str = "0xb8fcd5c31c58bd6052e410575fbab97173a2ae632eadc9958676b37e8761ac9a";
+const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
 
 #[tokio::main]
 async fn main() {
@@ -68,12 +68,14 @@ async fn main() {
             }
             let is_liquidatable = res.unwrap().value;
             if is_liquidatable {
-                let _res = market_abi_calls::absorb(&market, &contracts, vec![user])
-                    .await
-                    .unwrap();
-                
+                let res = market_abi_calls::absorb(&market, &contracts, vec![user]).await;
+                if res.is_err() {
+                    println!("error = {:?}", res.err());
+                    continue;
+                }
+
                 // let tx_link =
-                    // format!("https://fuellabs.github.io/block-explorer-v2/transaction/{}");
+                // format!("https://fuellabs.github.io/block-explorer-v2/transaction/{}");
                 channel
                     .say(
                         client.cache_and_http.http.clone(),
@@ -112,6 +114,7 @@ impl Users {
             .value;
         let mut index = self.last_check_borrowers_amount;
         while index < amount {
+            println!("index = {:?}", index);
             let borrower = methods.get_borrower(index).simulate().await.unwrap().value;
             self.list.push(borrower);
             index += 1;
