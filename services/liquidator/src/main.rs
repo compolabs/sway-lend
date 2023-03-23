@@ -114,7 +114,6 @@ impl Users {
             .value;
         let mut index = self.last_check_borrowers_amount;
         while index < amount {
-            println!("index = {:?}", index);
             let borrower = methods.get_borrower(index).simulate().await.unwrap().value;
             self.list.push(borrower);
             index += 1;
