@@ -27,7 +27,6 @@ export const FaucetVMProvider: React.FC<IProps> = ({ children }) => {
 
 export const useFaucetVM = () => useVM(ctx);
 
-//todo change
 const faucetAmounts: Record<string, number> = {
   ETH: 0.5,
   LINK: 50,
@@ -70,12 +69,15 @@ class FaucetVM {
   checkTokensThatAlreadyBeenMinted = async () => {
     const { walletToRead, addressInput } = this.rootStore.accountStore;
     if (walletToRead == null || addressInput == null) return;
-    const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
+    // const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
+    const tokens = [TOKENS_BY_SYMBOL.USDC];
     if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
+    console.log("checkTokensThatAlreadyBeenMinted");
 
     const tokensContracts = tokens.map((b) =>
       TokenContractAbi__factory.connect(b.assetId, walletToRead)
     );
+    console.time("alreadyMinted");
     const promise = new Promise((resolve, reject) => {
       this.rejectUpdateStatePromise = reject;
       resolve(
@@ -102,6 +104,7 @@ class FaucetVM {
       })
       .finally(() => {
         this.setInitialized(true);
+        console.timeEnd("alreadyMinted");
         this.setRejectUpdateStatePromise(undefined);
       });
   };

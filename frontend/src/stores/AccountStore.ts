@@ -35,7 +35,7 @@ class AccountStore {
       }
     }
     this.updateAccountBalances().then();
-    setInterval(this.updateAccountBalances, 10 * 1000);
+    setInterval(this.updateAccountBalances, 60 * 1000);
     reaction(
       () => this.address,
       () => Promise.all([this.updateAccountBalances()])
