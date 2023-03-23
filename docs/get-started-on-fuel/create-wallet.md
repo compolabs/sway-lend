@@ -4,10 +4,11 @@ description: How to create a wallet on the Fuel Network
 
 # Create wallet
 
-To interact with the [Sway Lend](https://app.swaylend.com) platform, you'll first need to connect a wallet. There are two options for doing this:
+To interact with the [Sway Lend](https://app.swaylend.com) platform, you'll first need to connect a wallet. There are three options for doing this:
 
 1. Generate a new account by clicking the "Connect to Wallet" button and then clicking the "Create Account" button in the modal window that appears. After generating the account, you can copy the seed phrase for safekeeping by clicking the "Copy Seed" button.
 2. Connect a Fuel Wallet, which is currently in alpha testing. For more information on how to do this, please follow this link: [https://wallet.fuel.network/](https://wallet.fuel.network/).
+3. Insert mnemonic phrase 12 words long.
 
 {% hint style="info" %}
 Please make sure that your Fuel Wallet is connected to the latest testnet beta 3 in order to sign transactions successfully. If your wallet is not connected to the latest testnet beta 3, you won't be able to sign transactions. Link is [https://beta-3.fuel.network/graphql](https://beta-3.fuel.network/graphql)
