@@ -224,9 +224,6 @@ class AccountStore {
     return { value: Address.fromString(this.address).toB256() };
   }
 
-  isWavesKeeperInstalled = false;
-  setWavesKeeperInstalled = (state: boolean) =>
-    (this.isWavesKeeperInstalled = state);
 }
 
 export default AccountStore;
