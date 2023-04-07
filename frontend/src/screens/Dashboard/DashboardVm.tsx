@@ -589,12 +589,9 @@ class DashboardVm {
     try {
       if (this.action === ACTION_TYPE.SUPPLY) {
         if (this.actionTokenAssetId === this.baseToken.assetId) {
-          console.log("supply base");
           tx = await this.supplyBase(marketContract);
-          console.log("supply base tx");
         } else {
           tx = await this.supplyCollateral(marketContract);
-          console.log("supply collateral tx");
         }
       }
       if (this.action === ACTION_TYPE.WITHDRAW) {
