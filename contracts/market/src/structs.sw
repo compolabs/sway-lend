@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
-library structs;
-dep i64;
+library;
 
+mod i64;
 use i64::I64;
 
 

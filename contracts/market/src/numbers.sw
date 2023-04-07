@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BUSL-1.1
-library numbers;
+library;
 use std::u128::U128;
 
 impl U128 {
