@@ -1,9 +1,6 @@
-use std::{str::FromStr};
+use std::str::FromStr;
 
-use fuels::{
-    signers::WalletUnlocked,
-    tx::{Address, AssetId, ContractId},
-};
+use fuels::{tx::{Address, AssetId, ContractId}, prelude::{WalletUnlocked, ViewOnlyAccount}};
 
 use crate::utils::{
     local_tests_utils::{
@@ -47,7 +44,7 @@ pub fn print_case_title(num: u8, name: &str, call: &str, amount: &str) {
 }
 
 pub async fn debug_state(
-    market: &MarketContract,
+    market: &MarketContract<WalletUnlocked>,
     wallets: &Vec<WalletUnlocked>,
     usdc_contract_id: ContractId,
     collateral_contract_id: ContractId,
@@ -104,7 +101,13 @@ pub async fn debug_state(
     );
     let supply_base = market_basic.total_supply_base as f64 * s_rate / 10u64.pow(6) as f64;
     let borrow_base = market_basic.total_borrow_base as f64 * b_rate / 10u64.pow(6) as f64;
-    let borrowers_amount = market.methods().get_borrowers_amount().simulate().await.unwrap().value;
+    let borrowers_amount = market
+        .methods()
+        .get_borrowers_amount()
+        .simulate()
+        .await
+        .unwrap()
+        .value;
     // let mut borrowers: Vec<Address> = vec![];
     // let mut i = 0;
     // while i < borrowers_amount {

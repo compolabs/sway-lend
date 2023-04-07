@@ -2,8 +2,7 @@ use std::io::Write;
 
 use crate::utils::number_utils::parse_units;
 use fuels::{
-    prelude::{abigen, Contract, DeployConfiguration},
-    signers::WalletUnlocked,
+    prelude::{abigen, Contract, DeployConfiguration, WalletUnlocked},
     tx::Address,
     types::SizedAsciiString,
 };
@@ -21,12 +20,12 @@ pub mod token_abi_calls {
 
     use super::*;
 
-    pub async fn mint(c: &TokenContract) -> FuelCallResponse<()> {
+    pub async fn mint(c: &TokenContract<WalletUnlocked>) -> FuelCallResponse<()> {
         let res = c.methods().mint().append_variable_outputs(1).call().await;
         res.unwrap()
     }
     pub async fn mint_and_transfer(
-        c: &TokenContract,
+        c: &TokenContract<WalletUnlocked>,
         amount: u64,
         recipient: Address,
     ) -> FuelCallResponse<()> {
@@ -38,7 +37,7 @@ pub mod token_abi_calls {
         res.call().await.unwrap()
     }
     pub async fn initialize(
-        c: &TokenContract,
+        c: &TokenContract<WalletUnlocked>,
         config: TokenInitializeConfig,
         mint_amount: u64,
         address: Address,
@@ -49,7 +48,7 @@ pub mod token_abi_calls {
             .await
             .expect("❌ Cannot initialize token")
     }
-    pub async fn config(c: &TokenContract) -> TokenInitializeConfig {
+    pub async fn config(c: &TokenContract<WalletUnlocked>) -> TokenInitializeConfig {
         if c.contract_id().hash().to_string() == BASE_ASSET_ID.to_string() {
             let mut name = String::from("Etherium");
             let mut symbol = String::from("ETH");
@@ -70,7 +69,7 @@ pub mod token_abi_calls {
 pub async fn get_token_contract_instance(
     wallet: &WalletUnlocked,
     deploy_config: &DeployTokenConfig,
-) -> TokenContract {
+) -> TokenContract<WalletUnlocked> {
     let mut name = deploy_config.name.clone();
     let mut symbol = deploy_config.symbol.clone();
     let decimals = deploy_config.decimals;
@@ -81,7 +80,7 @@ pub async fn get_token_contract_instance(
 
     let id = Contract::deploy(
         "./tests/artefacts/token/token_contract.bin",
-        &wallet,
+        wallet,
         DeployConfiguration::default().set_salt(salt),
     )
     .await

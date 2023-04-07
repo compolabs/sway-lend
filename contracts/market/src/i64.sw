@@ -1,4 +1,4 @@
-library i64;
+library;
 
 pub struct I64 {
     value: u64,

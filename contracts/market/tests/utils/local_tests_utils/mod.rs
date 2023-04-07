@@ -3,7 +3,8 @@ pub mod oracle;
 pub mod token;
 
 use crate::utils::number_utils::parse_units;
-use fuels::signers::WalletUnlocked;
+use fuels::prelude::ViewOnlyAccount;
+use fuels::prelude::WalletUnlocked;
 use fuels::tx::AssetId;
 use fuels::tx::ContractId;
 
@@ -21,12 +22,11 @@ pub struct Asset {
     pub contract_id: ContractId,
     pub asset_id: AssetId,
     pub coingeco_id: String,
-    pub instance: Option<TokenContract>,
+    pub instance: Option<TokenContract<WalletUnlocked>>,
     pub default_price: u64,
 }
 
 pub async fn _print_balances(wallet: &WalletUnlocked) {
-    
     let balances = wallet.get_balances().await.unwrap();
     println!("{:#?}\n", balances);
 }

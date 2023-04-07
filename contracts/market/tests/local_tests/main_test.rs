@@ -1,4 +1,5 @@
 
+use fuels::prelude::ViewOnlyAccount;
 use fuels::types::Address;
 
 use crate::utils::local_tests_utils::market::market_abi_calls;
@@ -74,7 +75,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     assert!(balance == amount);
 
     // Bob calls supply_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -106,7 +107,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     }
 
     // Alice calls supply_collateral
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::supply_collateral(&inst, collateral.asset_id, amount)
         .await
         .unwrap();
@@ -129,7 +130,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(2, "Alice", "withdraw_base", log_amount.as_str());
 
     // Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -161,7 +162,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     }
 
     //Chad calls supply_collateral
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::supply_collateral(&inst, collateral.asset_id, amount)
         .await
         .unwrap();
@@ -191,7 +192,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     assert!(balance == amount);
 
     // Chad calls supply_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -214,7 +215,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(5, "Alice", "withdraw_base", log_amount.as_str());
 
     //Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -257,7 +258,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
 
     assert!(market_abi_calls::is_liquidatable(&market, &contracts, alice_address).await);
 
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::absorb(&inst, &contracts, vec![alice_address])
         .await
         .unwrap();
@@ -279,7 +280,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     // 🤙 Call: buy_collateral
     // 💰 Amount: 172.44 USDC
 
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     let reservs = market_abi_calls::get_collateral_reserves(&market, collateral.contract_id).await;
     assert!(!reservs.negative);
 
@@ -322,7 +323,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(9, "Bob", "withdraw_base", log_amount.as_str());
 
     //Bob calls withdraw_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -346,7 +347,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(10, "Chad", "withdraw_base", log_amount.as_str());
 
     //Chad calls withdraw_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -370,7 +371,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(11, "Alice", "withdraw_base", log_amount.as_str());
 
     //Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -394,7 +395,7 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     print_case_title(12, "Chad", "withdraw_collateral", log_amount.as_str());
 
     //Chad calls withdraw_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
 
     market_abi_calls::withdraw_collateral(&inst, &contracts, collateral.contract_id, amount)
         .await

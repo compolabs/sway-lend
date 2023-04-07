@@ -1,4 +1,4 @@
-use fuels_types::Address;
+use fuels::types::Address;
 
 use crate::utils::{
     local_tests_utils::{

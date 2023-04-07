@@ -1,4 +1,4 @@
-use fuels_types::Address;
+use fuels::{prelude::ViewOnlyAccount, types::Address};
 
 use crate::utils::{
     local_tests_utils::{
@@ -53,7 +53,7 @@ async fn pause() {
     assert!(balance == amount);
 
     // Bob calls supply_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -79,7 +79,7 @@ async fn pause() {
     assert!(balance == amount);
 
     // Alice calls supply_collateral
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .unwrap();
@@ -99,7 +99,7 @@ async fn pause() {
     let amount = parse_units(150, usdc.config.decimals);
 
     // Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
 
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
@@ -133,7 +133,7 @@ async fn pause() {
 
     assert!(market_abi_calls::is_liquidatable(&market, &contracts, alice_address).await);
 
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::absorb(&inst, &contracts, vec![alice_address])
         .await
         .unwrap();
@@ -154,7 +154,7 @@ async fn pause() {
     // 🤙 Call: buy_collateral
     // 💰 Amount: 172.44 USDC
 
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     let reservs = market_abi_calls::get_collateral_reserves(&market, uni.contract_id).await;
     assert!(!reservs.negative);
 
@@ -216,7 +216,7 @@ async fn pause() {
     assert!(balance == amount);
 
     // Bob calls supply_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     let res = market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .is_err();
@@ -237,7 +237,7 @@ async fn pause() {
     assert!(balance == amount);
 
     // Alice calls supply_collateral
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     let res = market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .is_err();
@@ -252,7 +252,7 @@ async fn pause() {
     let amount = parse_units(150, usdc.config.decimals);
 
     // Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
 
     let res = market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
@@ -265,7 +265,7 @@ async fn pause() {
     // 🤙 Call: absorb
     // 🔥 Target: Alice
 
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     let res = market_abi_calls::absorb(&inst, &contracts, vec![alice_address])
         .await
         .is_err();
@@ -277,7 +277,7 @@ async fn pause() {
     // 🤙 Call: buy_collateral
     // 💰 Amount: 172.44 USDC
 
-    // let inst = market.with_wallet(bob.clone()).unwrap();
+    // let inst = market.with_account(bob.clone()).unwrap();
     let reservs = market_abi_calls::get_collateral_reserves(&market, uni.contract_id).await;
     assert!(!reservs.negative);
 

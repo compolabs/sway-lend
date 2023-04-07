@@ -1,6 +1,5 @@
-use fuels::{
-    prelude::{abigen, Contract, DeployConfiguration, SettableContract, TxParameters},
-    signers::WalletUnlocked,
+use fuels::prelude::{
+    abigen, Contract, DeployConfiguration, SettableContract, TxParameters, WalletUnlocked,
 };
 
 abigen!(Contract(
@@ -20,19 +19,27 @@ pub mod oracle_abi_calls {
 
     use super::*;
 
-    pub fn get_as_settable_contract(contract: &OracleContract) -> [&dyn SettableContract; 1] {
+    pub fn get_as_settable_contract(
+        contract: &OracleContract<WalletUnlocked>,
+    ) -> [&dyn SettableContract; 1] {
         [contract]
     }
 
-    pub async fn initialize(contract: &OracleContract, owner: Address) -> FuelCallResponse<()> {
+    pub async fn initialize(
+        contract: &OracleContract<WalletUnlocked>,
+        owner: Address,
+    ) -> FuelCallResponse<()> {
         contract.methods().initialize(owner).call().await.unwrap()
     }
 
-    pub async fn owner(contract: &OracleContract) -> Address {
+    pub async fn owner(contract: &OracleContract<WalletUnlocked>) -> Address {
         contract.methods().owner().simulate().await.unwrap().value
     }
 
-    pub async fn get_price(contract: &OracleContract, asset_id: ContractId) -> Price {
+    pub async fn get_price(
+        contract: &OracleContract<WalletUnlocked>,
+        asset_id: ContractId,
+    ) -> Price {
         contract
             .methods()
             .get_price(asset_id)
@@ -42,7 +49,10 @@ pub mod oracle_abi_calls {
             .value
     }
 
-    pub async fn _sync_prices(contract: &OracleContract, assets: &HashMap<String, Asset>) {
+    pub async fn _sync_prices(
+        contract: &OracleContract<WalletUnlocked>,
+        assets: &HashMap<String, Asset>,
+    ) {
         let client = reqwest::Client::new();
         let req = "https://api.coingecko.com/api/v3/simple/price?ids=compound-governance-token%2Cbinancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
         let body = client.get(req).send().await.unwrap().text().await.unwrap();
@@ -57,7 +67,7 @@ pub mod oracle_abi_calls {
     }
 
     pub async fn set_price(
-        contract: &OracleContract,
+        contract: &OracleContract<WalletUnlocked>,
         asset_id: ContractId,
         new_price: u64,
     ) -> FuelCallResponse<()> {
@@ -70,10 +80,12 @@ pub mod oracle_abi_calls {
     }
 }
 
-pub async fn get_oracle_contract_instance(wallet: &WalletUnlocked) -> OracleContract {
+pub async fn get_oracle_contract_instance(
+    wallet: &WalletUnlocked,
+) -> OracleContract<WalletUnlocked> {
     let id = Contract::deploy(
         "./tests/artefacts/oracle/oracle.bin",
-        &wallet,
+        wallet,
         DeployConfiguration::default()
             .set_tx_parameters(TxParameters::default().set_gas_limit(100_000_000)),
     )
