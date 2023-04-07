@@ -92,12 +92,12 @@ async fn main() {
 
 struct Users {
     pub list: Vec<Address>,
-    market: MarketContract,
+    market: MarketContract<WalletUnlocked>,
     last_check_borrowers_amount: u64,
 }
 
 impl Users {
-    fn new(market: MarketContract) -> Users {
+    fn new(market: MarketContract<WalletUnlocked>) -> Users {
         Users {
             list: vec![],
             market,

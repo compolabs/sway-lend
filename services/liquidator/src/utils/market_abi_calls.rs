@@ -1,7 +1,7 @@
 pub mod market_abi_calls {
 
     use fuels::{
-        prelude::{SettableContract, TxParameters},
+        prelude::{SettableContract, TxParameters, WalletUnlocked},
         programs::call_response::FuelCallResponse,
         types::Address,
     };
@@ -9,7 +9,7 @@ pub mod market_abi_calls {
     use crate::MarketContract;
 
     pub async fn absorb(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         addresses: Vec<Address>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
@@ -23,7 +23,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn is_liquidatable(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> Result<FuelCallResponse<bool>, fuels::types::errors::Error> {
