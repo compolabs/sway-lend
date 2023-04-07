@@ -21,7 +21,7 @@ abigen!(
 );
 
 const RPC: &str = "beta-3.fuel.network";
-const MARKET_ADDRESS: &str = "0xfda921f2ca26c0515aba2a00e5bc7d4de7a7243711ec5ac325558b0e25826576";
+const MARKET_ADDRESS: &str = "0xbccd5ee7e20f70fe710b14e692f54aa110631b716fd28b9b7a2e5d8ba9bb4069";
 const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
 
 #[tokio::main]
