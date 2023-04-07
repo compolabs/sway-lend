@@ -6,9 +6,9 @@ contract;
  * @notice An efficient monolithic money market protocol
  * @author SWAY GANG
  */
-dep numbers;
-dep structs;
-dep i64;
+// mod numbers;
+// mod structs;
+// mod i64;
 
 use i64::I64;
 use structs::*;

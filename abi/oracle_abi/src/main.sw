@@ -1,4 +1,4 @@
-library oracle_abi;
+library ;
 
 pub struct Price {
     asset_id: ContractId,
