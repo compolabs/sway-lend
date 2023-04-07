@@ -9,7 +9,7 @@ use fuels::prelude::{
 };
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
-use fuels_types::Address;
+use fuels::types::Address;
 use rand::Rng;
 
 abigen!(Contract(
@@ -28,17 +28,16 @@ abigen!(Contract(
 pub mod market_abi_calls {
 
     use fuels::prelude::{CallParameters, SettableContract};
-    use fuels_types::Address;
 
     use super::{abigen_bindings::market_contract_mod::AssetConfig, *};
 
-    pub async fn debug_increment_timestamp(market: &MarketContract) -> FuelCallResponse<()> {
+    pub async fn debug_increment_timestamp(market: &MarketContract<WalletUnlocked>) -> FuelCallResponse<()> {
         let res = market.methods().debug_increment_timestamp().call().await;
         res.unwrap()
     }
 
     pub async fn initialize(
-        contract: &MarketContract,
+        contract: &MarketContract<WalletUnlocked>,
         config: &MarketConfiguration,
         assets: &Vec<AssetConfig>,
         step: Option<u64>,
@@ -52,7 +51,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn supply_base(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         base_asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
@@ -75,7 +74,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn withdraw_base(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
@@ -93,7 +92,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn withdraw_collateral(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         asset: ContractId,
         amount: u64,
@@ -112,7 +111,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn supply_collateral(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         asset_id: AssetId,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
@@ -130,7 +129,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn get_user_collateral(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         address: Address,
         asset: ContractId,
     ) -> u64 {
@@ -143,7 +142,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn available_to_borrow(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> u64 {
@@ -157,7 +156,10 @@ pub mod market_abi_calls {
         res.unwrap().value
     }
 
-    pub async fn get_user_supply_borrow(market: &MarketContract, address: Address) -> (u64, u64) {
+    pub async fn get_user_supply_borrow(
+        market: &MarketContract<WalletUnlocked>,
+        address: Address,
+    ) -> (u64, u64) {
         market
             .methods()
             .get_user_supply_borrow(address)
@@ -167,19 +169,19 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn get_user_basic(market: &MarketContract, address: Address) -> UserBasic {
+    pub async fn get_user_basic(market: &MarketContract<WalletUnlocked>, address: Address) -> UserBasic {
         let res = market.methods().get_user_basic(address).simulate().await;
         res.unwrap().value
     }
-    pub async fn get_market_basics(market: &MarketContract) -> MarketBasics {
+    pub async fn get_market_basics(market: &MarketContract<WalletUnlocked>) -> MarketBasics {
         let res = market.methods().get_market_basics().simulate().await;
         res.unwrap().value
     }
-    pub async fn totals_collateral(market: &MarketContract, asset: ContractId) -> u64 {
+    pub async fn totals_collateral(market: &MarketContract<WalletUnlocked>, asset: ContractId) -> u64 {
         let res = market.methods().totals_collateral(asset).simulate().await;
         res.unwrap().value
     }
-    pub async fn get_utilization(market: &MarketContract) -> u64 {
+    pub async fn get_utilization(market: &MarketContract<WalletUnlocked>) -> u64 {
         market
             .methods()
             .get_utilization()
@@ -189,20 +191,20 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn balance_of(market: &MarketContract, asset_id: ContractId) -> u64 {
+    pub async fn balance_of(market: &MarketContract<WalletUnlocked>, asset_id: ContractId) -> u64 {
         let res = market.methods().balance_of(asset_id).simulate().await;
         res.unwrap().value
     }
 
     pub async fn pause(
-        contract: &MarketContract,
+        contract: &MarketContract<WalletUnlocked>,
         config: &PauseConfiguration,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         contract.methods().pause(config.clone()).call().await
     }
 
     pub async fn collateral_value_to_sell(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         asset: ContractId,
         collateral_amount: u64,
@@ -219,7 +221,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn buy_collateral(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         base_asset_id: AssetId,
         amount: u64,
         asset: ContractId,
@@ -246,7 +248,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn absorb(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         addresses: Vec<Address>,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
@@ -260,7 +262,7 @@ pub mod market_abi_calls {
     }
 
     pub async fn is_liquidatable(
-        market: &MarketContract,
+        market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> bool {
@@ -273,7 +275,7 @@ pub mod market_abi_calls {
             .value
     }
 
-    pub async fn get_collateral_reserves(market: &MarketContract, asset: ContractId) -> I64 {
+    pub async fn get_collateral_reserves(market: &MarketContract<WalletUnlocked>, asset: ContractId) -> I64 {
         let res = market.methods().get_collateral_reserves(asset);
         res
             // .tx_params(TX_PARAMS)
@@ -282,7 +284,7 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn get_reserves(market: &MarketContract) -> I64 {
+    pub async fn get_reserves(market: &MarketContract<WalletUnlocked>) -> I64 {
         let res = market.methods().get_reserves();
         res
             // .tx_params(TX_PARAMS)
@@ -306,7 +308,7 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
     .await
 }
 
-pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
+pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract<WalletUnlocked> {
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
     let storage_path = String::from("./out/debug/market-storage_slots.json");
@@ -316,7 +318,7 @@ pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
         .set_salt(salt)
         .set_tx_parameters(TxParameters::default().set_gas_price(1));
 
-    let id = Contract::deploy("./out/debug/market.bin", &wallet, deploy_config)
+    let id = Contract::deploy("./out/debug/market.bin", wallet, deploy_config)
         .await
         .unwrap();
 
@@ -326,8 +328,8 @@ pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract {
 pub async fn setup_market() -> (
     Vec<WalletUnlocked>,
     HashMap<String, Asset>,
-    MarketContract,
-    OracleContract,
+    MarketContract<WalletUnlocked>,
+    OracleContract<WalletUnlocked>,
 ) {
     //--------------- WALLET ---------------
     let wallets = init_wallets().await;

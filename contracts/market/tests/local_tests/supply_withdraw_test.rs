@@ -1,3 +1,4 @@
+use fuels::prelude::ViewOnlyAccount;
 use fuels::tx::Address;
 
 use crate::utils::local_tests_utils::market::market_abi_calls;
@@ -66,7 +67,7 @@ async fn supply_withdraw_test() {
     assert!(balance == amount);
 
     // Bob calls supply_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -96,7 +97,7 @@ async fn supply_withdraw_test() {
     assert!(balance == amount);
 
     // Alice calls supply_collateral
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .unwrap();
@@ -119,7 +120,7 @@ async fn supply_withdraw_test() {
     print_case_title(2, "Alice", "withdraw_base", log_amount.as_str());
 
     // Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
 
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
@@ -150,7 +151,7 @@ async fn supply_withdraw_test() {
     assert!(balance == amount);
 
     //Chad calls supply_collateral
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
         .await
         .unwrap();
@@ -180,7 +181,7 @@ async fn supply_withdraw_test() {
     assert!(balance == amount);
 
     // Chad calls supply_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -203,7 +204,7 @@ async fn supply_withdraw_test() {
     print_case_title(5, "Alice", "withdraw_base", log_amount.as_str());
 
     //Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -226,7 +227,7 @@ async fn supply_withdraw_test() {
     print_case_title(6, "Chad", "withdraw_base", log_amount.as_str());
 
     //Chad calls withdraw_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -256,7 +257,7 @@ async fn supply_withdraw_test() {
     token_abi_calls::mint_and_transfer(&usdc_instance, delta, alice_address).await;
 
     // Alice calls supply_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -288,7 +289,7 @@ async fn supply_withdraw_test() {
     assert!(balance == amount + 200_000_000 * AMOUNT_COEFFICIENT);
 
     // Chad calls supply_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::supply_base(&inst, usdc.asset_id, amount)
         .await
         .unwrap();
@@ -310,7 +311,7 @@ async fn supply_withdraw_test() {
     print_case_title(9, "Bob", "withdraw_base", log_amount.as_str());
 
     //Bob calls withdraw_base
-    let inst = market.with_wallet(bob.clone()).unwrap();
+    let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &contracts, amount)
         .await
         .unwrap();
@@ -334,7 +335,7 @@ async fn supply_withdraw_test() {
     print_case_title(10, "Alice", "withdraw_collateral", log_amount.as_str());
 
     //Alice calls withdraw_base
-    let inst = market.with_wallet(alice.clone()).unwrap();
+    let inst = market.with_account(alice.clone()).unwrap();
 
     market_abi_calls::withdraw_collateral(&inst, &contracts, uni.contract_id, amount)
         .await
@@ -358,7 +359,7 @@ async fn supply_withdraw_test() {
     print_case_title(11, "Chad", "withdraw_collateral", log_amount.as_str());
 
     //Chad calls withdraw_base
-    let inst = market.with_wallet(chad.clone()).unwrap();
+    let inst = market.with_account(chad.clone()).unwrap();
 
     market_abi_calls::withdraw_collateral(&inst, &contracts, uni.contract_id, amount)
         .await
