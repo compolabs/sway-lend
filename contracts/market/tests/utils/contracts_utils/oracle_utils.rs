@@ -1,5 +1,5 @@
 use fuels::prelude::{
-    abigen, Contract, DeployConfiguration, SettableContract, TxParameters, WalletUnlocked,
+    abigen, Contract, LoadConfiguration, SettableContract, TxParameters, WalletUnlocked,
 };
 
 abigen!(Contract(
@@ -10,12 +10,9 @@ abigen!(Contract(
 pub mod oracle_abi_calls {
     use std::collections::HashMap;
 
-    use fuels::{
-        programs::call_response::FuelCallResponse,
-        tx::{Address, ContractId},
-    };
+    use fuels::{programs::call_response::FuelCallResponse, types::ContractId};
 
-    use crate::utils::local_tests_utils::Asset;
+    use crate::utils::contracts_utils::token_utils::Asset;
 
     use super::*;
 
@@ -23,17 +20,6 @@ pub mod oracle_abi_calls {
         contract: &OracleContract<WalletUnlocked>,
     ) -> [&dyn SettableContract; 1] {
         [contract]
-    }
-
-    pub async fn initialize(
-        contract: &OracleContract<WalletUnlocked>,
-        owner: Address,
-    ) -> FuelCallResponse<()> {
-        contract.methods().initialize(owner).call().await.unwrap()
-    }
-
-    pub async fn owner(contract: &OracleContract<WalletUnlocked>) -> Address {
-        contract.methods().owner().simulate().await.unwrap().value
     }
 
     pub async fn get_price(
@@ -78,17 +64,17 @@ pub mod oracle_abi_calls {
             .await
             .unwrap()
     }
+
 }
 
-pub async fn get_oracle_contract_instance(
-    wallet: &WalletUnlocked,
-) -> OracleContract<WalletUnlocked> {
-    let id = Contract::deploy(
+pub async fn deploy_oracle(wallet: &WalletUnlocked) -> OracleContract<WalletUnlocked> {
+    let configurables = OracleContractConfigurables::default().set_ADMIN(wallet.address().into());
+    let id = Contract::load_from(
         "./tests/artefacts/oracle/oracle.bin",
-        wallet,
-        DeployConfiguration::default()
-            .set_tx_parameters(TxParameters::default().set_gas_limit(100_000_000)),
+        LoadConfiguration::default().set_configurables(configurables),
     )
+    .unwrap()
+    .deploy(wallet, TxParameters::default().set_gas_price(1))
     .await
     .unwrap();
 

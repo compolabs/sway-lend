@@ -1,12 +1,13 @@
 [[package]]
 name = 'core'
-source = 'path+from-root-FDF4A5DCC6ECD181'
+source = 'path+from-root-9BFE6D5D0CBDF740'
 
 [[package]]
 name = 'market'
 source = 'member'
 dependencies = [
     'oracle_abi',
+    'signed_integers',
     'std',
     'token_abi',
 ]
@@ -17,8 +18,13 @@ source = 'path+from-root-9ED3421BB02FBE52'
 dependencies = ['std']
 
 [[package]]
+name = 'signed_integers'
+source = 'git+https://github.com/FuelLabs/sway-libs?default-branch#027ff2985124e4d3015385756c7d6dee0bcf4b05'
+dependencies = ['std']
+
+[[package]]
 name = 'std'
-source = 'git+https://github.com/fuellabs/sway?tag=v0.37.0#607ac50176db8bef936f91bacf435d0ea37d041e'
+source = 'git+https://github.com/fuellabs/sway?tag=v0.42.1#3b66f8e424bd21e3ba467783b10b36e808cfa6ee'
 dependencies = ['core']
 
 [[package]]

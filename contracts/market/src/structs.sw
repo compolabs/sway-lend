@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: BUSL-1.1
 library;
+use signed_integers::i64::I64;
 
-mod i64;
-use i64::I64;
-
+const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
 pub struct MarketConfiguration {
     governor: Address,
@@ -72,6 +71,20 @@ pub struct MarketBasics {
     last_accrual_time: u64,
 }
 
+impl MarketBasics {
+    pub fn default() -> Self {
+        MarketBasics {
+            base_supply_index: SCALE_18,
+            base_borrow_index: SCALE_18,
+            tracking_supply_index: SCALE_18,
+            tracking_borrow_index: SCALE_18,
+            total_supply_base: 0,
+            total_borrow_base: 0,
+            last_accrual_time: 0,
+        }
+     }
+}
+
 pub enum Error {
     AlreadyInitialized: (),
     Paused: (),
@@ -87,3 +100,4 @@ pub enum Error {
     InvalidPayment: (),
     DebuggingDisabled: (),
 }
+

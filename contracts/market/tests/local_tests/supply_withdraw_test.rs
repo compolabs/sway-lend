@@ -1,5 +1,5 @@
 use fuels::prelude::ViewOnlyAccount;
-use fuels::tx::Address;
+use fuels::types::Address;
 
 use crate::utils::local_tests_utils::market::market_abi_calls;
 use crate::utils::local_tests_utils::oracle::oracle_abi_calls;
@@ -30,9 +30,9 @@ async fn supply_withdraw_test() {
 
     // ==================== Assets ====================
     let usdc = assets.get("USDC").unwrap();
-    let usdc_instance = TokenContract::new(usdc.contract_id.into(), admin.clone());
+    let usdc_instance = TokenContract::new(usdc.contract_id, admin.clone());
     let uni = assets.get("UNI").unwrap();
-    let uni_instance = TokenContract::new(uni.contract_id.into(), admin.clone());
+    let uni_instance = TokenContract::new(uni.contract_id, admin.clone());
 
     // ==================== Set oracle prices ====================
     let amount = parse_units(1, 9); //1 USDC = $1

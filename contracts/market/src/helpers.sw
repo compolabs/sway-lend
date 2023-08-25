@@ -1,6 +1,29 @@
 // SPDX-License-Identifier: BUSL-1.1
 library;
+use signed_integers::i64::I64;
 use std::u128::U128;
+
+impl I64 {
+    pub fn ge(self, other: Self) -> bool {
+        self > other || self == other
+    }
+
+    pub fn le(self, other: Self) -> bool {
+        self < other || self == other
+    }
+
+    pub fn zero() -> I64 {
+        I64::from(0)
+    }
+
+    pub fn flip(self) -> Self {
+        self * Self::neg_from(1)
+    }
+
+    // pub fn is_positive(self) -> bool {
+    //     self.underlying >= Self::indent() 
+    // }
+}
 
 impl U128 {
     pub fn from_u64(value: u64) -> U128 {

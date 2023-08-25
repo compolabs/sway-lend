@@ -1,16 +1,20 @@
+use fuels::programs::call_utils::TxDependencyExtension;
+use src20_sdk::DeployTokenConfig;
+use std::collections::HashMap;
 use std::fs;
-use std::{collections::HashMap, str::FromStr};
+use std::str::FromStr;
 
-use super::oracle::OracleContract;
-use crate::utils::local_tests_utils::oracle::{get_oracle_contract_instance, oracle_abi_calls};
-use crate::utils::local_tests_utils::*;
+use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
+use crate::utils::contracts_utils::token_utils::Asset;
 use fuels::prelude::{
-    abigen, Contract, DeployConfiguration, StorageConfiguration, TxParameters, BASE_ASSET_ID,
+    abigen, Contract, LoadConfiguration, TxParameters, WalletUnlocked, BASE_ASSET_ID,
 };
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
-use fuels::types::Address;
+use fuels::types::{Address, ContractId};
 use rand::Rng;
+
+use super::oracle_utils::OracleContract;
 
 abigen!(Contract(
     name = "MarketContract",
@@ -27,11 +31,16 @@ abigen!(Contract(
 // TODO: Make it a class not to pass a contract instance in the arguments
 pub mod market_abi_calls {
 
-    use fuels::prelude::{CallParameters, SettableContract};
+    use fuels::{
+        prelude::{CallParameters, SettableContract},
+        types::{AssetId, ContractId},
+    };
 
     use super::{abigen_bindings::market_contract_mod::AssetConfig, *};
 
-    pub async fn debug_increment_timestamp(market: &MarketContract<WalletUnlocked>) -> FuelCallResponse<()> {
+    pub async fn debug_increment_timestamp(
+        market: &MarketContract<WalletUnlocked>,
+    ) -> FuelCallResponse<()> {
         let res = market.methods().debug_increment_timestamp().call().await;
         res.unwrap()
     }
@@ -84,9 +93,9 @@ pub mod market_abi_calls {
         market
             .methods()
             .withdraw_base(amount)
+            .append_variable_outputs(1)
             .tx_params(tx_params)
             .set_contracts(contract_ids)
-            .append_variable_outputs(1)
             .call()
             .await
     }
@@ -121,8 +130,8 @@ pub mod market_abi_calls {
         market
             .methods()
             .supply_collateral()
+            .append_variable_outputs(1)
             .call_params(call_params)
-            // .append_variable_outputs(1)
             .unwrap()
             .call()
             .await
@@ -169,7 +178,10 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn get_user_basic(market: &MarketContract<WalletUnlocked>, address: Address) -> UserBasic {
+    pub async fn get_user_basic(
+        market: &MarketContract<WalletUnlocked>,
+        address: Address,
+    ) -> UserBasic {
         let res = market.methods().get_user_basic(address).simulate().await;
         res.unwrap().value
     }
@@ -177,7 +189,10 @@ pub mod market_abi_calls {
         let res = market.methods().get_market_basics().simulate().await;
         res.unwrap().value
     }
-    pub async fn totals_collateral(market: &MarketContract<WalletUnlocked>, asset: ContractId) -> u64 {
+    pub async fn totals_collateral(
+        market: &MarketContract<WalletUnlocked>,
+        asset: ContractId,
+    ) -> u64 {
         let res = market.methods().totals_collateral(asset).simulate().await;
         res.unwrap().value
     }
@@ -240,9 +255,9 @@ pub mod market_abi_calls {
             // .tx_params(tx_params)
             .call_params(call_params)
             .unwrap()
-            .estimate_tx_dependencies(None)
-            .await
-            .unwrap()
+            // .estimate_tx_dependencies(None)
+            // .await
+            // .unwrap()
             .call()
             .await
     }
@@ -275,9 +290,13 @@ pub mod market_abi_calls {
             .value
     }
 
-    pub async fn get_collateral_reserves(market: &MarketContract<WalletUnlocked>, asset: ContractId) -> I64 {
-        let res = market.methods().get_collateral_reserves(asset);
-        res
+    pub async fn get_collateral_reserves(
+        market: &MarketContract<WalletUnlocked>,
+        asset: ContractId,
+    ) -> I64 {
+        market
+            .methods()
+            .get_collateral_reserves(asset)
             // .tx_params(TX_PARAMS)
             .simulate()
             .await
@@ -285,8 +304,9 @@ pub mod market_abi_calls {
             .value
     }
     pub async fn get_reserves(market: &MarketContract<WalletUnlocked>) -> I64 {
-        let res = market.methods().get_reserves();
-        res
+        market
+            .methods()
+            .get_reserves()
             // .tx_params(TX_PARAMS)
             .simulate()
             .await
@@ -308,120 +328,117 @@ async fn init_wallets() -> Vec<WalletUnlocked> {
     .await
 }
 
-pub async fn deploy_market_contract(wallet: &WalletUnlocked) -> MarketContract<WalletUnlocked> {
+pub async fn deploy_market(wallet: &WalletUnlocked) -> MarketContract<WalletUnlocked> {
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
-    let storage_path = String::from("./out/debug/market-storage_slots.json");
-
-    let deploy_config: DeployConfiguration = DeployConfiguration::default()
-        .set_storage_configuration(StorageConfiguration::default().set_storage_path(storage_path))
-        .set_salt(salt)
-        .set_tx_parameters(TxParameters::default().set_gas_price(1));
-
-    let id = Contract::deploy("./out/debug/market.bin", wallet, deploy_config)
+    let configurables = MarketContractConfigurables::default(); //todo
+    let config = LoadConfiguration::default().set_configurables(configurables);
+    let id = Contract::load_from("./out/debug/market.bin", config)
+        .unwrap()
+        .with_salt(salt)
+        .deploy(wallet, TxParameters::default().set_gas_price(1))
         .await
         .unwrap();
 
     MarketContract::new(id, wallet.clone())
 }
 
-pub async fn setup_market() -> (
-    Vec<WalletUnlocked>,
-    HashMap<String, Asset>,
-    MarketContract<WalletUnlocked>,
-    OracleContract<WalletUnlocked>,
-) {
-    //--------------- WALLET ---------------
-    let wallets = init_wallets().await;
-    let address = Address::from(wallets[0].address());
+// pub async fn setup_market() -> (
+//     Vec<WalletUnlocked>,
+//     HashMap<String, Asset>,
+//     MarketContract<WalletUnlocked>,
+//     OracleContract<WalletUnlocked>,
+// ) {
+//     //--------------- WALLET ---------------
+//     let wallets = init_wallets().await;
+//     let address = Address::from(wallets[0].address());
 
-    //--------------- ORACLE ---------------
-    let oracle_instance = get_oracle_contract_instance(&wallets[0]).await;
-    let price_feed = ContractId::from(oracle_instance.contract_id());
-    oracle_abi_calls::initialize(&oracle_instance, address).await;
-    assert!(oracle_abi_calls::owner(&oracle_instance).await == address);
-    // oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
+//     //--------------- ORACLE ---------------
+//     let oracle_instance = deploy_oracle(&wallets[0]).await;
+//     let price_feed = ContractId::from(oracle_instance.contract_id());
+//     oracle_abi_calls::initialize(&oracle_instance, address).await;
+//     assert!(oracle_abi_calls::owner(&oracle_instance).await == address);
+//     // oracle_abi_calls::sync_prices(&oracle_instance, &assets).await;
 
-    //--------------- TOKENS ---------------
+//     //--------------- TOKENS ---------------
 
-    let deploy_config_json_str = fs::read_to_string("tests/utils/local_tests_utils/tokens.json")
-        .expect("Should have been able to read the file");
-    let deploy_configs: serde_json::Value =
-        serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
-    let deploy_configs = deploy_configs.as_array().unwrap();
-    let mut assets: HashMap<String, Asset> = HashMap::new();
-    let mut asset_configs: Vec<AssetConfig> = Vec::new();
-    for config_value in deploy_configs {
-        let config = DeployTokenConfig {
-            name: String::from(config_value["name"].as_str().unwrap()),
-            symbol: String::from(config_value["symbol"].as_str().unwrap()),
-            decimals: config_value["decimals"].as_u64().unwrap() as u8,
-            mint_amount: config_value["mint_amount"].as_u64().unwrap(),
-        };
+//     let deploy_config_json_str = fs::read_to_string("tests/utils/local_tests_utils/tokens.json")
+//         .expect("Should have been able to read the file");
+//     let deploy_configs: serde_json::Value =
+//         serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
+//     let deploy_configs = deploy_configs.as_array().unwrap();
+//     let mut assets: HashMap<String, Asset> = HashMap::new();
+//     let mut asset_configs: Vec<AssetConfig> = Vec::new();
+//     for config_value in deploy_configs {
+//         let config = DeployTokenConfig {
+//             name: String::from(config_value["name"].as_str().unwrap()),
+//             symbol: String::from(config_value["symbol"].as_str().unwrap()),
+//             decimals: config_value["decimals"].as_u64().unwrap() as u8,
+//         };
 
-        let instance = if config.symbol != "ETH" {
-            Some(token::get_token_contract_instance(&wallets[0], &config).await)
-        } else {
-            None
-        };
-        let contract_id = match instance {
-            Option::Some(instance) => ContractId::from(instance.contract_id()),
-            Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
-                .expect("Cannot parse BASE_ASSET_ID to contract id"),
-        };
+//         let instance = if config.symbol != "ETH" {
+//             Some(token::get_token_contract_instance(&wallets[0], &config).await)
+//         } else {
+//             None
+//         };
+//         let contract_id = match instance {
+//             Option::Some(instance) => ContractId::from(instance.contract_id()),
+//             Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
+//                 .expect("Cannot parse BASE_ASSET_ID to contract id"),
+//         };
 
-        assets.insert(
-            String::from(config_value["symbol"].as_str().unwrap()),
-            Asset {
-                config,
-                contract_id,
-                asset_id: AssetId::from(*contract_id),
-                coingeco_id: String::from(config_value["coingeco_id"].as_str().unwrap()),
-                default_price: parse_units(config_value["default_price"].as_u64().unwrap(), 9),
-                instance: Option::None,
-            },
-        );
+//         assets.insert(
+//             String::from(config_value["symbol"].as_str().unwrap()),
+//             Asset {
+//                 config,
+//                 contract_id,
+//                 asset_id: AssetId::from(*contract_id),
+//                 coingeco_id: String::from(config_value["coingeco_id"].as_str().unwrap()),
+//                 default_price: parse_units(config_value["default_price"].as_u64().unwrap(), 9),
+//                 instance: Option::None,
+//             },
+//         );
 
-        if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
-            asset_configs.push(AssetConfig {
-                asset: contract_id,
-                decimals: config_value["decimals"].as_u64().unwrap() as u8,
-                price_feed: price_feed,
-                borrow_collateral_factor: config_value["borrow_collateral_factor"]
-                    .as_u64()
-                    .unwrap(), // decimals: 4
-                liquidate_collateral_factor: config_value["liquidate_collateral_factor"]
-                    .as_u64()
-                    .unwrap(), // decimals: 4
-                liquidation_penalty: config_value["liquidation_penalty"].as_u64().unwrap(), // decimals: 4
-                supply_cap: config_value["supply_cap"].as_u64().unwrap(), // decimals: asset decimals
-            })
-        }
-    }
+//         if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
+//             asset_configs.push(AssetConfig {
+//                 asset: contract_id,
+//                 decimals: config_value["decimals"].as_u64().unwrap() as u8,
+//                 price_feed: price_feed,
+//                 borrow_collateral_factor: config_value["borrow_collateral_factor"]
+//                     .as_u64()
+//                     .unwrap(), // decimals: 4
+//                 liquidate_collateral_factor: config_value["liquidate_collateral_factor"]
+//                     .as_u64()
+//                     .unwrap(), // decimals: 4
+//                 liquidation_penalty: config_value["liquidation_penalty"].as_u64().unwrap(), // decimals: 4
+//                 supply_cap: config_value["supply_cap"].as_u64().unwrap(), // decimals: asset decimals
+//             })
+//         }
+//     }
 
-    //--------------- MARKET ---------------
-    let market_instance = deploy_market_contract(&wallets[0]).await;
-    let config_json_str = fs::read_to_string("tests/utils/local_tests_utils/config.json")
-        .expect("Should have been able to read the file");
-    let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
-    let config = config.as_object().unwrap();
+//     //--------------- MARKET ---------------
+//     let market_instance = deploy_market_contract(&wallets[0]).await;
+//     let config_json_str = fs::read_to_string("tests/utils/local_tests_utils/config.json")
+//         .expect("Should have been able to read the file");
+//     let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
+//     let config = config.as_object().unwrap();
 
-    let market_config = get_market_config(
-        address,
-        address,
-        assets.get("USDC").unwrap().contract_id,
-        assets.get("USDC").unwrap().config.decimals,
-        price_feed,
-        assets.get("SWAY").unwrap().contract_id,
-    );
+//     let market_config = get_market_config(
+//         address,
+//         address,
+//         assets.get("USDC").unwrap().contract_id,
+//         assets.get("USDC").unwrap().config.decimals,
+//         price_feed,
+//         assets.get("SWAY").unwrap().contract_id,
+//     );
 
-    let step = Option::Some(config["debug_step"].as_u64().unwrap());
-    market_abi_calls::initialize(&market_instance, &market_config, &asset_configs, step)
-        .await
-        .expect("❌ Cannot initialize market");
+//     let step = Option::Some(config["debug_step"].as_u64().unwrap());
+//     market_abi_calls::initialize(&market_instance, &market_config, &asset_configs, step)
+//         .await
+//         .expect("❌ Cannot initialize market");
 
-    (wallets, assets, market_instance, oracle_instance)
-}
+//     (wallets, assets, market_instance, oracle_instance)
+// }
 
 pub fn get_market_config(
     governor: Address,
@@ -431,8 +448,7 @@ pub fn get_market_config(
     price_feed: ContractId,
     reward_token: ContractId,
 ) -> MarketConfiguration {
-    let config_json_str = fs::read_to_string("tests/utils/local_tests_utils/config.json")
-        .expect("Should have been able to read the file");
+    let config_json_str = fs::read_to_string("tests/artefacts/config.json").unwrap();
     let config: serde_json::Value = serde_json::from_str(config_json_str.as_str()).unwrap();
     let config = config.as_object().unwrap();
 

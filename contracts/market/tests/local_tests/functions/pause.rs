@@ -1,10 +1,10 @@
 use fuels::{prelude::ViewOnlyAccount, types::Address};
+use src20_sdk::{token_abi_calls, TokenContract};
 
 use crate::utils::{
     local_tests_utils::{
         market::{self, market_abi_calls, PauseConfiguration},
         oracle::oracle_abi_calls,
-        token::{token_abi_calls, TokenContract},
     },
     number_utils::parse_units,
 };
@@ -22,9 +22,9 @@ async fn pause() {
 
     // ==================== Assets ====================
     let usdc = assets.get("USDC").unwrap();
-    let usdc_instance = TokenContract::new(usdc.contract_id.into(), admin.clone());
+    let usdc_instance = TokenContract::new(usdc.contract_id, admin.clone());
     let uni = assets.get("UNI").unwrap();
-    let uni_instance = TokenContract::new(uni.contract_id.into(), admin.clone());
+    let uni_instance = TokenContract::new(uni.contract_id, admin.clone());
 
     // ==================== Set oracle prices ====================
     let amount = parse_units(1, 9); //1 USDC = $1
@@ -47,7 +47,9 @@ async fn pause() {
     let amount = parse_units(400, usdc.config.decimals);
 
     // Transfer of 400 USDC to the Bob's wallet
-    token_abi_calls::mint_and_transfer(&usdc_instance, amount, bob_address).await;
+    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+        .await
+        .unwrap();
 
     let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount);
@@ -73,7 +75,9 @@ async fn pause() {
     let amount = parse_units(40, uni.config.decimals);
 
     // Transfer of 40 UNI to the Alice's wallet
-    token_abi_calls::mint_and_transfer(&uni_instance, amount, alice_address).await;
+    token_abi_calls::mint(&uni_instance, amount, alice_address)
+        .await
+        .unwrap();
 
     let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
     assert!(balance == amount);
@@ -164,7 +168,9 @@ async fn pause() {
             .await;
 
     // Transfer of amount to the wallet
-    token_abi_calls::mint_and_transfer(&usdc_instance, amount, bob_address).await;
+    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+        .await
+        .unwrap();
 
     //Сheck balance
     let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
@@ -210,7 +216,9 @@ async fn pause() {
     let amount = parse_units(400, usdc.config.decimals);
 
     // Transfer of 400 USDC to the Bob's wallet
-    token_abi_calls::mint_and_transfer(&usdc_instance, amount, bob_address).await;
+    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+        .await
+        .unwrap();
 
     let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount);
@@ -231,7 +239,9 @@ async fn pause() {
     let amount = parse_units(40, uni.config.decimals);
 
     // Transfer of 40 UNI to the Alice's wallet
-    token_abi_calls::mint_and_transfer(&uni_instance, amount, alice_address).await;
+    token_abi_calls::mint(&uni_instance, amount, alice_address)
+        .await
+        .unwrap();
 
     let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
     assert!(balance == amount);
@@ -287,7 +297,9 @@ async fn pause() {
             .await;
 
     // Transfer of amount to the wallet
-    token_abi_calls::mint_and_transfer(&usdc_instance, amount, bob_address).await;
+    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+        .await
+        .unwrap();
 
     // Bob calls buy_collateral
     // let addr = bob_address;

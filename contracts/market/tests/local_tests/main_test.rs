@@ -1,4 +1,3 @@
-
 use fuels::prelude::ViewOnlyAccount;
 use fuels::types::Address;
 
@@ -21,7 +20,12 @@ async fn main_test() {
     do_main_test(coefficient, "BTC", 20000, 0.1).await;
 }
 
-async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collateral_price: u64, drop_percent: f64) {
+async fn do_main_test(
+    amount_coefficient: u64,
+    collateral_symbol: &str,
+    collateral_price: u64,
+    drop_percent: f64,
+) {
     let scale_9 = 10u64.pow(9) as f64;
     print_title(("Main test with ".to_owned() + collateral_symbol).as_str());
     let (wallets, assets, market, oracle) = market::setup_market().await;
@@ -38,10 +42,10 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
 
     // ==================== Assets ====================
     let usdc = assets.get("USDC").unwrap();
-    let usdc_instance = TokenContract::new(usdc.contract_id.into(), admin.clone());
+    let usdc_instance = TokenContract::new(usdc.contract_id, admin.clone());
     let usdc_scale = 10u64.pow(6) as f64;
     let collateral = assets.get(collateral_symbol).unwrap();
-    let collateral_instance = TokenContract::new(collateral.contract_id.into(), admin.clone());
+    let collateral_instance = TokenContract::new(collateral.contract_id, admin.clone());
     let collateral_scale = 10_i32.pow(collateral.config.decimals as u32) as f64;
     // ==================== Set oracle prices ====================
     let amount = parse_units(1, 9); //1 USDC = $1
@@ -93,7 +97,8 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     // 🤙 Call: supply_collateral
     // 💰 Amount: $200.00
 
-    let amount = (200f64 / collateral_price as f64 * amount_coefficient as f64 * collateral_scale) as u64;
+    let amount =
+        (200f64 / collateral_price as f64 * amount_coefficient as f64 * collateral_scale) as u64;
     let log_amount = format!("{} {collateral_symbol}", amount as f64 / collateral_scale);
     print_case_title(1, "Alice", "supply_collateral", log_amount.as_str());
     println!("💸 Alice + {log_amount}");
@@ -113,7 +118,8 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
         .unwrap();
 
     // Сheck supply balance equal to amount
-    let res = market_abi_calls::get_user_collateral(&inst, alice_address, collateral.contract_id).await;
+    let res =
+        market_abi_calls::get_user_collateral(&inst, alice_address, collateral.contract_id).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, collateral.contract_id).await;
@@ -148,7 +154,8 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     // 🤙 Call: supply_collateral
     // 💰 Amount: 0.15 ETH ~ $300.00
 
-    let amount = (300f64 / collateral_price as f64 * amount_coefficient as f64 * collateral_scale) as u64;
+    let amount =
+        (300f64 / collateral_price as f64 * amount_coefficient as f64 * collateral_scale) as u64;
     let log_amount = format!("{} {collateral_symbol}", amount as f64 / collateral_scale);
     print_case_title(3, "Chad", "supply_collateral", log_amount.as_str());
     println!("💸 Chad + {log_amount}");
@@ -168,7 +175,8 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
         .unwrap();
 
     //Сheck supply balance equal to amount
-    let res = market_abi_calls::get_user_collateral(&inst, chad_address, collateral.contract_id).await;
+    let res =
+        market_abi_calls::get_user_collateral(&inst, chad_address, collateral.contract_id).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc.contract_id, collateral.contract_id).await;
@@ -285,9 +293,13 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
     assert!(!reservs.negative);
 
     let reservs = reservs.value;
-    let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, collateral.contract_id, reservs)
-            .await;
+    let amount = market_abi_calls::collateral_value_to_sell(
+        &market,
+        &contracts,
+        collateral.contract_id,
+        reservs,
+    )
+    .await;
 
     let log_amount = format!("{} USDC", amount as f64 / usdc_scale);
     print_case_title(8, "Bob", "buy_collateral", log_amount.as_str());
@@ -301,9 +313,16 @@ async fn do_main_test(amount_coefficient: u64, collateral_symbol: &str, collater
 
     // Bob calls buy_collateral
     let addr = bob_address;
-    market_abi_calls::buy_collateral(&inst, usdc.asset_id, amount, collateral.contract_id, 1, addr)
-        .await
-        .unwrap();
+    market_abi_calls::buy_collateral(
+        &inst,
+        usdc.asset_id,
+        amount,
+        collateral.contract_id,
+        1,
+        addr,
+    )
+    .await
+    .unwrap();
 
     //TODO: Check
     // let balance = bob.get_asset_balance(&collateral.asset_id).await.unwrap();
