@@ -11,7 +11,8 @@ mod structs;
 
 use helpers::*;
 use structs::*;
-use signed_integers::i64::I64;
+// use signed_integers::i64::I64;
+use i64::*;
 use oracle_abi::*;
 use token_abi::*;
 use std::auth::{AuthError,msg_sender};
@@ -179,12 +180,12 @@ fn timestamp() -> u64 {
 #[storage(read)]
 fn mint_reward_token(amount: u64, recipient: Address) {
     let config = get_config();
-    abi(Token, config.reward_token.value).mint_and_transfer(amount, recipient);
+    abi(FRC20, config.reward_token.value)._mint(amount, recipient);
 }
 
 #[storage(read)]
 fn is_absorb_paused() -> bool {
-    match storage.pause_config.read() {
+    match storage.pause_config.try_read().unwrap_or(Option::None) {
         Option::Some(config) => config.absorb_paused,
         Option::None(_) => false,
     }
@@ -192,21 +193,21 @@ fn is_absorb_paused() -> bool {
 
 #[storage(read)]
 fn is_buy_paused() -> bool {
-    match storage.pause_config.read() {
+    match storage.pause_config.try_read().unwrap_or(Option::None) {
         Option::Some(config) => config.buy_pause,
         Option::None(_) => false,
     }
 }
 #[storage(read)]
 fn is_supply_paused() -> bool {
-    match storage.pause_config.read() {
+    match storage.pause_config.try_read().unwrap_or(Option::None) {
         Option::Some(config) => config.supply_paused,
         Option::None(_) => false,
     }
 }
 #[storage(read)]
 fn is_withdraw_paused() -> bool {
-    match storage.pause_config.read() {
+    match storage.pause_config.try_read().unwrap_or(Option::None) {
         Option::Some(config) => config.withdraw_paused,
         Option::None(_) => false,
     }
@@ -372,11 +373,11 @@ fn is_borrow_collateralized(account: Address) -> bool {
     let config = get_config();
     let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals
     let mut borrow_limit = U128::new();
-    let mut index = 0u8;
+    let mut index = 0;
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
     while index < storage.asset_configs.len() {
         if !is_in_asset(assets_in ,index){
-            index = index + 1u8;
+            index = index + 1;
             continue
         }
 
@@ -806,7 +807,10 @@ fn withdraw_base_internal(amount: u64) {
 
     let (withdraw_amount, borrow_amount) = withdraw_and_borrow_amount(src_principal, src_principal_new);
     let mut market_basic = storage.market_basic.read();
-    market_basic.total_supply_base -= withdraw_amount;
+    // log(market_basic.total_supply_base);
+    // log(withdraw_amount);
+    // return;
+    market_basic.total_supply_base -= withdraw_amount; //Падает тут
     market_basic.total_borrow_base += borrow_amount;
     storage.market_basic.write(market_basic);
 
@@ -973,7 +977,7 @@ impl Market for Contract {
         let mut borrow_limit = U128::new();
         let mut index = 0u8;
         let config = get_config();
-        let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u64);
+        let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
         while index < storage.asset_configs.len() {
 
             if !is_in_asset(assets_in ,index){

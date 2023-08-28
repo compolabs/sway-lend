@@ -114,7 +114,8 @@ pub async fn init_tokens(
 fn convertI64(value: contracts_utils::market_utils::I64) -> i64 {
     // let is_negative = value.underlying < 9223372036854775808u64;
     // let value = value.underlying - 9223372036854775808u64;
-    value.underlying as i64 - 9223372036854775808u64 as i64
+    // value.underlying as i64 - 9223372036854775808u64 as i64
+    value.value as i64 * if value.negative { -1 } else { 1 }
 }
 
 pub async fn debug_state(

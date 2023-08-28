@@ -224,10 +224,10 @@ pub mod market_abi_calls {
         asset: ContractId,
         collateral_amount: u64,
     ) -> u64 {
-        let res = market
+        market
             .methods()
-            .collateral_value_to_sell(asset, collateral_amount);
-        res //.tx_params(TX_PARAMS)
+            .collateral_value_to_sell(asset, collateral_amount)
+            .tx_params(TxParameters::default().set_gas_price(1))
             .set_contracts(contract_ids)
             .simulate()
             .await
@@ -237,6 +237,7 @@ pub mod market_abi_calls {
 
     pub async fn buy_collateral(
         market: &MarketContract<WalletUnlocked>,
+        contract_ids: &[&dyn SettableContract],
         base_asset_id: AssetId,
         amount: u64,
         asset: ContractId,
@@ -246,18 +247,14 @@ pub mod market_abi_calls {
         let call_params = CallParameters::default()
             .set_amount(amount)
             .set_asset_id(base_asset_id);
-        // let tx_params = TxParameters::default()
-        //     .set_gas_limit(100_000_000)
-        //     .set_gas_price(1);
         market
             .methods()
             .buy_collateral(asset, min_amount, recipient)
-            // .tx_params(tx_params)
+            .tx_params(TxParameters::default().set_gas_price(1))
+            .set_contracts(contract_ids)
             .call_params(call_params)
             .unwrap()
-            // .estimate_tx_dependencies(None)
-            // .await
-            // .unwrap()
+            .append_variable_outputs(2)
             .call()
             .await
     }

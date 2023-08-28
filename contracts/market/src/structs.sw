@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BUSL-1.1
 library;
-use signed_integers::i64::I64;
+// use signed_integers::i64::I64;
+use i64::*;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 

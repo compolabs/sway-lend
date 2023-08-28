@@ -303,11 +303,9 @@ async fn main_test() {
 
     let inst = market.with_account(bob.clone()).unwrap();
     let reservs = market_abi_calls::get_collateral_reserves(&market, uni.contract_id).await;
-    // assert!(!reservs.negative);
+    assert!(!reservs.negative);
 
-    // let reservs = reservs.value;
-    println!("reservs = {:?}", reservs);
-    let reservs = 0;
+    let reservs = reservs.value;
     let amount =
         market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.contract_id, reservs)
             .await;
@@ -326,9 +324,17 @@ async fn main_test() {
 
     // Bob calls buy_collateral
     let addr = bob_address;
-    market_abi_calls::buy_collateral(&inst, usdc.asset_id, amount, uni.contract_id, 1, addr)
-        .await
-        .unwrap();
+    market_abi_calls::buy_collateral(
+        &inst,
+        &contracts,
+        usdc.asset_id,
+        amount,
+        uni.contract_id,
+        1,
+        addr,
+    )
+    .await
+    .unwrap();
 
     //Check
     let balance = bob.get_asset_balance(&uni.asset_id).await.unwrap();
