@@ -81,6 +81,16 @@
     },
     {
       "inputs": [],
+      "name": "asset_id",
+      "output": {
+        "name": "",
+        "type": 1,
+        "typeArguments": null
+      },
+      "attributes": null
+    },
+    {
+      "inputs": [],
       "name": "decimals",
       "output": {
         "name": "",
@@ -137,7 +147,7 @@
         "type": 6,
         "typeArguments": null
       },
-      "offset": 3512
+      "offset": 3888
     },
     {
       "name": "NAME",
@@ -146,7 +156,7 @@
         "type": 2,
         "typeArguments": null
       },
-      "offset": 3520
+      "offset": 3896
     },
     {
       "name": "SYMBOL",
@@ -155,7 +165,7 @@
         "type": 3,
         "typeArguments": null
       },
-      "offset": 3552
+      "offset": 3928
     },
     {
       "name": "OWNER",
@@ -164,7 +174,7 @@
         "type": 4,
         "typeArguments": []
       },
-      "offset": 3416
+      "offset": 3784
     }
   ]
 }

@@ -1,4 +1,5 @@
 use fuels::accounts::ViewOnlyAccount;
+use fuels::types::Bits256;
 use fuels::{
     accounts::wallet::WalletUnlocked,
     prelude::BASE_ASSET_ID,
@@ -65,7 +66,7 @@ pub async fn init_tokens(
         let config = DeployTokenConfig {
             name: String::from(config_value["name"].as_str().unwrap()),
             symbol: String::from(config_value["symbol"].as_str().unwrap()),
-            decimals: config_value["decimals"].as_u64().unwrap() as u8,
+            decimals: config_value["decimals"].as_u64().unwrap() ,
         };
 
         let instance = if config.symbol != "ETH" {
@@ -73,15 +74,14 @@ pub async fn init_tokens(
         } else {
             None
         };
-        let contract_id = match instance {
-            Option::Some(instance) => ContractId::from(instance.contract_id()),
-            Option::None => ContractId::from_str(BASE_ASSET_ID.to_string().as_str())
-                .expect("Cannot parse BASE_ASSET_ID to contract id"),
+        let bits256 = match instance {
+            Option::Some(instance) => instance.methods().asset_id().call().await.unwrap().value,
+            Option::None => Bits256::from_hex_str(BASE_ASSET_ID.to_string().as_str()).unwrap(),
         };
         if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
             asset_configs.push(AssetConfig {
-                asset: contract_id,
-                decimals: config_value["decimals"].as_u64().unwrap() as u8,
+                asset: bits256,
+                decimals: config_value["decimals"].as_u64().unwrap(),
                 price_feed: price_feed,
                 borrow_collateral_factor: config_value["borrow_collateral_factor"]
                     .as_u64()
@@ -98,11 +98,11 @@ pub async fn init_tokens(
             String::from(config_value["symbol"].as_str().unwrap()),
             Asset {
                 config,
-                contract_id,
-                asset_id: AssetId::from(*contract_id),
+                contract_id: ContractId::from(bits256.0),
+                asset_id: AssetId::from(bits256.0),
                 default_price: config_value["default_price"].as_u64().unwrap_or(0) * 10u64.pow(9),
                 instance: Option::None,
-                decimals: config_value["decimals"].as_u64().unwrap() as u8,
+                decimals: config_value["decimals"].as_u64().unwrap(),
                 symbol: config_value["symbol"].as_str().unwrap().into(),
                 coingeco_id: config_value["coingeco_id"].as_str().unwrap().into(),
             },
