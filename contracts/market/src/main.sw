@@ -38,8 +38,8 @@ storage {
     config: Option<MarketConfiguration> = Option::None,
     asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
-    totals_collateral: StorageMap<ContractId, u64> = StorageMap {},
-    user_collateral: StorageMap<(Address, ContractId), u64> = StorageMap {},
+    totals_collateral: StorageMap<AssetId, u64> = StorageMap {},
+    user_collateral: StorageMap<(Address, AssetId), u64> = StorageMap {},
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics::default(),
 }
@@ -61,24 +61,24 @@ abi Market {
     fn get_user_basic(account: Address) -> UserBasic;
 
     #[storage(read)]
-    fn get_user_collateral(address: Address, asset: ContractId) -> u64;
+    fn get_user_collateral(address: Address, asset: AssetId) -> u64;
 
     #[storage(read)]
-    fn get_oracle_price(asset: ContractId) -> u64;
+    fn get_oracle_price(asset: AssetId) -> u64;
 
     #[storage(read)]
-    fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig;
+    fn get_asset_config_by_asset_id(asset: AssetId) -> AssetConfig;
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64);
 
-    fn balance_of(asset: ContractId) -> u64;
+    fn balance_of(asset: AssetId) -> u64;
 
     #[storage(read)]
     fn get_market_basics() -> MarketBasics;
 
     #[storage(read)]
-    fn totals_collateral(asset: ContractId) -> u64;
+    fn totals_collateral(asset: AssetId) -> u64;
 
     #[storage(read)]
     fn available_to_borrow(account: Address) -> u64;
@@ -96,7 +96,7 @@ abi Market {
     fn is_liquidatable(account: Address) -> bool;
 
     #[storage(read)]
-    fn get_collateral_reserves(asset: ContractId) -> I64;
+    fn get_collateral_reserves(asset: AssetId) -> I64;
 
     #[storage(read)]
     fn get_reserves() -> I64;
@@ -107,23 +107,23 @@ abi Market {
 
     // TODO: test quote_collateral
     #[storage(read)]
-    fn quote_collateral(asset: ContractId, base_amount: u64) -> u64;
+    fn quote_collateral(asset: AssetId, base_amount: u64) -> u64;
 
     #[storage(read)]
-    fn collateral_value_to_sell(asset: ContractId, collateral_amount: u64) -> u64;
+    fn collateral_value_to_sell(asset: AssetId, collateral_amount: u64) -> u64;
 
     #[storage(read, write)]
     fn absorb(accounts: Vec<Address>);
 
     #[payable] 
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address);
+    fn buy_collateral(asset: AssetId, min_amount: u64, recipient: Address);
     
     #[payable] 
     #[storage(read, write)]
     fn supply_collateral();
     #[storage(read, write)]
-    fn withdraw_collateral(asset: ContractId, amount: u64);
+    fn withdraw_collateral(asset: AssetId, amount: u64);
 
     #[payable] 
     #[storage(read, write)]
@@ -150,20 +150,20 @@ abi Market {
 
 // 
 
-fn is_in_asset(assets_in: u16, asset_offset: u8) -> bool {
-    assets_in & (1u8 << asset_offset) != 0u16
+fn is_in_asset(assets_in: u16, asset_offset: u64) -> bool {
+    assets_in & (1u16 << asset_offset) != 0u16
 }
 
 #[storage(read, write)]
-fn update_assets_in(account: Address, asset_offset: u8, initial_user_balance: u64, final_user_balance: u64) {
+fn update_assets_in(account: Address, asset_offset: u64, initial_user_balance: u64, final_user_balance: u64) {
     let mut assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16); 
     if initial_user_balance == 0 && final_user_balance != 0 {
         // set bit for asset
-        assets_in = assets_in | 1u8 << asset_offset;
+        assets_in = assets_in | 1u16 << asset_offset;
         storage.supplied_collateral_assets.insert(account, assets_in);
     } else if initial_user_balance != 0 && final_user_balance == 0 {
         // clear bit for asset
-        assets_in = assets_in & !(1u8 << asset_offset);
+        assets_in = assets_in & !(1u16 << asset_offset);
         storage.supplied_collateral_assets.insert(account, assets_in);
     }
 }
@@ -180,7 +180,7 @@ fn timestamp() -> u64 {
 #[storage(read)]
 fn mint_reward_token(amount: u64, recipient: Address) {
     let config = get_config();
-    abi(FRC20, config.reward_token.value)._mint(amount, recipient);
+    abi(FRC20, config.reward_token)._mint(amount, recipient);
 }
 
 #[storage(read)]
@@ -238,7 +238,7 @@ pub fn get_caller() -> Address {
     }
 }
 
-fn get_price(asset: ContractId, price_feed: ContractId) -> u64 {
+fn get_price(asset: AssetId, price_feed: ContractId) -> u64 {
     let res = abi(Oracle, price_feed.value).get_price(asset);
     res.price
 }
@@ -393,7 +393,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
         let scale = U128::from_u64(10.pow(asset_config.decimals));
 
         borrow_limit += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
-        index = index + 1u8;
+        index = index + 1;
     }
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
@@ -415,16 +415,16 @@ fn is_liquidatable_internal(account: Address) -> bool {
     let present_value_ = U128::from_u64(present_value(principal_value_.flip()).into()); // decimals base_asset_decimals
     let mut liquidation_treshold = U128::new();
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
-    let mut index = 0u8;
+    let mut index = 0;
     while index < storage.asset_configs.len() {
         if !is_in_asset(assets_in ,index){
-            index = index + 1u8;
+            index = index + 1;
             continue
         }
 
         let asset_config = storage.asset_configs.get(index).unwrap().read();
 
-        let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0u64); // decimals asset_config.decimals
+        let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
         let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
         let price = U128::from_u64(price);
@@ -432,7 +432,7 @@ fn is_liquidatable_internal(account: Address) -> bool {
         let scale = U128::from_u64(10.pow(asset_config.decimals));
 
         liquidation_treshold += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
-        index = index + 1u8;
+        index = index + 1;
     }
 
     let scale = U128::from_u64(10.pow(config.base_token_decimals));
@@ -441,10 +441,10 @@ fn is_liquidatable_internal(account: Address) -> bool {
     liquidation_treshold < borrow_amount
 }
 
-// @Callable get_collateral_reserves(asset: ContractId) -> I64
+// @Callable get_collateral_reserves(asset: AssetId) -> I64
 #[storage(read)]
-fn get_collateral_reserves_internal(asset: ContractId) -> I64 { // -> asset decimals
-    I64::from(this_balance(asset)) - I64::from(storage.totals_collateral.get(asset).try_read().unwrap_or(0u64))
+fn get_collateral_reserves_internal(asset: AssetId) -> I64 { // -> asset decimals
+    I64::from(this_balance(asset)) - I64::from(storage.totals_collateral.get(asset).try_read().unwrap_or(0))
 }
 
 // @Callable get_reserves_internal() -> I64
@@ -555,20 +555,20 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
     let reserves = get_reserves_internal();
     require(reserves >= I64::from(0) && amount <= reserves.into(), Error::InsufficientReserves);
 
-    transfer_to_address(amount, config.base_token, to);
+    transfer_to_address(to, config.base_token, amount);
 }
 
 #[storage(read)]
-fn get_asset_config_by_asset_id_internal(asset: ContractId) -> (AssetConfig, u8) {
+fn get_asset_config_by_asset_id_internal(asset: AssetId) -> (AssetConfig, u64) {
     let mut out: Option<AssetConfig> = Option::None;
-    let mut i = 0u8;
+    let mut i = 0;
     while i < storage.asset_configs.len() {
         let asset_config = storage.asset_configs.get(i).unwrap().read();
         if asset_config.asset == asset {
             out = Option::Some(asset_config);
             break;
         }
-        i += 1u8;
+        i += 1;
     }
     match out {
         Option::Some(v) => (v, i),
@@ -576,11 +576,11 @@ fn get_asset_config_by_asset_id_internal(asset: ContractId) -> (AssetConfig, u8)
     }
 }
 
-// @Callable quote_collateral(asset: ContractId, base_amount: u64) -> u64 
+// @Callable quote_collateral(asset: AssetId, base_amount: u64) -> u64 
 //  A function that counts the collateral purchase rate of the user from our protocol
 //  i.e. how much collateral the user gets for redeeming one dollar of debt to be liquidated
 #[storage(read)]
-fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // asset decimals
+fn quote_collateral_internal(asset: AssetId, base_amount: u64) -> u64 { // asset decimals
     let config = get_config();
     let (asset_config, _) = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
@@ -597,9 +597,9 @@ fn quote_collateral_internal(asset: ContractId, base_amount: u64) -> u64 { // as
     (U128::from_u64(base_price) * U128::from_u64(base_amount) * U128::from_u64(asset_scale) / U128::from_u64(asset_price_discounted) / U128::from_u64(base_scale)).as_u64().unwrap()
 }
 
-// @Callable collateral_value_to_sell_internal(asset: ContractId, base_amount: u64) -> u64 
+// @Callable collateral_value_to_sell_internal(asset: AssetId, base_amount: u64) -> u64 
 #[storage(read)]
-fn collateral_value_to_sell_internal(asset: ContractId, collateral_amount: u64) -> u64 { // asset decimals
+fn collateral_value_to_sell_internal(asset: AssetId, collateral_amount: u64) -> u64 { // asset decimals
     let config = get_config();
     let (asset_config, _) = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
@@ -630,23 +630,23 @@ fn absorb_internal(account: Address) {
 
     let mut delta_value = U128::new(); // decimals 9
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
-    let mut index = 0u8;
+    let mut index = 0;
     while index < storage.asset_configs.len() {
        if !is_in_asset(assets_in ,index){
-            index = index + 1u8;
+            index = index + 1;
             continue
         }
 
         let asset_config = storage.asset_configs.get(index).unwrap().read();
         let asset = asset_config.asset;
-        let seize_amount = storage.user_collateral.get((account, asset)).try_read().unwrap_or(0u64); // asset decimals
+        let seize_amount = storage.user_collateral.get((account, asset)).try_read().unwrap_or(0); // asset decimals
         if seize_amount == 0 {
-            index += 1u8;
+            index += 1;
             continue;
         }
         storage.user_collateral.insert((account, asset), 0);
 
-        let total_collateral = storage.totals_collateral.get(asset).try_read().unwrap_or(0u64); // asset decimals
+        let total_collateral = storage.totals_collateral.get(asset).try_read().unwrap_or(0); // asset decimals
         storage.totals_collateral.insert(asset, total_collateral - seize_amount);
 
         let price = get_price(asset, asset_config.price_feed); // decimals 9
@@ -654,7 +654,7 @@ fn absorb_internal(account: Address) {
         let asset_scale = 10.pow(asset_config.decimals);
         let penalty_scale = 10.pow(4);
         delta_value += U128::from_u64(seize_amount) * U128::from_u64(price) * U128::from_u64(liquidation_penalty) / U128::from_u64(asset_scale) / U128::from_u64(penalty_scale); // decimals 9
-        index += 1u8;
+        index += 1;
     }
 
     let base_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
@@ -684,12 +684,12 @@ fn absorb_internal(account: Address) {
     // }
 }
 
-// @Callable buy_collateral(asset: ContractId, min_amount: u64, recipient: Address)
+// @Callable buy_collateral(asset: AssetId, min_amount: u64, recipient: Address)
 // @Payment base_token
 // function for buying the collateral of a liquidated user. 
 #[payable] 
 #[storage(read)]
-fn buy_collateral_internal(asset: ContractId, min_amount: u64, recipient: Address) {
+fn buy_collateral_internal(asset: AssetId, min_amount: u64, recipient: Address) {
     require(!is_buy_paused(), Error::Paused);
     let config = get_config();
     let base_amount = msg_amount();
@@ -707,7 +707,7 @@ fn buy_collateral_internal(asset: ContractId, min_amount: u64, recipient: Addres
     // Note: Pre-transfer hook can re-enter buyCollateral with a stale collateral ERC20 balance.
     //  Assets should not be listed which allow re-entry from pre-transfer now, as too much collateral could be bought.
     //  This is also a problem if quoteCollateral derives its discount from the collateral ERC20 balance.
-    transfer_to_address(collateral_amount, asset, recipient);
+    transfer_to_address(recipient, asset, collateral_amount);
 }
 
 // @Callable supply_collateral()
@@ -723,11 +723,11 @@ fn supply_collateral_internal() {
 
     let asset = msg_asset_id();
     let (asset_config, asset_offset) = get_asset_config_by_asset_id_internal(asset);
-    let mut total_supply_asset = storage.totals_collateral.get(asset).try_read().unwrap_or(0u64);
+    let mut total_supply_asset = storage.totals_collateral.get(asset).try_read().unwrap_or(0);
     total_supply_asset += amount;
     require(total_supply_asset <= asset_config.supply_cap, Error::SupplyCapExceeded);
 
-    let dst_collateral = storage.user_collateral.get((dst, asset)).try_read().unwrap_or(0u64);
+    let dst_collateral = storage.user_collateral.get((dst, asset)).try_read().unwrap_or(0);
     let dst_collateral_new = dst_collateral + amount;
 
     storage.totals_collateral.insert(asset, total_supply_asset);
@@ -735,14 +735,14 @@ fn supply_collateral_internal() {
     update_assets_in(dst, asset_offset, dst_collateral, dst_collateral_new);
 }
 
-// @Callable withdraw_collateral(asset: ContractId, amount: u64)
+// @Callable withdraw_collateral(asset: AssetId, amount: u64)
 #[storage(read, write)]
-fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
+fn withdraw_collateral_internal(asset: AssetId, amount: u64) {
     let caller = get_caller();
-    let src_collateral = storage.user_collateral.get((caller, asset)).try_read().unwrap_or(0u64);
+    let src_collateral = storage.user_collateral.get((caller, asset)).try_read().unwrap_or(0);
     let src_collateral_new = src_collateral - amount;
 
-    let new_total_supply_asset = storage.totals_collateral.get(asset).try_read().unwrap_or(0u64) - amount;
+    let new_total_supply_asset = storage.totals_collateral.get(asset).try_read().unwrap_or(0) - amount;
     storage.totals_collateral.insert(asset, new_total_supply_asset);
     storage.user_collateral.insert((caller, asset), src_collateral_new);
 
@@ -752,7 +752,7 @@ fn withdraw_collateral_internal(asset: ContractId, amount: u64) {
     // Note: no accrue interest, BorrowCF < LiquidationCF covers small changes
     require(is_borrow_collateralized(caller), Error::NotCollateralized);
 
-    transfer_to_address(amount, asset, caller);
+    transfer_to_address(caller, asset, amount);
 }
 
 // @Callable supply_base()
@@ -825,7 +825,7 @@ fn withdraw_base_internal(amount: u64) {
         }
     }
 
-    transfer_to_address(amount, config.base_token, caller);
+    transfer_to_address(caller, config.base_token, amount);
 
     // burn(withdraw_amount); 
 }
@@ -890,7 +890,7 @@ impl Market for Contract {
     }
 
     #[storage(read)]
-    fn get_oracle_price(asset: ContractId) -> u64 {
+    fn get_oracle_price(asset: AssetId) -> u64 {
         let base_token_price_feed = get_config().base_token_price_feed;
         get_price(asset, base_token_price_feed)
     }
@@ -940,8 +940,8 @@ impl Market for Contract {
     }
 
     #[storage(read)]
-    fn get_user_collateral(address: Address, asset: ContractId) -> u64 {
-        storage.user_collateral.get((address, asset)).try_read().unwrap_or(0u64)
+    fn get_user_collateral(address: Address, asset: AssetId) -> u64 {
+        storage.user_collateral.get((address, asset)).try_read().unwrap_or(0)
     }
 
     #[storage(read)]
@@ -958,7 +958,7 @@ impl Market for Contract {
         }
     }
 
-    fn balance_of(asset: ContractId) -> u64 {
+    fn balance_of(asset: AssetId) -> u64 {
         this_balance(asset)
     }
 
@@ -968,35 +968,35 @@ impl Market for Contract {
     }
 
     #[storage(read)]
-    fn totals_collateral(asset: ContractId) -> u64 {
+    fn totals_collateral(asset: AssetId) -> u64 {
         storage.totals_collateral.get(asset).try_read().unwrap_or(0u64)
     }
 
     #[storage(read)]
     fn available_to_borrow(account: Address) -> u64 {
         let mut borrow_limit = U128::new();
-        let mut index = 0u8;
+        let mut index = 0;
         let config = get_config();
         let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
         while index < storage.asset_configs.len() {
 
             if !is_in_asset(assets_in ,index){
-                index = index + 1u8;
+                index = index + 1;
                 continue
             }
 
             let asset_config = storage.asset_configs.get(index).unwrap().read();
 
-            let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0u64);
+            let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0);
             let balance = U128::from_u64(balance);
             let price = get_price(asset_config.asset, asset_config.price_feed); // decimals 9
             let price = U128::from_u64(price);
 
             let collateral_factor = U128::from_u64(asset_config.borrow_collateral_factor); // decimals 4
-            let scale = U128::from_u64(10.pow(asset_config.decimals + 4u8 + 9u8 - config.base_token_decimals));
+            let scale = U128::from_u64(10.pow(asset_config.decimals + 4 + 9 - config.base_token_decimals));
 
             borrow_limit += balance * price * collateral_factor / scale; //base_token_decimals
-            index = index + 1u8;
+            index = index + 1;
         };
         borrow_limit.as_u64().unwrap()
     }
@@ -1019,7 +1019,7 @@ impl Market for Contract {
         is_liquidatable_internal(account)
     }
     #[storage(read)]
-    fn get_collateral_reserves(asset: ContractId) -> I64 {
+    fn get_collateral_reserves(asset: AssetId) -> I64 {
         get_collateral_reserves_internal(asset)
     }
 
@@ -1033,12 +1033,12 @@ impl Market for Contract {
         withdraw_reserves_internal(to, amount)
     }
     #[storage(read)]
-    fn quote_collateral(asset: ContractId, base_amount: u64) -> u64 {
+    fn quote_collateral(asset: AssetId, base_amount: u64) -> u64 {
         quote_collateral_internal(asset, base_amount)
     }
 
     #[storage(read)]
-    fn collateral_value_to_sell(asset: ContractId, collateral_amount: u64) -> u64 {
+    fn collateral_value_to_sell(asset: AssetId, collateral_amount: u64) -> u64 {
         collateral_value_to_sell_internal(asset, collateral_amount)
     }
 
@@ -1055,7 +1055,7 @@ impl Market for Contract {
 
     #[payable]  
     #[storage(read)]
-    fn buy_collateral(asset: ContractId, min_amount: u64, recipient: Address) { // @Payment base_token
+    fn buy_collateral(asset: AssetId, min_amount: u64, recipient: Address) { // @Payment base_token
         buy_collateral_internal(asset, min_amount, recipient)
     }
 
@@ -1066,7 +1066,7 @@ impl Market for Contract {
     }
 
     #[storage(read, write)]
-    fn withdraw_collateral(asset: ContractId, amount: u64) {
+    fn withdraw_collateral(asset: AssetId, amount: u64) {
         withdraw_collateral_internal(asset, amount)
     }
 
@@ -1097,7 +1097,7 @@ impl Market for Contract {
     // }
 
     #[storage(read)]
-    fn get_asset_config_by_asset_id(asset: ContractId) -> AssetConfig {
+    fn get_asset_config_by_asset_id(asset: AssetId) -> AssetConfig {
         let (config, _) = get_asset_config_by_asset_id_internal(asset);
         config
     }
