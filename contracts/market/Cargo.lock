@@ -3363,6 +3363,7 @@ dependencies = [
 [[package]]
 name = "src20_sdk"
 version = "0.0.3"
+source = "git+https://github.com/compolabs/src-20.git?branch=token-factory#b3aea144a7f94fdd0fe6eabb38d336d2eef9103e"
 dependencies = [
  "dotenv",
  "fuels",
