@@ -12,7 +12,7 @@
       "components": [
         {
           "name": "__tuple_element",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -94,7 +94,7 @@
       "components": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -166,7 +166,7 @@
       "inputs": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -206,7 +206,7 @@
       "inputs": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -289,7 +289,7 @@
         "type": 7,
         "typeArguments": []
       },
-      "offset": 4180
+      "offset": 4212
     }
   ]
 }

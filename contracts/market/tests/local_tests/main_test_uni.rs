@@ -1,6 +1,6 @@
 use fuels::prelude::ViewOnlyAccount;
 use fuels::types::Address;
-use src20_sdk::{token_abi_calls, TokenContract};
+use src20_sdk::token_factory_abi_calls;
 
 use crate::utils::contracts_utils::market_utils::{
     deploy_market, get_market_config, market_abi_calls,
@@ -35,11 +35,9 @@ async fn main_test() {
     let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
 
     //--------------- TOKENS ---------------
-    let (assets, asset_configs) = init_tokens(&admin, oracle.contract_id().into()).await;
+    let (assets, asset_configs, factory) = init_tokens(&admin, oracle.contract_id().into()).await;
     let usdc = assets.get("USDC").unwrap();
-    let usdc_instance = TokenContract::new(usdc.contract_id, admin.clone());
     let uni = assets.get("UNI").unwrap();
-    let uni_instance = TokenContract::new(uni.contract_id, admin.clone());
 
     //--------------- MARKET ---------------
 
@@ -48,10 +46,10 @@ async fn main_test() {
     let market_config = get_market_config(
         admin.address().into(),
         admin.address().into(),
-        usdc.contract_id,
+        usdc.bits256,
         usdc.decimals,
         oracle.contract_id().into(),
-        assets.get("SWAY").unwrap().contract_id,
+        assets.get("SWAY").unwrap().bits256,
     );
 
     let step: Option<u64> = Option::Some(10000);
@@ -62,13 +60,13 @@ async fn main_test() {
 
     // ==================== Set oracle prices ====================
     let amount = parse_units(1, 9); //1 USDC = $1
-    oracle_abi_calls::set_price(&oracle, usdc.contract_id, amount).await;
-    let res = oracle_abi_calls::get_price(&oracle, usdc.contract_id).await;
+    oracle_abi_calls::set_price(&oracle, usdc.bits256, amount).await;
+    let res = oracle_abi_calls::get_price(&oracle, usdc.bits256).await;
     assert!(res.price == amount);
 
     let amount = parse_units(5, 9); //1 UNI = $5
-    oracle_abi_calls::set_price(&oracle, uni.contract_id, amount).await;
-    let res = oracle_abi_calls::get_price(&oracle, uni.contract_id).await;
+    oracle_abi_calls::set_price(&oracle, uni.bits256, amount).await;
+    let res = oracle_abi_calls::get_price(&oracle, uni.bits256).await;
     assert!(res.price == amount);
 
     println!("1 USDC = $1 ⎮ 1 UNI = $5\n");
@@ -80,13 +78,13 @@ async fn main_test() {
     // 🤙 Call: supply_base
     // 💰 Amount: 100.00 USDC
 
-    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.config.decimals);
+    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(0, "Bob", "supply_base", log_amount.as_str());
     println!("💸 Bob + {log_amount}");
 
     // Transfer of 100 USDC to the Bob's wallet
-    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+    token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)
         .await
         .unwrap();
 
@@ -112,13 +110,13 @@ async fn main_test() {
     // 🤙 Call: supply_collateral
     // 💰 Amount: 40.00 UNI ~ $200.00
 
-    let amount = parse_units(40 * AMOUNT_COEFFICIENT, uni.config.decimals);
+    let amount = parse_units(40 * AMOUNT_COEFFICIENT, uni.decimals);
     let log_amount = format!("{} UNI", amount as f64 / scale_9);
     print_case_title(1, "Alice", "supply_collateral", log_amount.as_str());
     println!("💸 Alice + {log_amount}");
 
     // Transfer of 40 UNI to the Alice's wallet
-    token_abi_calls::mint(&uni_instance, amount, alice_address)
+    token_factory_abi_calls::mint(&factory, alice_address, &uni.symbol, amount)
         .await
         .unwrap();
 
@@ -132,7 +130,7 @@ async fn main_test() {
         .unwrap();
 
     // Сheck supply balance equal to 40 UNI
-    let res = market_abi_calls::get_user_collateral(&inst, alice_address, uni.contract_id).await;
+    let res = market_abi_calls::get_user_collateral(&inst, alice_address, uni.bits256).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
@@ -144,7 +142,7 @@ async fn main_test() {
     // 🤙 Call: withdraw_base
     // 💰 Amount: 50.00 USDC
 
-    let amount = parse_units(50 * AMOUNT_COEFFICIENT, usdc.config.decimals);
+    let amount = parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(2, "Alice", "withdraw_base", log_amount.as_str());
 
@@ -167,13 +165,13 @@ async fn main_test() {
     // 🤙 Call: supply_collateral
     // 💰 Amount: 60.00 UNI ~ $300.00
 
-    let amount = parse_units(60 * AMOUNT_COEFFICIENT, uni.config.decimals);
+    let amount = parse_units(60 * AMOUNT_COEFFICIENT, uni.decimals);
     let log_amount = format!("{} UNI", amount as f64 / scale_9);
     print_case_title(3, "Chad", "supply_collateral", log_amount.as_str());
     println!("💸 Chad + {log_amount}");
 
     // Transfer of 60 UNI to the Chad's wallet
-    token_abi_calls::mint(&uni_instance, amount, chad_address)
+    token_factory_abi_calls::mint(&factory, chad_address, &uni.symbol, amount)
         .await
         .unwrap();
 
@@ -187,7 +185,7 @@ async fn main_test() {
         .unwrap();
 
     //Сheck supply balance equal to 60 UNI
-    let res = market_abi_calls::get_user_collateral(&inst, chad_address, uni.contract_id).await;
+    let res = market_abi_calls::get_user_collateral(&inst, chad_address, uni.bits256).await;
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
@@ -199,13 +197,13 @@ async fn main_test() {
     // 🤙 Call: supply_base
     // 💰 Amount: 200.00 USDC
 
-    let amount = parse_units(200 * AMOUNT_COEFFICIENT, usdc.config.decimals);
+    let amount = parse_units(200 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(4, "Chad", "supply_base", log_amount.as_str());
     println!("💸 Chad + {log_amount}");
 
     // Transfer of 200 USDC to the Chad's wallet
-    token_abi_calls::mint(&usdc_instance, amount, chad_address)
+    token_factory_abi_calls::mint(&factory, chad_address, &usdc.symbol, amount)
         .await
         .unwrap();
 
@@ -231,7 +229,7 @@ async fn main_test() {
     // 🤙 Call: withdraw_base
     // 💰 Amount: 100.00 USDC
 
-    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.config.decimals);
+    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(5, "Alice", "withdraw_base", log_amount.as_str());
 
@@ -243,7 +241,7 @@ async fn main_test() {
 
     // USDC balance should be amount + 50 USDC from case #2
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.config.decimals));
+    assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
     debug_state(&market, &wallets, usdc, uni).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
@@ -255,15 +253,15 @@ async fn main_test() {
     // 💰 Amount: -10%
 
     print_case_title(6, "Admin", "Drop of collateral price", "-10%");
-    let res = oracle_abi_calls::get_price(&oracle, uni.contract_id).await;
+    let res = oracle_abi_calls::get_price(&oracle, uni.bits256).await;
     let new_price = (res.price as f64 * 0.9) as u64;
     println!(
         "🔻 UNI price drops: ${}  -> ${}",
         res.price as f64 / scale_9,
         new_price as f64 / scale_9
     );
-    oracle_abi_calls::set_price(&oracle, uni.contract_id, new_price).await;
-    let res = oracle_abi_calls::get_price(&oracle, uni.contract_id).await;
+    oracle_abi_calls::set_price(&oracle, uni.bits256, new_price).await;
+    let res = oracle_abi_calls::get_price(&oracle, uni.bits256).await;
     assert!(new_price == res.price);
 
     debug_state(&market, &wallets, usdc, uni).await;
@@ -288,8 +286,7 @@ async fn main_test() {
     let (_, borrow) = market_abi_calls::get_user_supply_borrow(&market, alice_address).await;
     assert!(borrow == 0);
 
-    let amount =
-        market_abi_calls::get_user_collateral(&market, alice_address, uni.contract_id).await;
+    let amount = market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
     assert!(amount == 0);
 
     debug_state(&market, &wallets, usdc, uni).await;
@@ -302,19 +299,18 @@ async fn main_test() {
     // 💰 Amount: 172.44 USDC
 
     let inst = market.with_account(bob.clone()).unwrap();
-    let reservs = market_abi_calls::get_collateral_reserves(&market, uni.contract_id).await;
+    let reservs = market_abi_calls::get_collateral_reserves(&market, uni.bits256).await;
     assert!(!reservs.negative);
 
     let reservs = reservs.value;
     let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.contract_id, reservs)
-            .await;
+        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
 
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(8, "Bob", "buy_collateral", log_amount.as_str());
 
     // Transfer of amount to the wallet
-    token_abi_calls::mint(&usdc_instance, amount, bob_address)
+    token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)
         .await
         .unwrap();
 
@@ -329,7 +325,7 @@ async fn main_test() {
         &contracts,
         usdc.asset_id,
         amount,
-        uni.contract_id,
+        uni.bits256,
         1,
         addr,
     )
@@ -420,15 +416,14 @@ async fn main_test() {
     // 🤙 Call: withdraw_collateral
     // 💰 Amount: 270 UNI
 
-    let amount =
-        market_abi_calls::get_user_collateral(&market, chad_address, uni.contract_id).await;
+    let amount = market_abi_calls::get_user_collateral(&market, chad_address, uni.bits256).await;
     let log_amount = format!("{} UNI", amount as f64 / scale_9);
     print_case_title(12, "Chad", "withdraw_collateral", log_amount.as_str());
 
     //Chad calls withdraw_base
     let inst = market.with_account(chad.clone()).unwrap();
 
-    market_abi_calls::withdraw_collateral(&inst, &contracts, uni.contract_id, amount)
+    market_abi_calls::withdraw_collateral(&inst, &contracts, uni.bits256, amount)
         .await
         .unwrap();
 

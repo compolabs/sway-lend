@@ -10,7 +10,7 @@ abigen!(Contract(
 pub mod oracle_abi_calls {
     use std::collections::HashMap;
 
-    use fuels::{programs::call_response::FuelCallResponse, types::ContractId};
+    use fuels::{programs::call_response::FuelCallResponse, types::Bits256};
 
     use crate::utils::contracts_utils::token_utils::Asset;
 
@@ -22,10 +22,7 @@ pub mod oracle_abi_calls {
         [contract]
     }
 
-    pub async fn get_price(
-        contract: &OracleContract<WalletUnlocked>,
-        asset_id: ContractId,
-    ) -> Price {
+    pub async fn get_price(contract: &OracleContract<WalletUnlocked>, asset_id: Bits256) -> Price {
         contract
             .methods()
             .get_price(asset_id)
@@ -48,15 +45,16 @@ pub mod oracle_abi_calls {
                 Some(p) => (p * 10f64.powf(9f64)).round() as u64,
                 _ => asset.default_price,
             };
-            set_price(contract, asset.contract_id, price).await;
+            set_price(contract, asset.bits256, price).await;
         }
     }
 
     pub async fn set_price(
         contract: &OracleContract<WalletUnlocked>,
-        asset_id: ContractId,
+        asset_id: Bits256,
         new_price: u64,
     ) -> FuelCallResponse<()> {
+        // let bits256 = Bits256::from_hex_str(&asset_id.to_string()).unwrap();
         contract
             .methods()
             .set_price(asset_id, new_price)
@@ -64,7 +62,6 @@ pub mod oracle_abi_calls {
             .await
             .unwrap()
     }
-
 }
 
 pub async fn deploy_oracle(wallet: &WalletUnlocked) -> OracleContract<WalletUnlocked> {
