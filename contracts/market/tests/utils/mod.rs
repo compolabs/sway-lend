@@ -1,16 +1,14 @@
+use crate::utils::contracts_utils::market_utils::market_abi_calls;
+use crate::utils::number_utils::format_units;
 use fuels::accounts::ViewOnlyAccount;
-use fuels::types::Bits256;
 use fuels::{
     accounts::wallet::WalletUnlocked,
-    prelude::BASE_ASSET_ID,
     test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig},
     types::{Address, AssetId, ContractId},
 };
-use src20_sdk::{deploy_token_contract, DeployTokenConfig};
-use std::{collections::HashMap, fs, str::FromStr};
-
-use crate::utils::contracts_utils::market_utils::market_abi_calls;
-use crate::utils::number_utils::format_units;
+use src20_sdk::TokenFactoryContract;
+use src20_sdk::{deploy_token_factory_contract, token_factory_abi_calls};
+use std::{collections::HashMap, fs};
 
 use self::contracts_utils::market_utils::{AssetConfig, MarketContract};
 use self::contracts_utils::token_utils::Asset;
@@ -54,7 +52,11 @@ pub async fn init_wallets() -> Vec<WalletUnlocked> {
 pub async fn init_tokens(
     admin: &WalletUnlocked,
     price_feed: ContractId,
-) -> (HashMap<String, Asset>, Vec<AssetConfig>) {
+) -> (
+    HashMap<String, Asset>,
+    Vec<AssetConfig>,
+    TokenFactoryContract<WalletUnlocked>,
+) {
     let deploy_config_json_str = fs::read_to_string("tests/artefacts/tokens.json")
         .expect("Should have been able to read the file");
     let deploy_configs: serde_json::Value =
@@ -62,22 +64,24 @@ pub async fn init_tokens(
     let deploy_configs = deploy_configs.as_array().unwrap();
     let mut assets: HashMap<String, Asset> = HashMap::new();
     let mut asset_configs: Vec<AssetConfig> = vec![];
-    for config_value in deploy_configs {
-        let config = DeployTokenConfig {
-            name: String::from(config_value["name"].as_str().unwrap()),
-            symbol: String::from(config_value["symbol"].as_str().unwrap()),
-            decimals: config_value["decimals"].as_u64().unwrap() ,
-        };
 
-        let instance = if config.symbol != "ETH" {
-            Some(deploy_token_contract(&admin, &config, "tests/artefacts/token/FRC20.bin").await)
-        } else {
-            None
-        };
-        let bits256 = match instance {
-            Option::Some(instance) => instance.methods().asset_id().call().await.unwrap().value,
-            Option::None => Bits256::from_hex_str(BASE_ASSET_ID.to_string().as_str()).unwrap(),
-        };
+    let bin_path = "tests/artefacts/factory/token-factory.bin";
+    let factory = deploy_token_factory_contract(&admin, &bin_path).await;
+
+    for config_value in deploy_configs {
+        let name = String::from(config_value["name"].as_str().unwrap());
+        let symbol = String::from(config_value["symbol"].as_str().unwrap());
+        let decimals = config_value["decimals"].as_u64().unwrap();
+
+        token_factory_abi_calls::deploy(&factory, &symbol, &name, decimals)
+            .await
+            .unwrap();
+
+        let bits256 = token_factory_abi_calls::asset_id(&factory, &symbol)
+            .await
+            .unwrap()
+            .value;
+
         if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
             asset_configs.push(AssetConfig {
                 asset: bits256,
@@ -97,21 +101,20 @@ pub async fn init_tokens(
         assets.insert(
             String::from(config_value["symbol"].as_str().unwrap()),
             Asset {
-                config,
-                contract_id: ContractId::from(bits256.0),
+                bits256,
                 asset_id: AssetId::from(bits256.0),
+                // factory: factory.contract_id().into(),
                 default_price: config_value["default_price"].as_u64().unwrap_or(0) * 10u64.pow(9),
-                instance: Option::None,
                 decimals: config_value["decimals"].as_u64().unwrap(),
                 symbol: config_value["symbol"].as_str().unwrap().into(),
                 coingeco_id: config_value["coingeco_id"].as_str().unwrap().into(),
             },
         );
     }
-    (assets, asset_configs)
+    (assets, asset_configs, factory)
 }
 
-fn convertI64(value: contracts_utils::market_utils::I64) -> i64 {
+fn convert_i64(value: contracts_utils::market_utils::I64) -> i64 {
     // let is_negative = value.underlying < 9223372036854775808u64;
     // let value = value.underlying - 9223372036854775808u64;
     // value.underlying as i64 - 9223372036854775808u64 as i64
@@ -142,23 +145,21 @@ pub async fn debug_state(
 
     let market_basic = market_abi_calls::get_market_basics(&market).await;
     let usdc_balance =
-        market_abi_calls::balance_of(&market, usdc.contract_id).await as f64 / 10u64.pow(6) as f64;
+        market_abi_calls::balance_of(&market, usdc.bits256).await as f64 / 10u64.pow(6) as f64;
     let collateral_balance = format_units(
-        market_abi_calls::balance_of(&market, collateral.contract_id).await,
+        market_abi_calls::balance_of(&market, collateral.bits256).await,
         collateral_decimals,
     );
     let utilization = market_abi_calls::get_utilization(&market).await as f64 / scale18;
     let s_rate = market_basic.base_supply_index as f64 / scale18;
     let b_rate = market_basic.base_borrow_index as f64 / scale18;
-    let total_collateral =
-        market_abi_calls::totals_collateral(&market, collateral.contract_id).await;
+    let total_collateral = market_abi_calls::totals_collateral(&market, collateral.bits256).await;
     let last_accrual_time = market_basic.last_accrual_time;
-    let usdc_reservs = convertI64(market_abi_calls::get_reserves(&market).await);
+    let usdc_reservs = convert_i64(market_abi_calls::get_reserves(&market).await);
 
     let usdc_reservs = format!("{} USDC", usdc_reservs as f64 / 10u64.pow(6) as f64);
-    let collateral_reservs = convertI64(
-        market_abi_calls::get_collateral_reserves(&market, collateral.contract_id).await,
-    );
+    let collateral_reservs =
+        convert_i64(market_abi_calls::get_collateral_reserves(&market, collateral.bits256).await);
     let collateral_reservs = format!(
         "{} {collateral_symbol}",
         collateral_reservs as f64 / 10u64.pow(collateral_decimals as u32) as f64
@@ -201,9 +202,9 @@ pub async fn debug_state(
     let collateral_balance = alice.get_asset_balance(&collateral_asset_id).await.unwrap() as f64
         / 10u64.pow(collateral_decimals as u32) as f64;
     let collateral_amount =
-        market_abi_calls::get_user_collateral(&market, alice_address, collateral.contract_id).await;
+        market_abi_calls::get_user_collateral(&market, alice_address, collateral.bits256).await;
     println!("\nAlice 🦹");
-    println!("  Principal = {}", convertI64(basic.principal));
+    println!("  Principal = {}", convert_i64(basic.principal));
     println!("  Present supply = {supply} USDC | borrow = {borrow} USDC");
     println!(
         "  Supplied collateral {} {collateral_symbol}",
@@ -220,10 +221,10 @@ pub async fn debug_state(
     let collateral_balance = bob.get_asset_balance(&collateral_asset_id).await.unwrap() as f64
         / 10u64.pow(collateral_decimals as u32) as f64;
     let collateral_amount =
-        market_abi_calls::get_user_collateral(&market, bob_address, collateral.contract_id).await;
+        market_abi_calls::get_user_collateral(&market, bob_address, collateral.bits256).await;
     println!("\nBob 🧛");
 
-    println!("  Principal = {}", convertI64(basic.principal));
+    println!("  Principal = {}", convert_i64(basic.principal));
     println!("  Present supply = {supply} USDC | borrow = {borrow} USDC");
     println!(
         "  Supplied collateral {} {collateral_symbol}",
@@ -240,9 +241,9 @@ pub async fn debug_state(
     let collateral_balance = chad.get_asset_balance(&collateral_asset_id).await.unwrap() as f64
         / 10u64.pow(collateral_decimals as u32) as f64;
     let collateral_amount =
-        market_abi_calls::get_user_collateral(&market, chad_address, collateral.contract_id).await;
+        market_abi_calls::get_user_collateral(&market, chad_address, collateral.bits256).await;
     println!("\nChad 🤵");
-    println!("  Principal = {}", convertI64(basic.principal));
+    println!("  Principal = {}", convert_i64(basic.principal));
     println!("  Present supply = {supply} USDC | borrow = {borrow} USDC");
     println!(
         "  Supplied collateral {} {collateral_symbol}",

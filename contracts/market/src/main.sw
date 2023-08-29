@@ -680,7 +680,7 @@ fn absorb_internal(account: Address) {
 
     // if supply_amount > 0, issue LP token in the amount equal to supply_amount and send it to the user
     // if supply_amount > 0 {
-    //     mint_to_address(supply_amount, absorber);
+        // mint_to_address(supply_amount, absorber);
     // }
 }
 

@@ -53,13 +53,18 @@
     {
       "inputs": [
         {
-          "name": "amount",
-          "type": 5,
+          "name": "recipient",
+          "type": 4,
           "typeArguments": null
         },
         {
-          "name": "recipient",
-          "type": 4,
+          "name": "symbol_hash",
+          "type": 1,
+          "typeArguments": null
+        },
+        {
+          "name": "amount",
+          "type": 5,
           "typeArguments": null
         }
       ],
@@ -80,7 +85,13 @@
       ]
     },
     {
-      "inputs": [],
+      "inputs": [
+        {
+          "name": "symbol_hash",
+          "type": 1,
+          "typeArguments": null
+        }
+      ],
       "name": "asset_id",
       "output": {
         "name": "",
@@ -147,7 +158,7 @@
         "type": 6,
         "typeArguments": null
       },
-      "offset": 3888
+      "offset": 3880
     },
     {
       "name": "NAME",
@@ -156,7 +167,7 @@
         "type": 2,
         "typeArguments": null
       },
-      "offset": 3896
+      "offset": 3888
     },
     {
       "name": "SYMBOL",
@@ -165,7 +176,7 @@
         "type": 3,
         "typeArguments": null
       },
-      "offset": 3928
+      "offset": 3920
     },
     {
       "name": "OWNER",
@@ -174,7 +185,7 @@
         "type": 4,
         "typeArguments": []
       },
-      "offset": 3784
+      "offset": 3776
     }
   ]
 }

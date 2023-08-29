@@ -3366,6 +3366,7 @@ version = "0.0.3"
 dependencies = [
  "dotenv",
  "fuels",
+ "tai64",
 ]
 
 [[package]]
