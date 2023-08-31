@@ -174,7 +174,8 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        .get_asset_config_by_asset_id({ value: b.assetId })
+        // .get_asset_config_by_asset_id({ value: b.assetId })
+        .get_asset_config_by_asset_id(b.assetId)
         .simulate()
     );
     const data = await Promise.all(functions);
@@ -194,7 +195,8 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        .totals_collateral({ value: b.assetId })
+        // .totals_collateral({ value: b.assetId })
+        .totals_collateral(b.assetId)
         .simulate()
     );
     const data = await Promise.all(functions);
@@ -241,13 +243,15 @@ class DashboardVm {
   };
   updateTotalBaseTokenReserve = async (marketContract: MarketAbi) => {
     const { value } = await marketContract.functions
-      .balance_of({ value: this.baseToken.assetId })
+      // .balance_of({ value: this.baseToken.assetId })
+      .balance_of(this.baseToken.assetId)
       .simulate();
     this.setBaseTokenReserve(new BN(value.toString()));
   };
   updateTotalLiquidity = async (marketContract: MarketAbi) => {
     const result = await marketContract.functions
-      .balance_of({ value: this.baseToken.assetId })
+      // .balance_of({ value: this.baseToken.assetId })
+      .balance_of(this.baseToken.assetId)
       .simulate();
     const result2 = await marketContract.functions.get_reserves().simulate();
     // const liq = BN.formatUnits(
@@ -283,9 +287,10 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        .get_user_collateral(addressInput, {
-          value: b.assetId,
-        })
+        // .get_user_collateral(addressInput, {
+        //   value: b.assetId,
+        // })
+        .get_user_collateral(addressInput, b.assetId)
         .simulate()
     );
     const data = await Promise.all(functions);
@@ -305,7 +310,8 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        .get_asset_config_by_asset_id({ value: b.assetId })
+        // .get_asset_config_by_asset_id({ value: b.assetId })
+        .get_asset_config_by_asset_id(b.assetId)
         .simulate()
     );
     const data = await Promise.all(functions);
