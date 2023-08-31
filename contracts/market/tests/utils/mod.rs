@@ -8,10 +8,10 @@ use fuels::{
 };
 use src20_sdk::TokenFactoryContract;
 use src20_sdk::{deploy_token_factory_contract, token_factory_abi_calls};
-use std::{collections::HashMap, fs};
+use std::collections::HashMap;
 
 use self::contracts_utils::market_utils::{AssetConfig, MarketContract};
-use self::contracts_utils::token_utils::Asset;
+use self::contracts_utils::token_utils::{Asset, TokenConfig};
 
 pub mod contracts_utils;
 pub mod number_utils;
@@ -20,15 +20,22 @@ pub fn print_title(title: &str) {
     println!(
         r#"
 
-███████╗██╗    ██╗ █████╗ ██╗   ██╗     ██████╗  █████╗ ███╗   ██╗ ██████╗ 
-██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝    ██╔════╝ ██╔══██╗████╗  ██║██╔════╝ 
-███████╗██║ █╗ ██║███████║ ╚████╔╝     ██║  ███╗███████║██╔██╗ ██║██║  ███╗
-╚════██║██║███╗██║██╔══██║  ╚██╔╝      ██║   ██║██╔══██║██║╚██╗██║██║   ██║
-███████║╚███╔███╔╝██║  ██║   ██║       ╚██████╔╝██║  ██║██║ ╚████║╚██████╔╝
-╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝                                                                         
-
+ ██████╗ ██████╗ ███╗   ███╗██████╗  ██████╗ ███████╗ █████╗ ██████╗ ██╗██╗     ██╗████████╗██╗   ██╗
+██╔════╝██╔═══██╗████╗ ████║██╔══██╗██╔═══██╗██╔════╝██╔══██╗██╔══██╗██║██║     ██║╚══██╔══╝╚██╗ ██╔╝
+██║     ██║   ██║██╔████╔██║██████╔╝██║   ██║███████╗███████║██████╔╝██║██║     ██║   ██║    ╚████╔╝ 
+██║     ██║   ██║██║╚██╔╝██║██╔═══╝ ██║   ██║╚════██║██╔══██║██╔══██╗██║██║     ██║   ██║     ╚██╔╝  
+╚██████╗╚██████╔╝██║ ╚═╝ ██║██║     ╚██████╔╝███████║██║  ██║██████╔╝██║███████╗██║   ██║      ██║   
+ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝      ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═════╝ ╚═╝╚══════╝╚═╝   ╚═╝      ╚═╝   
+                                                                                                     
+██╗      █████╗ ██████╗ ███████╗                                                                     
+██║     ██╔══██╗██╔══██╗██╔════╝                                                                     
+██║     ███████║██████╔╝███████╗                                                                     
+██║     ██╔══██║██╔══██╗╚════██║                                                                     
+███████╗██║  ██║██████╔╝███████║                                                                     
+╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝                                                                     
+                                                                                                     
+                                                                    
 🏁 {title} 🏁 
-Market config: ./src/tests/market.sw:293:5
 "#
     );
 }
@@ -57,21 +64,19 @@ pub async fn init_tokens(
     Vec<AssetConfig>,
     TokenFactoryContract<WalletUnlocked>,
 ) {
-    let deploy_config_json_str = fs::read_to_string("tests/artefacts/tokens.json")
-        .expect("Should have been able to read the file");
-    let deploy_configs: serde_json::Value =
-        serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
-    let deploy_configs = deploy_configs.as_array().unwrap();
+    let bin_path = "tests/artefacts/factory/token-factory.bin";
+    let factory = deploy_token_factory_contract(admin, &bin_path).await;
+
+    let tokens_json = std::fs::read_to_string("tests/artefacts/tokens.json").unwrap();
+    let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
+
     let mut assets: HashMap<String, Asset> = HashMap::new();
     let mut asset_configs: Vec<AssetConfig> = vec![];
 
-    let bin_path = "tests/artefacts/factory/token-factory.bin";
-    let factory = deploy_token_factory_contract(&admin, &bin_path).await;
-
-    for config_value in deploy_configs {
-        let name = String::from(config_value["name"].as_str().unwrap());
-        let symbol = String::from(config_value["symbol"].as_str().unwrap());
-        let decimals = config_value["decimals"].as_u64().unwrap();
+    for config in token_configs {
+        let name = config.name;
+        let symbol = config.symbol;
+        let decimals = config.decimals;
 
         token_factory_abi_calls::deploy(&factory, &symbol, &name, decimals)
             .await
@@ -82,32 +87,27 @@ pub async fn init_tokens(
             .unwrap()
             .value;
 
-        if config_value["symbol"].as_str().unwrap() != String::from("USDC") {
+        if symbol != "USDC" {
             asset_configs.push(AssetConfig {
                 asset: bits256,
-                decimals: config_value["decimals"].as_u64().unwrap(),
-                price_feed: price_feed,
-                borrow_collateral_factor: config_value["borrow_collateral_factor"]
-                    .as_u64()
-                    .unwrap(), // decimals: 4
-                liquidate_collateral_factor: config_value["liquidate_collateral_factor"]
-                    .as_u64()
-                    .unwrap(), // decimals: 4
-                liquidation_penalty: config_value["liquidation_penalty"].as_u64().unwrap(), // decimals: 4
-                supply_cap: config_value["supply_cap"].as_u64().unwrap(), // decimals: asset decimals
+                decimals: config.decimals,
+                price_feed,
+                borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4
+                liquidate_collateral_factor: config.liquidate_collateral_factor.unwrap(), // decimals: 4
+                liquidation_penalty: config.liquidation_penalty.unwrap(), // decimals: 4
+                supply_cap: config.supply_cap.unwrap(), // decimals: asset decimals
             });
         }
 
         assets.insert(
-            String::from(config_value["symbol"].as_str().unwrap()),
+            symbol.clone(),
             Asset {
                 bits256,
                 asset_id: AssetId::from(bits256.0),
-                // factory: factory.contract_id().into(),
-                default_price: config_value["default_price"].as_u64().unwrap_or(0) * 10u64.pow(9),
-                decimals: config_value["decimals"].as_u64().unwrap(),
-                symbol: config_value["symbol"].as_str().unwrap().into(),
-                coingeco_id: config_value["coingeco_id"].as_str().unwrap().into(),
+                default_price: config.default_price,
+                decimals: config.decimals,
+                symbol,
+                coingeco_id: config.coingeco_id,
             },
         );
     }

@@ -52,6 +52,7 @@ async fn main_test() {
         assets.get("SWAY").unwrap().bits256,
     );
 
+    // debug step
     let step: Option<u64> = Option::Some(10000);
 
     market_abi_calls::initialize(&market, &market_config, &asset_configs, step)

@@ -1,14 +1,25 @@
 use fuels::types::{AssetId, Bits256};
+use serde::Deserialize;
 
 pub struct Asset {
-    // pub config: DeployTokenConfig,
     pub bits256: Bits256,
-    // pub contract_id: ContractId,
     pub asset_id: AssetId,
-    // pub instance: Option<TokenContract<WalletUnlocked>>,
     pub default_price: u64,
     pub decimals: u64,
     pub symbol: String,
     pub coingeco_id: String,
-    // pub asset_config: AssetConfig,
+}
+
+#[derive(Deserialize)]
+pub struct TokenConfig {
+    pub asset_id: String,
+    pub name: String,
+    pub symbol: String,
+    pub coingeco_id: String,
+    pub default_price: u64,
+    pub decimals: u64,
+    pub borrow_collateral_factor: Option<u64>,
+    pub liquidate_collateral_factor: Option<u64>,
+    pub liquidation_penalty: Option<u64>,
+    pub supply_cap: Option<u64>,
 }

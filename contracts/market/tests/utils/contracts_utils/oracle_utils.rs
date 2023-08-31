@@ -65,13 +65,13 @@ pub mod oracle_abi_calls {
 }
 
 pub async fn deploy_oracle(wallet: &WalletUnlocked) -> OracleContract<WalletUnlocked> {
-    let configurables = OracleContractConfigurables::default().set_ADMIN(wallet.address().into());
+    let configurables = OracleContractConfigurables::default().with_ADMIN(wallet.address().into());
     let id = Contract::load_from(
         "./tests/artefacts/oracle/oracle.bin",
-        LoadConfiguration::default().set_configurables(configurables),
+        LoadConfiguration::default().with_configurables(configurables),
     )
     .unwrap()
-    .deploy(wallet, TxParameters::default().set_gas_price(1))
+    .deploy(wallet, TxParameters::default().with_gas_price(1))
     .await
     .unwrap();
 
