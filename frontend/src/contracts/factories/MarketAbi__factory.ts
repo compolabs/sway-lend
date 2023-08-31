@@ -4,13 +4,13 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.0
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.54.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
-import { Interface, Contract } from "fuels";
-import type { Provider, Account, AbstractAddress } from "fuels";
+import { Interface, Contract, ContractFactory } from "fuels";
+import type { Provider, Account, AbstractAddress, BytesLike, DeployContractOptions } from "fuels";
 import type { MarketAbi, MarketAbiInterface } from "../MarketAbi";
 
 const _abi = {
@@ -171,7 +171,7 @@ const _abi = {
       "components": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -181,7 +181,7 @@ const _abi = {
         },
         {
           "name": "decimals",
-          "type": 19,
+          "type": 18,
           "typeArguments": null
         },
         {
@@ -294,12 +294,12 @@ const _abi = {
         },
         {
           "name": "base_token",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
           "name": "base_token_decimals",
-          "type": 19,
+          "type": 18,
           "typeArguments": null
         },
         {
@@ -369,7 +369,7 @@ const _abi = {
         },
         {
           "name": "reward_token",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -478,12 +478,6 @@ const _abi = {
       "type": "u64",
       "components": null,
       "typeParameters": null
-    },
-    {
-      "typeId": 19,
-      "type": "u8",
-      "components": null,
-      "typeParameters": null
     }
   ],
   "functions": [
@@ -544,7 +538,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -560,7 +554,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -582,14 +576,14 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "payable",
+          "arguments": []
+        },
+        {
           "name": "storage",
           "arguments": [
             "read"
           ]
-        },
-        {
-          "name": "payable",
-          "arguments": []
         }
       ]
     },
@@ -597,7 +591,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -643,7 +637,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -729,7 +723,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -786,7 +780,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -877,7 +871,7 @@ const _abi = {
         },
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -1033,7 +1027,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -1089,15 +1083,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -1105,7 +1099,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -1152,7 +1146,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset",
-          "type": 10,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -1406,5 +1400,14 @@ export class MarketAbi__factory {
     accountOrProvider: Account | Provider
   ): MarketAbi {
     return new Contract(id, _abi, accountOrProvider) as unknown as MarketAbi
+  }
+  static async deployContract(
+    bytecode: BytesLike,
+    wallet: Account,
+    options: DeployContractOptions = {}
+  ): Promise<MarketAbi> {
+    const factory = new ContractFactory(bytecode, _abi, wallet);
+    const contract = await factory.deployContract(options);
+    return contract as unknown as MarketAbi;
   }
 }

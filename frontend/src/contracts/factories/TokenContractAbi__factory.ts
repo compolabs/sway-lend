@@ -4,13 +4,13 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.0
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.54.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
-import { Interface, Contract } from "fuels";
-import type { Provider, Account, AbstractAddress } from "fuels";
+import { Interface, Contract, ContractFactory } from "fuels";
+import type { Provider, Account, AbstractAddress, BytesLike, DeployContractOptions } from "fuels";
 import type { TokenContractAbi, TokenContractAbiInterface } from "../TokenContractAbi";
 
 const _abi = {
@@ -620,5 +620,14 @@ export class TokenContractAbi__factory {
     accountOrProvider: Account | Provider
   ): TokenContractAbi {
     return new Contract(id, _abi, accountOrProvider) as unknown as TokenContractAbi
+  }
+  static async deployContract(
+    bytecode: BytesLike,
+    wallet: Account,
+    options: DeployContractOptions = {}
+  ): Promise<TokenContractAbi> {
+    const factory = new ContractFactory(bytecode, _abi, wallet);
+    const contract = await factory.deployContract(options);
+    return contract as unknown as TokenContractAbi;
   }
 }

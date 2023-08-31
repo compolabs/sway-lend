@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.0
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.54.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
 import type {
@@ -22,8 +22,8 @@ import type {
 
 import type { Enum } from "./common";
 
-export type ErrorInput = Enum<{ AddressAlreadyMint: [], CannotReinitialize: [], MintIsClosed: [], NotOwner: [] }>;
-export type ErrorOutput = ErrorInput;
+export enum ErrorInput { AddressAlreadyMint = 'AddressAlreadyMint', CannotReinitialize = 'CannotReinitialize', MintIsClosed = 'MintIsClosed', NotOwner = 'NotOwner' };
+export enum ErrorOutput { AddressAlreadyMint = 'AddressAlreadyMint', CannotReinitialize = 'CannotReinitialize', MintIsClosed = 'MintIsClosed', NotOwner = 'NotOwner' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;

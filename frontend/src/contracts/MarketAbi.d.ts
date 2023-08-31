@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.0
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.54.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
 import type {
@@ -22,21 +22,21 @@ import type {
 
 import type { Option, Enum, Vec } from "./common";
 
-export type ErrorInput = Enum<{ AlreadyInitialized: [], Paused: [], Unauthorized: [], InsufficientReserves: [], NotLiquidatable: [], NotForSale: [], TooMuchSlippage: [], SupplyCapExceeded: [], NotCollateralized: [], BorrowTooSmall: [], NotPermitted: [], InvalidPayment: [], DebuggingDisabled: [] }>;
-export type ErrorOutput = ErrorInput;
+export enum ErrorInput { AlreadyInitialized = 'AlreadyInitialized', Paused = 'Paused', Unauthorized = 'Unauthorized', InsufficientReserves = 'InsufficientReserves', NotLiquidatable = 'NotLiquidatable', NotForSale = 'NotForSale', TooMuchSlippage = 'TooMuchSlippage', SupplyCapExceeded = 'SupplyCapExceeded', NotCollateralized = 'NotCollateralized', BorrowTooSmall = 'BorrowTooSmall', NotPermitted = 'NotPermitted', InvalidPayment = 'InvalidPayment', DebuggingDisabled = 'DebuggingDisabled' };
+export enum ErrorOutput { AlreadyInitialized = 'AlreadyInitialized', Paused = 'Paused', Unauthorized = 'Unauthorized', InsufficientReserves = 'InsufficientReserves', NotLiquidatable = 'NotLiquidatable', NotForSale = 'NotForSale', TooMuchSlippage = 'TooMuchSlippage', SupplyCapExceeded = 'SupplyCapExceeded', NotCollateralized = 'NotCollateralized', BorrowTooSmall = 'BorrowTooSmall', NotPermitted = 'NotPermitted', InvalidPayment = 'InvalidPayment', DebuggingDisabled = 'DebuggingDisabled' };
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
-export type AssetConfigInput = { asset: ContractIdInput, price_feed: ContractIdInput, decimals: BigNumberish, borrow_collateral_factor: BigNumberish, liquidate_collateral_factor: BigNumberish, liquidation_penalty: BigNumberish, supply_cap: BigNumberish };
-export type AssetConfigOutput = { asset: ContractIdOutput, price_feed: ContractIdOutput, decimals: number, borrow_collateral_factor: BN, liquidate_collateral_factor: BN, liquidation_penalty: BN, supply_cap: BN };
+export type AssetConfigInput = { asset: string, price_feed: ContractIdInput, decimals: BigNumberish, borrow_collateral_factor: BigNumberish, liquidate_collateral_factor: BigNumberish, liquidation_penalty: BigNumberish, supply_cap: BigNumberish };
+export type AssetConfigOutput = { asset: string, price_feed: ContractIdOutput, decimals: BN, borrow_collateral_factor: BN, liquidate_collateral_factor: BN, liquidation_penalty: BN, supply_cap: BN };
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 export type I64Input = { value: BigNumberish, negative: boolean };
 export type I64Output = { value: BN, negative: boolean };
 export type MarketBasicsInput = { base_supply_index: BigNumberish, base_borrow_index: BigNumberish, tracking_supply_index: BigNumberish, tracking_borrow_index: BigNumberish, total_supply_base: BigNumberish, total_borrow_base: BigNumberish, last_accrual_time: BigNumberish };
 export type MarketBasicsOutput = { base_supply_index: BN, base_borrow_index: BN, tracking_supply_index: BN, tracking_borrow_index: BN, total_supply_base: BN, total_borrow_base: BN, last_accrual_time: BN };
-export type MarketConfigurationInput = { governor: AddressInput, pause_guardian: AddressInput, base_token: ContractIdInput, base_token_decimals: BigNumberish, base_token_price_feed: ContractIdInput, kink: BigNumberish, supply_per_second_interest_rate_slope_low: BigNumberish, supply_per_second_interest_rate_slope_high: BigNumberish, borrow_per_second_interest_rate_slope_low: BigNumberish, borrow_per_second_interest_rate_slope_high: BigNumberish, borrow_per_second_interest_rate_base: BigNumberish, store_front_price_factor: BigNumberish, base_tracking_supply_speed: BigNumberish, base_tracking_borrow_speed: BigNumberish, base_min_for_rewards: BigNumberish, base_borrow_min: BigNumberish, target_reserves: BigNumberish, reward_token: ContractIdInput };
-export type MarketConfigurationOutput = { governor: AddressOutput, pause_guardian: AddressOutput, base_token: ContractIdOutput, base_token_decimals: number, base_token_price_feed: ContractIdOutput, kink: BN, supply_per_second_interest_rate_slope_low: BN, supply_per_second_interest_rate_slope_high: BN, borrow_per_second_interest_rate_slope_low: BN, borrow_per_second_interest_rate_slope_high: BN, borrow_per_second_interest_rate_base: BN, store_front_price_factor: BN, base_tracking_supply_speed: BN, base_tracking_borrow_speed: BN, base_min_for_rewards: BN, base_borrow_min: BN, target_reserves: BN, reward_token: ContractIdOutput };
+export type MarketConfigurationInput = { governor: AddressInput, pause_guardian: AddressInput, base_token: string, base_token_decimals: BigNumberish, base_token_price_feed: ContractIdInput, kink: BigNumberish, supply_per_second_interest_rate_slope_low: BigNumberish, supply_per_second_interest_rate_slope_high: BigNumberish, borrow_per_second_interest_rate_slope_low: BigNumberish, borrow_per_second_interest_rate_slope_high: BigNumberish, borrow_per_second_interest_rate_base: BigNumberish, store_front_price_factor: BigNumberish, base_tracking_supply_speed: BigNumberish, base_tracking_borrow_speed: BigNumberish, base_min_for_rewards: BigNumberish, base_borrow_min: BigNumberish, target_reserves: BigNumberish, reward_token: string };
+export type MarketConfigurationOutput = { governor: AddressOutput, pause_guardian: AddressOutput, base_token: string, base_token_decimals: BN, base_token_price_feed: ContractIdOutput, kink: BN, supply_per_second_interest_rate_slope_low: BN, supply_per_second_interest_rate_slope_high: BN, borrow_per_second_interest_rate_slope_low: BN, borrow_per_second_interest_rate_slope_high: BN, borrow_per_second_interest_rate_base: BN, store_front_price_factor: BN, base_tracking_supply_speed: BN, base_tracking_borrow_speed: BN, base_min_for_rewards: BN, base_borrow_min: BN, target_reserves: BN, reward_token: string };
 export type PauseConfigurationInput = { supply_paused: boolean, withdraw_paused: boolean, absorb_paused: boolean, buy_pause: boolean };
 export type PauseConfigurationOutput = PauseConfigurationInput;
 export type UserBasicInput = { principal: I64Input, base_tracking_index: BigNumberish, base_tracking_accrued: BigNumberish, reward_claimed: BigNumberish };
@@ -78,33 +78,33 @@ interface MarketAbiInterface extends Interface {
 
   encodeFunctionData(functionFragment: 'absorb', values: [Vec<AddressInput>]): Uint8Array;
   encodeFunctionData(functionFragment: 'available_to_borrow', values: [AddressInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'balance_of', values: [ContractIdInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'buy_collateral', values: [ContractIdInput, BigNumberish, AddressInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'collateral_value_to_sell', values: [ContractIdInput, BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'balance_of', values: [string]): Uint8Array;
+  encodeFunctionData(functionFragment: 'buy_collateral', values: [string, BigNumberish, AddressInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'collateral_value_to_sell', values: [string, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'debug_increment_timestamp', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_asset_config_by_asset_id', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrow_rate', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrower', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrowers_amount', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_collateral_reserves', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_collateral_reserves', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_configuration', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_market_basics', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_oracle_price', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_oracle_price', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_reserves', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_supply_rate', values: [BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_user_basic', values: [AddressInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_user_collateral', values: [AddressInput, ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_user_collateral', values: [AddressInput, string]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_user_supply_borrow', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_utilization', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'initialize', values: [MarketConfigurationInput, Vec<AssetConfigInput>, Option<BigNumberish>]): Uint8Array;
   encodeFunctionData(functionFragment: 'is_liquidatable', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'pause', values: [PauseConfigurationInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'quote_collateral', values: [ContractIdInput, BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'quote_collateral', values: [string, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'supply_base', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'supply_collateral', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'totals_collateral', values: [ContractIdInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'totals_collateral', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'withdraw_base', values: [BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'withdraw_collateral', values: [ContractIdInput, BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'withdraw_collateral', values: [string, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'withdraw_reserves', values: [AddressInput, BigNumberish]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'absorb', data: BytesLike): DecodedValue;
@@ -144,33 +144,33 @@ export class MarketAbi extends Contract {
   functions: {
     absorb: InvokeFunction<[accounts: Vec<AddressInput>], void>;
     available_to_borrow: InvokeFunction<[account: AddressInput], BN>;
-    balance_of: InvokeFunction<[asset: ContractIdInput], BN>;
-    buy_collateral: InvokeFunction<[asset: ContractIdInput, min_amount: BigNumberish, recipient: AddressInput], void>;
-    collateral_value_to_sell: InvokeFunction<[asset: ContractIdInput, collateral_amount: BigNumberish], BN>;
+    balance_of: InvokeFunction<[asset: string], BN>;
+    buy_collateral: InvokeFunction<[asset: string, min_amount: BigNumberish, recipient: AddressInput], void>;
+    collateral_value_to_sell: InvokeFunction<[asset: string, collateral_amount: BigNumberish], BN>;
     debug_increment_timestamp: InvokeFunction<[], void>;
-    get_asset_config_by_asset_id: InvokeFunction<[asset: ContractIdInput], AssetConfigOutput>;
+    get_asset_config_by_asset_id: InvokeFunction<[asset: string], AssetConfigOutput>;
     get_borrow_rate: InvokeFunction<[utilization: BigNumberish], BN>;
     get_borrower: InvokeFunction<[index: BigNumberish], AddressOutput>;
     get_borrowers_amount: InvokeFunction<[], BN>;
-    get_collateral_reserves: InvokeFunction<[asset: ContractIdInput], I64Output>;
+    get_collateral_reserves: InvokeFunction<[asset: string], I64Output>;
     get_configuration: InvokeFunction<[], MarketConfigurationOutput>;
     get_market_basics: InvokeFunction<[], MarketBasicsOutput>;
-    get_oracle_price: InvokeFunction<[asset: ContractIdInput], BN>;
+    get_oracle_price: InvokeFunction<[asset: string], BN>;
     get_reserves: InvokeFunction<[], I64Output>;
     get_supply_rate: InvokeFunction<[utilization: BigNumberish], BN>;
     get_user_basic: InvokeFunction<[account: AddressInput], UserBasicOutput>;
-    get_user_collateral: InvokeFunction<[address: AddressInput, asset: ContractIdInput], BN>;
+    get_user_collateral: InvokeFunction<[address: AddressInput, asset: string], BN>;
     get_user_supply_borrow: InvokeFunction<[account: AddressInput], [BN, BN]>;
     get_utilization: InvokeFunction<[], BN>;
     initialize: InvokeFunction<[config: MarketConfigurationInput, asset_configs: Vec<AssetConfigInput>, debug_step: Option<BigNumberish>], void>;
     is_liquidatable: InvokeFunction<[account: AddressInput], boolean>;
     pause: InvokeFunction<[pause_config: PauseConfigurationInput], void>;
-    quote_collateral: InvokeFunction<[asset: ContractIdInput, base_amount: BigNumberish], BN>;
+    quote_collateral: InvokeFunction<[asset: string, base_amount: BigNumberish], BN>;
     supply_base: InvokeFunction<[], void>;
     supply_collateral: InvokeFunction<[], void>;
-    totals_collateral: InvokeFunction<[asset: ContractIdInput], BN>;
+    totals_collateral: InvokeFunction<[asset: string], BN>;
     withdraw_base: InvokeFunction<[amount: BigNumberish], void>;
-    withdraw_collateral: InvokeFunction<[asset: ContractIdInput, amount: BigNumberish], void>;
+    withdraw_collateral: InvokeFunction<[asset: string, amount: BigNumberish], void>;
     withdraw_reserves: InvokeFunction<[to: AddressInput, amount: BigNumberish], void>;
   };
 }

@@ -4,13 +4,13 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.38.0
-  Forc version: 0.35.5
-  Fuel-Core version: 0.17.3
+  Fuels version: 0.54.0
+  Forc version: 0.44.0
+  Fuel-Core version: 0.20.4
 */
 
-import { Interface, Contract } from "fuels";
-import type { Provider, Account, AbstractAddress } from "fuels";
+import { Interface, Contract, ContractFactory } from "fuels";
+import type { Provider, Account, AbstractAddress, BytesLike, DeployContractOptions } from "fuels";
 import type { OracleAbi, OracleAbiInterface } from "../OracleAbi";
 
 const _abi = {
@@ -27,7 +27,7 @@ const _abi = {
       "components": [
         {
           "name": "__tuple_element",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -46,25 +46,36 @@ const _abi = {
     },
     {
       "typeId": 3,
+      "type": "enum Identity",
+      "components": [
+        {
+          "name": "Address",
+          "type": 7,
+          "typeArguments": null
+        },
+        {
+          "name": "ContractId",
+          "type": 8,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 4,
       "type": "generic T",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 4,
+      "typeId": 5,
       "type": "raw untyped ptr",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 5,
-      "type": "str[13]",
-      "components": null,
-      "typeParameters": null
-    },
-    {
       "typeId": 6,
-      "type": "str[19]",
+      "type": "str[13]",
       "components": null,
       "typeParameters": null
     },
@@ -98,7 +109,7 @@ const _abi = {
       "components": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -120,7 +131,7 @@ const _abi = {
       "components": [
         {
           "name": "ptr",
-          "type": 4,
+          "type": 5,
           "typeArguments": null
         },
         {
@@ -130,7 +141,7 @@ const _abi = {
         }
       ],
       "typeParameters": [
-        3
+        4
       ]
     },
     {
@@ -143,7 +154,7 @@ const _abi = {
           "typeArguments": [
             {
               "name": "",
-              "type": 3,
+              "type": 4,
               "typeArguments": null
             }
           ]
@@ -155,7 +166,7 @@ const _abi = {
         }
       ],
       "typeParameters": [
-        3
+        4
       ]
     },
     {
@@ -170,7 +181,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         }
       ],
@@ -190,35 +201,11 @@ const _abi = {
       ]
     },
     {
-      "inputs": [
-        {
-          "name": "owner",
-          "type": 7,
-          "typeArguments": null
-        }
-      ],
-      "name": "initialize",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read",
-            "write"
-          ]
-        }
-      ]
-    },
-    {
       "inputs": [],
       "name": "owner",
       "output": {
         "name": "",
-        "type": 7,
+        "type": 3,
         "typeArguments": null
       },
       "attributes": [
@@ -234,7 +221,7 @@ const _abi = {
       "inputs": [
         {
           "name": "asset_id",
-          "type": 8,
+          "type": 2,
           "typeArguments": null
         },
         {
@@ -303,21 +290,23 @@ const _abi = {
       "logId": 1,
       "loggedType": {
         "name": "",
-        "type": 5,
-        "typeArguments": null
-      }
-    },
-    {
-      "logId": 2,
-      "loggedType": {
-        "name": "",
-        "type": 5,
+        "type": 6,
         "typeArguments": null
       }
     }
   ],
   "messagesTypes": [],
-  "configurables": []
+  "configurables": [
+    {
+      "name": "ADMIN",
+      "configurableType": {
+        "name": "",
+        "type": 7,
+        "typeArguments": []
+      },
+      "offset": 4212
+    }
+  ]
 }
 
 export class OracleAbi__factory {
@@ -330,5 +319,14 @@ export class OracleAbi__factory {
     accountOrProvider: Account | Provider
   ): OracleAbi {
     return new Contract(id, _abi, accountOrProvider) as unknown as OracleAbi
+  }
+  static async deployContract(
+    bytecode: BytesLike,
+    wallet: Account,
+    options: DeployContractOptions = {}
+  ): Promise<OracleAbi> {
+    const factory = new ContractFactory(bytecode, _abi, wallet);
+    const contract = await factory.deployContract(options);
+    return contract as unknown as OracleAbi;
   }
 }
