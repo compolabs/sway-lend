@@ -5,7 +5,7 @@ import Divider from "./Divider";
 import { Anchor } from "@components/Anchor";
 import SizedBox from "@components/SizedBox";
 // import { CONTRACT_ADDRESSES } from "@src/constants";
-import { useStores } from "@stores";
+// import { useStores } from "@stores";
 // import Select from "@components/Select";
 // import Text from "@components/Text";
 import { Row } from "./Flex";
@@ -49,7 +49,7 @@ const Container = styled.div`
 //   key: v,
 // }));
 const Footer: React.FC<IProps> = () => {
-  const { settingsStore } = useStores();
+  // const { settingsStore } = useStores();
   return (
     <Root>
       <Divider />

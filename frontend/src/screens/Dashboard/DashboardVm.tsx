@@ -175,7 +175,7 @@ class DashboardVm {
     const functions = collaterals.map((b) =>
       marketContract.functions
         .get_asset_config_by_asset_id({ value: b.assetId })
-        .get()
+        .simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -193,7 +193,9 @@ class DashboardVm {
     const collaterals = this.collaterals;
 
     const functions = collaterals.map((b) =>
-      marketContract.functions.totals_collateral({ value: b.assetId }).get()
+      marketContract.functions
+        .totals_collateral({ value: b.assetId })
+        .simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -223,7 +225,7 @@ class DashboardVm {
     if (addressInput == null) return;
     const { value } = await marketContract.functions
       .get_user_supply_borrow(addressInput)
-      .get();
+      .simulate();
     if (value == null) return;
     this.setSuppliedBalance(new BN(value[0].toString()));
     this.setBorrowedBalance(new BN(value[1].toString()));
@@ -232,20 +234,22 @@ class DashboardVm {
   updateMarketBasic = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const { value } = await marketContract.functions.get_market_basics().get();
+    const { value } = await marketContract.functions
+      .get_market_basics()
+      .simulate();
     this.setMarketBasic(value);
   };
   updateTotalBaseTokenReserve = async (marketContract: MarketAbi) => {
     const { value } = await marketContract.functions
       .balance_of({ value: this.baseToken.assetId })
-      .get();
+      .simulate();
     this.setBaseTokenReserve(new BN(value.toString()));
   };
   updateTotalLiquidity = async (marketContract: MarketAbi) => {
     const result = await marketContract.functions
       .balance_of({ value: this.baseToken.assetId })
-      .get();
-    const result2 = await marketContract.functions.get_reserves().get();
+      .simulate();
+    const result2 = await marketContract.functions.get_reserves().simulate();
     // const liq = BN.formatUnits(
     //     new BN(result.value.toString()).minus(result2.value.value.toString()),
     //     this.baseToken.decimals
@@ -268,7 +272,7 @@ class DashboardVm {
       .available_to_borrow(addressInput)
       .txParams({ gasLimit: (1e8).toString() })
       .addContracts([oracle])
-      .get();
+      .simulate();
     this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
   };
 
@@ -282,7 +286,7 @@ class DashboardVm {
         .get_user_collateral(addressInput, {
           value: b.assetId,
         })
-        .get()
+        .simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -302,7 +306,7 @@ class DashboardVm {
     const functions = collaterals.map((b) =>
       marketContract.functions
         .get_asset_config_by_asset_id({ value: b.assetId })
-        .get()
+        .simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -318,11 +322,13 @@ class DashboardVm {
   updateSupplyAndBorrowRates = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const { value } = await marketContract.functions.get_utilization().get();
+    const { value } = await marketContract.functions
+      .get_utilization()
+      .simulate();
     this.setUtilization(new BN(value.toString()));
     const [borrow, supply] = await Promise.all([
-      marketContract.functions.get_borrow_rate(value).get(),
-      marketContract.functions.get_supply_rate(value).get(),
+      marketContract.functions.get_borrow_rate(value).simulate(),
+      marketContract.functions.get_supply_rate(value).simulate(),
     ]);
     this.setBorrowRate(new BN(borrow.value.toString()));
     this.setSupplyRate(new BN(supply.value.toString()));

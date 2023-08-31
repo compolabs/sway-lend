@@ -5,7 +5,6 @@ import { IToken, NODE_URL, ROUTES, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
 import { Mnemonic } from "@fuel-ts/mnemonic";
-import { FuelProviderConfig } from "@fuel-wallet/sdk";
 
 export enum LOGIN_TYPE {
   FUEL_WALLET = "FUEL_WALLET",
@@ -48,7 +47,8 @@ class AccountStore {
     window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
   };
   handleAccEvent = (account: string) => this.setAddress(account);
-  handleNetworkEvent = (network: FuelProviderConfig) => {
+  // handleNetworkEvent = (network: FuelProviderConfig) => {
+  handleNetworkEvent = (network: any) => {
     if (network.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
         `Please change network url to Testnet Beta 3`,
@@ -149,7 +149,7 @@ class AccountStore {
       });
       return;
     }
-    const account = await window.fuel.currentAccount();
+    const accounts = await fuel.accounts();
     const provider = await fuel.getProvider();
     if (provider.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
@@ -162,6 +162,7 @@ class AccountStore {
         }
       );
     }
+    const account = accounts[0];
     this.setAddress(account);
   };
 

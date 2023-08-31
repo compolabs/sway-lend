@@ -11,7 +11,7 @@ import {
 import BN from "@src/utils/BN";
 import { TokenContractAbi__factory } from "@src/contracts";
 import { LOGIN_TYPE } from "@stores/AccountStore";
-import { Asset } from "@fuel-wallet/types";
+// import { Asset } from "@fuel-wallet/types";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -80,7 +80,7 @@ class FaucetVM {
       resolve(
         Promise.all(
           tokensContracts.map((v) =>
-            v.functions.already_minted(addressInput).get()
+            v.functions.already_minted(addressInput).simulate()
           )
         )
       );
@@ -145,7 +145,7 @@ class FaucetVM {
       return;
     }
     if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
-      const addedAssets: Array<Asset> = await window?.fuel.assets();
+      const addedAssets: Array<any> = await window?.fuel.assets();
       if (
         addedAssets != null &&
         !addedAssets.some((v) => v.assetId === assetId)
@@ -171,7 +171,7 @@ class FaucetVM {
         this.rootStore.notificationStore.toast(
           `You have successfully minted ${token.symbol}`,
           {
-            link: `${EXPLORER_URL}/transaction/${transactionResult.transactionId}`,
+            link: `${EXPLORER_URL}/transaction/${transactionResult.id}`,
             linkTitle: "View on Explorer",
             type: "success",
             title: "Transaction is completed!",
