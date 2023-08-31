@@ -44,40 +44,33 @@ class PricesStore {
   };
 
   updateTokenPrices = async () => {
-    // const checkWallet = Wallet.fromSeed(SEED, "", new Provider(NODE_URL));
-    const checkWallet = Wallet.generate();
-
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
     try {
-      const oracleContract = OracleAbi__factory.connect(
-        priceOracle,
-        checkWallet
+      let provider = new Provider(NODE_URL);
+      const wallet = Wallet.fromPrivateKey(
+        process.env.REACT_APP_SECRET!,
+        provider
+      );
+      const oracleContract = OracleAbi__factory.connect(priceOracle, wallet);
+
+      const response = await Promise.all(
+        TOKENS_LIST.map((token) =>
+          oracleContract.functions.get_price(token.assetId).simulate()
+        )
       );
 
-      // const response = await Promise.all(
-      //     TOKENS_LIST.map((token) =>
-      //         oracleContract.functions.get_price(token.assetId).dryRun()
-      //     )
-      // );
-
       //todo change to locked wallet
-      const response = await oracleContract.functions
-        .get_price(
-          "0xa715086b6bb8c944ba370c78e7ca38c35ec5c0f758fb2b57be11fdae23988600"
-        )
-        .dryRun();
-      console.log(response);
-      // if (response.length > 0) {
-      //   const v = response.reduce(
-      //     (acc, { value }) => ({
-      //       ...acc,
-      //       [value.asset_id]: BN.formatUnits(value.price.toString(), 9),
-      //     }),
-      //     {}
-      //   );
-      //   console.log("setTokensPrices", v);
-      //   this.setTokensPrices(v);
-      // }
+      if (response.length > 0) {
+        const v = response.reduce(
+          (acc, { value }) => ({
+            ...acc,
+            [value.asset_id]: BN.formatUnits(value.price.toString(), 9),
+          }),
+          {}
+        );
+        console.log("setTokensPrices", v);
+        this.setTokensPrices(v);
+      }
     } catch (e) {
       console.log(e);
     }

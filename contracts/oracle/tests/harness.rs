@@ -15,7 +15,7 @@ const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671e
 struct TokenConfig {
     asset_id: String,
     // name: String,
-    // symbol: String,
+    symbol: String,
     coingeco_id: String,
     default_price: u64,
     // decimals: u64,
@@ -39,9 +39,9 @@ async fn sync_prices() {
     let body = c.get(req).send().await.unwrap().text().await.unwrap();
     let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
     let mut prices: Vec<(Bits256, u64)> = vec![];
-    for config in token_configs {
+    for config in &token_configs {
         let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
-        let price = match responce[config.coingeco_id]["usd"].as_f64() {
+        let price = match responce[config.coingeco_id.clone()]["usd"].as_f64() {
             Some(p) => (p * 10f64.powf(9f64)).round() as u64,
             _ => (config.default_price as f64 * 10f64.powf(9f64)) as u64,
         };
@@ -55,9 +55,24 @@ async fn sync_prices() {
         .call()
         .await
         .unwrap();
+
+    for config in &token_configs {
+        let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
+        let price = instance
+            .methods()
+            .get_price(bits256)
+            .tx_params(TxParameters::default().with_gas_price(1))
+            .call()
+            .await
+            .unwrap()
+            .value
+            .price;
+        let price = price as f64 / 10f64.powf(9f64);
+        println!("price of {} = ${price}", config.symbol);
+    }
 }
 
-#[tokio::test]
+// #[tokio::test]
 async fn deploy() {
     if ORACLE_ADDRESS != "" {
         return;
