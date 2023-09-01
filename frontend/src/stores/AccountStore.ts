@@ -40,20 +40,20 @@ class AccountStore {
 
   onFuelLoaded = () => {
     //fixme
-    if (window.fuel == null) {
-      window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
-      window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
-    }
-    if (window.fuelet == null) {
-      window?.fuelet?.on(
-        window?.fuelet.events.currentAccount,
-        this.handleAccEvent
-      );
-      window?.fuelet?.on(
-        window?.fuelet.events?.network,
-        this.handleNetworkEvent
-      );
-    }
+    // if (window.fuel == null) {
+    //   window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
+    //   window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
+    // }
+    // if (window.fuelet == null) {
+    //   window?.fuelet?.on(
+    //     window?.fuelet.events.currentAccount,
+    //     this.handleAccEvent
+    //   );
+    //   window?.fuelet?.on(
+    //     window?.fuelet.events?.network,
+    //     this.handleNetworkEvent
+    //   );
+    // }
   };
   handleAccEvent = (account: string) => this.setAddress(account);
   handleNetworkEvent = (network: FuelWalletProvider) => {
@@ -142,7 +142,7 @@ class AccountStore {
 
   disconnect = async () => {
     try {
-      this.walletInstance.disconnect();
+      // this.walletInstance.disconnect();
     } catch (e) {
       this.setAddress(null);
       this.setLoginType(null);
@@ -154,7 +154,8 @@ class AccountStore {
   loginWithWallet = async () => {
     if (this.walletInstance == null)
       throw new Error("There is no wallet instance");
-    const res = await this.walletInstance.connect({ url: NODE_URL });
+    // const res = await this.walletInstance.connect({ url: NODE_URL });
+    const res = await this.walletInstance.connect();
     if (!res) {
       this.rootStore.notificationStore.toast("User denied", {
         type: "error",
@@ -163,8 +164,6 @@ class AccountStore {
     }
     const account = await this.walletInstance.currentAccount();
     const provider = await this.walletInstance.getProvider();
-    console.log("provider.url", provider.url);
-    console.log("NODE_URL", NODE_URL);
     if (provider.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
         `Please change network url to beta 4`,
@@ -197,8 +196,8 @@ class AccountStore {
   }
 
   getWallet = async (): Promise<WalletLocked | WalletUnlocked | null> => {
-    if (this.address == null) return null;
-    return this.walletInstance.getWallet(this.address);
+    if (this.address == null || window.fuel == null) return null;
+    return window.fuel.getWallet(this.address);
   };
 
   get walletToRead(): WalletLocked | null {

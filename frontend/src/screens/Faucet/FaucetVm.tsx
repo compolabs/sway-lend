@@ -150,6 +150,7 @@ class FaucetVM {
     //   console.log("return 1");
     //   return;
     // }
+    if (window?.fuel == null) return;
     if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
       const addedAssets: Array<any> = await window?.fuel.assets();
       if (
@@ -164,6 +165,8 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const { tokenFactory } = this.rootStore.settingsStore.currentVersionConfig;
     const wallet = await accountStore.getWallet();
+    console.log(wallet);
+    console.log("wallet in  mint", wallet);
     // const wallet2 = Wallet.fromPrivateKey(
     //   process.env.REACT_APP_SECRET!,
     //   accountStore.provider
