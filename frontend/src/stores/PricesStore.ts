@@ -5,8 +5,8 @@ import { Provider, Wallet } from "fuels";
 import {
   IToken,
   NODE_URL,
-  SEED,
-  TOKENS_BY_SYMBOL,
+  // SEED,
+  // TOKENS_BY_SYMBOL,
   TOKENS_LIST,
 } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
@@ -72,6 +72,7 @@ class PricesStore {
         this.setTokensPrices(v);
       }
     } catch (e) {
+      console.log("updateTokenPrices error");
       console.log(e);
     }
   };

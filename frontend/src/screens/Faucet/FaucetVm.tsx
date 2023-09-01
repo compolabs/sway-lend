@@ -67,42 +67,45 @@ class FaucetVM {
   setRejectUpdateStatePromise = (v: any) => (this.rejectUpdateStatePromise = v);
 
   checkTokensThatAlreadyBeenMinted = async () => {
-    const { walletToRead, addressInput } = this.rootStore.accountStore;
-    if (walletToRead == null || addressInput == null) return;
-    const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
-    if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
-
-    const tokensContracts = tokens.map((b) =>
-      TokenContractAbi__factory.connect(b.assetId, walletToRead)
-    );
-    const promise = new Promise((resolve, reject) => {
-      this.rejectUpdateStatePromise = reject;
-      resolve(
-        Promise.all(
-          tokensContracts.map((v) =>
-            v.functions.already_minted(addressInput).simulate()
-          )
-        )
-      );
-    });
-    promise
-      .catch((v) => {
-        console.log("update faucet data error", v);
-      })
-      .then((value: any) => {
-        if (value.length > 0) {
-          const v = value.reduce(
-            (acc: any, v: any, index: number) =>
-              v.value ? [...acc, tokens[index].assetId] : [...acc],
-            [] as string[]
-          );
-          this.setAlreadyMintedTokens(v);
-        }
-      })
-      .finally(() => {
-        this.setInitialized(true);
-        this.setRejectUpdateStatePromise(undefined);
-      });
+    // console.log(this.rootStore.settingsStore.faucetTokens);
+    // const { walletToRead, addressInput } = this.rootStore.accountStore;
+    // if (walletToRead == null || addressInput == null) return;
+    // // const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
+    // const tokens = TOKENS_LIST.filter((v) => v.symbol === "USDC");
+    // if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
+    //
+    // const tokensContracts = tokens.map((b) => {
+    //   console.log(b.symbol, b.assetId);
+    //   return TokenContractAbi__factory.connect(b.assetId, walletToRead);
+    // });
+    // const promise = new Promise((resolve, reject) => {
+    //   this.rejectUpdateStatePromise = reject;
+    //   resolve(
+    //     Promise.all(
+    //       tokensContracts.map((v) =>
+    //         v.functions.already_minted(addressInput).simulate()
+    //       )
+    //     )
+    //   );
+    // });
+    // promise
+    //   .catch((v) => {
+    //     console.log("update faucet data error", v);
+    //   })
+    //   .then((value: any) => {
+    //     if (value.length > 0) {
+    //       const v = value.reduce(
+    //         (acc: any, v: any, index: number) =>
+    //           v.value ? [...acc, tokens[index].assetId] : [...acc],
+    //         [] as string[]
+    //       );
+    //       this.setAlreadyMintedTokens(v);
+    //     }
+    //   })
+    //   .finally(() => {
+    //     this.setInitialized(true);
+    //     this.setRejectUpdateStatePromise(undefined);
+    //   });
   };
 
   actionTokenAssetId: string | null = null;
