@@ -7,7 +7,6 @@ import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
 import { EXPLORER_URL } from "@src/constants";
 import SizedBox from "@components/SizedBox";
-import { LOGIN_TYPE } from "@stores/AccountStore";
 
 interface IProps {}
 
@@ -35,14 +34,6 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
       title: "Congratulations!",
     });
   };
-  const handleCopySeed = () => {
-    if (accountStore.mnemonicPhrase == null) return;
-    copy(accountStore.mnemonicPhrase);
-    notificationStore.toast("Don't share it with anyone", {
-      type: "success",
-      title: "Your seed was copied",
-    });
-  };
   const handleLogout = () => accountStore.disconnect();
 
   return (
@@ -50,14 +41,6 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
       <Text weight={700} onClick={handleCopyAddress} className="menu-item">
         Copy address
       </Text>
-      {accountStore.loginType === LOGIN_TYPE.GENERATE_FROM_SEED && (
-        <>
-          <SizedBox height={10} />
-          <Text weight={700} onClick={handleCopySeed} className="menu-item">
-            Copy seed
-          </Text>
-        </>
-      )}
       <SizedBox height={10} />
       <Text
         className="menu-item"

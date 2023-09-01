@@ -30,6 +30,11 @@ class SettingsStore {
 
   faucetTokens: Record<string, string> | null = null;
   setFaucetTokens = (s: Record<string, string>) => (this.faucetTokens = s);
+  addFaucetToken = (s: any) => (this.faucetTokens = s);
+
+  get faucetTokenForCurrentAccount() {
+    return "";
+  }
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
 

@@ -1,21 +1,19 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
-import { IToken, NODE_URL, ROUTES, TOKENS_LIST } from "@src/constants";
+import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
 import BN from "@src/utils/BN";
-import { Mnemonic } from "@fuel-ts/mnemonic";
+import { FuelWalletProvider } from "@fuel-wallet/sdk";
 
 export enum LOGIN_TYPE {
   FUEL_WALLET = "FUEL_WALLET",
-  GENERATE_FROM_SEED = "GENERATE_FROM_SEED",
-  PASTE_SEED = "PASTE_SEED",
+  FUELET = "FUELET",
 }
 
 export interface ISerializedAccountStore {
   address: string | null;
   loginType: LOGIN_TYPE | null;
-  mnemonicPhrase: string | null;
 }
 
 class AccountStore {
@@ -28,13 +26,12 @@ class AccountStore {
     if (initState) {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
-      this.setMnemonicPhrase(initState.mnemonicPhrase);
-      if (initState.loginType === LOGIN_TYPE.FUEL_WALLET) {
+      if (initState.loginType != null) {
         document.addEventListener("FuelLoaded", this.onFuelLoaded);
       }
     }
     this.updateAccountBalances().then();
-    setInterval(this.updateAccountBalances, 20 * 1000);
+    setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
       () => this.address,
       () => Promise.all([this.updateAccountBalances()])
@@ -42,19 +39,30 @@ class AccountStore {
   }
 
   onFuelLoaded = () => {
-    if (window.fuel == null) return;
-    window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
-    window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
+    //fixme
+    if (window.fuel == null) {
+      window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
+      window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
+    }
+    if (window.fuelet == null) {
+      window?.fuelet?.on(
+        window?.fuelet.events.currentAccount,
+        this.handleAccEvent
+      );
+      window?.fuelet?.on(
+        window?.fuelet.events?.network,
+        this.handleNetworkEvent
+      );
+    }
   };
   handleAccEvent = (account: string) => this.setAddress(account);
-  // handleNetworkEvent = (network: FuelProviderConfig) => {
-  handleNetworkEvent = (network: any) => {
+  handleNetworkEvent = (network: FuelWalletProvider) => {
     if (network.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
-        `Please change network url to Testnet Beta 3`,
+        `Please change network url to Testnet Beta 4`,
         {
           link: NODE_URL,
-          linkTitle: "Go to Testnet Beta 3",
+          linkTitle: "Go to Testnet Beta 4",
           type: "error",
           title: "Attention",
         }
@@ -65,8 +73,8 @@ class AccountStore {
   public address: string | null = null;
   setAddress = (address: string | null) => (this.address = address);
 
-  public mnemonicPhrase: string | null = null;
-  setMnemonicPhrase = (seed: string | null) => (this.mnemonicPhrase = seed);
+  public privateKey: string | null = null;
+  setPrivateKey = (key: string | null) => (this.privateKey = key);
 
   public loginType: LOGIN_TYPE | null = null;
   setLoginType = (loginType: LOGIN_TYPE | null) => (this.loginType = loginType);
@@ -113,56 +121,61 @@ class AccountStore {
   serialize = (): ISerializedAccountStore => ({
     address: this.address,
     loginType: this.loginType,
-    mnemonicPhrase: this.mnemonicPhrase,
   });
 
-  login = async (loginType: LOGIN_TYPE, phrase?: string) => {
+  login = async (loginType: LOGIN_TYPE) => {
     this.setLoginType(loginType);
-    switch (loginType) {
-      case LOGIN_TYPE.FUEL_WALLET:
-        await this.loginWithFuelWallet();
-        await this.onFuelLoaded();
-        break;
-      case LOGIN_TYPE.GENERATE_FROM_SEED:
-      case LOGIN_TYPE.PASTE_SEED:
-        await this.loginWithMnemonicPhrase(phrase);
-        break;
-      default:
-        return;
-    }
+    await this.loginWithWallet();
+    await this.onFuelLoaded();
   };
+
+  get walletInstance() {
+    switch (this.loginType) {
+      case LOGIN_TYPE.FUEL_WALLET:
+        return window.fuel;
+      case LOGIN_TYPE.FUELET:
+        return window.fuelet;
+      default:
+        return null;
+    }
+  }
+
   disconnect = async () => {
-    if (this.loginType === LOGIN_TYPE.FUEL_WALLET) {
-      await window.fuel.disconnect();
+    try {
+      this.walletInstance.disconnect();
+    } catch (e) {
+      this.setAddress(null);
+      this.setLoginType(null);
     }
     this.setAddress(null);
-    this.setMnemonicPhrase(null);
     this.setLoginType(null);
   };
 
-  loginWithFuelWallet = async () => {
-    const fuel = window.fuel;
-    const res = await fuel?.connect({ url: NODE_URL });
+  loginWithWallet = async () => {
+    if (this.walletInstance == null)
+      throw new Error("There is no wallet instance");
+    const res = await this.walletInstance.connect({ url: NODE_URL });
     if (!res) {
       this.rootStore.notificationStore.toast("User denied", {
         type: "error",
       });
       return;
     }
-    const accounts = await fuel.accounts();
-    const provider = await fuel.getProvider();
+    const account = await this.walletInstance.currentAccount();
+    const provider = await this.walletInstance.getProvider();
+    console.log("provider.url", provider.url);
+    console.log("NODE_URL", NODE_URL);
     if (provider.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(
-        `Please change network url to beta 3`,
+        `Please change network url to beta 4`,
         {
           link: NODE_URL,
-          linkTitle: "Go to Beta 3",
+          linkTitle: "Go to Beta 4",
           type: "error",
           title: "Attention",
         }
       );
     }
-    const account = accounts[0];
     this.setAddress(account);
   };
 
@@ -183,36 +196,9 @@ class AccountStore {
     return this.address != null;
   }
 
-  loginWithMnemonicPhrase = (mnemonicPhrase?: string) => {
-    const mnemonic =
-      mnemonicPhrase == null ? Mnemonic.generate(16) : mnemonicPhrase;
-    const seed = Mnemonic.mnemonicToSeed(mnemonic);
-    const wallet = Wallet.fromPrivateKey(seed, NODE_URL);
-    this.setAddress(wallet.address.toAddress());
-    this.setMnemonicPhrase(mnemonic);
-    this.rootStore.settingsStore.setLoginModalOpened(false);
-    if (mnemonicPhrase == null) {
-      this.rootStore.notificationStore.toast("First you need to mint ETH", {
-        link: `${window.location.origin}/#${ROUTES.FAUCET}`,
-        linkTitle: "Go to Faucet",
-        type: "info",
-        title: "Attention",
-      });
-    }
-  };
-
   getWallet = async (): Promise<WalletLocked | WalletUnlocked | null> => {
     if (this.address == null) return null;
-    switch (this.loginType) {
-      case LOGIN_TYPE.FUEL_WALLET:
-        return window.fuel?.getWallet(this.address);
-      case LOGIN_TYPE.GENERATE_FROM_SEED:
-      case LOGIN_TYPE.PASTE_SEED:
-        if (this.mnemonicPhrase == null) return null;
-        const seed = Mnemonic.mnemonicToSeed(this.mnemonicPhrase);
-        return Wallet.fromPrivateKey(seed, new Provider(NODE_URL));
-    }
-    return null;
+    return this.walletInstance.getWallet(this.address);
   };
 
   get walletToRead(): WalletLocked | null {

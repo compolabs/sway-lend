@@ -2,13 +2,7 @@ import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import BN from "@src/utils/BN";
 import { Provider, Wallet } from "fuels";
-import {
-  IToken,
-  NODE_URL,
-  // SEED,
-  // TOKENS_BY_SYMBOL,
-  TOKENS_LIST,
-} from "@src/constants";
+import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
 class PricesStore {
@@ -68,7 +62,6 @@ class PricesStore {
           }),
           {}
         );
-        console.log("setTokensPrices", v);
         this.setTokensPrices(v);
       }
     } catch (e) {

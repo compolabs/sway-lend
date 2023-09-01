@@ -9,9 +9,9 @@ import {
   TOKENS_LIST,
 } from "@src/constants";
 import BN from "@src/utils/BN";
-import { TokenContractAbi__factory } from "@src/contracts";
 import { LOGIN_TYPE } from "@stores/AccountStore";
-// import { Asset } from "@fuel-wallet/types";
+import { TokenFactoryAbi__factory } from "@src/contracts";
+import { hashMessage } from "fuels";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -43,9 +43,9 @@ class FaucetVM {
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
 
-  alreadyMintedTokens: string[] = [];
-  private setAlreadyMintedTokens = (l: string[]) =>
-    (this.alreadyMintedTokens = l);
+  // alreadyMintedTokens: string[] = [];
+  // private setAlreadyMintedTokens = (l: string[]) =>
+  //   (this.alreadyMintedTokens = l);
 
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
@@ -106,6 +106,7 @@ class FaucetVM {
     //     this.setInitialized(true);
     //     this.setRejectUpdateStatePromise(undefined);
     //   });
+    this.setInitialized(true);
   };
 
   actionTokenAssetId: string | null = null;
@@ -143,10 +144,12 @@ class FaucetVM {
   }
 
   mint = async (assetId?: string) => {
-    if (assetId == null || this.alreadyMintedTokens.includes(assetId)) {
-      console.log("return 1");
-      return;
-    }
+    // const alreadyMintedTokens = this.rootStore.settingsStore.faucetTokens[th];
+
+    if (assetId == null) return;
+    //   console.log("return 1");
+    //   return;
+    // }
     if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
       const addedAssets: Array<any> = await window?.fuel.assets();
       if (
@@ -159,17 +162,30 @@ class FaucetVM {
     this._setLoading(true);
     this.setActionTokenAssetId(assetId);
     const { accountStore, notificationStore } = this.rootStore;
+    const { tokenFactory } = this.rootStore.settingsStore.currentVersionConfig;
     const wallet = await accountStore.getWallet();
+    // const wallet2 = Wallet.fromPrivateKey(
+    //   process.env.REACT_APP_SECRET!,
+    //   accountStore.provider
+    // );
     if (wallet == null) return;
-    const tokenContract = TokenContractAbi__factory.connect(assetId, wallet);
+    const tokenFactoryContract = TokenFactoryAbi__factory.connect(
+      tokenFactory,
+      wallet
+    );
 
     try {
-      const { transactionResult } = await tokenContract.functions
-        .mint()
-        .txParams({ gasPrice: 1 })
+      const token = TOKENS_BY_ASSET_ID[assetId];
+      const amount = BN.parseUnits(faucetAmounts[token.symbol], token.decimals);
+      const hash = hashMessage(token.symbol);
+      const userAddress = wallet.address.toB256();
+
+      const { transactionResult } = await tokenFactoryContract.functions
+        .mint({ value: userAddress }, hash, amount.toString())
+        .txParams({ gasPrice: 2 })
         .call();
       if (transactionResult != null) {
-        this.setAlreadyMintedTokens([...this.alreadyMintedTokens, assetId]);
+        // this.setAlreadyMintedTokens([...this.alreadyMintedTokens, assetId]);
         const token = TOKENS_BY_ASSET_ID[assetId];
         this.rootStore.notificationStore.toast(
           `You have successfully minted ${token.symbol}`,
