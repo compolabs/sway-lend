@@ -1,4 +1,4 @@
-use fuels::prelude::ViewOnlyAccount;
+use fuels::prelude::{TxParameters, ViewOnlyAccount};
 use fuels::types::Address;
 use src20_sdk::token_factory_abi_calls;
 
@@ -52,22 +52,25 @@ async fn main_test() {
 
     // debug step
     let step: Option<u64> = Option::Some(10000);
-    let asset_configs = asset_configs.try_into().unwrap();
-    let market = deploy_market(&admin, market_config, asset_configs, step).await;
+    let market = deploy_market(&admin, market_config, step).await;
+
+    for config in &asset_configs {
+        market
+            .methods()
+            .add_asset_collateral(config.clone())
+            .tx_params(TxParameters::default().with_gas_price(1))
+            .call()
+            .await
+            .unwrap();
+    }
     // ==================== Set oracle prices ====================
-    let amount = parse_units(1, 9); //1 USDC = $1
-    oracle_abi_calls::set_price(&oracle, usdc.bits256, amount).await;
-    let res = oracle_abi_calls::get_price(&oracle, usdc.bits256).await;
-    assert!(res.price == amount);
-
-    let amount = parse_units(5, 9); //1 UNI = $5
-    oracle_abi_calls::set_price(&oracle, uni.bits256, amount).await;
-    let res = oracle_abi_calls::get_price(&oracle, uni.bits256).await;
-    assert!(res.price == amount);
-
-    println!("1 USDC = $1 ⎮ 1 UNI = $5\n");
+    for asset in &assets {
+        let price = asset.1.default_price * 10u64.pow(9);
+        oracle_abi_calls::set_price(&oracle, asset.1.bits256, price).await;
+        println!("1 {} = ${}", asset.1.symbol, asset.1.default_price);
+    }
+    println!("\n");
     debug_state(&market, &wallets, usdc, uni).await;
-
     // =================================================
     // ==================== Case #0 ====================
     // 👛 Wallet: Bob 🧛
@@ -283,6 +286,7 @@ async fn main_test() {
     assert!(borrow == 0);
 
     let amount = market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
+    println!("amount = {:?}", amount);
     assert!(amount == 0);
 
     debug_state(&market, &wallets, usdc, uni).await;

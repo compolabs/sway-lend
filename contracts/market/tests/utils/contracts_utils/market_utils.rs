@@ -281,23 +281,15 @@ pub mod market_abi_calls {
     }
 }
 
-/*
-MARKET_CONFIGURATION: Option<MarketConfiguration> = Option::None,
-    ASSETS_CONFIGURATIONS: Option<[AssetConfig; 5]> = Option::None,
-    ASSETS_CONFIGURATIONS_LENGTH: u64 = 5, //
-    DEBUG_STEP: Option<u64> = Option::None,
-*/
 pub async fn deploy_market(
     wallet: &WalletUnlocked,
     market_configuration: MarketConfiguration,
-    asset_configurations: Vec<AssetConfig>,
     debug_step: Option<u64>, // only for local test
 ) -> MarketContract<WalletUnlocked> {
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
     let configurables = MarketContractConfigurables::default()
         .with_MARKET_CONFIGURATION(Option::Some(market_configuration))
-        .with_ASSET_CONFIGURATIONS(Option::Some(asset_configurations.try_into().unwrap()))
         .with_DEBUG_STEP(debug_step);
     let config = LoadConfiguration::default().with_configurables(configurables);
     let id = Contract::load_from("./out/debug/market.bin", config)
