@@ -41,8 +41,6 @@ async fn main_test() {
 
     //--------------- MARKET ---------------
 
-    let market = deploy_market(&admin).await;
-
     let market_config = get_market_config(
         admin.address().into(),
         admin.address().into(),
@@ -54,11 +52,8 @@ async fn main_test() {
 
     // debug step
     let step: Option<u64> = Option::Some(10000);
-
-    market_abi_calls::initialize(&market, &market_config, &asset_configs, step)
-        .await
-        .expect("❌ Cannot initialize market");
-
+    let asset_configs = asset_configs.try_into().unwrap();
+    let market = deploy_market(&admin, market_config, asset_configs, step).await;
     // ==================== Set oracle prices ====================
     let amount = parse_units(1, 9); //1 USDC = $1
     oracle_abi_calls::set_price(&oracle, usdc.bits256, amount).await;

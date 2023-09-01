@@ -28,34 +28,36 @@ use std::storage::storage_vec::*;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
+configurable {
+    MARKET_CONFIGURATION: Option<MarketConfiguration> = Option::None,
+    ASSET_CONFIGURATIONS: Option<[AssetConfig; 6]> = Option::None,
+    ASSET_CONFIGURATIONS_LENGTH: u64 = 6, // 
+    DEBUG_STEP: Option<u64> = Option::None,
+}
+
 storage {
-    debug: bool = false,
-    debug_timestamp: u64 = 0,
-    debug_step: u64 = 0,
     borrowers: StorageVec<Address> = StorageVec {},
     is_borrower: StorageMap<Address, bool> = StorageMap {},
     supplied_collateral_assets: StorageMap<Address, u16> = StorageMap {},
-    config: Option<MarketConfiguration> = Option::None,
-    asset_configs: StorageVec<AssetConfig> = StorageVec {},
     pause_config: Option<PauseConfiguration> = Option::None,
     totals_collateral: StorageMap<AssetId, u64> = StorageMap {},
     user_collateral: StorageMap<(Address, AssetId), u64> = StorageMap {},
     user_basic: StorageMap<Address, UserBasic> = StorageMap {},
     market_basic: MarketBasics = MarketBasics::default(),
+    
+    debug_timestamp: u64 = 0,
 }
 
 abi Market {
     #[storage(read, write)]
     fn debug_increment_timestamp();
 
-    #[storage(read, write)]
-    fn initialize(config: MarketConfiguration, asset_configs: Vec<AssetConfig>, debug_step: Option<u64>);
-
     #[storage(write, read)]
     fn pause(config: PauseConfiguration);
 
-    #[storage(read)]
     fn get_configuration() -> MarketConfiguration;
+
+    fn get_asset_configurations() -> [AssetConfig; 6];
 
     #[storage(read)]
     fn get_user_basic(account: Address) -> UserBasic;
@@ -63,11 +65,7 @@ abi Market {
     #[storage(read)]
     fn get_user_collateral(address: Address, asset: AssetId) -> u64;
 
-    #[storage(read)]
     fn get_oracle_price(asset: AssetId) -> u64;
-
-    #[storage(read)]
-    fn get_asset_config_by_asset_id(asset: AssetId) -> AssetConfig;
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64);
@@ -86,10 +84,8 @@ abi Market {
     #[storage(read)]
     fn get_utilization() -> u64;
 
-    #[storage(read)]
     fn get_supply_rate(utilization: u64) -> u64;
 
-    #[storage(read)]
     fn get_borrow_rate(utilization: u64) -> u64;
 
     #[storage(read)]
@@ -106,10 +102,8 @@ abi Market {
     fn withdraw_reserves(to: Address, amount: u64);
 
     // TODO: test quote_collateral
-    #[storage(read)]
     fn quote_collateral(asset: AssetId, base_amount: u64) -> u64;
 
-    #[storage(read)]
     fn collateral_value_to_sell(asset: AssetId, collateral_amount: u64) -> u64;
 
     #[storage(read, write)]
@@ -170,7 +164,7 @@ fn update_assets_in(account: Address, asset_offset: u64, initial_user_balance: u
 
 #[storage(read)]
 fn timestamp() -> u64 {
-    if storage.debug.try_read().unwrap_or(false) {
+    if DEBUG_STEP.is_none() {
         storage.debug_timestamp.try_read().unwrap_or(0)
     } else {
         std::block::timestamp()
@@ -179,7 +173,7 @@ fn timestamp() -> u64 {
 
 #[storage(read)]
 fn mint_reward_token(amount: u64, recipient: Address) {
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     abi(FRC20, config.reward_token)._mint(amount, recipient);
 }
 
@@ -221,14 +215,6 @@ fn is_withdraw_paused() -> bool {
 //     }
 // }
 
-#[storage(read)]
-fn get_config() -> MarketConfiguration {
-    match storage.config.read() {
-        Option::Some(c) => c,
-        _ => revert(0),
-    }
-}
-
 pub fn get_caller() -> Address {
     let sender: Result<Identity, AuthError> = msg_sender();
     if let Identity::Address(address) = sender.unwrap() {
@@ -267,26 +253,24 @@ pub fn principal_value_borrow(base_borrow_index_: u64, present_value_: u64) -> u
 
 #[storage(read)]
 fn present_value(principal_value_: I64) -> I64 { // -> base_asset_decimals
-    let base_supply_index = storage.market_basic.read().base_supply_index; // -> decimals 18
-    let base_borrow_index = storage.market_basic.read().base_borrow_index; // -> decimals 18
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     if principal_value_ >= I64::from(0) {
-        let present_value_u64 = present_value_supply(base_supply_index, principal_value_.into());
+        let present_value_u64 = present_value_supply(market_basic.base_supply_index, principal_value_.into());
         I64::from(present_value_u64)
     } else {
-        let present_value_u64 = present_value_borrow(base_borrow_index, principal_value_.flip().into());
+        let present_value_u64 = present_value_borrow(market_basic.base_borrow_index, principal_value_.flip().into());
         I64::from(present_value_u64).flip()
     }
 }
 
 #[storage(read)]
 fn principal_value(present_value_: I64) -> I64 { // -> base_asset_decimals
-    let base_supply_index = storage.market_basic.read().base_supply_index; // -> decimals 18
-    let base_borrow_index = storage.market_basic.read().base_borrow_index; // -> decimals 18
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     if present_value_ >= I64::from(0) {
-        let principal_value_u64 = principal_value_supply(base_supply_index, present_value_.into());
+        let principal_value_u64 = principal_value_supply(market_basic.base_supply_index, present_value_.into());
         I64::from(principal_value_u64)
     } else {
-        let principal_value_u64 = principal_value_borrow(base_borrow_index, present_value_.flip().into());
+        let principal_value_u64 = principal_value_borrow(market_basic.base_borrow_index, present_value_.flip().into());
         I64::from(principal_value_u64).flip()
     }
 }
@@ -294,7 +278,7 @@ fn principal_value(present_value_: I64) -> I64 { // -> base_asset_decimals
 // @Callable get_utilization() -> u64
 #[storage(read)]
 fn get_utilization_internal() -> u64 { // -> decimals 18
-    let market_basic = storage.market_basic.read();
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     let total_supply_ = present_value_supply(market_basic.base_supply_index, market_basic.total_supply_base); // decimals 6
     let total_borrow_ = present_value_borrow(market_basic.base_borrow_index, market_basic.total_borrow_base); // decimals 6
     if total_supply_ == 0 {
@@ -306,10 +290,9 @@ fn get_utilization_internal() -> u64 { // -> decimals 18
 }
 
 // @Callable get_supply_rate(utilization: u64) -> U128
-#[storage(read)]
 fn get_supply_rate_internal(utilization: u64) -> U128 { // -> decimals 18
     let utilization = U128::from_u64(utilization);
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let kink_ = U128::from_u64(config.kink); // decimals 18
     let interest_rate_slope_low = U128::from_u64(config.supply_per_second_interest_rate_slope_low);// decimals 18
     let interest_rate_slope_high = U128::from_u64(config.supply_per_second_interest_rate_slope_high);// decimals 18
@@ -322,10 +305,9 @@ fn get_supply_rate_internal(utilization: u64) -> U128 { // -> decimals 18
 }
 
 // @Callable get_borrow_rate(utilization: u64) -> U128
-#[storage(read)]
 fn get_borrow_rate_internal(utilization: u64) -> U128 { // -> decimals 18
     let utilization = U128::from_u64(utilization); // decimals 18
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let kink_ = U128::from_u64(config.kink); // decimals 18
     let interest_rate_base = U128::from_u64(config.borrow_per_second_interest_rate_base); // decimals 18
     let interest_rate_slope_low = U128::from_u64(config.borrow_per_second_interest_rate_slope_low); // decimals 18
@@ -345,7 +327,7 @@ fn accrued_interest_indices(now: u64, last_accrual_time: u64) -> (u64, u64) { //
         return (SCALE_18, SCALE_18)
     }
     let time_elapsed = now - last_accrual_time;
-    let market_basic = storage.market_basic.read();
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     let mut base_supply_index_ = U128::from_u64(market_basic.base_supply_index); // decimals 18
     let mut base_borrow_index_ = U128::from_u64(market_basic.base_borrow_index); // decimals 18
     if time_elapsed > 0 {
@@ -370,18 +352,18 @@ fn is_borrow_collateralized(account: Address) -> bool {
         return true
     };
 
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let present_value_ = present_value(principal_value_.flip()); // decimals base_asset_decimals
     let mut borrow_limit = U128::new();
     let mut index = 0;
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
-    while index < storage.asset_configs.len() {
+    while index < ASSET_CONFIGURATIONS_LENGTH { 
         if !is_in_asset(assets_in ,index){
             index = index + 1;
             continue
         }
 
-        let asset_config = storage.asset_configs.get(index).unwrap().read();
+        let asset_config = ASSET_CONFIGURATIONS.unwrap()[index];
 
         let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0u64); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
@@ -411,18 +393,18 @@ fn is_liquidatable_internal(account: Address) -> bool {
         return false
     };
 
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let present_value_ = U128::from_u64(present_value(principal_value_.flip()).into()); // decimals base_asset_decimals
     let mut liquidation_treshold = U128::new();
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
     let mut index = 0;
-    while index < storage.asset_configs.len() {
+    while index < ASSET_CONFIGURATIONS_LENGTH { 
         if !is_in_asset(assets_in ,index){
             index = index + 1;
             continue
         }
 
-        let asset_config = storage.asset_configs.get(index).unwrap().read();
+        let asset_config = ASSET_CONFIGURATIONS.unwrap()[index];
 
         let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0); // decimals asset_config.decimals
         let balance = U128::from_u64(balance);
@@ -450,20 +432,19 @@ fn get_collateral_reserves_internal(asset: AssetId) -> I64 { // -> asset decimal
 // @Callable get_reserves_internal() -> I64
 #[storage(read)]
 fn get_reserves_internal() -> I64 {  // base_token_decimals
-    let config = get_config();
-    let last_accrual_time = storage.market_basic.last_accrual_time.read();
-    let (base_supply_index_, base_borrow_index_) = accrued_interest_indices(timestamp(), last_accrual_time);  // decimals (18, 18)
+    let config = MARKET_CONFIGURATION.unwrap();
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
+    let (base_supply_index_, base_borrow_index_) = accrued_interest_indices(timestamp(), market_basic.last_accrual_time);  // decimals (18, 18)
     let balance = this_balance(config.base_token); // base_token_decimals
-    let total_supply = present_value_supply(base_supply_index_, storage.market_basic.total_supply_base.read()); // base_token_decimals
-    let total_borrow = present_value_borrow(base_borrow_index_, storage.market_basic.total_borrow_base.read()); // base_token_decimals
+    let total_supply = present_value_supply(base_supply_index_, market_basic.total_supply_base); // base_token_decimals
+    let total_borrow = present_value_borrow(base_borrow_index_, market_basic.total_borrow_base); // base_token_decimals
     I64::from(balance + total_borrow) - I64::from(total_supply)
 }
 
 #[storage(read, write)]
 fn accrue_internal() {
-    let config = get_config();
-    let mut market_basic = storage.market_basic.read();
-    let now = timestamp();
+    let config = MARKET_CONFIGURATION.unwrap();
+    let mut market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());    let now = timestamp();
     let time_elapsed = now - market_basic.last_accrual_time;
     if time_elapsed > 0 {
         if market_basic.last_accrual_time != 0 {
@@ -492,6 +473,7 @@ fn accrue_internal() {
 // the function through which any balance changes will pass. updates the reward variables on the user
 #[storage(write, read)]
 fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64) {
+    let market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     let principal = basic.principal;
     let mut basic = basic;
     basic.principal = principal_new;
@@ -501,16 +483,16 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
     };
 
     if principal >= I64::from(0) {
-        let index_delta = storage.market_basic.tracking_supply_index.read() - basic.base_tracking_index; // decimals 18
+        let index_delta = market_basic.tracking_supply_index - basic.base_tracking_index; // decimals 18
         basic.base_tracking_accrued += principal.into() * index_delta / SCALE_18; // native_asset_decimal
     } else {
-        let index_delta = storage.market_basic.tracking_borrow_index.read() - basic.base_tracking_index;
+        let index_delta = market_basic.tracking_borrow_index - basic.base_tracking_index;
         basic.base_tracking_accrued += principal.flip().into() * index_delta / SCALE_18; // native_asset_decimal
     }
     if principal_new >= I64::from(0) {
-        basic.base_tracking_index = storage.market_basic.tracking_supply_index.read();
+        basic.base_tracking_index = market_basic.tracking_supply_index;
     } else {
-        basic.base_tracking_index = storage.market_basic.tracking_borrow_index.read();
+        basic.base_tracking_index = market_basic.tracking_borrow_index;
     }
     storage.user_basic.insert(account, basic);
 }
@@ -548,7 +530,7 @@ fn withdraw_and_borrow_amount(old_principal: I64, new_principal: I64) -> (u64, u
 // @Callable withdraw_reserves(to: Address, amount: u64)
 #[storage(read)]
 fn withdraw_reserves_internal(to: Address, amount: u64) {
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let sender = get_caller();
 
     require(sender == config.governor, Error::Unauthorized);
@@ -558,20 +540,19 @@ fn withdraw_reserves_internal(to: Address, amount: u64) {
     transfer_to_address(to, config.base_token, amount);
 }
 
-#[storage(read)]
 fn get_asset_config_by_asset_id_internal(asset: AssetId) -> (AssetConfig, u64) {
     let mut out: Option<AssetConfig> = Option::None;
-    let mut i = 0;
-    while i < storage.asset_configs.len() {
-        let asset_config = storage.asset_configs.get(i).unwrap().read();
+    let mut index = 0;
+    while index < ASSET_CONFIGURATIONS_LENGTH { 
+        let asset_config = ASSET_CONFIGURATIONS.unwrap()[index];
         if asset_config.asset == asset {
             out = Option::Some(asset_config);
             break;
         }
-        i += 1;
+        index += 1;
     }
     match out {
-        Option::Some(v) => (v, i),
+        Option::Some(v) => (v, index),
         Option::None(_) => revert(0),
     }
 }
@@ -579,9 +560,8 @@ fn get_asset_config_by_asset_id_internal(asset: AssetId) -> (AssetConfig, u64) {
 // @Callable quote_collateral(asset: AssetId, base_amount: u64) -> u64 
 //  A function that counts the collateral purchase rate of the user from our protocol
 //  i.e. how much collateral the user gets for redeeming one dollar of debt to be liquidated
-#[storage(read)]
 fn quote_collateral_internal(asset: AssetId, base_amount: u64) -> u64 { // asset decimals
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let (asset_config, _) = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
     let base_price = get_price(config.base_token, config.base_token_price_feed); // decimals 9
@@ -598,9 +578,8 @@ fn quote_collateral_internal(asset: AssetId, base_amount: u64) -> u64 { // asset
 }
 
 // @Callable collateral_value_to_sell_internal(asset: AssetId, base_amount: u64) -> u64 
-#[storage(read)]
 fn collateral_value_to_sell_internal(asset: AssetId, collateral_amount: u64) -> u64 { // asset decimals
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let (asset_config, _) = get_asset_config_by_asset_id_internal(asset);
     let asset_price = get_price(asset, asset_config.price_feed); // decimals 9
     let base_price = get_price(config.base_token, config.base_token_price_feed);// decimals 9
@@ -626,18 +605,18 @@ fn absorb_internal(account: Address) {
     let account_user = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default());
     let old_principal = account_user.principal;
     let old_balance = present_value(old_principal);// base_asset_decimals
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
 
     let mut delta_value = U128::new(); // decimals 9
     let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
     let mut index = 0;
-    while index < storage.asset_configs.len() {
+    while index < ASSET_CONFIGURATIONS_LENGTH { 
        if !is_in_asset(assets_in ,index){
             index = index + 1;
             continue
         }
 
-        let asset_config = storage.asset_configs.get(index).unwrap().read();
+      let asset_config = ASSET_CONFIGURATIONS.unwrap()[index];
         let asset = asset_config.asset;
         let seize_amount = storage.user_collateral.get((account, asset)).try_read().unwrap_or(0); // asset decimals
         if seize_amount == 0 {
@@ -673,7 +652,7 @@ fn absorb_internal(account: Address) {
 
     // Reserves are decreased by increasing total supply and decreasing borrows
     //  the amount of debt repaid by reserves is `newBalance - oldBalance`
-    let mut market_basic = storage.market_basic.read();
+    let mut market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     market_basic.total_supply_base += supply_amount;
     market_basic.total_borrow_base -= repay_amount;
     storage.market_basic.write(market_basic);
@@ -691,7 +670,7 @@ fn absorb_internal(account: Address) {
 #[storage(read)]
 fn buy_collateral_internal(asset: AssetId, min_amount: u64, recipient: Address) {
     require(!is_buy_paused(), Error::Paused);
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let base_amount = msg_amount();
     require(msg_asset_id() == config.base_token && base_amount > 0, Error::InvalidPayment);
 
@@ -762,7 +741,7 @@ fn withdraw_collateral_internal(asset: AssetId, amount: u64) {
 fn supply_base_internal() {
     require(!is_supply_paused(), Error::Paused);
     let caller = get_caller();
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let amount = msg_amount();
 
     require(amount > 0, Error::InvalidPayment);
@@ -778,7 +757,7 @@ fn supply_base_internal() {
     let dst_principal_new = principal_value(dst_balance);
 
     let (repay_amount, supply_amount) = repay_and_supply_amount(dst_principal, dst_principal_new);
-    let mut market_basic = storage.market_basic.read();
+    let mut market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     market_basic.total_supply_base += supply_amount;
     market_basic.total_borrow_base -= repay_amount;
     storage.market_basic.write(market_basic);
@@ -798,7 +777,7 @@ fn withdraw_base_internal(amount: u64) {
     require(amount > 0, Error::InvalidPayment);
     accrue_internal();
 
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let caller = get_caller();
     let src_user = storage.user_basic.get(caller).try_read().unwrap_or(UserBasic::default());
     let src_principal = src_user.principal;
@@ -806,7 +785,7 @@ fn withdraw_base_internal(amount: u64) {
     let src_principal_new = principal_value(src_balance);
 
     let (withdraw_amount, borrow_amount) = withdraw_and_borrow_amount(src_principal, src_principal_new);
-    let mut market_basic = storage.market_basic.read();
+    let mut market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
     // log(market_basic.total_supply_base);
     // log(withdraw_amount);
     // return;
@@ -834,7 +813,7 @@ fn withdraw_base_internal(amount: u64) {
 // function for removing reward tokens by the admin. The reward_token is set in the config
 #[storage(read)]
 fn withdraw_reward_token_internal(to: Address, amount: u64) {
-    let config = get_config();
+    let config = MARKET_CONFIGURATION.unwrap();
     let sender = get_caller();
     require(sender == config.governor, Error::NotPermitted);
 
@@ -885,53 +864,45 @@ fn claim_internal() {
 impl Market for Contract {
     #[storage(read, write)]
     fn debug_increment_timestamp() {
-        require(storage.debug.read(), Error::DebuggingDisabled);
-        storage.debug_timestamp.write(storage.debug_timestamp.read() + storage.debug_step.read());
+        require(DEBUG_STEP.is_some(), Error::DebuggingDisabled);
+        storage.debug_timestamp.write(storage.debug_timestamp.try_read().unwrap_or(0) + DEBUG_STEP.unwrap());
     }
 
-    #[storage(read)]
     fn get_oracle_price(asset: AssetId) -> u64 {
-        let base_token_price_feed = get_config().base_token_price_feed;
+        let base_token_price_feed = MARKET_CONFIGURATION.unwrap().base_token_price_feed;
         get_price(asset, base_token_price_feed)
     }
 
-    #[storage(read, write)]
-    fn initialize(
-        config: MarketConfiguration,
-        asset_configs: Vec<AssetConfig>,
-        debug_step: Option<u64>,
-    ) {
-        require(storage.config.try_read().unwrap_or(Option::None).is_none(), Error::AlreadyInitialized);
-        storage.config.write(Option::Some(config));
-        let mut index = 0;
-        while index < asset_configs.len() {
-            storage.asset_configs.push(asset_configs.get(index).unwrap());
-            index += 1;
-        }
-        if debug_step.is_some() {
-            storage.debug.write(true);
-            storage.debug_timestamp.write(std::block::timestamp());
-            storage.debug_step.write(debug_step.unwrap());
-        }
-        let mut market_basic = storage.market_basic.try_read().unwrap_or(MarketBasics::default());
-        market_basic.base_supply_index = SCALE_18;
-        market_basic.base_borrow_index = SCALE_18;
-        market_basic.tracking_supply_index = SCALE_18;
-        market_basic.tracking_borrow_index = SCALE_18;
-        storage.market_basic.write(market_basic); 
-    }
+    // #[storage(read, write)]
+    // fn initialize(
+    //     config: MarketConfiguration,
+    //     asset_configs: Vec<AssetConfig>,
+    //     debug_step: Option<u64>,
+    // ) {
+    //     require(storage.config.try_read().unwrap_or(Option::None).is_none(), Error::AlreadyInitialized);
+    //     storage.config.write(Option::Some(config));
+    //     let mut index = 0;
+    //     while index < asset_configs.len() {
+    //         storage.asset_configs.push(asset_configs.get(index).unwrap());
+    //         index += 1;
+    //     }
+    //     if debug_step.is_some() {
+    //         storage.debug.write(true);
+    //         storage.debug_timestamp.write(std::block::timestamp());
+    //         storage.debug_step.write(debug_step.unwrap());
+    //     }
+    // }
 
     #[storage(write, read)]
     fn pause(pause_config: PauseConfiguration) {
         let sender = get_caller();
-        let config = get_config();
+        let config = MARKET_CONFIGURATION.unwrap();
         require(sender == config.governor || sender == config.pause_guardian, Error::Unauthorized);
         storage.pause_config.write(Option::Some(pause_config));
     }
 
-    #[storage(read)]
     fn get_configuration() -> MarketConfiguration {
-        get_config()
+        MARKET_CONFIGURATION.unwrap()
     }
 
     #[storage(read)]
@@ -947,7 +918,7 @@ impl Market for Contract {
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64) {
         let principal_value = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal;
-        let last_accrual_time = storage.market_basic.last_accrual_time.read();
+        let last_accrual_time = storage.market_basic.try_read().unwrap_or(MarketBasics::default()).last_accrual_time;
         let (supply_index_, borrow_index_) = accrued_interest_indices(timestamp(), last_accrual_time);   // decimals (18, 18)
         if principal_value >= I64::new() {
             let supply = present_value_supply(supply_index_, principal_value.into());
@@ -976,16 +947,16 @@ impl Market for Contract {
     fn available_to_borrow(account: Address) -> u64 {
         let mut borrow_limit = U128::new();
         let mut index = 0;
-        let config = get_config();
+        let config = MARKET_CONFIGURATION.unwrap();
         let assets_in = storage.supplied_collateral_assets.get(account).try_read().unwrap_or(0u16);
-        while index < storage.asset_configs.len() {
+        while index < ASSET_CONFIGURATIONS_LENGTH { 
 
             if !is_in_asset(assets_in ,index){
                 index = index + 1;
                 continue
             }
 
-            let asset_config = storage.asset_configs.get(index).unwrap().read();
+            let asset_config = ASSET_CONFIGURATIONS.unwrap()[index];
 
             let balance = storage.user_collateral.get((account, asset_config.asset)).try_read().unwrap_or(0);
             let balance = U128::from_u64(balance);
@@ -1006,11 +977,9 @@ impl Market for Contract {
         get_utilization_internal()
     }
 
-    #[storage(read)]
     fn get_supply_rate(utilization: u64) -> u64 {
         get_supply_rate_internal(utilization).as_u64().unwrap()
     }
-    #[storage(read)]
     fn get_borrow_rate(utilization: u64) -> u64 {
         get_borrow_rate_internal(utilization).as_u64().unwrap()
     }
@@ -1032,12 +1001,10 @@ impl Market for Contract {
     fn withdraw_reserves(to: Address, amount: u64) {
         withdraw_reserves_internal(to, amount)
     }
-    #[storage(read)]
     fn quote_collateral(asset: AssetId, base_amount: u64) -> u64 {
         quote_collateral_internal(asset, base_amount)
     }
 
-    #[storage(read)]
     fn collateral_value_to_sell(asset: AssetId, collateral_amount: u64) -> u64 {
         collateral_value_to_sell_internal(asset, collateral_amount)
     }
@@ -1096,10 +1063,8 @@ impl Market for Contract {
     //     claim_internal()
     // }
 
-    #[storage(read)]
-    fn get_asset_config_by_asset_id(asset: AssetId) -> AssetConfig {
-        let (config, _) = get_asset_config_by_asset_id_internal(asset);
-        config
+    fn get_asset_configurations() -> [AssetConfig; 6] {
+        ASSET_CONFIGURATIONS.unwrap()
     }
     
     #[storage(read)]

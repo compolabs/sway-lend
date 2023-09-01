@@ -19,27 +19,13 @@ pub mod market_abi_calls {
         types::{AssetId, Bits256},
     };
 
-    use super::{abigen_bindings::market_contract_mod::AssetConfig, *};
+    use super::*;
 
     pub async fn debug_increment_timestamp(
         market: &MarketContract<WalletUnlocked>,
     ) -> FuelCallResponse<()> {
         let res = market.methods().debug_increment_timestamp().call().await;
         res.unwrap()
-    }
-
-    pub async fn initialize(
-        contract: &MarketContract<WalletUnlocked>,
-        config: &MarketConfiguration,
-        assets: &Vec<AssetConfig>,
-        step: Option<u64>,
-    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        contract
-            .methods()
-            .initialize(config.clone(), assets.clone(), step)
-            .tx_params(TxParameters::default().with_gas_price(1))
-            .call()
-            .await
     }
 
     pub async fn supply_base(
@@ -295,10 +281,24 @@ pub mod market_abi_calls {
     }
 }
 
-pub async fn deploy_market(wallet: &WalletUnlocked) -> MarketContract<WalletUnlocked> {
+/*
+MARKET_CONFIGURATION: Option<MarketConfiguration> = Option::None,
+    ASSETS_CONFIGURATIONS: Option<[AssetConfig; 5]> = Option::None,
+    ASSETS_CONFIGURATIONS_LENGTH: u64 = 5, //
+    DEBUG_STEP: Option<u64> = Option::None,
+*/
+pub async fn deploy_market(
+    wallet: &WalletUnlocked,
+    market_configuration: MarketConfiguration,
+    asset_configurations: Vec<AssetConfig>,
+    debug_step: Option<u64>, // only for local test
+) -> MarketContract<WalletUnlocked> {
     let mut rng = rand::thread_rng();
     let salt = rng.gen::<[u8; 32]>();
-    let configurables = MarketContractConfigurables::default(); //todo
+    let configurables = MarketContractConfigurables::default()
+        .with_MARKET_CONFIGURATION(Option::Some(market_configuration))
+        .with_ASSET_CONFIGURATIONS(Option::Some(asset_configurations.try_into().unwrap()))
+        .with_DEBUG_STEP(debug_step);
     let config = LoadConfiguration::default().with_configurables(configurables);
     let id = Contract::load_from("./out/debug/market.bin", config)
         .unwrap()
