@@ -7,6 +7,7 @@ import { CONTRACT_ADDRESSES, IContractsConfig, NODE_URL } from "@src/constants";
 export interface ISerializedSettingsStore {
   selectedTheme: THEME_TYPE | null;
   version: string | null;
+  faucetTokens: Record<string, string> | null;
 }
 
 class SettingsStore {
@@ -19,11 +20,21 @@ class SettingsStore {
       initState.selectedTheme != null &&
         (this.selectedTheme = initState.selectedTheme);
       initState.version != null && (this.version = initState.version);
+      initState.faucetTokens != null &&
+        (this.faucetTokens = initState.faucetTokens);
     }
   }
 
   version: string = "0.1.0";
   setVersion = (s: string) => (this.version = s);
+
+  faucetTokens: Record<string, string> | null = null;
+  setFaucetTokens = (s: Record<string, string>) => (this.faucetTokens = s);
+  addFaucetToken = (s: any) => (this.faucetTokens = s);
+
+  get faucetTokenForCurrentAccount() {
+    return "";
+  }
 
   selectedTheme: THEME_TYPE = THEME_TYPE.DARK_THEME;
 
@@ -37,6 +48,7 @@ class SettingsStore {
   serialize = (): ISerializedSettingsStore => ({
     selectedTheme: this.selectedTheme,
     version: this.version,
+    faucetTokens: this.faucetTokens,
   });
 
   walletModalOpened: boolean = false;
@@ -54,7 +66,7 @@ class SettingsStore {
   }
 
   get currentVersionConfig(): IContractsConfig {
-    return CONTRACT_ADDRESSES[this.version];
+    return CONTRACT_ADDRESSES;
   }
 }
 
