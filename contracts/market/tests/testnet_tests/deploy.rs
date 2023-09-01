@@ -49,32 +49,44 @@ async fn deploy() {
 
         if symbol != "USDC" {
             asset_configs.push(AssetConfig {
-                asset: bits256,
+                asset_id: bits256,
                 decimals: config.decimals,
                 price_feed: oracle.contract_id().into(),
                 borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4
                 liquidate_collateral_factor: config.liquidate_collateral_factor.unwrap(), // decimals: 4
                 liquidation_penalty: config.liquidation_penalty.unwrap(), // decimals: 4
                 supply_cap: config.supply_cap.unwrap(), // decimals: asset decimals
+                paused: false,
             })
         }
     }
     let usdc = assets.get("USDC").unwrap();
 
     //--------------- MARKET ---------------
-    let market = deploy_market(&wallet).await;
     let market_config = get_market_config(
         wallet.address().into(),
         wallet.address().into(),
         usdc.bits256,
         usdc.decimals,
         oracle.contract_id().into(),
-        assets.get("SWAY").unwrap().bits256,
+        // assets.get("SWAY").unwrap().bits256,
     );
+    let market = deploy_market(&wallet, market_config, Option::None).await;
+    let sway_bits256 = market_abi_calls::get_reward_token_asset_id(&market).await;
+    println!("SWAY Address = {:?}", AssetId::from(sway_bits256.0));
 
-    market_abi_calls::initialize(&market, &market_config, &asset_configs, Option::None)
-        .await
-        .expect("❌ Cannot initialize market");
+    //--------------- SETUP COLLATERALS ---------------
+    for config in &asset_configs {
+        let mut config = config.clone();
+        // replace swaylend token into reward token
+        if config.asset_id == assets.get("SWAY").unwrap().bits256 {
+            config.asset_id = sway_bits256
+        }
 
-    println!("Market contract = {}", market.contract_id().hash(),);
+        market_abi_calls::add_asset_collateral(&market, &config)
+            .await
+            .unwrap();
+    }
+
+    println!("Market contract = {}", market.contract_id().hash());
 }

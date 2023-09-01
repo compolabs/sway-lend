@@ -1,5 +1,5 @@
-use fuels::prelude::{TxParameters, ViewOnlyAccount};
-use fuels::types::Address;
+use fuels::prelude::ViewOnlyAccount;
+use fuels::types::{Address, AssetId};
 use src20_sdk::token_factory_abi_calls;
 
 use crate::utils::contracts_utils::market_utils::{
@@ -47,26 +47,36 @@ async fn main_test() {
         usdc.bits256,
         usdc.decimals,
         oracle.contract_id().into(),
-        assets.get("SWAY").unwrap().bits256,
+        // assets.get("SWAY").unwrap().bits256,
     );
 
     // debug step
     let step: Option<u64> = Option::Some(10000);
     let market = deploy_market(&admin, market_config, step).await;
-
+    let sway_bits256 = market_abi_calls::get_reward_token_asset_id(&market).await;
+    println!("SWAY Address = {:?}", AssetId::from(sway_bits256.0));
+    //--------------- SETUP COLLATERALS ---------------
     for config in &asset_configs {
-        market
-            .methods()
-            .add_asset_collateral(config.clone())
-            .tx_params(TxParameters::default().with_gas_price(1))
-            .call()
+        let mut config = config.clone();
+        // replace swaylend token into reward token
+        if config.asset_id == assets.get("SWAY").unwrap().bits256 {
+            config.asset_id = sway_bits256
+        }
+
+        market_abi_calls::add_asset_collateral(&market, &config)
             .await
             .unwrap();
     }
     // ==================== Set oracle prices ====================
     for asset in &assets {
+        // replace swaylend token into reward token
+        let asset_id = if asset.1.symbol == "SWAY" {
+            sway_bits256
+        } else {
+            asset.1.bits256
+        };
         let price = asset.1.default_price * 10u64.pow(9);
-        oracle_abi_calls::set_price(&oracle, asset.1.bits256, price).await;
+        oracle_abi_calls::set_price(&oracle, asset_id, price).await;
         println!("1 {} = ${}", asset.1.symbol, asset.1.default_price);
     }
     println!("\n");

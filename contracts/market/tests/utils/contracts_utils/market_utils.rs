@@ -51,6 +51,18 @@ pub mod market_abi_calls {
             .await
     }
 
+    pub async fn add_asset_collateral(
+        market: &MarketContract<WalletUnlocked>,
+        config: &AssetConfig,
+    ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
+        market
+            .methods()
+            .add_asset_collateral(config.clone())
+            .tx_params(TxParameters::default().with_gas_price(1))
+            .call()
+            .await
+    }
+
     pub async fn withdraw_base(
         market: &MarketContract<WalletUnlocked>,
         contract_ids: &[&dyn SettableContract],
@@ -117,6 +129,16 @@ pub mod market_abi_calls {
             .simulate()
             .await;
         res.unwrap().value
+    }
+
+    pub async fn get_reward_token_asset_id(market: &MarketContract<WalletUnlocked>) -> Bits256 {
+        market
+            .methods()
+            .get_reward_token_asset_id()
+            .simulate()
+            .await
+            .unwrap()
+            .value
     }
 
     pub async fn available_to_borrow(
@@ -324,7 +346,7 @@ pub fn get_market_config(
     base_token_bits256: Bits256,
     base_token_decimals: u64,
     price_feed: ContractId,
-    reward_token_bits256: Bits256,
+    // reward_token_bits256: Bits256,
 ) -> MarketConfiguration {
     let config_json_str = std::fs::read_to_string("tests/artefacts/config.json").unwrap();
     let config: MarketConfig = serde_json::from_str(&config_json_str).unwrap();
@@ -349,6 +371,6 @@ pub fn get_market_config(
         base_min_for_rewards: config.base_min_for_rewards,         // decimals base_token_decimals
         base_borrow_min: config.base_borrow_min,                   // decimals: base_token_decimals
         target_reserves: config.target_reserves,                   // decimals: base_token_decimals
-        // reward_token: reward_token_bits256,
+                                                                   // reward_token: reward_token_bits256,
     }
 }

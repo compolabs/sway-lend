@@ -41,7 +41,6 @@ async fn pause_test() {
         usdc.bits256,
         usdc.decimals,
         oracle.contract_id().into(),
-        assets.get("SWAY").unwrap().bits256,
     );
 
     // debug step
