@@ -23,25 +23,38 @@ pub struct MarketConfiguration {
     base_min_for_rewards: u64, // decimals base_token_decimals
     base_borrow_min: u64, // decimals: base_token_decimals
     target_reserves: u64, // decimals: base_token_decimals
-    reward_token: AssetId, 
+    // reward_token: AssetId, 
 }
 
 pub struct AssetConfig {
-    asset: AssetId,
+    asset_id: AssetId,
     price_feed: ContractId,
     decimals: u64,
     borrow_collateral_factor: u64, // decimals: 4
     liquidate_collateral_factor: u64, // decimals: 4
     liquidation_penalty: u64, // decimals: 4
     supply_cap: u64, // decimals: asset decimals
+    paused: bool,
 }
 
 pub struct PauseConfiguration {
     supply_paused: bool, 
     withdraw_paused: bool, 
     absorb_paused: bool, 
-    buy_pause: bool,
-    // claim_paused: bool,
+    buy_paused: bool,
+    claim_paused: bool,
+}
+
+impl PauseConfiguration {
+    pub fn default() -> Self {
+        PauseConfiguration {
+            supply_paused: false,
+            withdraw_paused: false,
+            absorb_paused: false,
+            buy_paused: false,
+            claim_paused: false,
+        }
+     }
 }
 
 pub struct UserBasic {
@@ -99,6 +112,6 @@ pub enum Error {
     BorrowTooSmall: (),
     NotPermitted: (),
     InvalidPayment: (),
+    UnknownAsset: (),
     DebuggingDisabled: (),
 }
-
