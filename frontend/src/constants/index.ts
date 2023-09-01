@@ -30,7 +30,7 @@ export const SEED =
 export const CONTRACT_ADDRESSES: IContractsConfig = {
   priceOracle:
     "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d",
-  market: "0x68c4a706ff183ac73b1529bff157a57c04a53f1d55397154ce36118bb07a8ee6",
+  market: "0x3501744e60be272c67245f32ac3190992a46ef9d652133fe74775b0bd4193ebc",
   tokenFactory:
     "0xd8c627b9cd9ee42e2c2bd9793b13bc9f8e9aad32e25a99ea574f23c1dd17685a",
 };

@@ -36,6 +36,7 @@ export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
   const store = useMemo(() => new DashboardVm(rootStore), [rootStore]);
   return <ctx.Provider value={store}>{children}</ctx.Provider>;
 };
+//todo fix maxbtn
 
 export const useDashboardVM = () => useVM(ctx);
 
@@ -149,9 +150,11 @@ class DashboardVm {
           this.updateAccountBalances(marketContract),
           this.updateSupplyAndBorrowRates(marketContract),
           this.updateMarketBasic(marketContract),
-          this.updateMaxBorrowAmount(marketContract),
+          // error
+          // this.updateMaxBorrowAmount(marketContract),
           this.updateUserCollateralBalances(marketContract),
-          this.updateCollateralsData(marketContract),
+          //todo check it was duplicate of logic above
+          // this.updateCollateralsData(marketContract),
           this.updateTotalBaseTokenReserve(marketContract),
           this.updateTotalLiquidity(marketContract),
         ])
@@ -170,20 +173,14 @@ class DashboardVm {
   getAssetsConfig = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const collaterals = this.collaterals;
+    const result = await marketContract.functions
+      .get_asset_configurations()
+      .simulate();
 
-    const functions = collaterals.map((b) =>
-      marketContract.functions
-        // .get_asset_config_by_asset_id({ value: b.assetId })
-        .get_asset_config_by_asset_id(b.assetId)
-        .simulate()
-    );
-    const data = await Promise.all(functions);
-    if (data.length > 0) {
-      const v = data.reduce((acc, res, index) => {
+    if (result.value != null) {
+      const v = result.value.reduce((acc, res, index) => {
         if (res == null) return acc;
-        const assetId = collaterals[index].assetId;
-        return { ...acc, [assetId]: res.value };
+        return { ...acc, [res.asset_id]: res };
       }, {});
       this.setAssetsConfigs(v);
     }
@@ -194,10 +191,7 @@ class DashboardVm {
     const collaterals = this.collaterals;
 
     const functions = collaterals.map((b) =>
-      marketContract.functions
-        // .totals_collateral({ value: b.assetId })
-        .totals_collateral(b.assetId)
-        .simulate()
+      marketContract.functions.totals_collateral(b.assetId).simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -243,21 +237,15 @@ class DashboardVm {
   };
   updateTotalBaseTokenReserve = async (marketContract: MarketAbi) => {
     const { value } = await marketContract.functions
-      // .balance_of({ value: this.baseToken.assetId })
       .balance_of(this.baseToken.assetId)
       .simulate();
     this.setBaseTokenReserve(new BN(value.toString()));
   };
   updateTotalLiquidity = async (marketContract: MarketAbi) => {
     const result = await marketContract.functions
-      // .balance_of({ value: this.baseToken.assetId })
       .balance_of(this.baseToken.assetId)
       .simulate();
     const result2 = await marketContract.functions.get_reserves().simulate();
-    // const liq = BN.formatUnits(
-    //     new BN(result.value.toString()).minus(result2.value.value.toString()),
-    //     this.baseToken.decimals
-    // );
     this.setTotalLiquidity(
       new BN(result.value.toString()).minus(result2.value.value.toString())
     );
@@ -287,9 +275,6 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        // .get_user_collateral(addressInput, {
-        //   value: b.assetId,
-        // })
         .get_user_collateral(addressInput, b.assetId)
         .simulate()
     );
@@ -301,27 +286,6 @@ class DashboardVm {
         return { ...acc, [assetId]: new BN(res.value.toString()) };
       }, {});
       this.setCollateralBalances(v);
-    }
-  };
-  updateCollateralsData = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
-    const collaterals = this.collaterals;
-
-    const functions = collaterals.map((b) =>
-      marketContract.functions
-        // .get_asset_config_by_asset_id({ value: b.assetId })
-        .get_asset_config_by_asset_id(b.assetId)
-        .simulate()
-    );
-    const data = await Promise.all(functions);
-    if (data.length > 0) {
-      const v = data.reduce((acc, res, index) => {
-        if (res == null) return acc;
-        const assetId = collaterals[index].assetId;
-        return { ...acc, [assetId]: res.value };
-      }, {});
-      this.setCollateralData(v);
     }
   };
 
@@ -373,6 +337,7 @@ class DashboardVm {
   get baseToken() {
     return TOKENS_BY_SYMBOL.USDC;
   }
+  //fixme outOfGasError
 
   supplyBase = async (market: any) => {
     if (this.tokenAmount == null || this.tokenAmount.lte(0)) return;
@@ -385,7 +350,7 @@ class DashboardVm {
           assetId: this.baseToken.assetId,
         },
       })
-      .txParams({ gasPrice: 1 })
+      .txParams({ gasPrice: 100000 })
       .call();
   };
   withdrawBase = async (market: any) => {
