@@ -39,23 +39,18 @@ class AccountStore {
   }
 
   onFuelLoaded = () => {
-    //fixme
-    // if (window.fuel == null) {
-    //   window?.fuel?.on(window?.fuel.events.currentAccount, this.handleAccEvent);
-    //   window?.fuel?.on(window?.fuel.events?.network, this.handleNetworkEvent);
-    // }
-    // if (window.fuelet == null) {
-    //   window?.fuelet?.on(
-    //     window?.fuelet.events.currentAccount,
-    //     this.handleAccEvent
-    //   );
-    //   window?.fuelet?.on(
-    //     window?.fuelet.events?.network,
-    //     this.handleNetworkEvent
-    //   );
-    // }
+    if (this.walletInstance == null) return;
+    this.walletInstance.on(
+      window?.fuel.events.currentAccount,
+      this.handleAccEvent
+    );
+    this.walletInstance.on(
+      window?.fuel.events?.network,
+      this.handleNetworkEvent
+    );
   };
   handleAccEvent = (account: string) => this.setAddress(account);
+
   handleNetworkEvent = (network: FuelWalletProvider) => {
     if (network.url !== NODE_URL) {
       this.rootStore.notificationStore.toast(

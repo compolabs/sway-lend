@@ -5,6 +5,7 @@ import { Provider, Wallet } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
+//fixme fix of getting price of tokens
 class PricesStore {
   public readonly rootStore: RootStore;
 

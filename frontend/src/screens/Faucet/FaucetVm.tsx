@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { useVM } from "@src/hooks/useVM";
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { RootStore, useStores } from "@stores";
 import {
   EXPLORER_URL,
@@ -43,77 +43,18 @@ class FaucetVM {
   loading: boolean = false;
   private _setLoading = (l: boolean) => (this.loading = l);
 
-  // alreadyMintedTokens: string[] = [];
-  // private setAlreadyMintedTokens = (l: string[]) =>
-  //   (this.alreadyMintedTokens = l);
-
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
-    this.checkTokensThatAlreadyBeenMinted().then();
-    reaction(
-      () => this.rootStore.accountStore.address,
-      () => this.checkTokensThatAlreadyBeenMinted()
-    );
     makeAutoObservable(this);
   }
-
-  updateFaucetStateWhenVersionChanged = async () => {
-    this.setInitialized(false);
-    await this.checkTokensThatAlreadyBeenMinted();
-    this.setInitialized(true);
-  };
 
   rejectUpdateStatePromise?: () => void;
   setRejectUpdateStatePromise = (v: any) => (this.rejectUpdateStatePromise = v);
 
-  checkTokensThatAlreadyBeenMinted = async () => {
-    // console.log(this.rootStore.settingsStore.faucetTokens);
-    // const { walletToRead, addressInput } = this.rootStore.accountStore;
-    // if (walletToRead == null || addressInput == null) return;
-    // // const tokens = TOKENS_LIST.filter((v) => v.symbol !== "ETH");
-    // const tokens = TOKENS_LIST.filter((v) => v.symbol === "USDC");
-    // if (this.rejectUpdateStatePromise != null) this.rejectUpdateStatePromise();
-    //
-    // const tokensContracts = tokens.map((b) => {
-    //   console.log(b.symbol, b.assetId);
-    //   return TokenContractAbi__factory.connect(b.assetId, walletToRead);
-    // });
-    // const promise = new Promise((resolve, reject) => {
-    //   this.rejectUpdateStatePromise = reject;
-    //   resolve(
-    //     Promise.all(
-    //       tokensContracts.map((v) =>
-    //         v.functions.already_minted(addressInput).simulate()
-    //       )
-    //     )
-    //   );
-    // });
-    // promise
-    //   .catch((v) => {
-    //     console.log("update faucet data error", v);
-    //   })
-    //   .then((value: any) => {
-    //     if (value.length > 0) {
-    //       const v = value.reduce(
-    //         (acc: any, v: any, index: number) =>
-    //           v.value ? [...acc, tokens[index].assetId] : [...acc],
-    //         [] as string[]
-    //       );
-    //       this.setAlreadyMintedTokens(v);
-    //     }
-    //   })
-    //   .finally(() => {
-    //     this.setInitialized(true);
-    //     this.setRejectUpdateStatePromise(undefined);
-    //   });
-    this.setInitialized(true);
-  };
-
   actionTokenAssetId: string | null = null;
   setActionTokenAssetId = (l: string | null) => (this.actionTokenAssetId = l);
 
-  initialized: boolean = false;
-  private setInitialized = (l: boolean) => (this.initialized = l);
+  initialized: boolean = true;
 
   get faucetTokens() {
     const { accountStore, pricesStore } = this.rootStore;
@@ -144,13 +85,7 @@ class FaucetVM {
   }
 
   mint = async (assetId?: string) => {
-    // const alreadyMintedTokens = this.rootStore.settingsStore.faucetTokens[th];
-
     if (assetId == null) return;
-    //   console.log("return 1");
-    //   return;
-    // }
-    if (window?.fuel == null) return;
     if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
       const addedAssets: Array<any> = await window?.fuel.assets();
       if (
@@ -165,12 +100,6 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const { tokenFactory } = this.rootStore.settingsStore.currentVersionConfig;
     const wallet = await accountStore.getWallet();
-    console.log(wallet);
-    console.log("wallet in  mint", wallet);
-    // const wallet2 = Wallet.fromPrivateKey(
-    //   process.env.REACT_APP_SECRET!,
-    //   accountStore.provider
-    // );
     if (wallet == null) return;
     const tokenFactoryContract = TokenFactoryAbi__factory.connect(
       tokenFactory,
@@ -188,7 +117,6 @@ class FaucetVM {
         .txParams({ gasPrice: 2 })
         .call();
       if (transactionResult != null) {
-        // this.setAlreadyMintedTokens([...this.alreadyMintedTokens, assetId]);
         const token = TOKENS_BY_ASSET_ID[assetId];
         this.rootStore.notificationStore.toast(
           `You have successfully minted ${token.symbol}`,
