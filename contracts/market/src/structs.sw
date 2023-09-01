@@ -23,7 +23,7 @@ pub struct MarketConfiguration {
     base_min_for_rewards: u64, // decimals base_token_decimals
     base_borrow_min: u64, // decimals: base_token_decimals
     target_reserves: u64, // decimals: base_token_decimals
-    reward_token: AssetId, 
+    // reward_token: AssetId, 
 }
 
 pub struct AssetConfig {

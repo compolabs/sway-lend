@@ -349,6 +349,6 @@ pub fn get_market_config(
         base_min_for_rewards: config.base_min_for_rewards,         // decimals base_token_decimals
         base_borrow_min: config.base_borrow_min,                   // decimals: base_token_decimals
         target_reserves: config.target_reserves,                   // decimals: base_token_decimals
-        reward_token: reward_token_bits256,
+        // reward_token: reward_token_bits256,
     }
 }

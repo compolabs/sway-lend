@@ -14,7 +14,6 @@ use structs::*;
 // use signed_integers::i64::I64;
 use i64::*;
 use oracle_abi::*;
-use token_abi::*;
 use std::auth::{AuthError,msg_sender};
 use std::call_frames::{contract_id,msg_asset_id};
 use std::constants::ZERO_B256;
@@ -26,6 +25,7 @@ use std::token::transfer_to_address;
 use std::u128::U128;
 use std::storage::storage_vec::*;
 use std::vec::Vec;
+use std::token::mint_to_address;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
@@ -131,8 +131,10 @@ abi Market {
     // ## 6. Reward stuff
     // todo add description and test reward stuff
 
+    fn get_reward_token_asset_id() -> AssetId;
+
     //function for claiming reward tokens by admin. `reward_token` is set in merket config
-    fn withdraw_reward_token(to: Address, amount: u64);
+    fn withdraw_reward_token(recipient: Address, amount: u64);
 
     #[storage(read, write)]
     fn get_reward_owed(account: Address) -> u64;
@@ -460,12 +462,13 @@ impl Market for Contract {
 
     // ## 6. Reward stuff
 
-    fn withdraw_reward_token(to: Address, amount: u64) {
-        let config = MARKET_CONFIGURATION.unwrap();
-        let sender = msg_sender_address();
-        require(sender == config.governor, Error::NotPermitted);
+    fn get_reward_token_asset_id() -> AssetId {
+        sha256((contract_id(), ZERO_B256))
+    }
 
-        mint_reward_token(amount, to);
+    fn withdraw_reward_token(recipient: Address, amount: u64) {
+        require(msg_sender_address() == MARKET_CONFIGURATION.unwrap().governor, Error::NotPermitted);
+        mint_to_address(recipient, ZERO_B256, amount);
     }
 
     #[storage(read, write)]
@@ -502,8 +505,8 @@ impl Market for Contract {
             basic.reward_claimed = accrued;
             storage.user_basic.insert(caller, basic);
 
-            let owed = accrued - claimed;
-            mint_reward_token(owed, caller);
+            let amount = accrued - claimed;
+            mint_to_address(caller, ZERO_B256, amount);
         }
     }
 
@@ -589,12 +592,6 @@ fn timestamp() -> u64 {
     } else {
         std::block::timestamp()
     }
-}
-
-//todo mint token from this contract
-fn mint_reward_token(amount: u64, recipient: Address) {
-    let config = MARKET_CONFIGURATION.unwrap();
-    abi(FRC20, config.reward_token)._mint(amount, recipient);
 }
 
 fn msg_sender_address() -> Address {
