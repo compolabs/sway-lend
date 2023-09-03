@@ -27,6 +27,14 @@ use std::storage::storage_vec::*;
 use std::vec::Vec;
 use std::token::mint_to_address;
 
+// todo: create an issue about usage local library inside a another local library
+// todo: make indexer
+// todo: redeploy market contract
+// todo: refrash testnet main test
+// todo: debug indexer
+// todo: create offchain math on rust
+// todo: create liquidator based on the math
+
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
 configurable {
@@ -208,6 +216,8 @@ impl Market for Contract {
         require(storage.asset_configurations.get(asset_config.asset_id).try_read().is_none(), Error::UnknownAsset);
         storage.asset_configurations.insert(asset_config.asset_id, asset_config);
         storage.asset_configurations_keys.push(asset_config.asset_id);
+
+        log(AssetCollateralEvent {asset_config});
     }
 
     #[storage(read, write)]
@@ -216,6 +226,8 @@ impl Market for Contract {
         let mut config = storage.asset_configurations.get(asset_id).try_read().unwrap();
         config.paused = true;
         storage.asset_configurations.insert(asset_id, config);
+
+        log(AssetCollateralEvent {asset_config: config});
     }
 
     #[storage(read, write)]
@@ -224,6 +236,8 @@ impl Market for Contract {
         let mut config = storage.asset_configurations.get(asset_id).try_read().unwrap();
         config.paused = false;
         storage.asset_configurations.insert(asset_id, config);
+
+        log(AssetCollateralEvent {asset_config: config});
     }
 
     #[storage(read)]
@@ -262,22 +276,34 @@ impl Market for Contract {
     
         storage.totals_collateral.insert(asset_id, total_supply_asset);
         storage.user_collateral.insert((caller, asset_id), user_collateral_new);
+
+        log(UserCollateralEvent{
+            address: caller, 
+            asset_id, 
+            amount: user_collateral_new
+        });
     }
 
     #[storage(read, write)]
-    fn withdraw_collateral(asset: AssetId, amount: u64) {
+    fn withdraw_collateral(asset_id: AssetId, amount: u64) {
         let caller = msg_sender_address();
-        let src_collateral = storage.user_collateral.get((caller, asset)).try_read().unwrap_or(0);
+        let src_collateral = storage.user_collateral.get((caller, asset_id)).try_read().unwrap_or(0);
         let src_collateral_new = src_collateral - amount;
 
-        let new_total_supply_asset = storage.totals_collateral.get(asset).try_read().unwrap_or(0) - amount;
-        storage.totals_collateral.insert(asset, new_total_supply_asset);
-        storage.user_collateral.insert((caller, asset), src_collateral_new);
+        let new_total_supply_asset = storage.totals_collateral.get(asset_id).try_read().unwrap_or(0) - amount;
+        storage.totals_collateral.insert(asset_id, new_total_supply_asset);
+        storage.user_collateral.insert((caller, asset_id), src_collateral_new);
+
+        log(UserCollateralEvent{
+            address: caller, 
+            asset_id, 
+            amount: src_collateral_new
+        });
 
         // Note: no accrue interest, BorrowCF < LiquidationCF covers small changes
         require(is_borrow_collateralized(caller), Error::NotCollateralized);
 
-        transfer_to_address(caller, asset, amount);
+        transfer_to_address(caller, asset_id, amount);
     }
     
     #[storage(read)]
@@ -504,6 +530,8 @@ impl Market for Contract {
         if accrued > claimed {
             basic.reward_claimed = accrued;
             storage.user_basic.insert(caller, basic);
+            
+            log(UserBasicEvent{user_basic: basic});
 
             let amount = accrued - claimed;
             mint_to_address(caller, ZERO_B256, amount);
@@ -860,6 +888,8 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
         basic.base_tracking_index = market_basic.tracking_borrow_index;
     }
     storage.user_basic.insert(account, basic);
+
+    log(UserBasicEvent{user_basic: basic});
 }
 
 fn repay_and_supply_amount(old_principal: I64, new_principal: I64) -> (u64, u64) {
@@ -930,6 +960,12 @@ fn absorb_internal(account: Address) {
             continue;
         }
         storage.user_collateral.insert((account, asset_config.asset_id), 0);
+
+        log(UserCollateralEvent{
+            address: account, 
+            asset_id: asset_config.asset_id, 
+            amount: 0
+        });
 
         let total_collateral = storage.totals_collateral.get(asset_config.asset_id).try_read().unwrap_or(0); // asset decimals
         storage.totals_collateral.insert(asset_config.asset_id, total_collateral - seize_amount);
