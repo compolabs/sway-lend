@@ -115,6 +115,11 @@ const _abi = {
           "typeArguments": null
         },
         {
+          "name": "UnknownAsset",
+          "type": 0,
+          "typeArguments": null
+        },
+        {
           "name": "DebuggingDisabled",
           "type": 0,
           "typeArguments": null
@@ -170,7 +175,7 @@ const _abi = {
       "type": "struct AssetConfig",
       "components": [
         {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         },
@@ -202,6 +207,11 @@ const _abi = {
         {
           "name": "supply_cap",
           "type": 18,
+          "typeArguments": null
+        },
+        {
+          "name": "paused",
+          "type": 3,
           "typeArguments": null
         }
       ],
@@ -366,11 +376,6 @@ const _abi = {
           "name": "target_reserves",
           "type": 18,
           "typeArguments": null
-        },
-        {
-          "name": "reward_token",
-          "type": 2,
-          "typeArguments": null
         }
       ],
       "typeParameters": null
@@ -395,7 +400,12 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "buy_pause",
+          "name": "buy_paused",
+          "type": 3,
+          "typeArguments": null
+        },
+        {
+          "name": "claim_paused",
           "type": 3,
           "typeArguments": null
         }
@@ -514,6 +524,30 @@ const _abi = {
     {
       "inputs": [
         {
+          "name": "asset_config",
+          "type": 9,
+          "typeArguments": null
+        }
+      ],
+      "name": "add_asset_collateral",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "write",
+            "read"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
           "name": "account",
           "type": 8,
           "typeArguments": null
@@ -553,7 +587,7 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         },
@@ -576,13 +610,31 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read"
+          ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "claim",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
           ]
         }
       ]
@@ -590,7 +642,7 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         },
@@ -634,18 +686,18 @@ const _abi = {
       ]
     },
     {
-      "inputs": [
-        {
-          "name": "asset",
-          "type": 2,
-          "typeArguments": null
-        }
-      ],
-      "name": "get_asset_config_by_asset_id",
+      "inputs": [],
+      "name": "get_asset_configurations",
       "output": {
         "name": "",
-        "type": 9,
-        "typeArguments": null
+        "type": 17,
+        "typeArguments": [
+          {
+            "name": "",
+            "type": 9,
+            "typeArguments": null
+          }
+        ]
       },
       "attributes": [
         {
@@ -670,59 +722,12 @@ const _abi = {
         "type": 18,
         "typeArguments": null
       },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
+      "attributes": null
     },
     {
       "inputs": [
         {
-          "name": "index",
-          "type": 18,
-          "typeArguments": null
-        }
-      ],
-      "name": "get_borrower",
-      "output": {
-        "name": "",
-        "type": 8,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [],
-      "name": "get_borrowers_amount",
-      "output": {
-        "name": "",
-        "type": 18,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [
-        {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         }
@@ -750,14 +755,7 @@ const _abi = {
         "type": 13,
         "typeArguments": null
       },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
+      "attributes": null
     },
     {
       "inputs": [],
@@ -765,29 +763,6 @@ const _abi = {
       "output": {
         "name": "",
         "type": 12,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [
-        {
-          "name": "asset",
-          "type": 2,
-          "typeArguments": null
-        }
-      ],
-      "name": "get_oracle_price",
-      "output": {
-        "name": "",
-        "type": 18,
         "typeArguments": null
       },
       "attributes": [
@@ -819,6 +794,40 @@ const _abi = {
     {
       "inputs": [
         {
+          "name": "account",
+          "type": 8,
+          "typeArguments": null
+        }
+      ],
+      "name": "get_reward_owed",
+      "output": {
+        "name": "",
+        "type": 18,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "get_reward_token_asset_id",
+      "output": {
+        "name": "",
+        "type": 2,
+        "typeArguments": null
+      },
+      "attributes": null
+    },
+    {
+      "inputs": [
+        {
           "name": "utilization",
           "type": 18,
           "typeArguments": null
@@ -830,14 +839,7 @@ const _abi = {
         "type": 18,
         "typeArguments": null
       },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
+      "attributes": null
     },
     {
       "inputs": [
@@ -870,7 +872,7 @@ const _abi = {
           "typeArguments": null
         },
         {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         }
@@ -933,52 +935,6 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "config",
-          "type": 13,
-          "typeArguments": null
-        },
-        {
-          "name": "asset_configs",
-          "type": 17,
-          "typeArguments": [
-            {
-              "name": "",
-              "type": 9,
-              "typeArguments": null
-            }
-          ]
-        },
-        {
-          "name": "debug_step",
-          "type": 5,
-          "typeArguments": [
-            {
-              "name": "",
-              "type": 18,
-              "typeArguments": null
-            }
-          ]
-        }
-      ],
-      "name": "initialize",
-      "output": {
-        "name": "",
-        "type": 0,
-        "typeArguments": null
-      },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read",
-            "write"
-          ]
-        }
-      ]
-    },
-    {
-      "inputs": [
-        {
           "name": "account",
           "type": 8,
           "typeArguments": null
@@ -1026,7 +982,31 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "asset",
+          "name": "asset_id",
+          "type": 2,
+          "typeArguments": null
+        }
+      ],
+      "name": "pause_asset_collateral",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
+        }
+      ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         },
@@ -1052,8 +1032,14 @@ const _abi = {
       ]
     },
     {
-      "inputs": [],
-      "name": "supply_base",
+      "inputs": [
+        {
+          "name": "asset_id",
+          "type": 2,
+          "typeArguments": null
+        }
+      ],
+      "name": "resume_asset_collateral",
       "output": {
         "name": "",
         "type": 0,
@@ -1066,10 +1052,28 @@ const _abi = {
             "read",
             "write"
           ]
-        },
+        }
+      ]
+    },
+    {
+      "inputs": [],
+      "name": "supply_base",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": [
         {
           "name": "payable",
           "arguments": []
+        },
+        {
+          "name": "storage",
+          "arguments": [
+            "read",
+            "write"
+          ]
         }
       ]
     },
@@ -1098,7 +1102,7 @@ const _abi = {
     {
       "inputs": [
         {
-          "name": "asset",
+          "name": "asset_id",
           "type": 2,
           "typeArguments": null
         }
@@ -1198,6 +1202,27 @@ const _abi = {
           ]
         }
       ]
+    },
+    {
+      "inputs": [
+        {
+          "name": "recipient",
+          "type": 8,
+          "typeArguments": null
+        },
+        {
+          "name": "amount",
+          "type": 18,
+          "typeArguments": null
+        }
+      ],
+      "name": "withdraw_reward_token",
+      "output": {
+        "name": "",
+        "type": 0,
+        "typeArguments": null
+      },
+      "attributes": null
     }
   ],
   "loggedTypes": [
@@ -1384,10 +1409,89 @@ const _abi = {
         "type": 4,
         "typeArguments": []
       }
+    },
+    {
+      "logId": 23,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 24,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 25,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 26,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 27,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
+    },
+    {
+      "logId": 28,
+      "loggedType": {
+        "name": "",
+        "type": 4,
+        "typeArguments": []
+      }
     }
   ],
   "messagesTypes": [],
-  "configurables": []
+  "configurables": [
+    {
+      "name": "MARKET_CONFIGURATION",
+      "configurableType": {
+        "name": "",
+        "type": 5,
+        "typeArguments": [
+          {
+            "name": "",
+            "type": 13,
+            "typeArguments": []
+          }
+        ]
+      },
+      "offset": 707192
+    },
+    {
+      "name": "DEBUG_STEP",
+      "configurableType": {
+        "name": "",
+        "type": 5,
+        "typeArguments": [
+          {
+            "name": "",
+            "type": 18,
+            "typeArguments": null
+          }
+        ]
+      },
+      "offset": 707448
+    }
+  ]
 }
 
 export class MarketAbi__factory {
