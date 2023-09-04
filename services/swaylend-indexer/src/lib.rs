@@ -4,17 +4,9 @@ use fuel_indexer_utils::prelude::*;
 #[indexer(manifest = "swaylend_indexer.manifest.yaml")]
 pub mod swaylend_indexer_index_mod {
 
-    fn swaylend_indexer_handler(block_data: BlockData) {
-        if block_data.header.height % 1000 == 0 {
-            info!("Processing Block#{}. (>'.')>", block_data.header.height);
-        }
-        
-        let block = Block::new(block_data.header.height.into(), block_data.id);
-        block.save();
-
-        for transaction in block_data.transactions.iter() {
-            let tx = Transaction::new(block_data.id, Bytes32::from(<[u8; 32]>::from(transaction.id)));
-            tx.save();
-        }
+    fn handle_block(block: BlockData) {
+        let height = block.height;
+        let txs = block.transactions.len();
+        info!("🧱 Block height: {height} | transacrions: {txs}");
     }
 }

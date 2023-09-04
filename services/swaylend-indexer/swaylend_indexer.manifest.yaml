@@ -10,7 +10,7 @@ identifier: swaylend_indexer
 abi: "./market-abi.json"
 
 # The particular start block after which you'd like your indexer to start indexing events.
-start_block: ~
+start_block: 1462255
 
 # The particular end block after which you'd like your indexer to stop indexing events.
 end_block: ~
@@ -22,7 +22,7 @@ end_block: ~
 fuel_client: ~
 
 # The contract_id specifies which particular contract you would like your index to subscribe to.
-contract_id: ~
+contract_id: 0x2679d41c2981bcd6ab69d66f0ae656077efecac2c2dd729f88f5a6457ce1d5f1
 
 # The graphql_schema field contains the file path that points to the GraphQL schema for the
 # given index.
