@@ -7,7 +7,9 @@ use crate::utils::contracts_utils::market_utils::{
 };
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
 use crate::utils::number_utils::parse_units;
-use crate::utils::{debug_state, init_tokens, init_wallets, print_case_title, print_title};
+use crate::utils::{
+    convert_i64, debug_state, init_tokens, init_wallets, print_case_title, print_title,
+};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
@@ -309,13 +311,13 @@ async fn main_test() {
     // 💰 Amount: 172.44 USDC
 
     let inst = market.with_account(bob.clone()).unwrap();
-    let reservs = market_abi_calls::get_collateral_reserves(&market, uni.bits256).await;
-    assert!(!reservs.negative);
+    let reservs =
+        convert_i64(market_abi_calls::get_collateral_reserves(&market, uni.bits256).await);
+    assert!(reservs > 0);
 
-    let reservs = reservs.value;
     println!("reserves = {:?}", reservs);
     let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
+        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs as u64).await;
 
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(8, "Bob", "buy_collateral", log_amount.as_str());

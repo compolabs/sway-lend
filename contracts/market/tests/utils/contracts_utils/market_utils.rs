@@ -283,7 +283,7 @@ pub mod market_abi_calls {
     pub async fn get_collateral_reserves(
         market: &MarketContract<WalletUnlocked>,
         asset_id: Bits256,
-    ) -> I64 {
+    ) -> I128 {
         market
             .methods()
             .get_collateral_reserves(asset_id)
@@ -293,7 +293,7 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn get_reserves(market: &MarketContract<WalletUnlocked>) -> I64 {
+    pub async fn get_reserves(market: &MarketContract<WalletUnlocked>) -> I128 {
         market
             .methods()
             .get_reserves()

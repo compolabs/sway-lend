@@ -11,8 +11,9 @@ mod structs;
 
 use helpers::*;
 use structs::*;
-// use signed_integers::i64::I64;
-use i64::*;
+// use signed_integers::i128::I128;
+use signed_integers::i128::I128;
+// use i128::*;
 use oracle_abi::*;
 use std::auth::{AuthError,msg_sender};
 use std::call_frames::{contract_id,msg_asset_id};
@@ -155,14 +156,14 @@ abi Market {
 
     // Gets the total amount of protocol reserves of the base asset
     #[storage(read)]
-    fn get_reserves() -> I64;
+    fn get_reserves() -> I128;
 
     // Withdraws base token reserves if called by the governor
     #[storage(read)]
     fn withdraw_reserves(to: Address, amount: u64);
 
     #[storage(read)]
-    fn get_collateral_reserves(asset_id: AssetId) -> I64;
+    fn get_collateral_reserves(asset_id: AssetId) -> I128;
     
     // ## 8. Pause settings
     // This is an administrative function that allows the system's governor to pause supply, withdraw, absorb, buy and claim
@@ -329,7 +330,7 @@ impl Market for Contract {
         let user_principal = user_basic.principal;
         let user_present = present_value(user_principal);
     
-        let user_balance = user_present + I64::from(amount);
+        let user_balance = user_present + I128::from_u64(amount);
         let user_principal_new = principal_value(user_balance);
     
         let (repay_amount, supply_amount) = repay_and_supply_amount(user_principal, user_principal_new);
@@ -354,7 +355,7 @@ impl Market for Contract {
         let caller = msg_sender_address();
         let user_basic = storage.user_basic.get(caller).try_read().unwrap_or(UserBasic::default());
         let user_principal = user_basic.principal;
-        let user_balance = present_value(user_principal) - I64::from(amount);
+        let user_balance = present_value(user_principal) - I128::from_u64(amount);
         let user_principal_new = principal_value(user_balance);
 
         let (withdraw_amount, borrow_amount) = withdraw_and_borrow_amount(user_principal, user_principal_new);
@@ -365,8 +366,8 @@ impl Market for Contract {
 
         update_base_principal(caller, user_basic, user_principal_new);
 
-        if user_balance < I64::from(0) {
-            require(user_balance.flip().into() >= config.base_borrow_min, Error::BorrowTooSmall);
+        if user_balance < I128::new() {
+            require(user_balance.flip().into().lower >= config.base_borrow_min, Error::BorrowTooSmall);
             require(is_borrow_collateralized(caller), Error::NotCollateralized);
         }
 
@@ -380,11 +381,11 @@ impl Market for Contract {
         let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal;
         let last_accrual_time = storage.market_basic.last_accrual_time.read();
         let (supply_index, borrow_index) = accrued_interest_indices(timestamp(), last_accrual_time);   // decimals (18, 18)
-        if principal >= I64::new() {
-            let supply = present_value_supply(supply_index, principal.into());
+        if principal >= I128::new() {
+            let supply = present_value_supply(supply_index, principal.into().lower);
             (supply, 0)
         } else {
-            let borrow = present_value_borrow(borrow_index, principal.flip().into());
+            let borrow = present_value_borrow(borrow_index, principal.flip().into().lower);
             (0, borrow)
         }
     }
@@ -441,13 +442,13 @@ impl Market for Contract {
         require(msg_asset_id() == config.base_token && payment_amount > 0, Error::InvalidPayment);
 
         let reserves = get_reserves_internal();
-        require(reserves < I64::from(0) || reserves.into() < config.target_reserves, Error::NotForSale);
+        require(reserves < I128::new() || reserves.into().lower < config.target_reserves, Error::NotForSale);
 
         // Note: Re-entrancy can skip the reserves check above on a second buyCollateral call.
         let reserves = get_collateral_reserves_internal(asset_id);
         let collateral_amount = quote_collateral_internal(asset_id, payment_amount);
         require(collateral_amount >= min_amount, Error::TooMuchSlippage);
-        require(I64::from(collateral_amount) <= reserves, Error::InsufficientReserves);
+        require(I128::from_u64(collateral_amount) <= reserves, Error::InsufficientReserves);
 
         // Note: Pre-transfer hook can re-enter buyCollateral with a stale collateral ERC20 balance.
         //  Assets should not be listed which allow re-entry from pre-transfer now, as too much collateral could be bought.
@@ -535,7 +536,7 @@ impl Market for Contract {
     // ## 7. Reserves stuff
 
     #[storage(read)]
-    fn get_reserves() -> I64{
+    fn get_reserves() -> I128{
         get_reserves_internal()
     }
 
@@ -546,13 +547,13 @@ impl Market for Contract {
 
         require(caller == config.governor, Error::Unauthorized);
         let reserves = get_reserves_internal();
-        require(reserves >= I64::from(0) && amount <= reserves.into(), Error::InsufficientReserves);
+        require(reserves >= I128::new() && amount <= reserves.into().lower, Error::InsufficientReserves);
 
         transfer_to_address(to, config.base_token, amount)
     }
 
     #[storage(read)]
-    fn get_collateral_reserves(asset_id: AssetId) -> I64{
+    fn get_collateral_reserves(asset_id: AssetId) -> I128{
         get_collateral_reserves_internal(asset_id)
     }
 
@@ -648,26 +649,26 @@ pub fn principal_value_borrow(base_borrow_index: u64, present: u64) -> u64 { // 
 }
 
 #[storage(read)]
-fn present_value(principal: I64) -> I64 { // -> base_asset_decimals
+fn present_value(principal: I128) -> I128 { // -> base_asset_decimals
     let market_basic = storage.market_basic.read();
-    if principal >= I64::from(0) {
-        let present_value_u64 = present_value_supply(market_basic.base_supply_index, principal.into());
-        I64::from(present_value_u64)
+    if principal >= I128::new() {
+        let present_value_u64 = present_value_supply(market_basic.base_supply_index, principal.into().lower);
+        I128::from_u64(present_value_u64)
     } else {
-        let present_value_u64 = present_value_borrow(market_basic.base_borrow_index, principal.flip().into());
-        I64::from(present_value_u64).flip()
+        let present_value_u64 = present_value_borrow(market_basic.base_borrow_index, principal.flip().into().lower);
+        I128::from_u64(present_value_u64).flip()
     }
 }
 
 #[storage(read)]
-fn principal_value(present_value: I64) -> I64 { // -> base_asset_decimals
+fn principal_value(present_value: I128) -> I128 { // -> base_asset_decimals
     let market_basic = storage.market_basic.read();
-    if present_value >= I64::from(0) {
-        let principal_value_u64 = principal_value_supply(market_basic.base_supply_index, present_value.into());
-        I64::from(principal_value_u64)
+    if present_value >= I128::new() {
+        let principal_value_u64 = principal_value_supply(market_basic.base_supply_index, present_value.into().lower);
+        I128::from_u64(principal_value_u64)
     } else {
-        let principal_value_u64 = principal_value_borrow(market_basic.base_borrow_index, present_value.flip().into());
-        I64::from(principal_value_u64).flip()
+        let principal_value_u64 = principal_value_borrow(market_basic.base_borrow_index, present_value.flip().into().lower);
+        I128::from_u64(principal_value_u64).flip()
     }
 }
 
@@ -740,7 +741,7 @@ fn accrued_interest_indices(now: u64, last_accrual_time: u64) -> (u64, u64) { //
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal; // decimals base_asset_decimal
-    if principal >= I64::new() {
+    if principal >= I128::new() {
         return true
     };
 
@@ -766,7 +767,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(1000000000); // 1e9
-    let borrow_amount = U128::from_u64(present.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
+    let borrow_amount = present.into() * U128::from_u64(base_token_price) / scale; // decimals 9
     borrow_limit >= borrow_amount
 }
 // @Callable is_liquidatable(account: Address) -> bool
@@ -775,12 +776,12 @@ fn is_borrow_collateralized(account: Address) -> bool {
 #[storage(read)]
 fn is_liquidatable_internal(account: Address) -> bool {
     let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal; // decimals base_asset_decimal
-    if principal >= I64::new() {
+    if principal >= I128::new() {
         return false
     };
 
     let config = MARKET_CONFIGURATION.unwrap();
-    let present = U128::from_u64(present_value(principal.flip()).into()); // decimals base_asset_decimals
+    let present = present_value(principal.flip()).into(); // decimals base_asset_decimals
     let mut liquidation_treshold = U128::new();
     let mut index = 0;
     while index < storage.collateral_configurations_keys.len() { 
@@ -804,22 +805,22 @@ fn is_liquidatable_internal(account: Address) -> bool {
     liquidation_treshold < borrow_amount
 }
 
-// @Callable get_collateral_reserves(asset: AssetId) -> I64
-// @Callable get_collateral_reserves(asset: AssetId) -> I64
+// @Callable get_collateral_reserves(asset: AssetId) -> I128
+// @Callable get_collateral_reserves(asset: AssetId) -> I128
 #[storage(read)]
-fn get_collateral_reserves_internal(asset_id: AssetId) -> I64 { // -> asset decimals
-    I64::from(this_balance(asset_id)) - I64::from(storage.totals_collateral.get(asset_id).try_read().unwrap_or(0))
+fn get_collateral_reserves_internal(asset_id: AssetId) -> I128 { // -> asset decimals
+    I128::from_u64(this_balance(asset_id)) - I128::from_u64(storage.totals_collateral.get(asset_id).try_read().unwrap_or(0))
 }
 
-// @Callable get_reserves_internal() -> I64
+// @Callable get_reserves_internal() -> I128
 #[storage(read)]
-fn get_reserves_internal() -> I64 {  // base_token_decimals
+fn get_reserves_internal() -> I128 {  // base_token_decimals
     let market_basic = storage.market_basic.read();
     let (base_supply_index, base_borrow_index) = accrued_interest_indices(timestamp(), market_basic.last_accrual_time);  // decimals (18, 18)
     let balance = this_balance(MARKET_CONFIGURATION.unwrap().base_token); // base_token_decimals
     let total_supply = present_value_supply(base_supply_index, market_basic.total_supply_base); // base_token_decimals
     let total_borrow = present_value_borrow(base_borrow_index, market_basic.total_borrow_base); // base_token_decimals
-    I64::from(balance + total_borrow) - I64::from(total_supply)
+    I128::from_u64(balance + total_borrow) - I128::from_u64(total_supply)
 }
 
 #[storage(read, write)]
@@ -854,7 +855,7 @@ fn accrue_internal() {
 
 // the function through which any balance changes will pass. updates the reward variables on the user
 #[storage(write, read)]
-fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64) {
+fn update_base_principal(account: Address, basic: UserBasic, principal_new: I128) {
     let market_basic = storage.market_basic.read();
     let principal = basic.principal;
     let mut basic = basic;
@@ -864,14 +865,14 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
         basic.base_tracking_index = SCALE_18
     };
 
-    if principal >= I64::from(0) {
+    if principal >= I128::new() {
         let index_delta = market_basic.tracking_supply_index - basic.base_tracking_index; // decimals 18
-        basic.base_tracking_accrued += principal.into() * index_delta / SCALE_18; // native_asset_decimal
+        basic.base_tracking_accrued += principal.into().lower * index_delta / SCALE_18; // native_asset_decimal
     } else {
         let index_delta = market_basic.tracking_borrow_index - basic.base_tracking_index;
-        basic.base_tracking_accrued += principal.flip().into() * index_delta / SCALE_18; // native_asset_decimal
+        basic.base_tracking_accrued += principal.flip().into().lower * index_delta / SCALE_18; // native_asset_decimal
     }
-    if principal_new >= I64::from(0) {
+    if principal_new >= I128::new() {
         basic.base_tracking_index = market_basic.tracking_supply_index;
     } else {
         basic.base_tracking_index = market_basic.tracking_borrow_index;
@@ -881,33 +882,33 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
     log(UserBasicEvent{user_basic: basic});
 }
 
-fn repay_and_supply_amount(old_principal: I64, new_principal: I64) -> (u64, u64) {
+fn repay_and_supply_amount(old_principal: I128, new_principal: I128) -> (u64, u64) {
     // If the new principal is less than the old principal, then no amount has been repaid or supplied
     if new_principal < old_principal {
         return (0, 0)
     };
 
-    if new_principal <= I64::from(0) {
-        return ((new_principal - old_principal).into(), 0);
-    } else if old_principal >= I64::from(0) {
-        return (0, (new_principal - old_principal).into());
+    if new_principal <= I128::new() {
+        return ((new_principal - old_principal).into().lower, 0);
+    } else if old_principal >= I128::new() {
+        return (0, (new_principal - old_principal).into().lower);
     } else {
-        return (old_principal.flip().into(), new_principal.into());
+        return (old_principal.flip().into().lower, new_principal.into().lower);
     }
 }
 
-fn withdraw_and_borrow_amount(old_principal: I64, new_principal: I64) -> (u64, u64) {
+fn withdraw_and_borrow_amount(old_principal: I128, new_principal: I128) -> (u64, u64) {
     // If the new principal is greater than the old principal, then no amount has been withdrawn or borrowed
     if new_principal > old_principal {
         return (0, 0)
     };
 
-    if new_principal >= I64::from(0) {
-        return ((old_principal - new_principal).into(), 0);
-    } else if old_principal <= I64::from(0) {
-        return (0, (old_principal - new_principal).into());
+    if new_principal >= I128::new() {
+        return ((old_principal - new_principal).into().lower, 0);
+    } else if old_principal <= I128::new() {
+        return (0, (old_principal - new_principal).into().lower);
     } else {
-        return ((old_principal).into(), (new_principal).flip().into());
+        return ((old_principal).into().lower, (new_principal).flip().into().lower);
     }
 }
 
@@ -971,9 +972,9 @@ fn absorb_internal(account: Address) {
     let base_scale = 10.pow(config.base_token_decimals);
 
     let delta_balance = delta_value.as_u64().unwrap() * base_scale / base_price; // base_asset_decimals
-    let mut new_balance = old_balance + I64::from(delta_balance); // base_asset_decimals
-    if new_balance < I64::from(0) {
-        new_balance = I64::from(0);
+    let mut new_balance = old_balance + I128::from_u64(delta_balance); // base_asset_decimals
+    if new_balance < I128::new() {
+        new_balance = I128::new();
     }
 
     let new_principal = principal_value(new_balance);

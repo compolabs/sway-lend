@@ -115,11 +115,12 @@ pub async fn init_tokens(
     (assets, asset_configs, factory)
 }
 
-fn convert_i64(value: contracts_utils::market_utils::I64) -> i64 {
+pub fn convert_i64(value: contracts_utils::market_utils::I128) -> i128 {
     // let is_negative = value.underlying < 9223372036854775808u64;
     // let value = value.underlying - 9223372036854775808u64;
-    // value.underlying as i64 - 9223372036854775808u64 as i64
-    value.value as i64 * if value.negative { -1 } else { 1 }
+    //---------
+    value.underlying as i128 - 9223372036854775808u64 as i128
+    // value.value as i64 * if value.negative { -1 } else { 1 }
 }
 
 pub async fn debug_state(

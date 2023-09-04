@@ -7,7 +7,7 @@ use crate::utils::contracts_utils::market_utils::{
 };
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
 use crate::utils::number_utils::parse_units;
-use crate::utils::{debug_state, init_tokens, init_wallets, print_title};
+use crate::utils::{convert_i64, debug_state, init_tokens, init_wallets, print_title};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
@@ -184,12 +184,17 @@ async fn pause_test() {
     // 💰 Amount: 172.44 USDC
 
     let inst = market.with_account(bob.clone()).unwrap();
-    let reservs = market_abi_calls::get_collateral_reserves(&market, uni.bits256).await;
-    assert!(!reservs.negative);
+    let reservs =
+        convert_i64(market_abi_calls::get_collateral_reserves(&market, uni.bits256).await);
+    assert!(reservs > 0);
 
-    let reservs = reservs.value;
-    let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
+    let amount = market_abi_calls::collateral_value_to_sell(
+        &market,
+        &contracts,
+        uni.bits256,
+        reservs as u64,
+    )
+    .await;
 
     // Transfer of amount to the wallet
     token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)
@@ -321,12 +326,17 @@ async fn pause_test() {
     // 💰 Amount: 172.44 USDC
 
     // let inst = market.with_account(bob.clone()).unwrap();
-    let reservs = market_abi_calls::get_collateral_reserves(&market, uni.bits256).await;
-    assert!(!reservs.negative);
+    let reservs =
+        convert_i64(market_abi_calls::get_collateral_reserves(&market, uni.bits256).await);
+    assert!(reservs > 0);
 
-    let reservs = reservs.value;
-    let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
+    let amount = market_abi_calls::collateral_value_to_sell(
+        &market,
+        &contracts,
+        uni.bits256,
+        reservs as u64,
+    )
+    .await;
 
     // Transfer of amount to the wallet
     token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)

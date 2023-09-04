@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BUSL-1.1
 library;
 // use signed_integers::i64::I64;
-use i64::*;
+use signed_integers::i128::I128;
+
+// use i64::*;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
@@ -58,7 +60,7 @@ impl PauseConfiguration {
 }
 
 pub struct UserBasic {
-    principal: I64, // decimals: base_asset_decimal
+    principal: I128, // decimals: base_asset_decimal
     base_tracking_index: u64,	// decimals: 18
     base_tracking_accrued: u64,	// decimals: native_asset_decimal
     reward_claimed: u64,	// decimals: native_asset_decimal
@@ -67,7 +69,7 @@ pub struct UserBasic {
 impl UserBasic {
     pub fn default() -> Self {
         UserBasic {
-            principal: I64::new(),
+            principal: I128::new(),
             base_tracking_index: 0,
             base_tracking_accrued: 0,
             reward_claimed: 0,
