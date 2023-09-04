@@ -22,15 +22,11 @@ interface IProps
 
 const Root = styled.div<{ focused?: boolean; error?: boolean }>`
   width: 100%;
-  background: ${({ focused }) => (focused ? "#fffff" : "#f1f2fe")};
+  background: none;
 
   align-items: center;
-  border-radius: 12px;
   justify-content: space-between;
   display: flex;
-  padding: 12px;
-  font-size: 16px;
-  line-height: 24px;
   box-sizing: border-box;
   height: 48px;
 
@@ -41,10 +37,28 @@ const Root = styled.div<{ focused?: boolean; error?: boolean }>`
       focused ? `${theme.colors.text}` : `${theme.colors.text}`};
     outline: none;
     border: none;
-    background-color: transparent;
 
     ::placeholder {
       color: ${({ theme }) => `${theme.colors.text}`};
+    }
+    caret-color: ${({ theme }) => theme.colors.primary01};
+    font-weight: 600;
+    line-height: 32px;
+    background: transparent;
+    color: ${({ theme }) => theme.colors.text};
+
+    ::-webkit-outer-spin-button,
+    ::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    [type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    ::placeholder {
+      color: ${({ theme }) => theme.colors.text};
     }
   }
 `;

@@ -2,11 +2,10 @@ import styled from "@emotion/styled";
 import React, { useCallback, useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
 import BN from "@src/utils/BN";
-import BigNumberInput from "@components/BigNumberInput";
-import AmountInput from "@components/AmountInput";
 import _ from "lodash";
 import Text from "@components/Text";
 import SizedBox from "@components/SizedBox";
+import { FormattedInput } from "./FormattedInput";
 
 interface IProps {
   assetId: string;
@@ -76,10 +75,11 @@ const TokenInput: React.FC<IProps> = (props) => {
     props.amount && setAmount(props.amount);
   }, [props.amount]);
 
-  const handleChangeAmount = (v: BN) => {
+  const handleChangeAmount = (e: any) => {
     if (props.disabled) return;
-    setAmount(v);
-    debounce(v);
+    const value = BN.parseUnits(e.target.value, props.decimals);
+    setAmount(value);
+    debounce(value);
   };
   //eslint-disable-next-line react-hooks/exhaustive-deps
   const debounce = useCallback(
@@ -92,26 +92,15 @@ const TokenInput: React.FC<IProps> = (props) => {
   return (
     <Root>
       <InputContainer focused={focused} readOnly={!props.setAmount}>
-        <BigNumberInput
-          renderInput={(props, ref) => (
-            <AmountInput
-              {...props}
-              onFocus={(e) => {
-                props.onFocus && props.onFocus(e);
-                !props.readOnly && setFocused(true);
-              }}
-              onBlur={(e) => {
-                props.onBlur && props.onBlur(e);
-                setFocused(false);
-              }}
-              ref={ref}
-            />
-          )}
-          autofocus={focused}
-          decimals={props.decimals}
-          value={amount}
-          onChange={handleChangeAmount}
+        <FormattedInput
           placeholder="0.00"
+          decimals={props.decimals}
+          formatSeparator=","
+          value={BN.formatUnits(amount, props.decimals).toString()}
+          onChange={handleChangeAmount}
+          autoFocus={focused}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           readOnly={!props.setAmount}
         />
         {props.onMaxClick && (
@@ -127,7 +116,6 @@ const TokenInput: React.FC<IProps> = (props) => {
         )}
       </InputContainer>
       <SizedBox height={2} />
-      {/*{props.error==null}*/}
       {props.error != null ? (
         <Text fitContent size="tiny" type="error">
           {props.error}

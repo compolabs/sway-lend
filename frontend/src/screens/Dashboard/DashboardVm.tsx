@@ -430,7 +430,6 @@ class DashboardVm {
       this.baseTokenReserve == null
     )
       return null;
-
     switch (this.action) {
       case ACTION_TYPE.SUPPLY:
         const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
