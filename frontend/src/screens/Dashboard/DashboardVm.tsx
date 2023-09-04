@@ -15,7 +15,7 @@ import {
   OracleAbi__factory,
 } from "@src/contracts";
 import {
-  AssetConfigOutput,
+  CollateralConfigurationOutput,
   MarketBasicsOutput,
 } from "@src/contracts/MarketAbi";
 import { Contract } from "fuels";
@@ -113,13 +113,15 @@ class DashboardVm {
   setCollateralReserves = (l: Record<string, BN> | null) =>
     (this.collateralReserves = l);
 
-  assetsConfigs: Record<string, AssetConfigOutput> | null = null;
-  setAssetsConfigs = (l: Record<string, AssetConfigOutput> | null) =>
-    (this.assetsConfigs = l);
+  assetsConfigs: Record<string, CollateralConfigurationOutput> | null = null;
+  setAssetsConfigs = (
+    l: Record<string, CollateralConfigurationOutput> | null
+  ) => (this.assetsConfigs = l);
 
-  collateralsData: Record<string, AssetConfigOutput> | null = null;
-  setCollateralData = (l: Record<string, AssetConfigOutput> | null) =>
-    (this.collateralsData = l);
+  collateralsData: Record<string, CollateralConfigurationOutput> | null = null;
+  setCollateralData = (
+    l: Record<string, CollateralConfigurationOutput> | null
+  ) => (this.collateralsData = l);
 
   initMarketSignedContract = async () => {
     const { accountStore } = this.rootStore;
@@ -174,7 +176,7 @@ class DashboardVm {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
     const result = await marketContract.functions
-      .get_asset_configurations()
+      .get_collateral_configurations()
       .simulate();
 
     if (result.value != null) {
