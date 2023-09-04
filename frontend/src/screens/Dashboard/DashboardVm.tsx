@@ -152,19 +152,18 @@ class DashboardVm {
           this.updateAccountBalances(marketContract),
           this.updateSupplyAndBorrowRates(marketContract),
           this.updateMarketBasic(marketContract),
-          // error
-          // this.updateMaxBorrowAmount(marketContract),
+          //error
+          this.updateMaxBorrowAmount(marketContract),
           this.updateUserCollateralBalances(marketContract),
-          //todo check it was duplicate of logic above
-          // this.updateCollateralsData(marketContract),
           this.updateTotalBaseTokenReserve(marketContract),
           this.updateTotalLiquidity(marketContract),
         ])
       );
     });
+
     promise
       .catch((v) => {
-        console.log("update data error", v);
+        console.log(v);
       })
       .finally(() => {
         this.setInitialized(true);
@@ -264,9 +263,10 @@ class DashboardVm {
     );
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
-      .txParams({ gasLimit: (1e8).toString() })
+      .callParams({ gasLimit: 10000 })
       .addContracts([oracle])
       .simulate();
+    console.log("updateMaxBorrowAmount", value.toString());
     this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
   };
 
@@ -340,9 +340,7 @@ class DashboardVm {
     return TOKENS_BY_SYMBOL.USDC;
   }
 
-  //fixme outOfGasError
-
-  supplyBase = async (market: any) => {
+  supplyBase = async (market: MarketAbi) => {
     if (this.tokenAmount == null || this.tokenAmount.lte(0)) return;
 
     return market.functions
@@ -365,7 +363,7 @@ class DashboardVm {
       .call();
   };
 
-  supplyCollateral = async (market: any) => {
+  supplyCollateral = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
@@ -385,7 +383,7 @@ class DashboardVm {
       .call();
   };
 
-  withdrawCollateral = async (market: any) => {
+  withdrawCollateral = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
@@ -399,16 +397,13 @@ class DashboardVm {
       this.rootStore.accountStore.provider
     );
     return market.functions
-      .withdraw_collateral(
-        { value: this.actionTokenAssetId },
-        this.tokenAmount.toString()
-      )
-      .txParams({ gasPrice: 1 })
+      .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
+      .callParams({ gasLimit: 10000 })
       .call();
   };
 
-  borrowBase = async (market: any) => {
+  borrowBase = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
       this.maxBorrowBaseTokenAmount == null ||
@@ -436,50 +431,53 @@ class DashboardVm {
     )
       return null;
 
-    if (this.action === ACTION_TYPE.SUPPLY) {
-      const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
-        this.actionTokenAssetId
-      );
-      let balance = tokenBalance?.balance ?? BN.ZERO;
-      if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
-        balance = balance.minus(500);
-      }
+    switch (this.action) {
+      case ACTION_TYPE.SUPPLY:
+        const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
+          this.actionTokenAssetId
+        );
+        let balance = tokenBalance?.balance ?? BN.ZERO;
+        if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
+          balance = balance.minus(500);
+        }
 
-      if (
-        this.actionTokenAssetId !== this.baseToken.assetId &&
-        tokenBalance?.balance?.gt(
-          this.currentAssetCollateralCapacityLeft ?? BN.ZERO
-        )
-      ) {
-        balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
-      }
-      this.setTokenAmount(balance);
-    }
-    if (this.action === ACTION_TYPE.WITHDRAW) {
-      if (this.actionTokenAssetId === this.baseToken.assetId) {
-        this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
-      } else {
-        const balance =
-          this.collateralBalances == null
-            ? BN.ZERO
-            : this.collateralBalances[this.actionTokenAssetId];
+        if (
+          this.actionTokenAssetId !== this.baseToken.assetId &&
+          tokenBalance?.balance?.gt(
+            this.currentAssetCollateralCapacityLeft ?? BN.ZERO
+          )
+        ) {
+          balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
+        }
+        console.log("SUPPLY", balance);
         this.setTokenAmount(balance);
-      }
-    }
-    if (this.action === ACTION_TYPE.BORROW) {
-      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
-        this.setTokenAmount(this.baseTokenReserve);
-        return;
-      }
-      this.setTokenAmount(this.fixedMaxBorrowedAmount);
-    }
-    if (this.action === ACTION_TYPE.REPAY) {
-      const balance = this.rootStore.accountStore.findBalanceByAssetId(
-        this.baseToken.assetId
-      );
-      balance?.balance?.gte(this.fixedMaxBorrowedAmount)
-        ? this.setTokenAmount(this.borrowedBalance)
-        : this.setTokenAmount(balance?.balance ?? BN.ZERO);
+        break;
+      case ACTION_TYPE.WITHDRAW:
+        if (this.actionTokenAssetId === this.baseToken.assetId) {
+          this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
+        } else {
+          const balance =
+            this.collateralBalances == null
+              ? BN.ZERO
+              : this.collateralBalances[this.actionTokenAssetId];
+          this.setTokenAmount(balance);
+        }
+        break;
+      case ACTION_TYPE.BORROW:
+        if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
+          this.setTokenAmount(this.baseTokenReserve);
+          return;
+        }
+        this.setTokenAmount(this.fixedMaxBorrowedAmount);
+        break;
+      case ACTION_TYPE.REPAY:
+        const balance1 = this.rootStore.accountStore.findBalanceByAssetId(
+          this.baseToken.assetId
+        );
+        balance1?.balance?.gte(this.fixedMaxBorrowedAmount)
+          ? this.setTokenAmount(this.borrowedBalance)
+          : this.setTokenAmount(balance1?.balance ?? BN.ZERO);
+        break;
     }
   }
 
