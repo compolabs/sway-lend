@@ -113,25 +113,6 @@
       "typeParameters": null
     },
     {
-      "typeId": 5,
-      "type": "enum Option",
-      "components": [
-        {
-          "name": "None",
-          "type": 0,
-          "typeArguments": null
-        },
-        {
-          "name": "Some",
-          "type": 6,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": [
-        6
-      ]
-    },
-    {
       "typeId": 6,
       "type": "generic T",
       "components": null,
@@ -1576,39 +1557,6 @@
         "type": 4,
         "typeArguments": []
       }
-    }
-  ],
-  "messagesTypes": [],
-  "configurables": [
-    {
-      "name": "MARKET_CONFIGURATION",
-      "configurableType": {
-        "name": "",
-        "type": 5,
-        "typeArguments": [
-          {
-            "name": "",
-            "type": 14,
-            "typeArguments": []
-          }
-        ]
-      },
-      "offset": 698444
-    },
-    {
-      "name": "DEBUG_STEP",
-      "configurableType": {
-        "name": "",
-        "type": 5,
-        "typeArguments": [
-          {
-            "name": "",
-            "type": 21,
-            "typeArguments": null
-          }
-        ]
-      },
-      "offset": 698692
     }
   ]
 }
