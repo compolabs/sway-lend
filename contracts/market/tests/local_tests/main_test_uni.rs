@@ -313,6 +313,7 @@ async fn main_test() {
     assert!(!reservs.negative);
 
     let reservs = reservs.value;
+    println!("reserves = {:?}", reservs);
     let amount =
         market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
 

@@ -115,3 +115,15 @@ pub enum Error {
     UnknownAsset: (),
     DebuggingDisabled: (),
 }
+
+
+// Events
+
+
+pub struct AssetCollateralEvent{asset_config: AssetConfig}
+pub struct UserBasicEvent{user_basic: UserBasic}
+pub struct UserCollateralEvent{
+    address: Address,
+    asset_id: AssetId,
+    amount: u64,
+}
