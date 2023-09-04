@@ -7,7 +7,7 @@ use fuels::{
 };
 
 use crate::utils::contracts_utils::{
-    market_utils::{deploy_market, get_market_config, market_abi_calls, AssetConfig},
+    market_utils::{deploy_market, get_market_config, market_abi_calls, CollateralConfiguration},
     oracle_utils::OracleContract,
     token_utils::{Asset, TokenConfig},
 };
@@ -31,7 +31,7 @@ async fn deploy() {
     let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
 
     let mut assets: HashMap<String, Asset> = HashMap::new();
-    let mut asset_configs: Vec<AssetConfig> = Vec::new();
+    let mut asset_configs: Vec<CollateralConfiguration> = Vec::new();
     for config in token_configs {
         let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
         let symbol = config.symbol;
@@ -48,7 +48,7 @@ async fn deploy() {
         );
 
         if symbol != "USDC" {
-            asset_configs.push(AssetConfig {
+            asset_configs.push(CollateralConfiguration {
                 asset_id: bits256,
                 decimals: config.decimals,
                 price_feed: oracle.contract_id().into(),
@@ -83,7 +83,7 @@ async fn deploy() {
             config.asset_id = sway_bits256
         }
 
-        market_abi_calls::add_asset_collateral(&market, &config)
+        market_abi_calls::add_collateral_asset(&market, &config)
             .await
             .unwrap();
     }

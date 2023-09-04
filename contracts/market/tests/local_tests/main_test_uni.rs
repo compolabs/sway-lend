@@ -63,7 +63,7 @@ async fn main_test() {
             config.asset_id = sway_bits256
         }
 
-        market_abi_calls::add_asset_collateral(&market, &config)
+        market_abi_calls::add_collateral_asset(&market, &config)
             .await
             .unwrap();
     }

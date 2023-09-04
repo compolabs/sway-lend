@@ -1,7 +1,9 @@
 use fuels::programs::call_utils::TxDependencyExtension;
 use serde::Deserialize;
 
-use fuels::prelude::{abigen, Contract, LoadConfiguration, TxParameters, WalletUnlocked};
+use fuels::prelude::{
+    abigen, Contract, LoadConfiguration, StorageConfiguration, TxParameters, WalletUnlocked,
+};
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::types::{Address, Bits256, ContractId};
 use rand::Rng;
@@ -51,13 +53,13 @@ pub mod market_abi_calls {
             .await
     }
 
-    pub async fn add_asset_collateral(
+    pub async fn add_collateral_asset(
         market: &MarketContract<WalletUnlocked>,
-        config: &AssetConfig,
+        config: &CollateralConfiguration,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         market
             .methods()
-            .add_asset_collateral(config.clone())
+            .add_collateral_asset(config.clone())
             .tx_params(TxParameters::default().with_gas_price(1))
             .call()
             .await
@@ -313,7 +315,11 @@ pub async fn deploy_market(
     let configurables = MarketContractConfigurables::default()
         .with_MARKET_CONFIGURATION(Option::Some(market_configuration))
         .with_DEBUG_STEP(debug_step);
-    let config = LoadConfiguration::default().with_configurables(configurables);
+    let storage = StorageConfiguration::load_from("./out/debug/market-storage_slots.json").unwrap();
+    let config = LoadConfiguration::default()
+        .with_configurables(configurables)
+        .with_storage_configuration(storage);
+
     let id = Contract::load_from("./out/debug/market.bin", config)
         .unwrap()
         .with_salt(salt)

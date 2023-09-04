@@ -26,7 +26,7 @@ pub struct MarketConfiguration {
     // reward_token: AssetId, 
 }
 
-pub struct AssetConfig {
+pub struct CollateralConfiguration {
     asset_id: AssetId,
     price_feed: ContractId,
     decimals: u64,
@@ -118,10 +118,10 @@ pub enum Error {
 
 
 // Events
+pub struct AssetCollateralEvent{configuration: CollateralConfiguration}
 
-
-pub struct AssetCollateralEvent{asset_config: AssetConfig}
 pub struct UserBasicEvent{user_basic: UserBasic}
+
 pub struct UserCollateralEvent{
     address: Address,
     asset_id: AssetId,

@@ -10,7 +10,7 @@ use src20_sdk::TokenFactoryContract;
 use src20_sdk::{deploy_token_factory_contract, token_factory_abi_calls};
 use std::collections::HashMap;
 
-use self::contracts_utils::market_utils::{AssetConfig, MarketContract};
+use self::contracts_utils::market_utils::{CollateralConfiguration, MarketContract};
 use self::contracts_utils::token_utils::{Asset, TokenConfig};
 
 pub mod contracts_utils;
@@ -61,7 +61,7 @@ pub async fn init_tokens(
     price_feed: ContractId,
 ) -> (
     HashMap<String, Asset>,
-    Vec<AssetConfig>,
+    Vec<CollateralConfiguration>,
     TokenFactoryContract<WalletUnlocked>,
 ) {
     let bin_path = "tests/artefacts/factory/token-factory.bin";
@@ -71,7 +71,7 @@ pub async fn init_tokens(
     let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
 
     let mut assets: HashMap<String, Asset> = HashMap::new();
-    let mut asset_configs: Vec<AssetConfig> = vec![];
+    let mut asset_configs: Vec<CollateralConfiguration> = vec![];
 
     for config in token_configs {
         let name = config.name;
@@ -88,7 +88,7 @@ pub async fn init_tokens(
             .value;
 
         if symbol != "USDC" {
-            asset_configs.push(AssetConfig {
+            asset_configs.push(CollateralConfiguration {
                 asset_id: bits256,
                 decimals: config.decimals,
                 price_feed,

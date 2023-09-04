@@ -50,7 +50,7 @@ async fn pause_test() {
     for config in &asset_configs {
         market
             .methods()
-            .add_asset_collateral(config.clone())
+            .add_collateral_asset(config.clone())
             .tx_params(TxParameters::default().with_gas_price(1))
             .call()
             .await
