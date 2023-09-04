@@ -337,6 +337,7 @@ class DashboardVm {
   get baseToken() {
     return TOKENS_BY_SYMBOL.USDC;
   }
+
   //fixme outOfGasError
 
   supplyBase = async (market: any) => {
@@ -349,8 +350,8 @@ class DashboardVm {
           amount: this.tokenAmount.toString(),
           assetId: this.baseToken.assetId,
         },
+        gasLimit: 100000,
       })
-      .txParams({ gasPrice: 100000 })
       .call();
   };
   withdrawBase = async (market: any) => {
@@ -377,8 +378,8 @@ class DashboardVm {
           assetId: this.actionTokenAssetId,
           amount: this.tokenAmount.toString(),
         },
+        gasLimit: 10000,
       })
-      .txParams({ gasPrice: 1 })
       .call();
   };
 
@@ -584,9 +585,7 @@ class DashboardVm {
       if (this.action === ACTION_TYPE.REPAY) {
         tx = await this.supplyBase(marketContract);
       }
-      this.notifyThatActionIsSuccessful(
-        tx?.transactionResult.transactionId ?? ""
-      );
+      this.notifyThatActionIsSuccessful(tx?.transactionResult.id ?? "");
       this.hideAll();
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
