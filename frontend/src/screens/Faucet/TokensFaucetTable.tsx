@@ -77,13 +77,6 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 <Loading />
               </Button>
             );
-
-          // if (vm.alreadyMintedTokens.includes(t.assetId))
-          //   return (
-          //     <Button fixed disabled>
-          //       Minted
-          //     </Button>
-          //   );
           if (ethBalance?.eq(0) && t.symbol !== "ETH")
             return (
               <Button fixed disabled>
@@ -121,7 +114,6 @@ const TokensFaucetTable: React.FC<IProps> = () => {
     accountStore.isLoggedIn,
     settingsStore,
     vm.loading,
-    // vm.alreadyMintedTokens,
     pricesStore.tokensPrices,
   ]);
   const columns = React.useMemo(

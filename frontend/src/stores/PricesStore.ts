@@ -13,7 +13,8 @@ class PricesStore {
     this.rootStore = rootStore;
     makeAutoObservable(this);
     this.updateTokenPrices().then();
-    setInterval(this.updateTokenPrices, 60 * 1000);
+    //todo make it back 60 when ret error is fixed
+    setInterval(this.updateTokenPrices, 10 * 1000);
     reaction(
       () => [
         this.rootStore.settingsStore.version,

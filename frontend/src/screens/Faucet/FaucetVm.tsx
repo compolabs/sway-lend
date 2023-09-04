@@ -59,7 +59,7 @@ class FaucetVM {
   get faucetTokens() {
     const { accountStore, pricesStore } = this.rootStore;
     if (accountStore.assetBalances == null) return [];
-    return TOKENS_LIST.map((b) => {
+    return TOKENS_LIST.filter((t) => t.symbol !== "SWAY").map((b) => {
       const balance = accountStore.findBalanceByAssetId(b.assetId);
       const price =
         pricesStore.tokensPrices != null
