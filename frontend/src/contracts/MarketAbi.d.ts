@@ -27,8 +27,10 @@ export enum ErrorOutput { AlreadyInitialized = 'AlreadyInitialized', Paused = 'P
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
-export type AssetConfigInput = { asset_id: string, price_feed: ContractIdInput, decimals: BigNumberish, borrow_collateral_factor: BigNumberish, liquidate_collateral_factor: BigNumberish, liquidation_penalty: BigNumberish, supply_cap: BigNumberish, paused: boolean };
-export type AssetConfigOutput = { asset_id: string, price_feed: ContractIdOutput, decimals: BN, borrow_collateral_factor: BN, liquidate_collateral_factor: BN, liquidation_penalty: BN, supply_cap: BN, paused: boolean };
+export type AssetCollateralEventInput = { configuration: CollateralConfigurationInput };
+export type AssetCollateralEventOutput = { configuration: CollateralConfigurationOutput };
+export type CollateralConfigurationInput = { asset_id: string, price_feed: ContractIdInput, decimals: BigNumberish, borrow_collateral_factor: BigNumberish, liquidate_collateral_factor: BigNumberish, liquidation_penalty: BigNumberish, supply_cap: BigNumberish, paused: boolean };
+export type CollateralConfigurationOutput = { asset_id: string, price_feed: ContractIdOutput, decimals: BN, borrow_collateral_factor: BN, liquidate_collateral_factor: BN, liquidation_penalty: BN, supply_cap: BN, paused: boolean };
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 export type I64Input = { value: BigNumberish, negative: boolean };
@@ -41,6 +43,10 @@ export type PauseConfigurationInput = { supply_paused: boolean, withdraw_paused:
 export type PauseConfigurationOutput = PauseConfigurationInput;
 export type UserBasicInput = { principal: I64Input, base_tracking_index: BigNumberish, base_tracking_accrued: BigNumberish, reward_claimed: BigNumberish };
 export type UserBasicOutput = { principal: I64Output, base_tracking_index: BN, base_tracking_accrued: BN, reward_claimed: BN };
+export type UserBasicEventInput = { user_basic: UserBasicInput };
+export type UserBasicEventOutput = { user_basic: UserBasicOutput };
+export type UserCollateralEventInput = { address: AddressInput, asset_id: string, amount: BigNumberish };
+export type UserCollateralEventOutput = { address: AddressOutput, asset_id: string, amount: BN };
 
 export type MarketAbiConfigurables = {
   MARKET_CONFIGURATION: Option;
@@ -50,15 +56,15 @@ export type MarketAbiConfigurables = {
 interface MarketAbiInterface extends Interface {
   functions: {
     absorb: FunctionFragment;
-    add_asset_collateral: FunctionFragment;
+    add_collateral_asset: FunctionFragment;
     available_to_borrow: FunctionFragment;
     balance_of: FunctionFragment;
     buy_collateral: FunctionFragment;
     claim: FunctionFragment;
     collateral_value_to_sell: FunctionFragment;
     debug_increment_timestamp: FunctionFragment;
-    get_asset_configurations: FunctionFragment;
     get_borrow_rate: FunctionFragment;
+    get_collateral_configurations: FunctionFragment;
     get_collateral_reserves: FunctionFragment;
     get_configuration: FunctionFragment;
     get_market_basics: FunctionFragment;
@@ -72,9 +78,9 @@ interface MarketAbiInterface extends Interface {
     get_utilization: FunctionFragment;
     is_liquidatable: FunctionFragment;
     pause: FunctionFragment;
-    pause_asset_collateral: FunctionFragment;
+    pause_collateral_asset: FunctionFragment;
     quote_collateral: FunctionFragment;
-    resume_asset_collateral: FunctionFragment;
+    resume_collateral_asset: FunctionFragment;
     supply_base: FunctionFragment;
     supply_collateral: FunctionFragment;
     totals_collateral: FunctionFragment;
@@ -85,15 +91,15 @@ interface MarketAbiInterface extends Interface {
   };
 
   encodeFunctionData(functionFragment: 'absorb', values: [Vec<AddressInput>]): Uint8Array;
-  encodeFunctionData(functionFragment: 'add_asset_collateral', values: [AssetConfigInput]): Uint8Array;
+  encodeFunctionData(functionFragment: 'add_collateral_asset', values: [CollateralConfigurationInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'available_to_borrow', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'balance_of', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'buy_collateral', values: [string, BigNumberish, AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'claim', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'collateral_value_to_sell', values: [string, BigNumberish]): Uint8Array;
   encodeFunctionData(functionFragment: 'debug_increment_timestamp', values: []): Uint8Array;
-  encodeFunctionData(functionFragment: 'get_asset_configurations', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_borrow_rate', values: [BigNumberish]): Uint8Array;
+  encodeFunctionData(functionFragment: 'get_collateral_configurations', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_collateral_reserves', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'get_configuration', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'get_market_basics', values: []): Uint8Array;
@@ -107,9 +113,9 @@ interface MarketAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'get_utilization', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'is_liquidatable', values: [AddressInput]): Uint8Array;
   encodeFunctionData(functionFragment: 'pause', values: [PauseConfigurationInput]): Uint8Array;
-  encodeFunctionData(functionFragment: 'pause_asset_collateral', values: [string]): Uint8Array;
+  encodeFunctionData(functionFragment: 'pause_collateral_asset', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'quote_collateral', values: [string, BigNumberish]): Uint8Array;
-  encodeFunctionData(functionFragment: 'resume_asset_collateral', values: [string]): Uint8Array;
+  encodeFunctionData(functionFragment: 'resume_collateral_asset', values: [string]): Uint8Array;
   encodeFunctionData(functionFragment: 'supply_base', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'supply_collateral', values: []): Uint8Array;
   encodeFunctionData(functionFragment: 'totals_collateral', values: [string]): Uint8Array;
@@ -119,15 +125,15 @@ interface MarketAbiInterface extends Interface {
   encodeFunctionData(functionFragment: 'withdraw_reward_token', values: [AddressInput, BigNumberish]): Uint8Array;
 
   decodeFunctionData(functionFragment: 'absorb', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'add_asset_collateral', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'add_collateral_asset', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'available_to_borrow', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'balance_of', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'buy_collateral', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'claim', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'collateral_value_to_sell', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'debug_increment_timestamp', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'get_asset_configurations', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_borrow_rate', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'get_collateral_configurations', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_collateral_reserves', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_configuration', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'get_market_basics', data: BytesLike): DecodedValue;
@@ -141,9 +147,9 @@ interface MarketAbiInterface extends Interface {
   decodeFunctionData(functionFragment: 'get_utilization', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'is_liquidatable', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'pause', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'pause_asset_collateral', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'pause_collateral_asset', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'quote_collateral', data: BytesLike): DecodedValue;
-  decodeFunctionData(functionFragment: 'resume_asset_collateral', data: BytesLike): DecodedValue;
+  decodeFunctionData(functionFragment: 'resume_collateral_asset', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'supply_base', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'supply_collateral', data: BytesLike): DecodedValue;
   decodeFunctionData(functionFragment: 'totals_collateral', data: BytesLike): DecodedValue;
@@ -157,15 +163,15 @@ export class MarketAbi extends Contract {
   interface: MarketAbiInterface;
   functions: {
     absorb: InvokeFunction<[accounts: Vec<AddressInput>], void>;
-    add_asset_collateral: InvokeFunction<[asset_config: AssetConfigInput], void>;
+    add_collateral_asset: InvokeFunction<[configuration: CollateralConfigurationInput], void>;
     available_to_borrow: InvokeFunction<[account: AddressInput], BN>;
     balance_of: InvokeFunction<[asset: string], BN>;
     buy_collateral: InvokeFunction<[asset_id: string, min_amount: BigNumberish, recipient: AddressInput], void>;
     claim: InvokeFunction<[], void>;
     collateral_value_to_sell: InvokeFunction<[asset_id: string, collateral_amount: BigNumberish], BN>;
     debug_increment_timestamp: InvokeFunction<[], void>;
-    get_asset_configurations: InvokeFunction<[], Vec<AssetConfigOutput>>;
     get_borrow_rate: InvokeFunction<[utilization: BigNumberish], BN>;
+    get_collateral_configurations: InvokeFunction<[], Vec<CollateralConfigurationOutput>>;
     get_collateral_reserves: InvokeFunction<[asset_id: string], I64Output>;
     get_configuration: InvokeFunction<[], MarketConfigurationOutput>;
     get_market_basics: InvokeFunction<[], MarketBasicsOutput>;
@@ -179,14 +185,14 @@ export class MarketAbi extends Contract {
     get_utilization: InvokeFunction<[], BN>;
     is_liquidatable: InvokeFunction<[account: AddressInput], boolean>;
     pause: InvokeFunction<[pause_config: PauseConfigurationInput], void>;
-    pause_asset_collateral: InvokeFunction<[asset_id: string], void>;
+    pause_collateral_asset: InvokeFunction<[asset_id: string], void>;
     quote_collateral: InvokeFunction<[asset_id: string, base_amount: BigNumberish], BN>;
-    resume_asset_collateral: InvokeFunction<[asset_id: string], void>;
+    resume_collateral_asset: InvokeFunction<[asset_id: string], void>;
     supply_base: InvokeFunction<[], void>;
     supply_collateral: InvokeFunction<[], void>;
     totals_collateral: InvokeFunction<[asset_id: string], BN>;
     withdraw_base: InvokeFunction<[amount: BigNumberish], void>;
-    withdraw_collateral: InvokeFunction<[asset: string, amount: BigNumberish], void>;
+    withdraw_collateral: InvokeFunction<[asset_id: string, amount: BigNumberish], void>;
     withdraw_reserves: InvokeFunction<[to: AddressInput, amount: BigNumberish], void>;
     withdraw_reward_token: InvokeFunction<[recipient: AddressInput, amount: BigNumberish], void>;
   };
