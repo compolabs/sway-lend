@@ -1,17 +1,12 @@
 use crate::utils::contracts_utils::market_utils::market_abi_calls;
 use crate::utils::number_utils::format_units;
+use fuels::accounts::wallet::WalletUnlocked;
 use fuels::accounts::ViewOnlyAccount;
-use fuels::{
-    accounts::wallet::WalletUnlocked,
-    test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig},
-    types::{Address, AssetId, ContractId},
-};
-use src20_sdk::TokenFactoryContract;
-use src20_sdk::{deploy_token_factory_contract, token_factory_abi_calls};
-use std::collections::HashMap;
+use fuels::test_helpers::{launch_custom_provider_and_get_wallets, WalletsConfig};
+use fuels::types::Address;
 
-use self::contracts_utils::market_utils::{CollateralConfiguration, MarketContract};
-use self::contracts_utils::token_utils::{Asset, TokenConfig};
+use self::contracts_utils::market_utils::MarketContract;
+use self::contracts_utils::token_utils::Asset;
 
 pub mod contracts_utils;
 pub mod number_utils;
@@ -54,65 +49,6 @@ pub fn print_case_title(num: u8, name: &str, call: &str, amount: &str) {
 pub async fn init_wallets() -> Vec<WalletUnlocked> {
     let config = WalletsConfig::new(Some(5), Some(1), Some(1_000_000_000));
     launch_custom_provider_and_get_wallets(config, None, None).await
-}
-
-pub async fn init_tokens(
-    admin: &WalletUnlocked,
-    price_feed: ContractId,
-) -> (
-    HashMap<String, Asset>,
-    Vec<CollateralConfiguration>,
-    TokenFactoryContract<WalletUnlocked>,
-) {
-    let bin_path = "tests/artefacts/factory/token-factory.bin";
-    let factory = deploy_token_factory_contract(admin, &bin_path).await;
-
-    let tokens_json = std::fs::read_to_string("tests/artefacts/tokens.json").unwrap();
-    let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
-
-    let mut assets: HashMap<String, Asset> = HashMap::new();
-    let mut asset_configs: Vec<CollateralConfiguration> = vec![];
-
-    for config in token_configs {
-        let name = config.name;
-        let symbol = config.symbol;
-        let decimals = config.decimals;
-
-        token_factory_abi_calls::deploy(&factory, &symbol, &name, decimals)
-            .await
-            .unwrap();
-
-        let bits256 = token_factory_abi_calls::asset_id(&factory, &symbol)
-            .await
-            .unwrap()
-            .value;
-
-        if symbol != "USDC" {
-            asset_configs.push(CollateralConfiguration {
-                asset_id: bits256,
-                decimals: config.decimals,
-                price_feed,
-                borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4
-                liquidate_collateral_factor: config.liquidate_collateral_factor.unwrap(), // decimals: 4
-                liquidation_penalty: config.liquidation_penalty.unwrap(), // decimals: 4
-                supply_cap: config.supply_cap.unwrap(), // decimals: asset decimals
-                paused: false
-            });
-        }
-
-        assets.insert(
-            symbol.clone(),
-            Asset {
-                bits256,
-                asset_id: AssetId::from(bits256.0),
-                default_price: config.default_price,
-                decimals: config.decimals,
-                symbol,
-                coingeco_id: config.coingeco_id,
-            },
-        );
-    }
-    (assets, asset_configs, factory)
 }
 
 fn convert_i64(value: contracts_utils::market_utils::I64) -> i64 {

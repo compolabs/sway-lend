@@ -6,8 +6,9 @@ use crate::utils::contracts_utils::market_utils::{
     deploy_market, get_market_config, market_abi_calls,
 };
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
+use crate::utils::contracts_utils::token_utils::init_tokens;
 use crate::utils::number_utils::parse_units;
-use crate::utils::{debug_state, init_tokens, init_wallets, print_case_title, print_title};
+use crate::utils::{debug_state, init_wallets, print_case_title, print_title};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
