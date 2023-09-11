@@ -1,7 +1,6 @@
 import RootStore from "@stores/RootStore";
 import { THEME_TYPE } from "@src/themes/ThemeProvider";
 import { makeAutoObservable } from "mobx";
-import { getCurrentBrowser } from "@src/utils/getCurrentBrowser";
 import { CONTRACT_ADDRESSES, IContractsConfig, NODE_URL } from "@src/constants";
 
 export interface ISerializedSettingsStore {
@@ -18,19 +17,19 @@ class SettingsStore {
     makeAutoObservable(this);
     if (initState != null) {
       initState.selectedTheme != null &&
-        (this.selectedTheme = initState.selectedTheme);
+      (this.selectedTheme = initState.selectedTheme);
       initState.version != null && (this.version = initState.version);
       initState.faucetTokens != null &&
-        (this.faucetTokens = initState.faucetTokens);
+      (this.faucetTokens = initState.faucetTokens);
     }
   }
 
   version: string = "0.1.0";
-  setVersion = (s: string) => (this.version = s);
+  // setVersion = (s: string) => (this.version = s);
 
   faucetTokens: Record<string, string> | null = null;
-  setFaucetTokens = (s: Record<string, string>) => (this.faucetTokens = s);
-  addFaucetToken = (s: any) => (this.faucetTokens = s);
+  // setFaucetTokens = (s: Record<string, string>) => (this.faucetTokens = s);
+  // addFaucetToken = (s: any) => (this.faucetTokens = s);
 
   get faucetTokenForCurrentAccount() {
     return "";
@@ -48,7 +47,7 @@ class SettingsStore {
   serialize = (): ISerializedSettingsStore => ({
     selectedTheme: this.selectedTheme,
     version: this.version,
-    faucetTokens: this.faucetTokens,
+    faucetTokens: this.faucetTokens
   });
 
   walletModalOpened: boolean = false;
@@ -59,11 +58,6 @@ class SettingsStore {
 
   loginModalOpened: boolean = false;
   setLoginModalOpened = (s: boolean) => (this.loginModalOpened = s);
-
-  get doesBrowserSupportsFuelWallet(): boolean {
-    const browser = getCurrentBrowser();
-    return ["chrome", "firefox", "brave", "edge"].includes(browser);
-  }
 
   get currentVersionConfig(): IContractsConfig {
     return CONTRACT_ADDRESSES;

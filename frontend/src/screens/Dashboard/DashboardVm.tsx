@@ -268,6 +268,7 @@ class DashboardVm {
       .simulate();
     console.log("updateMaxBorrowAmount", value.toString());
     this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
+    // this.setMaxBorrowBaseTokenAmount(new BN(1000 * 1e6));
   };
 
   updateUserCollateralBalances = async (marketContract: MarketAbi) => {
@@ -418,7 +419,7 @@ class DashboardVm {
     );
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
-      .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
+      .txParams({ gasPrice: 1 })
       .addContracts([oracle])
       .call();
   };

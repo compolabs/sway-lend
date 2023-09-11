@@ -43,6 +43,8 @@ class PricesStore {
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
     try {
       let provider = new Provider(NODE_URL);
+      // const wallet = Wallet.generate({ provider });
+      // console.log(process.env.REACT_APP_SECRET);
       const wallet = Wallet.fromPrivateKey(
         process.env.REACT_APP_SECRET!,
         provider
@@ -56,6 +58,7 @@ class PricesStore {
       );
 
       //todo change to locked wallet
+      // console.log("response", response);
       if (response.length > 0) {
         const v = response.reduce(
           (acc, { value }) => ({
