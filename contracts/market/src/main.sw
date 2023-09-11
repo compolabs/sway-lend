@@ -6,13 +6,16 @@ contract;
  * @notice An efficient monolithic money market protocol
  * @author Composability labs
  */
+mod i64;
 mod helpers;
 mod structs;
+mod events;
 
+use i64::*;
 use helpers::*;
 use structs::*;
-// use signed_integers::i64::I64;
-use i64::*;
+use events::*;
+
 use oracle_abi::*;
 use std::auth::{AuthError,msg_sender};
 use std::call_frames::{contract_id,msg_asset_id};

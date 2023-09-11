@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BUSL-1.1
 library;
-// use signed_integers::i64::I64;
-use i64::*;
+use ::i64::*;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
@@ -114,16 +113,4 @@ pub enum Error {
     InvalidPayment: (),
     UnknownAsset: (),
     DebuggingDisabled: (),
-}
-
-
-// Events
-pub struct AssetCollateralEvent{configuration: CollateralConfiguration}
-
-pub struct UserBasicEvent{user_basic: UserBasic}
-
-pub struct UserCollateralEvent{
-    address: Address,
-    asset_id: AssetId,
-    amount: u64,
 }
