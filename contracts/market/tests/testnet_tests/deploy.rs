@@ -20,7 +20,7 @@ async fn deploy() {
     //--------------- WALLET ---------------
     dotenv().ok();
     let provider = Provider::connect(RPC).await.unwrap();
-    let secret = std::env::var("SECRET").unwrap();
+    let secret = std::env::var("ADMIN").unwrap();
     let wallet =
         WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider.clone()));
 

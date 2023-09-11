@@ -39,9 +39,7 @@ pub mod market_abi_calls {
             .with_amount(amount)
             .with_asset_id(base_asset_id);
 
-        let tx_params = TxParameters::default()
-            .with_gas_limit(100_000_000)
-            .with_gas_price(1);
+        let tx_params = TxParameters::default().with_gas_price(1);
 
         market
             .methods()
@@ -70,9 +68,7 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::default()
-            .with_gas_limit(100_000_000)
-            .with_gas_price(1);
+        let tx_params = TxParameters::default().with_gas_price(1);
         market
             .methods()
             .withdraw_base(amount)
@@ -114,6 +110,7 @@ pub mod market_abi_calls {
             .methods()
             .supply_collateral()
             .append_variable_outputs(1)
+            .tx_params(TxParameters::default().with_gas_price(1))
             .call_params(call_params)
             .unwrap()
             .call()

@@ -70,7 +70,7 @@ impl Oracle for Contract {
         });
     }
  
-   #[storage(read, write)]
+    #[storage(read, write)]
     fn set_prices(prices: Vec<(AssetId, u64)>) {
         validate_owner();
         let mut i = 0;

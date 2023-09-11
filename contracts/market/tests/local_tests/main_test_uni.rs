@@ -6,7 +6,7 @@ use crate::utils::contracts_utils::market_utils::{
     deploy_market, get_market_config, market_abi_calls,
 };
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
-use crate::utils::contracts_utils::token_utils::init_tokens;
+use crate::utils::contracts_utils::token_utils::deploy_tokens;
 use crate::utils::number_utils::parse_units;
 use crate::utils::{debug_state, init_wallets, print_case_title, print_title};
 
@@ -36,7 +36,7 @@ async fn main_test() {
     let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
 
     //--------------- TOKENS ---------------
-    let (assets, asset_configs, factory) = init_tokens(&admin, oracle.contract_id().into()).await;
+    let (assets, asset_configs, factory) = deploy_tokens(&admin, oracle.contract_id().into()).await;
     let usdc = assets.get("USDC").unwrap();
     let uni = assets.get("UNI").unwrap();
 
@@ -155,6 +155,9 @@ async fn main_test() {
     let amount = parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(2, "Alice", "withdraw_base", log_amount.as_str());
+
+    let value = market_abi_calls::available_to_borrow(&market, &contracts, alice_address).await;
+    println!("  Available to borrow = {}", value);
 
     // Alice calls withdraw_base
     let inst = market.with_account(alice.clone()).unwrap();
