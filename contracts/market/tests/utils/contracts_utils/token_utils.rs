@@ -89,7 +89,7 @@ pub async fn deploy_tokens(
     (assets, asset_configs, factory)
 }
 
-pub async fn load_tokens(tokens_json_path: &str) -> HashMap<String, Asset> {
+pub async fn _load_tokens(tokens_json_path: &str) -> HashMap<String, Asset> {
     let tokens_json = std::fs::read_to_string(tokens_json_path).unwrap();
     let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
 
