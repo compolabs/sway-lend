@@ -10,3 +10,13 @@ type Transaction @entity {
     hash: Bytes32! @unique
 }
 
+# type CollateralConfiguration {
+#     asset_id: AssetId,
+#     price_feed: ContractId,
+#     decimals: u64,
+#     borrow_collateral_factor: u64, // decimals: 4
+#     liquidate_collateral_factor: u64, // decimals: 4
+#     liquidation_penalty: u64, // decimals: 4
+#     supply_cap: u64, // decimals: asset decimals
+#     paused: bool,
+# }

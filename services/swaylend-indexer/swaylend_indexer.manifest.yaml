@@ -7,7 +7,7 @@ graphql_schema: schema/swaylend_indexer.schema.graphql
 module:
   wasm: target/wasm32-unknown-unknown/release/swaylend_indexer.wasm
 metrics: ~
-contract_id: "0x2679d41c2981bcd6ab69d66f0ae656077efecac2c2dd729f88f5a6457ce1d5f1"
+contract_id: fuel1yeuag8pfsx7dd2mf6ehs4ejkqal0ajkzctwh98ug7kny2l8p6hcs68qu6k
 start_block: 1462255
 end_block: ~
 resumable: true
