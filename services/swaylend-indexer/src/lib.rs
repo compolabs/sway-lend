@@ -41,14 +41,13 @@ pub mod swaylend_indexer_index_mod {
     }
 
     fn handle_user_collateral_event(event: UserCollateralEvent) {
-        // fixme
-        // let entry = UserCollateralEntity {
-        //     id: uid([..event.address, ..event.asset_id.0]), // https://forum.fuel.network/t/how-to-get-uid-based-on-2-address-and-assetid/3082
-        //     address: event.address,
-        //     asset_id: event.asset_id.0.into(),
-        //     amount: event.amount,
-        // };
-        // entry.save();
+        let entry = UserCollateralEntity {
+            id: uid([event.address.into(), event.asset_id.0].concat()),
+            address: event.address,
+            asset_id: event.asset_id.0.into(),
+            amount: event.amount,
+        };
+        entry.save();
         info!("✨ UserCollateralEvent: {:#?}", event);
     }
 }
