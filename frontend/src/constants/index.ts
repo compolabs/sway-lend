@@ -28,7 +28,7 @@ export const FAUCET_URL = "https://faucet-beta-4.fuel.network";
 export const CONTRACT_ADDRESSES: IContractsConfig = {
   priceOracle:
     "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d",
-  market: "0x2679d41c2981bcd6ab69d66f0ae656077efecac2c2dd729f88f5a6457ce1d5f1",
+  market: "0x9795996ffca3540819dbe8ace726d4a83e5411bf2177ba7c4ca7e1b5a8df1972",
   tokenFactory:
     "0xd8c627b9cd9ee42e2c2bd9793b13bc9f8e9aad32e25a99ea574f23c1dd17685a",
 };

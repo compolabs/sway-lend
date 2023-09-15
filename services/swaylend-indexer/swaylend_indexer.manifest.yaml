@@ -8,6 +8,6 @@ module:
   wasm: target/wasm32-unknown-unknown/release/swaylend_indexer.wasm
 metrics: ~
 contract_id: fuel1j72ejmlu5d2qsxwmazkwwfk54ql9gydly9mm5lzv5lsmt2xlr9eqn59m8x
-start_block: 1462255
+start_block: 2440023
 end_block: ~
 resumable: true

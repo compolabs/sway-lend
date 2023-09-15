@@ -89,4 +89,5 @@ async fn deploy() {
     }
 
     println!("Market contract = {}", market.contract_id().hash());
+    println!("Market contract = {}", market.contract_id().to_string());
 }

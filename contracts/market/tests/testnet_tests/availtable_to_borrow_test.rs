@@ -11,8 +11,7 @@ use fuels::types::{Address, ContractId};
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
-const MARKET_ADDRESS: &str = "0x2679d41c2981bcd6ab69d66f0ae656077efecac2c2dd729f88f5a6457ce1d5f1";
+const MARKET_ADDRESS: &str = "0x9795996ffca3540819dbe8ace726d4a83e5411bf2177ba7c4ca7e1b5a8df1972";
 
 #[tokio::test]
 async fn availtable_to_borrow_test() {
