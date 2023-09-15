@@ -10,13 +10,31 @@ type Transaction @entity {
     hash: Bytes32! @unique
 }
 
-# type CollateralConfiguration {
-#     asset_id: AssetId,
-#     price_feed: ContractId,
-#     decimals: u64,
-#     borrow_collateral_factor: u64, // decimals: 4
-#     liquidate_collateral_factor: u64, // decimals: 4
-#     liquidation_penalty: u64, // decimals: 4
-#     supply_cap: u64, // decimals: asset decimals
-#     paused: bool,
-# }
+type CollateralConfigurationEntity @entity {
+    id: ID! 
+    asset_id: AssetId!
+    price_feed: ContractId!
+    decimals: UInt8!
+    borrow_collateral_factor: UInt8!
+    liquidate_collateral_factor: UInt8!
+    liquidation_penalty: UInt8!
+    supply_cap: UInt8!
+    paused: Boolean!
+}
+
+type UserBasicEntity @entity {
+    id: ID! 
+    address: Address!
+    principal_absolute: UInt8!
+    principal_negative: Boolean!
+    base_tracking_index: UInt8!
+    base_tracking_accrued: UInt8!
+    reward_claimed: UInt8!
+}
+
+type UserCollateralEntity @entity {
+    id: ID! 
+    address: Address!
+    asset_id: AssetId!
+    amount: UInt8!
+}

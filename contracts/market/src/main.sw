@@ -527,7 +527,7 @@ impl Market for Contract {
             basic.reward_claimed = accrued;
             storage.user_basic.insert(caller, basic);
             
-            log(UserBasicEvent{user_basic: basic});
+            log(UserBasicEvent{user_basic: basic, address: caller});
 
             let amount = accrued - claimed;
             mint_to_address(caller, ZERO_B256, amount);
@@ -881,7 +881,7 @@ fn update_base_principal(account: Address, basic: UserBasic, principal_new: I64)
     }
     storage.user_basic.insert(account, basic);
 
-    log(UserBasicEvent{user_basic: basic});
+    log(UserBasicEvent{user_basic: basic, address: account});
 }
 
 fn repay_and_supply_amount(old_principal: I64, new_principal: I64) -> (u64, u64) {

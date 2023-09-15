@@ -27,12 +27,9 @@ const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cd
 #[tokio::main]
 async fn main() {
     // contract
-    let provider = match Provider::connect(RPC).await {
-        Ok(p) => p,
-        Err(error) => panic!("❌ Problem creating provider: {:#?}", error),
-    };
     dotenv().ok();
-    let secret = env::var("SECRET").expect("❌ Expected a account secret in the environment");
+    let provider = Provider::connect(RPC).await.unwrap();
+    let secret = env::var("SECRET").unwrap();
     let wallet = WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider));
 
     let bech32_id = Bech32ContractId::from(ContractId::from_str(MARKET_ADDRESS).unwrap());
