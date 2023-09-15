@@ -263,12 +263,9 @@ class DashboardVm {
     );
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
-      .callParams({ gasLimit: 10000 })
       .addContracts([oracle])
       .simulate();
-    console.log("updateMaxBorrowAmount", value.toString());
     this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
-    // this.setMaxBorrowBaseTokenAmount(new BN(1000 * 1e6));
   };
 
   updateUserCollateralBalances = async (marketContract: MarketAbi) => {
