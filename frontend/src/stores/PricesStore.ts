@@ -43,10 +43,8 @@ class PricesStore {
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
     try {
       let provider = new Provider(NODE_URL);
-      // const wallet = Wallet.generate({ provider });
-      // console.log(process.env.REACT_APP_SECRET);
-      const wallet = Wallet.fromPrivateKey(
-        process.env.REACT_APP_SECRET!,
+      const wallet = Wallet.fromAddress(
+        "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
         provider
       );
       const oracleContract = OracleAbi__factory.connect(priceOracle, wallet);

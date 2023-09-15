@@ -25,8 +25,6 @@ export const NODE_URL = "https://beta-4.fuel.network/graphql";
 export const EXPLORER_URL =
   "https://fuellabs.github.io/block-explorer-v2/beta-3/#";
 export const FAUCET_URL = "https://faucet-beta-4.fuel.network";
-export const SEED =
-  "0x1586034a5486b0af22458ed29106865fee519b341bd260a2d9baad1d2a5c0d5b1505692de3ce6324ba5f306460d7db9a00ffebd5cefccf305da14c6c8fdde0f0";
 export const CONTRACT_ADDRESSES: IContractsConfig = {
   priceOracle:
     "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d",
