@@ -447,7 +447,6 @@ class DashboardVm {
         ) {
           balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
         }
-        console.log("SUPPLY", balance);
         this.setTokenAmount(balance);
         break;
       case ACTION_TYPE.WITHDRAW:
