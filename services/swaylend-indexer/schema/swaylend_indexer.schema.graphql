@@ -1,15 +1,3 @@
-type Block @entity {
-    id: ID!
-    height: UInt8!
-    hash: Bytes32! @unique
-}
-
-type Transaction @entity {
-    id: ID!
-    block: Block! @join(on:hash)
-    hash: Bytes32! @unique
-}
-
 type CollateralConfigurationEntity @entity {
     id: ID! 
     asset_id: AssetId!
