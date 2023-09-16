@@ -32,8 +32,17 @@ use std::token::mint_to_address;
 
 // todo: make indexer
 // todo: redeploy market contract
-// todo: refrash testnet main test
+// // todo: refrash testnet main test
 // todo: debug indexer
+/* 
+1) run docker
+2) run indexer
+3) deploy indexer
+4) wait
+5) curl -X POST http://localhost:29987/api/sql/composabilitylabs/swaylend_indexer  \ 
+                          -d  '{"query":"SELECT json_agg(t) FROM (SELECT * FROM composabilitylabs_swaylend_indexer.collateralconfigurationentity) t;"}' \
+                          -H "Content-type: application/json"
+ */
 // todo: create offchain math on rust
 // todo: create liquidator based on the math
 

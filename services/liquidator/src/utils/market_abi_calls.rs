@@ -16,8 +16,8 @@ pub mod market_abi_calls {
         market
             .methods()
             .absorb(addresses)
-            .set_contracts(contract_ids)
-            .tx_params(TxParameters::default().set_gas_price(1))
+            .with_contracts(contract_ids)
+            .tx_params(TxParameters::default().with_gas_price(1))
             .call()
             .await
     }
@@ -27,11 +27,11 @@ pub mod market_abi_calls {
         contract_ids: &[&dyn SettableContract],
         address: Address,
     ) -> Result<FuelCallResponse<bool>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::default().set_gas_price(1);
+        let tx_params = TxParameters::default().with_gas_price(1);
         market
             .methods()
             .is_liquidatable(address)
-            .set_contracts(contract_ids)
+            .with_contracts(contract_ids)
             .tx_params(tx_params)
             // .estimate_tx_dependencies(None).await.unwrap()
             .simulate()

@@ -20,9 +20,9 @@ abigen!(
     )
 );
 
-const RPC: &str = "beta-3.fuel.network";
-const MARKET_ADDRESS: &str = "0xbccd5ee7e20f70fe710b14e692f54aa110631b716fd28b9b7a2e5d8ba9bb4069";
-const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
+const RPC: &str = "beta-4.fuel.network";
+const MARKET_ADDRESS: &str = "0x9795996ffca3540819dbe8ace726d4a83e5411bf2177ba7c4ca7e1b5a8df1972";
+const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
 
 #[tokio::main]
 async fn main() {
@@ -45,13 +45,21 @@ async fn main() {
     let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
     let client = Client::builder(&token, GatewayIntents::default())
         .await
-        .expect("Err creating client");
+        .expect("❌ Err creating client");
     let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
 
     let channel = ChannelId(channel_id.parse::<u64>().unwrap());
 
     print_swaygang_sign("✅ SwayLend liquidator is alive");
     loop {
+
+        // market.methods().coll
+        // let mut  i = 0;
+        // while  {
+            // 
+        // }
+        // oracle.methods().get_price(asset_id)
+
         users.fetch().await;
         let list = users.list.clone();
         // println!("Total users {}", list.len());

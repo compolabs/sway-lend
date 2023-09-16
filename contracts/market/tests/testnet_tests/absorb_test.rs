@@ -5,7 +5,7 @@ use crate::utils::contracts_utils::oracle_utils::{oracle_abi_calls, OracleContra
 use crate::utils::print_title;
 use fuels::accounts::wallet::WalletUnlocked;
 use fuels::accounts::ViewOnlyAccount;
-use fuels::prelude::Provider;
+use fuels::prelude::{Provider, Bech32ContractId};
 use fuels::types::{Address, ContractId};
 
 // Multiplies all values by this number
@@ -15,10 +15,10 @@ const MARKET_ADDRESS: &str = "0x9795996ffca3540819dbe8ace726d4a83e5411bf2177ba7c
 const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
 
 #[tokio::test]
-async fn availtable_to_borrow_test() {
+async fn absorb_test() {
     dotenv::dotenv().ok();
 
-    print_title("Available to borrow");
+    print_title("🔥 Absorb");
     //--------------- WALLETS ---------------
     let provider = Provider::connect(RPC).await.unwrap();
 
@@ -39,6 +39,6 @@ async fn availtable_to_borrow_test() {
     let id = ContractId::from_str(MARKET_ADDRESS).unwrap();
     let market = MarketContract::new(id, admin.clone());
 
-    let value = market_abi_calls::available_to_borrow(&market, &contracts, alice_address).await;
-    println!("Available to borrow = {}", value);
+    let value = market_abi_calls::is_liquidatable(&market, &contracts, alice_address).await;
+    println!("Alice is_liquidatable = {}", value);
 }
