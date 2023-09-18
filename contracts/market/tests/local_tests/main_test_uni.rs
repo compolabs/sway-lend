@@ -80,7 +80,6 @@ async fn main_test() {
         };
         let price = asset.1.default_price * 10u64.pow(9);
         oracle_abi_calls::set_price(&oracle, asset_id, price).await;
-        // println!("1 {} = ${}", asset.1.symbol, asset.1.default_price);
     }
     // =================================================
     // ==================== Step #0 ====================
@@ -146,27 +145,6 @@ async fn main_test() {
     debug_state(&market, &wallets, usdc, uni).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
 
-    // let collateral =
-    //     market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
-    // let res = market_abi_calls::withdraw_collateral(
-    //     &market.with_account(alice.clone()).unwrap(),
-    //     &[&oracle],
-    //     uni.bits256,
-    //     collateral,
-    // )
-    // .await
-    // .unwrap();
-    // println!(
-    //     "address = {:?}",
-    //     res.decode_logs_with_type::<Address>().unwrap()
-    // );
-    // println!("logs = {:?}", res.decode_logs_with_type::<u64>().unwrap());
-
-    // let collateral =
-    //     market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
-    // println!("collateral = {:?}", collateral);
-    // return;
-    
     // =================================================
     // ==================== Step #2 ====================
     // 👛 Wallet: Alice 🦹

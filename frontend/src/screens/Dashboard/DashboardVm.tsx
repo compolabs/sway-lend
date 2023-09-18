@@ -348,7 +348,7 @@ class DashboardVm {
           amount: this.tokenAmount.toString(),
           assetId: this.baseToken.assetId,
         },
-        gasLimit: 100000,
+        gasLimit: 1000000,
       })
       .call();
   };
@@ -394,10 +394,11 @@ class DashboardVm {
       OracleAbi__factory.abi,
       this.rootStore.accountStore.provider
     );
+
     return market.functions
       .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
-      .callParams({ gasLimit: 10000 })
+      .callParams({ gasLimit: 100000 })
       .call();
   };
 

@@ -3558,6 +3558,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "src20_sdk"
+version = "0.0.3"
+source = "git+https://github.com/compolabs/src-20.git?branch=token-factory#cc7d0bf8dad1311d27b7e11227c8c068c33b74a7"
+dependencies = [
+ "dotenv",
+ "fuels",
+ "tai64",
+]
+
+[[package]]
 name = "stable_deref_trait"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3632,6 +3642,7 @@ dependencies = [
  "serde",
  "serde_json",
  "serenity",
+ "src20_sdk",
  "tokio",
 ]
 
