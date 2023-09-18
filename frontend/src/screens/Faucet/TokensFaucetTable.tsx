@@ -19,6 +19,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
   const vm = useFaucetVM();
   const [tokens, setTokens] = useState<any>([]);
   const ethBalance = accountStore.getBalance(TOKENS_BY_SYMBOL.ETH);
+  const mintedTokens = settingsStore.mintedTokensForCurrentAccount?.split(",");
   useMemo(() => {
     setTokens(
       vm.faucetTokens.map((t) => ({
@@ -75,6 +76,12 @@ const TokensFaucetTable: React.FC<IProps> = () => {
             return (
               <Button fixed disabled>
                 <Loading />
+              </Button>
+            );
+          if (mintedTokens?.includes(t.assetId))
+            return (
+              <Button fixed disabled>
+                Minted
               </Button>
             );
           if (ethBalance?.eq(0) && t.symbol !== "ETH")

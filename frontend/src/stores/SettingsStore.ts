@@ -7,6 +7,7 @@ export interface ISerializedSettingsStore {
   selectedTheme: THEME_TYPE | null;
   version: string | null;
   faucetTokens: Record<string, string> | null;
+  mintedTokens: Record<string, string> | null;
 }
 
 class SettingsStore {
@@ -17,10 +18,12 @@ class SettingsStore {
     makeAutoObservable(this);
     if (initState != null) {
       initState.selectedTheme != null &&
-      (this.selectedTheme = initState.selectedTheme);
+        (this.selectedTheme = initState.selectedTheme);
       initState.version != null && (this.version = initState.version);
       initState.faucetTokens != null &&
-      (this.faucetTokens = initState.faucetTokens);
+        (this.faucetTokens = initState.faucetTokens);
+      initState.mintedTokens != null &&
+        (this.mintedTokens = initState.mintedTokens);
     }
   }
 
@@ -47,7 +50,8 @@ class SettingsStore {
   serialize = (): ISerializedSettingsStore => ({
     selectedTheme: this.selectedTheme,
     version: this.version,
-    faucetTokens: this.faucetTokens
+    faucetTokens: this.faucetTokens,
+    mintedTokens: this.mintedTokens,
   });
 
   walletModalOpened: boolean = false;
@@ -55,6 +59,34 @@ class SettingsStore {
 
   network: string = NODE_URL;
   setNetwork = (s: string) => (this.network = s);
+
+  mintedTokens: Record<string, string> | null = null;
+  setMintedTokens = (s: Record<string, string> | null) =>
+    (this.mintedTokens = s);
+
+  get mintedTokensForCurrentAccount() {
+    if (this.mintedTokens == null) return null;
+    if (this.rootStore.accountStore.address == null) return null;
+    return this.mintedTokens[this.rootStore.accountStore.address];
+  }
+
+  addMintedToken = (tokenAddress: string) => {
+    const tokens = this.mintedTokensForCurrentAccount;
+    const accountAddress = this.rootStore.accountStore.address;
+    if (accountAddress == null) return;
+    if (this.mintedTokens == null) {
+      this.setMintedTokens({ [accountAddress]: tokenAddress });
+      return;
+    }
+
+    this.setMintedTokens({
+      ...this.mintedTokens,
+      [accountAddress]:
+        tokens == null
+          ? tokenAddress
+          : tokens?.concat(",").concat(tokenAddress),
+    });
+  };
 
   loginModalOpened: boolean = false;
   setLoginModalOpened = (s: boolean) => (this.loginModalOpened = s);

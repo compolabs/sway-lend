@@ -14,6 +14,7 @@ import { TokenFactoryAbi__factory } from "@src/contracts";
 import { hashMessage } from "fuels";
 
 const ctx = React.createContext<FaucetVM | null>(null);
+
 interface IProps {
   children: React.ReactNode;
 }
@@ -116,6 +117,9 @@ class FaucetVM {
         .call();
       if (transactionResult != null) {
         const token = TOKENS_BY_ASSET_ID[assetId];
+        if (token != TOKENS_BY_SYMBOL.ETH) {
+          this.rootStore.settingsStore.addMintedToken(assetId);
+        }
         this.rootStore.notificationStore.toast(
           `You have successfully minted ${token.symbol}`,
           {
