@@ -3,8 +3,7 @@ use fuels::{
     prelude::{abigen, ContractId, Provider, WalletUnlocked, BASE_ASSET_ID},
     types::Bits256,
 };
-use serenity::{model::prelude::ChannelId, prelude::GatewayIntents};
-use std::{env, str::FromStr, thread::sleep, time::Duration};
+use std::{str::FromStr, thread::sleep, time::Duration};
 mod utils;
 use fuels::accounts::ViewOnlyAccount;
 use serde::Deserialize;
@@ -42,13 +41,13 @@ async fn main() {
     let oracle = OracleContract::new(id, wallet.clone());
 
     //discord
-    let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
-    let serenity_client = serenity::prelude::Client::builder(&token, GatewayIntents::default())
-        .await
-        .expect("❌ Err creating client");
-    let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
+    // let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
+    // let serenity_client = serenity::prelude::Client::builder(&token, GatewayIntents::default())
+    //     .await
+    //     .expect("❌ Err creating client");
+    // let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
 
-    let channel = ChannelId(channel_id.parse::<u64>().unwrap());
+    // let channel = ChannelId(channel_id.parse::<u64>().unwrap());
 
     print_swaygang_sign("✅ Oracle is alive");
     loop {
@@ -80,17 +79,17 @@ async fn main() {
             message += format!("\n👁 Oracle address: {ORACLE_ADDRESS}").as_str();
             message += format!("\n-----------------------------------").as_str();
             println!("{message}");
-            channel
-                .say(serenity_client.cache_and_http.http.clone(), message)
-                .await
-                .unwrap();
+            // channel
+            //     .say(serenity_client.cache_and_http.http.clone(), message)
+            //     .await
+            //     .unwrap();
         } else {
             let message = "❌ Cannot update prices";
             println!("{message}");
-            channel
-                .say(serenity_client.cache_and_http.http.clone(), message)
-                .await
-                .unwrap();
+            // channel
+            //     .say(serenity_client.cache_and_http.http.clone(), message)
+            //     .await
+            //     .unwrap();
         }
 
         sleep(Duration::from_secs(5 * 60));

@@ -26,11 +26,11 @@ async fn withdraw_collateral() {
     let admin_pk = std::env::var("ADMIN").unwrap().parse().unwrap();
     let admin = WalletUnlocked::new_from_private_key(admin_pk, Some(provider.clone()));
 
-    let alice_pk = std::env::var("CHAD").unwrap().parse().unwrap();
-    let alice = WalletUnlocked::new_from_private_key(alice_pk, Some(provider.clone()));
-    let alice_address = Address::from(alice.address());
+    let chad_pk = std::env::var("CHAD").unwrap().parse().unwrap();
+    let chad = WalletUnlocked::new_from_private_key(chad_pk, Some(provider.clone()));
+    let chad_address = Address::from(chad.address());
 
-    println!("alice address = {:?}", alice.address().to_string());
+    println!("chad address = {:?}", chad.address().to_string());
 
     //--------------- MARKET ---------------
     let id = ContractId::from_str(MARKET_ADDRESS).unwrap();
@@ -45,11 +45,11 @@ async fn withdraw_collateral() {
     let uni = assets.get("UNI").unwrap();
 
     let collateral =
-        market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
+        market_abi_calls::get_user_collateral(&market, chad_address, uni.bits256).await;
     println!("collateral = {:?}", collateral);
 
     market_abi_calls::withdraw_collateral(
-        &market.with_account(alice).unwrap(),
+        &market.with_account(chad).unwrap(),
         &[&oracle],
         uni.bits256,
         collateral,
@@ -58,6 +58,6 @@ async fn withdraw_collateral() {
     .unwrap();
 
     let collateral =
-        market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
+        market_abi_calls::get_user_collateral(&market, chad_address, uni.bits256).await;
     println!("collateral = {:?}", collateral);
 }

@@ -398,7 +398,6 @@ class DashboardVm {
     return market.functions
       .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
-      .callParams({ gasLimit: 100000 })
       .call();
   };
 
