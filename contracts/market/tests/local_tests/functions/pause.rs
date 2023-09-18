@@ -8,7 +8,7 @@ use crate::utils::contracts_utils::market_utils::{
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
 use crate::utils::contracts_utils::token_utils::deploy_tokens;
 use crate::utils::number_utils::parse_units;
-use crate::utils::{debug_state, init_wallets, print_title};
+use crate::utils::{init_wallets, print_title};
 
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
@@ -27,7 +27,6 @@ async fn pause_test() {
 
     //--------------- ORACLE ---------------
     let oracle = deploy_oracle(&admin).await;
-    let contracts = oracle_abi_calls::get_as_settable_contract(&oracle);
 
     //--------------- TOKENS ---------------
     let (assets, asset_configs, factory) = deploy_tokens(&admin, oracle.contract_id().into()).await;
@@ -64,9 +63,8 @@ async fn pause_test() {
         println!("1 {} = ${}", asset.1.symbol, asset.1.default_price);
     }
     println!("\n");
-    debug_state(&market, &wallets, usdc, uni).await;
     // =================================================
-    // ==================== Case #0 ====================
+    // ==================== Step #0 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: supply_base
     // 💰 Amount: 400.00 USDC
@@ -94,7 +92,7 @@ async fn pause_test() {
     market_abi_calls::debug_increment_timestamp(&market).await;
 
     // =================================================
-    // ==================== Case #1 ====================
+    // ==================== Step #1 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: supply_collateral
     // 💰 Amount: 40.00 UNI ~ $200.00
@@ -122,7 +120,7 @@ async fn pause_test() {
     market_abi_calls::debug_increment_timestamp(&market).await;
 
     // =================================================
-    // ==================== Case #2 ====================
+    // ==================== Step #2 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: withdraw_base
     // 💰 Amount: 150.00 USDC
@@ -132,7 +130,7 @@ async fn pause_test() {
     // Alice calls withdraw_base
     let inst = market.with_account(alice.clone()).unwrap();
 
-    market_abi_calls::withdraw_base(&inst, &contracts, amount)
+    market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
         .await
         .unwrap();
 
@@ -143,7 +141,7 @@ async fn pause_test() {
     market_abi_calls::debug_increment_timestamp(&market).await;
 
     // =================================================
-    // ==================== Case #3 ====================
+    // ==================== Step #3 ====================
     // 👛 Wallet: Admin 🗿
     // 🤙 Drop of collateral price
     // 💰 Amount: -10%
@@ -157,15 +155,15 @@ async fn pause_test() {
     market_abi_calls::debug_increment_timestamp(&market).await;
 
     // =================================================
-    // ==================== Case #4 ====================
+    // ==================== Step #4 ====================
     // 👛 Wallet: Bob 🦹
     // 🤙 Call: absorb
     // 🔥 Target: Alice
 
-    assert!(market_abi_calls::is_liquidatable(&market, &contracts, alice_address).await);
+    assert!(market_abi_calls::is_liquidatable(&market, &[&oracle], alice_address).await);
 
     let inst = market.with_account(bob.clone()).unwrap();
-    market_abi_calls::absorb(&inst, &contracts, vec![alice_address])
+    market_abi_calls::absorb(&inst, &[&oracle], vec![alice_address])
         .await
         .unwrap();
 
@@ -179,7 +177,7 @@ async fn pause_test() {
     market_abi_calls::debug_increment_timestamp(&market).await;
 
     // =================================================
-    // ==================== Case #5 ====================
+    // ==================== Step #5 ====================
     // 👛 Wallet: Bob 🤵
     // 🤙 Call: buy_collateral
     // 💰 Amount: 172.44 USDC
@@ -190,7 +188,7 @@ async fn pause_test() {
 
     let reservs = reservs.value;
     let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
+        market_abi_calls::collateral_value_to_sell(&market, &[&oracle], uni.bits256, reservs).await;
 
     // Transfer of amount to the wallet
     token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)
@@ -205,7 +203,7 @@ async fn pause_test() {
     let addr = bob_address;
     market_abi_calls::buy_collateral(
         &inst,
-        &contracts,
+        &[&oracle],
         usdc.asset_id,
         amount,
         uni.bits256,
@@ -220,7 +218,7 @@ async fn pause_test() {
     // TODO claim_paused
 
     // =================================================
-    // ==================== Case #6 ====================
+    // ==================== Step #6 ====================
     // 👛 Wallet: Admin 🗿
     // 🤙 Call: reset UNI price and pause
 
@@ -242,7 +240,7 @@ async fn pause_test() {
         .unwrap();
 
     // =================================================
-    // ==================== Case #7 ====================
+    // ==================== Step #7 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: supply_base
     // 💰 Amount: 400.00 USDC
@@ -265,7 +263,7 @@ async fn pause_test() {
     assert!(res);
 
     // =================================================
-    // ==================== Case #8 ====================
+    // ==================== Step #8 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: supply_collateral
     // 💰 Amount: 40.00 UNI ~ $200.00
@@ -288,7 +286,7 @@ async fn pause_test() {
     assert!(res);
 
     // =================================================
-    // ==================== Case #9 ====================
+    // ==================== Step #9 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: withdraw_base
     // 💰 Amount: 150.00 USDC
@@ -298,25 +296,25 @@ async fn pause_test() {
     // Alice calls withdraw_base
     let inst = market.with_account(alice.clone()).unwrap();
 
-    let res = market_abi_calls::withdraw_base(&inst, &contracts, amount)
+    let res = market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
         .await
         .is_err();
     assert!(res);
 
     // =================================================
-    // ==================== Case #4 ====================
+    // ==================== Step #4 ====================
     // 👛 Wallet: Bob 🦹
     // 🤙 Call: absorb
     // 🔥 Target: Alice
 
     let inst = market.with_account(bob.clone()).unwrap();
-    let res = market_abi_calls::absorb(&inst, &contracts, vec![alice_address])
+    let res = market_abi_calls::absorb(&inst, &[&oracle], vec![alice_address])
         .await
         .is_err();
     assert!(res);
 
     // =================================================
-    // ==================== Case #5 ====================
+    // ==================== Step #5 ====================
     // 👛 Wallet: Bob 🤵
     // 🤙 Call: buy_collateral
     // 💰 Amount: 172.44 USDC
@@ -327,7 +325,7 @@ async fn pause_test() {
 
     let reservs = reservs.value;
     let amount =
-        market_abi_calls::collateral_value_to_sell(&market, &contracts, uni.bits256, reservs).await;
+        market_abi_calls::collateral_value_to_sell(&market, &[&oracle], uni.bits256, reservs).await;
 
     // Transfer of amount to the wallet
     token_factory_abi_calls::mint(&factory, bob_address, &usdc.symbol, amount)

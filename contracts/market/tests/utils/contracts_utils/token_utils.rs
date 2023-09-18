@@ -89,25 +89,40 @@ pub async fn deploy_tokens(
     (assets, asset_configs, factory)
 }
 
-pub async fn _load_tokens(tokens_json_path: &str) -> HashMap<String, Asset> {
+pub async fn load_tokens(tokens_json_path: &str, price_feed: ContractId) -> (HashMap<String, Asset>, Vec<CollateralConfiguration>) {
     let tokens_json = std::fs::read_to_string(tokens_json_path).unwrap();
     let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
 
     let mut assets: HashMap<String, Asset> = HashMap::new();
+    let mut asset_configs: Vec<CollateralConfiguration> = Vec::new();
 
     for config in token_configs {
         let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
+        let symbol = config.symbol;
         assets.insert(
-            config.symbol.clone(),
+            symbol.clone(),
             Asset {
                 bits256,
                 asset_id: AssetId::from(bits256.0),
                 default_price: config.default_price,
                 decimals: config.decimals,
-                symbol: config.symbol.clone(),
+                symbol: symbol.clone(),
                 coingeco_id: config.coingeco_id,
             },
         );
+
+        if symbol != "USDC" {
+            asset_configs.push(CollateralConfiguration {
+                asset_id: bits256,
+                decimals: config.decimals,
+                price_feed,
+                borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4
+                liquidate_collateral_factor: config.liquidate_collateral_factor.unwrap(), // decimals: 4
+                liquidation_penalty: config.liquidation_penalty.unwrap(), // decimals: 4
+                supply_cap: config.supply_cap.unwrap(), // decimals: asset decimals
+                paused: false,
+            })
+        }
     }
-    assets
+    (assets, asset_configs)
 }

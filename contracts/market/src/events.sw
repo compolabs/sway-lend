@@ -2,7 +2,7 @@ library;
 
 use ::structs::*;
 
-pub struct AssetCollateralEvent{configuration: CollateralConfiguration}
+pub struct CollateralConfigurationEvent{configuration: CollateralConfiguration}
 
 pub struct UserBasicEvent{user_basic: UserBasic, address: Address}
 

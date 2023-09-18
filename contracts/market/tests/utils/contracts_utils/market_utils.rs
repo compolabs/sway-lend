@@ -24,7 +24,12 @@ pub mod market_abi_calls {
     pub async fn debug_increment_timestamp(
         market: &MarketContract<WalletUnlocked>,
     ) -> FuelCallResponse<()> {
-        let res = market.methods().debug_increment_timestamp().call().await;
+        let res = market
+            .methods()
+            .debug_increment_timestamp()
+            .tx_params(TxParameters::default().with_gas_price(1))
+            .call()
+            .await;
         res.unwrap()
     }
 
@@ -83,9 +88,7 @@ pub mod market_abi_calls {
         asset_id: Bits256,
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
-        let tx_params = TxParameters::default()
-            .with_gas_limit(100_000_000)
-            .with_gas_price(1);
+        let tx_params = TxParameters::default().with_gas_price(1);
         market
             .methods()
             .withdraw_collateral(asset_id, amount)
@@ -282,7 +285,6 @@ pub mod market_abi_calls {
         market
             .methods()
             .get_collateral_reserves(asset_id)
-            // .tx_params(TX_PARAMS)
             .simulate()
             .await
             .unwrap()
@@ -292,7 +294,6 @@ pub mod market_abi_calls {
         market
             .methods()
             .get_reserves()
-            // .tx_params(TX_PARAMS)
             .simulate()
             .await
             .unwrap()

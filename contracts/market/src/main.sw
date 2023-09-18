@@ -30,22 +30,6 @@ use std::storage::storage_vec::*;
 use std::vec::Vec;
 use std::token::mint_to_address;
 
-// todo: make indexer
-// todo: redeploy market contract
-// // todo: refrash testnet main test
-// todo: debug indexer
-/* 
-1) run docker
-2) run indexer
-3) deploy indexer
-4) wait
-5) curl -X POST http://localhost:29987/api/sql/composabilitylabs/swaylend_indexer  \ 
-                          -d  '{"query":"SELECT json_agg(t) FROM (SELECT * FROM composabilitylabs_swaylend_indexer.collateralconfigurationentity) t;"}' \
-                          -H "Content-type: application/json"
- */
-// todo: create offchain math on rust
-// todo: create liquidator based on the math
-
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
 configurable {
@@ -228,7 +212,7 @@ impl Market for Contract {
         storage.collateral_configurations.insert(configuration.asset_id, configuration);
         storage.collateral_configurations_keys.push(configuration.asset_id);
 
-        log(AssetCollateralEvent {configuration});
+        log(CollateralConfigurationEvent {configuration});
     }
 
     #[storage(read, write)]
@@ -238,7 +222,7 @@ impl Market for Contract {
         configuration.paused = true;
         storage.collateral_configurations.insert(asset_id, configuration);
 
-        log(AssetCollateralEvent {configuration});
+        log(CollateralConfigurationEvent {configuration});
     }
 
     #[storage(read, write)]
@@ -248,7 +232,7 @@ impl Market for Contract {
         configuration.paused = false;
         storage.collateral_configurations.insert(asset_id, configuration);
 
-        log(AssetCollateralEvent {configuration});
+        log(CollateralConfigurationEvent {configuration});
     }
 
     #[storage(read)]
@@ -392,7 +376,7 @@ impl Market for Contract {
         let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal;
         let last_accrual_time = storage.market_basic.last_accrual_time.read();
         let (supply_index, borrow_index) = accrued_interest_indices(timestamp(), last_accrual_time);   // decimals (18, 18)
-        if principal >= I64::new() {
+        if !principal.negative {
             let supply = present_value_supply(supply_index, principal.into());
             (supply, 0)
         } else {
@@ -620,7 +604,7 @@ impl Market for Contract {
 
 #[storage(read)]
 fn timestamp() -> u64 {
-    if DEBUG_STEP.is_none() {
+    if DEBUG_STEP.is_some() {
         storage.debug_timestamp.read()
     } else {
         std::block::timestamp()
@@ -752,7 +736,7 @@ fn accrued_interest_indices(now: u64, last_accrual_time: u64) -> (u64, u64) { //
 #[storage(read)]
 fn is_borrow_collateralized(account: Address) -> bool {
     let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal; // decimals base_asset_decimal
-    if principal >= I64::new() {
+    if !principal.negative {
         return true
     };
 
@@ -787,7 +771,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
 #[storage(read)]
 fn is_liquidatable_internal(account: Address) -> bool {
     let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal; // decimals base_asset_decimal
-    if principal >= I64::new() {
+    if !principal.negative {
         return false
     };
 

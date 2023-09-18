@@ -1,6 +1,9 @@
+use std::time::Duration;
+
 use fuels::prelude::ViewOnlyAccount;
 use fuels::types::Address;
 use src20_sdk::token_factory_abi_calls;
+use tokio::time::sleep;
 
 use crate::utils::contracts_utils::market_utils::{
     deploy_market, get_market_config, market_abi_calls,
@@ -15,11 +18,11 @@ use crate::utils::{debug_state, init_wallets, print_case_title, print_title};
 const AMOUNT_COEFFICIENT: u64 = 10u64.pow(0);
 
 #[tokio::test]
-async fn main_test() {
+async fn main_test_no_debug() {
     let scale_6 = 10u64.pow(6) as f64;
     let scale_9 = 10u64.pow(9) as f64;
 
-    print_title("Main test with UNI");
+    print_title("Main test with UNI (no debug mode)");
     //--------------- WALLETS ---------------
     let wallets = init_wallets().await;
     let admin = &wallets[0];
@@ -31,9 +34,6 @@ async fn main_test() {
     let bob_address = Address::from(bob.address());
     let chad_address = Address::from(chad.address());
 
-    println!("alice_address = {alice_address}");
-    println!("bob_address = {bob_address}");
-    println!("chad_address = {chad_address}");
     //--------------- ORACLE ---------------
     let oracle = deploy_oracle(&admin).await;
 
@@ -53,9 +53,7 @@ async fn main_test() {
         // assets.get("SWAY").unwrap().bits256,
     );
 
-    // debug step
-    let step: Option<u64> = Option::Some(10000);
-    let market = deploy_market(&admin, market_config, step).await;
+    let market = deploy_market(&admin, market_config, Option::None).await;
     let sway_bits256 = market_abi_calls::get_reward_token_asset_id(&market).await;
     // println!("SWAY Address = {:?}", AssetId::from(sway_bits256.0));
     //--------------- SETUP COLLATERALS ---------------
@@ -82,6 +80,7 @@ async fn main_test() {
         oracle_abi_calls::set_price(&oracle, asset_id, price).await;
         // println!("1 {} = ${}", asset.1.symbol, asset.1.default_price);
     }
+
     // =================================================
     // ==================== Step #0 ====================
     // 👛 Wallet: Bob 🧛
@@ -112,7 +111,7 @@ async fn main_test() {
     assert!(supply_balance == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #1 ====================
@@ -144,29 +143,8 @@ async fn main_test() {
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
-    // let collateral =
-    //     market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
-    // let res = market_abi_calls::withdraw_collateral(
-    //     &market.with_account(alice.clone()).unwrap(),
-    //     &[&oracle],
-    //     uni.bits256,
-    //     collateral,
-    // )
-    // .await
-    // .unwrap();
-    // println!(
-    //     "address = {:?}",
-    //     res.decode_logs_with_type::<Address>().unwrap()
-    // );
-    // println!("logs = {:?}", res.decode_logs_with_type::<u64>().unwrap());
-
-    // let collateral =
-    //     market_abi_calls::get_user_collateral(&market, alice_address, uni.bits256).await;
-    // println!("collateral = {:?}", collateral);
-    // return;
-    
     // =================================================
     // ==================== Step #2 ====================
     // 👛 Wallet: Alice 🦹
@@ -188,7 +166,7 @@ async fn main_test() {
     assert!(balance == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #3 ====================
@@ -220,7 +198,7 @@ async fn main_test() {
     assert!(res == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #4 ====================
@@ -252,7 +230,7 @@ async fn main_test() {
     assert!(amount - 5 < supply_balance);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #5 ====================
@@ -275,7 +253,7 @@ async fn main_test() {
     assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #6 ====================
@@ -296,7 +274,7 @@ async fn main_test() {
     assert!(new_price == res.price);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #7 ====================
@@ -321,7 +299,7 @@ async fn main_test() {
     assert!(amount == 0);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #8 ====================
@@ -369,7 +347,7 @@ async fn main_test() {
     assert!(balance == 40_000_000_000 * AMOUNT_COEFFICIENT);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #9 ====================
@@ -393,7 +371,7 @@ async fn main_test() {
     assert!(bob.get_asset_balance(&usdc.asset_id).await.unwrap() == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #10 ====================
@@ -417,7 +395,7 @@ async fn main_test() {
     assert!(chad.get_asset_balance(&usdc.asset_id).await.unwrap() == amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #11 ====================
@@ -440,7 +418,7 @@ async fn main_test() {
     assert!(supplied == 0);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    market_abi_calls::debug_increment_timestamp(&market).await;
+    sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #12 ====================

@@ -38,7 +38,7 @@ pub fn print_title(title: &str) {
 pub fn print_case_title(num: u8, name: &str, call: &str, amount: &str) {
     println!(
         r#"
-==================== Case #{num} ====================
+==================== Step #{num} ====================
 👛 Wallet: {name}
 🤙 Call: {call}
 💰 Amount: {amount}

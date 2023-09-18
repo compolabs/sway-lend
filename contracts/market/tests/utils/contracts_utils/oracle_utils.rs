@@ -1,6 +1,4 @@
-use fuels::prelude::{
-    abigen, Contract, LoadConfiguration, SettableContract, TxParameters, WalletUnlocked,
-};
+use fuels::prelude::{abigen, Contract, LoadConfiguration, TxParameters, WalletUnlocked};
 
 abigen!(Contract(
     name = "OracleContract",
@@ -15,12 +13,6 @@ pub mod oracle_abi_calls {
     use crate::utils::contracts_utils::token_utils::Asset;
 
     use super::*;
-
-    pub fn get_as_settable_contract(
-        contract: &OracleContract<WalletUnlocked>,
-    ) -> [&dyn SettableContract; 1] {
-        [contract]
-    }
 
     pub async fn get_price(contract: &OracleContract<WalletUnlocked>, asset_id: Bits256) -> Price {
         contract
