@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.54.0
+  Fuels version: 0.57.0
   Forc version: 0.44.0
   Fuel-Core version: 0.20.4
 */
@@ -172,18 +172,6 @@ const _abi = {
     },
     {
       "typeId": 9,
-      "type": "struct AssetCollateralEvent",
-      "components": [
-        {
-          "name": "configuration",
-          "type": 10,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
-      "typeId": 10,
       "type": "struct CollateralConfiguration",
       "components": [
         {
@@ -224,6 +212,18 @@ const _abi = {
         {
           "name": "paused",
           "type": 3,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 10,
+      "type": "struct CollateralConfigurationEvent",
+      "components": [
+        {
+          "name": "configuration",
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -478,6 +478,11 @@ const _abi = {
           "name": "user_basic",
           "type": 17,
           "typeArguments": null
+        },
+        {
+          "name": "address",
+          "type": 8,
+          "typeArguments": null
         }
       ],
       "typeParameters": null
@@ -571,7 +576,7 @@ const _abi = {
       "inputs": [
         {
           "name": "configuration",
-          "type": 10,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -756,7 +761,7 @@ const _abi = {
         "typeArguments": [
           {
             "name": "",
-            "type": 10,
+            "type": 9,
             "typeArguments": null
           }
         ]
@@ -1111,15 +1116,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -1324,7 +1329,7 @@ const _abi = {
       "logId": 6,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1428,7 +1433,7 @@ const _abi = {
       "logId": 19,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1444,7 +1449,7 @@ const _abi = {
       "logId": 21,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1608,7 +1613,7 @@ const _abi = {
           }
         ]
       },
-      "offset": 698444
+      "offset": 697092
     },
     {
       "name": "DEBUG_STEP",
@@ -1623,7 +1628,7 @@ const _abi = {
           }
         ]
       },
-      "offset": 698692
+      "offset": 697340
     }
   ]
 }

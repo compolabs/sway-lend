@@ -4,7 +4,7 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.54.0
+  Fuels version: 0.57.0
   Forc version: 0.44.0
   Fuel-Core version: 0.20.4
 */
@@ -27,10 +27,10 @@ export enum ErrorOutput { AlreadyInitialized = 'AlreadyInitialized', Paused = 'P
 
 export type AddressInput = { value: string };
 export type AddressOutput = AddressInput;
-export type AssetCollateralEventInput = { configuration: CollateralConfigurationInput };
-export type AssetCollateralEventOutput = { configuration: CollateralConfigurationOutput };
 export type CollateralConfigurationInput = { asset_id: string, price_feed: ContractIdInput, decimals: BigNumberish, borrow_collateral_factor: BigNumberish, liquidate_collateral_factor: BigNumberish, liquidation_penalty: BigNumberish, supply_cap: BigNumberish, paused: boolean };
 export type CollateralConfigurationOutput = { asset_id: string, price_feed: ContractIdOutput, decimals: BN, borrow_collateral_factor: BN, liquidate_collateral_factor: BN, liquidation_penalty: BN, supply_cap: BN, paused: boolean };
+export type CollateralConfigurationEventInput = { configuration: CollateralConfigurationInput };
+export type CollateralConfigurationEventOutput = { configuration: CollateralConfigurationOutput };
 export type ContractIdInput = { value: string };
 export type ContractIdOutput = ContractIdInput;
 export type I64Input = { value: BigNumberish, negative: boolean };
@@ -43,8 +43,8 @@ export type PauseConfigurationInput = { supply_paused: boolean, withdraw_paused:
 export type PauseConfigurationOutput = PauseConfigurationInput;
 export type UserBasicInput = { principal: I64Input, base_tracking_index: BigNumberish, base_tracking_accrued: BigNumberish, reward_claimed: BigNumberish };
 export type UserBasicOutput = { principal: I64Output, base_tracking_index: BN, base_tracking_accrued: BN, reward_claimed: BN };
-export type UserBasicEventInput = { user_basic: UserBasicInput };
-export type UserBasicEventOutput = { user_basic: UserBasicOutput };
+export type UserBasicEventInput = { user_basic: UserBasicInput, address: AddressInput };
+export type UserBasicEventOutput = { user_basic: UserBasicOutput, address: AddressOutput };
 export type UserCollateralEventInput = { address: AddressInput, asset_id: string, amount: BigNumberish };
 export type UserCollateralEventOutput = { address: AddressOutput, asset_id: string, amount: BN };
 

@@ -1,8 +1,7 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import BN from "@src/utils/BN";
-import { Provider, Wallet } from "fuels";
-import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
+import { IToken, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
 //fixme fix of getting price of tokens
@@ -40,13 +39,10 @@ class PricesStore {
   };
 
   updateTokenPrices = async () => {
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
     try {
-      let provider = new Provider(NODE_URL);
-      const wallet = Wallet.fromAddress(
-        "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
-        provider
-      );
+      const wallet = accountStore.walletToRead;
       const oracleContract = OracleAbi__factory.connect(priceOracle, wallet);
 
       const response = await Promise.all(

@@ -14,7 +14,6 @@ import { TokenFactoryAbi__factory } from "@src/contracts";
 import { hashMessage } from "fuels";
 
 const ctx = React.createContext<FaucetVM | null>(null);
-//todo remoe sway token from faucet
 interface IProps {
   children: React.ReactNode;
 }
@@ -33,7 +32,6 @@ const faucetAmounts: Record<string, number> = {
   UNI: 50,
   BTC: 0.01,
   USDC: 300,
-  SWAY: 5,
   COMP: 5,
 };
 

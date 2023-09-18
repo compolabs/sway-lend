@@ -195,9 +195,12 @@ class AccountStore {
     return window.fuel.getWallet(this.address);
   };
 
-  get walletToRead(): WalletLocked | null {
-    if (this.address == null) return null;
-    return Wallet.fromAddress(this.address, new Provider(NODE_URL));
+  get walletToRead(): WalletLocked {
+    //just acc with eth on balance
+    return Wallet.fromAddress(
+      "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
+      this.provider
+    );
   }
 
   get addressInput(): null | { value: string } {
