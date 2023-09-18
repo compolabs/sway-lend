@@ -60,13 +60,13 @@ async fn main() {
         let mut message = String::from("🪬 Price oracle update\n");
         for config in &token_configs {
             let price = 
-            if config.symbol == "UNI" {
-                (4.5 * 10f64.powf(9f64)) as u64
-            } else {
+            // if config.symbol == "UNI" {
+            //     (4.5 * 10f64.powf(9f64)) as u64
+            // } else {
                 match responce[config.coingeco_id.clone()]["usd"].as_f64() {
                     Some(p) => (p * 10f64.powf(9f64)).round() as u64,
                     _ => config.default_price,
-                }
+                // }
             };
             prices.push((Bits256::from_hex_str(&config.asset_id).unwrap(), price));
             let unit_price = price as f64 / 10f64.powf(9f64);
