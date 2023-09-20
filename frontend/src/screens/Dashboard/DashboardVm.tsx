@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useMemo } from "react";
-import { action, makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
@@ -14,10 +14,7 @@ import {
   MarketAbi__factory,
   OracleAbi__factory,
 } from "@src/contracts";
-import {
-  CollateralConfigurationOutput,
-  MarketBasicsOutput,
-} from "@src/contracts/MarketAbi";
+import { CollateralConfigurationOutput } from "@src/contracts/MarketAbi";
 import { Contract } from "fuels";
 
 const ctx = React.createContext<DashboardVm | null>(null);
@@ -358,7 +355,6 @@ class DashboardVm {
     return market.functions
       .withdraw_base(this.tokenAmount.toString())
       .txParams({ gasPrice: 1 })
-      .callParams({ gasLimit: 10000 })
       .call();
   };
 
@@ -398,7 +394,6 @@ class DashboardVm {
     return market.functions
       .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
-      .callParams({ gasLimit: 100 })
       .call();
   };
 
