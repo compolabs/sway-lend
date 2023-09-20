@@ -1,11 +1,11 @@
-const INDEXER_URL: &str = "http://localhost:29987/api/sql/composabilitylabs/swaylend_indexer";
+use crate::INDEXER_URL;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct IndexerResponce<T> {
     pub data: Vec<Vec<T>>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct CollateralConfig {
     pub asset_id: String,
     pub borrow_collateral_factor: u64,
@@ -17,14 +17,14 @@ pub struct CollateralConfig {
     pub price_feed: String,
     pub supply_cap: u64,
 }
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize)]
 pub struct UserCollateral {
     pub id: String,
     pub address: String,
     pub amount: u64,
     pub asset_id: String,
 }
-#[derive(serde::Deserialize, Debug, Clone)]
+#[derive(serde::Deserialize, Clone)]
 pub struct UserBasics {
     pub id: String,
     pub address: String,
