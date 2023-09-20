@@ -8,6 +8,7 @@ import getAlert from "@src/utils/alertUtil";
 export type TNotifyOptions = ToastOptions & {
   link?: string;
   linkTitle?: string;
+  copyTitle?: string;
   copyText?: string;
   title?: string;
 };
@@ -27,7 +28,6 @@ class NotificationStore {
         : "light";
 
     toast(getAlert(content, options) ?? content, {
-      autoClose: 1500,
       ...options,
       theme,
     });

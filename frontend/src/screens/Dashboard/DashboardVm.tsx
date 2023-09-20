@@ -848,6 +848,8 @@ class DashboardVm {
       {
         link: `${EXPLORER_URL}/transaction/${link}`,
         linkTitle: "View on Explorer",
+        copyTitle: "Copy tx id",
+        copyText: link,
         type: "success",
         title: "Transaction is completed!",
       }
