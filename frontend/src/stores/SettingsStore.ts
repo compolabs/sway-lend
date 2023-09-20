@@ -3,11 +3,20 @@ import { THEME_TYPE } from "@src/themes/ThemeProvider";
 import { makeAutoObservable } from "mobx";
 import { CONTRACT_ADDRESSES, IContractsConfig, NODE_URL } from "@src/constants";
 
+interface ILogItem {
+  fuelAddress: string | null;
+  address: string | null;
+  timestamp: string | null;
+  action: string | null;
+  errorMessage: string | null;
+}
+
 export interface ISerializedSettingsStore {
   selectedTheme: THEME_TYPE | null;
   version: string | null;
   faucetTokens: Record<string, string> | null;
   mintedTokens: Record<string, string> | null;
+  log: string | null;
 }
 
 class SettingsStore {
@@ -24,6 +33,7 @@ class SettingsStore {
         (this.faucetTokens = initState.faucetTokens);
       initState.mintedTokens != null &&
         (this.mintedTokens = initState.mintedTokens);
+      initState.log != null && (this.log = initState.log);
     }
   }
 
@@ -52,6 +62,7 @@ class SettingsStore {
     version: this.version,
     faucetTokens: this.faucetTokens,
     mintedTokens: this.mintedTokens,
+    log: this.log,
   });
 
   walletModalOpened: boolean = false;
@@ -94,6 +105,28 @@ class SettingsStore {
   get currentVersionConfig(): IContractsConfig {
     return CONTRACT_ADDRESSES;
   }
+
+  log: string | null = null;
+  setLog = (s: string | null) => (this.log = s);
+
+  addErrorToLog = (log: ILogItem) => {
+    const currentLog = this.log == null ? [] : JSON.parse(this.log);
+    const newLog = JSON.stringify([...currentLog, log]);
+    this.setLog(newLog);
+  };
+  exportLogData = () => {
+    if (this.log == null) {
+      console.log("your log file is empty");
+      return;
+    }
+    const jsonString = `data:text/json;chatset=utf-8,${encodeURIComponent(
+      this.log ?? ""
+    )}`;
+    const link = document.createElement("a");
+    link.href = jsonString;
+    link.download = "swayLendLogFile.json";
+    link.click();
+  };
 }
 
 export default SettingsStore;

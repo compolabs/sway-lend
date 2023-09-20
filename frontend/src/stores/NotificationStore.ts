@@ -8,6 +8,7 @@ import getAlert from "@src/utils/alertUtil";
 export type TNotifyOptions = ToastOptions & {
   link?: string;
   linkTitle?: string;
+  copyText?: string;
   title?: string;
 };
 

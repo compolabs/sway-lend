@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useMemo } from "react";
-import { makeAutoObservable, reaction } from "mobx";
+import { action, makeAutoObservable, reaction } from "mobx";
 import { RootStore, useStores } from "@stores";
 import { useVM } from "@src/hooks/useVM";
 import {
@@ -23,10 +23,10 @@ import { Contract } from "fuels";
 const ctx = React.createContext<DashboardVm | null>(null);
 
 export enum ACTION_TYPE {
-  SUPPLY,
-  BORROW,
-  REPAY,
-  WITHDRAW,
+  SUPPLY = "SUPPLY",
+  BORROW = "BORROW",
+  REPAY = "REPAY",
+  WITHDRAW = "WITHDRAW",
 }
 
 export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
@@ -348,7 +348,6 @@ class DashboardVm {
           amount: this.tokenAmount.toString(),
           assetId: this.baseToken.assetId,
         },
-        gasLimit: 1000000,
       })
       .call();
   };
@@ -358,6 +357,7 @@ class DashboardVm {
     return market.functions
       .withdraw_base(this.tokenAmount.toString())
       .txParams({ gasPrice: 1 })
+      .callParams({ gasLimit: 10000 })
       .call();
   };
 
@@ -376,7 +376,6 @@ class DashboardVm {
           assetId: this.actionTokenAssetId,
           amount: this.tokenAmount.toString(),
         },
-        gasLimit: 10000,
       })
       .call();
   };
@@ -398,6 +397,7 @@ class DashboardVm {
     return market.functions
       .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
+      .callParams({ gasLimit: 100 })
       .call();
   };
 
@@ -587,13 +587,21 @@ class DashboardVm {
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
+      const { addErrorToLog } = this.rootStore.settingsStore;
+      const err = {
+        fuelAddress: this.rootStore.accountStore.address,
+        address: this.rootStore.accountStore.addressB256,
+        timestamp: new Date().getTime().toString(),
+        action: this.action,
+        errorMessage: e?.toString() ?? "",
+      };
+      console.log(e);
+      addErrorToLog(err);
       const error = JSON.parse(JSON.stringify(e)).toString();
-      // const messageText = Object.keys(error?.logs[0])[0] ?? "Error message";
       this.rootStore.notificationStore.toast(error.error, {
         type: "error",
         title: "Oops..",
       });
-      console.error(e);
     } finally {
       this._setLoading(false);
     }

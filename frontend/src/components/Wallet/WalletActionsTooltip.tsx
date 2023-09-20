@@ -25,7 +25,7 @@ const Root = styled(Column)`
 `;
 
 const WalletActionsTooltip: React.FC<IProps> = () => {
-  const { notificationStore, accountStore } = useStores();
+  const { notificationStore, accountStore, settingsStore } = useStores();
 
   const handleCopyAddress = () => {
     accountStore.address && copy(accountStore.address);
@@ -54,6 +54,14 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
       <SizedBox height={10} />
       <Text weight={700} onClick={handleLogout} className="menu-item">
         Disconnect
+      </Text>
+      <SizedBox height={10} />
+      <Text
+        weight={700}
+        onClick={settingsStore.exportLogData}
+        className="menu-item"
+      >
+        Export log file
       </Text>
     </Root>
   );
