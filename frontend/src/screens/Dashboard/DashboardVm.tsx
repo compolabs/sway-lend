@@ -69,8 +69,8 @@ class DashboardVm {
   suppliedBalance: BN | null = null;
   setSuppliedBalance = (l: BN | null) => (this.suppliedBalance = l);
 
-  utilization: BN | null = null;
-  setUtilization = (l: BN | null) => (this.supplyRate = l);
+  // utilization: BN | null = null;
+  // setUtilization = (l: BN | null) => (this.utilization = l);
 
   supplyRate: BN | null = null;
   setSupplyRate = (l: BN | null) => (this.supplyRate = l);
@@ -90,8 +90,8 @@ class DashboardVm {
   totalLiquidity: BN | null = null;
   setTotalLiquidity = (l: BN | null) => (this.totalLiquidity = l);
 
-  marketBasic: MarketBasicsOutput | null = null;
-  setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
+  // marketBasic: MarketBasicsOutput | null = null;
+  // setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
 
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
@@ -123,16 +123,16 @@ class DashboardVm {
     l: Record<string, CollateralConfigurationOutput> | null
   ) => (this.collateralsData = l);
 
-  initMarketSignedContract = async () => {
-    const { accountStore } = this.rootStore;
-    if (accountStore.address == null) return;
-    const wallet = await accountStore.getWallet();
-    const { market } = this.rootStore.settingsStore.currentVersionConfig;
-    if (wallet != null) {
-      const marketContract = MarketAbi__factory.connect(market, wallet);
-      this.setMarketContractSigned(marketContract);
-    }
-  };
+  // initMarketSignedContract = async () => {
+  //   const { accountStore } = this.rootStore;
+  //   if (accountStore.address == null) return;
+  //   const wallet = await accountStore.getWallet();
+  //   const { market } = this.rootStore.settingsStore.currentVersionConfig;
+  //   if (wallet != null) {
+  //     const marketContract = MarketAbi__factory.connect(market, wallet);
+  //     this.setMarketContractSigned(marketContract);
+  //   }
+  // };
 
   updateMarketState = async () => {
     const { accountStore } = this.rootStore;
@@ -151,7 +151,7 @@ class DashboardVm {
           this.updateTotalCollateralInfo(marketContract),
           this.updateAccountBalances(marketContract),
           this.updateSupplyAndBorrowRates(marketContract),
-          this.updateMarketBasic(marketContract),
+          // this.updateMarketBasic(marketContract),
           //error
           this.updateMaxBorrowAmount(marketContract),
           this.updateUserCollateralBalances(marketContract),
@@ -162,9 +162,7 @@ class DashboardVm {
     });
 
     promise
-      .catch((v) => {
-        console.log(v);
-      })
+      .catch((v) => console.error(v))
       .finally(() => {
         this.setInitialized(true);
         this.setRejectUpdateStatePromise(undefined);
@@ -186,6 +184,7 @@ class DashboardVm {
       this.setAssetsConfigs(v);
     }
   };
+
   updateTotalCollateralInfo = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
@@ -228,20 +227,22 @@ class DashboardVm {
     this.setBorrowedBalance(new BN(value[1].toString()));
   };
 
-  updateMarketBasic = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
-    const { value } = await marketContract.functions
-      .get_market_basics()
-      .simulate();
-    this.setMarketBasic(value);
-  };
+  // updateMarketBasic = async (marketContract: MarketAbi) => {
+  //   const { addressInput } = this.rootStore.accountStore;
+  //   if (addressInput == null) return;
+  //   const { value } = await marketContract.functions
+  //     .get_market_basics()
+  //     .simulate();
+  //   this.setMarketBasic(value);
+  // };
+
   updateTotalBaseTokenReserve = async (marketContract: MarketAbi) => {
     const { value } = await marketContract.functions
       .balance_of(this.baseToken.assetId)
       .simulate();
     this.setBaseTokenReserve(new BN(value.toString()));
   };
+
   updateTotalLiquidity = async (marketContract: MarketAbi) => {
     const result = await marketContract.functions
       .balance_of(this.baseToken.assetId)
@@ -295,7 +296,7 @@ class DashboardVm {
     const { value } = await marketContract.functions
       .get_utilization()
       .simulate();
-    this.setUtilization(new BN(value.toString()));
+    // this.setUtilization(new BN(value.toString()));
     const [borrow, supply] = await Promise.all([
       marketContract.functions.get_borrow_rate(value).simulate(),
       marketContract.functions.get_supply_rate(value).simulate(),
@@ -313,9 +314,9 @@ class DashboardVm {
     TOKENS_BY_SYMBOL.UNI,
   ];
 
-  marketContractSigned: MarketAbi | null = null;
-  setMarketContractSigned = (v: MarketAbi | null) =>
-    (this.marketContractSigned = v);
+  // marketContractSigned: MarketAbi | null = null;
+  // setMarketContractSigned = (v: MarketAbi | null) =>
+  //   (this.marketContractSigned = v);
 
   mode: 0 | 1 = 0;
   setMode = (v: 0 | 1) => (this.mode = v);
@@ -550,15 +551,15 @@ class DashboardVm {
     const { accountStore } = this.rootStore;
     this._setLoading(true);
     let marketContract = null;
-    if (this.marketContractSigned == null) {
-      const { accountStore } = this.rootStore;
-      if (accountStore.address == null) return;
-      const wallet = await accountStore.getWallet();
-      const { market } = this.rootStore.settingsStore.currentVersionConfig;
-      if (wallet != null) {
-        marketContract = MarketAbi__factory.connect(market, wallet);
-      }
+    // if (this.marketContractSigned == null) {
+    // const { accountStore } = this.rootStore;
+    if (accountStore.address == null) return;
+    const wallet = await accountStore.getWallet();
+    const { market } = this.rootStore.settingsStore.currentVersionConfig;
+    if (wallet != null) {
+      marketContract = MarketAbi__factory.connect(market, wallet);
     }
+    // }
     if (marketContract == null) return;
     let tx = null;
     try {
@@ -889,7 +890,7 @@ class DashboardVm {
     this.setBorrowedBalance(null);
     this.setBorrowRate(null);
     this.setSupplyRate(null);
-    this.setMarketBasic(null);
+    // this.setMarketBasic(null);
     this.setMaxBorrowBaseTokenAmount(null);
     this.setCollateralBalances(null);
     this.setCollateralData(null);

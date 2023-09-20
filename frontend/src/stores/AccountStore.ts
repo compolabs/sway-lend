@@ -137,7 +137,7 @@ class AccountStore {
 
   disconnect = async () => {
     try {
-      // this.walletInstance.disconnect();
+      this.walletInstance.disconnect();
     } catch (e) {
       this.setAddress(null);
       this.setLoginType(null);
