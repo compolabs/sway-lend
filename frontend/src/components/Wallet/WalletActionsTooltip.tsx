@@ -52,16 +52,16 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
         View in Explorer
       </Text>
       <SizedBox height={10} />
-      <Text weight={700} onClick={handleLogout} className="menu-item">
-        Disconnect
-      </Text>
-      <SizedBox height={10} />
       <Text
         weight={700}
         onClick={settingsStore.exportLogData}
         className="menu-item"
       >
         Export log file
+      </Text>
+      <SizedBox height={10} />
+      <Text weight={700} onClick={handleLogout} className="menu-item">
+        Disconnect
       </Text>
     </Root>
   );

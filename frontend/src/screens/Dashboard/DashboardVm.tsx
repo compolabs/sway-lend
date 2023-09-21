@@ -16,6 +16,7 @@ import {
 } from "@src/contracts";
 import { CollateralConfigurationOutput } from "@src/contracts/MarketAbi";
 import { Contract } from "fuels";
+import centerEllipsis from "@src/utils/centerEllipsis";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
@@ -66,9 +67,6 @@ class DashboardVm {
   suppliedBalance: BN | null = null;
   setSuppliedBalance = (l: BN | null) => (this.suppliedBalance = l);
 
-  // utilization: BN | null = null;
-  // setUtilization = (l: BN | null) => (this.utilization = l);
-
   supplyRate: BN | null = null;
   setSupplyRate = (l: BN | null) => (this.supplyRate = l);
 
@@ -86,9 +84,6 @@ class DashboardVm {
 
   totalLiquidity: BN | null = null;
   setTotalLiquidity = (l: BN | null) => (this.totalLiquidity = l);
-
-  // marketBasic: MarketBasicsOutput | null = null;
-  // setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
 
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
@@ -843,7 +838,7 @@ class DashboardVm {
       {
         link: `${EXPLORER_URL}/transaction/${link}`,
         linkTitle: "View on Explorer",
-        copyTitle: "Copy tx id",
+        copyTitle: `Tx id - ${centerEllipsis(link)}`,
         copyText: link,
         type: "success",
         title: "Transaction is completed!",

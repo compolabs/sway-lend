@@ -28,6 +28,7 @@ class NotificationStore {
         : "light";
 
     toast(getAlert(content, options) ?? content, {
+      autoClose: 5000,
       ...options,
       theme,
     });

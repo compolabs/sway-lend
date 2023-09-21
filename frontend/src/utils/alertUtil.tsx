@@ -4,11 +4,13 @@ import { ReactComponent as ErrorIcon } from "@src/assets/icons/error.svg";
 import { ReactComponent as SuccessIcon } from "@src/assets/icons/success.svg";
 import { ReactComponent as WarningIcon } from "@src/assets/icons/warning.svg";
 import { ReactComponent as InfoIcon } from "@src/assets/icons/information.svg";
+import { ReactComponent as СopyIcon } from "@src/assets/icons/copy.svg";
 import { Column, Row } from "@components/Flex";
 import Text from "@components/Text";
 import { TNotifyOptions } from "@stores/NotificationStore";
 import { TypeOptions } from "react-toastify";
 import copy from "copy-to-clipboard";
+import SizedBox from "@components/SizedBox";
 
 const Root = styled.div`
   display: flex;
@@ -57,21 +59,25 @@ const getAlert = (
           >
             {content}
           </Text>
+          {copyText && copyTitle && (
+            <Row
+              alignItems="baseline"
+              onClick={() => {
+                console.log("copy");
+                copyText && copy(copyText);
+              }}
+            >
+              <Text fitContent weight={600} type="secondary">
+                {copyTitle || copyText}
+              </Text>
+              <SizedBox width={4} />
+              <СopyIcon width={16} height={16} style={{ cursor: "pointer" }} />
+            </Row>
+          )}
           {link && (
             <Link target="_blank" href={link}>
               <Text weight={600} type="secondary">
                 {linkTitle || link}
-              </Text>
-            </Link>
-          )}
-          {copyText && copyTitle && (
-            <Link target="_blank">
-              <Text
-                weight={600}
-                type="secondary"
-                onClick={() => copyText && copy(copyText)}
-              >
-                {copyTitle || copyText}
               </Text>
             </Link>
           )}
