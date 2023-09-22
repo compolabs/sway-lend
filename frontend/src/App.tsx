@@ -8,6 +8,7 @@ import { ROUTES } from "@src/constants";
 import Faucet from "@screens/Faucet";
 import Dashboard from "@screens/Dashboard";
 import Footer from "@components/Footer";
+import Tutorial from "@screens/Tutorial";
 
 const Root = styled(Column)`
   width: 100%;
@@ -23,6 +24,7 @@ const App: React.FC = () => {
       <Routes>
         <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.FAUCET} element={<Faucet />} />
+        <Route path={ROUTES.TUTORIAL} element={<Tutorial />} />
         <Route path="*" element={<Navigate to={ROUTES.DASHBOARD} />} />
       </Routes>
       <Footer />

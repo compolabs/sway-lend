@@ -838,7 +838,7 @@ class DashboardVm {
       {
         link: `${EXPLORER_URL}/transaction/${link}`,
         linkTitle: "View on Explorer",
-        copyTitle: `Tx id - ${centerEllipsis(link)}`,
+        copyTitle: `Copy tx id: ${centerEllipsis(link)}`,
         copyText: link,
         type: "success",
         title: "Transaction is completed!",

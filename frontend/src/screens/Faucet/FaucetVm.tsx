@@ -12,6 +12,7 @@ import BN from "@src/utils/BN";
 import { LOGIN_TYPE } from "@stores/AccountStore";
 import { TokenFactoryAbi__factory } from "@src/contracts";
 import { hashMessage } from "fuels";
+import centerEllipsis from "@src/utils/centerEllipsis";
 
 const ctx = React.createContext<FaucetVM | null>(null);
 
@@ -117,16 +118,17 @@ class FaucetVM {
         .call();
       if (transactionResult != null) {
         const token = TOKENS_BY_ASSET_ID[assetId];
-        if (token != TOKENS_BY_SYMBOL.ETH) {
+        if (token !== TOKENS_BY_SYMBOL.ETH) {
           this.rootStore.settingsStore.addMintedToken(assetId);
         }
+        const txId = transactionResult.id ?? "";
         this.rootStore.notificationStore.toast(
           `You have successfully minted ${token.symbol}`,
           {
-            link: `${EXPLORER_URL}/transaction/${transactionResult.id}`,
+            link: `${EXPLORER_URL}/transaction/${txId}`,
             linkTitle: "View on Explorer",
             type: "success",
-            copyTitle: "Copy tx id",
+            copyTitle: `Copy tx id: ${centerEllipsis(txId)}`,
             copyText: transactionResult.id,
             title: "Transaction is completed!",
           }

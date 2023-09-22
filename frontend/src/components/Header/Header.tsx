@@ -11,6 +11,7 @@ import { ROUTES } from "@src/constants";
 import { useTheme } from "@emotion/react";
 import Text from "@components/Text";
 import MobileMenuIcon from "../MobileMenuIcon";
+import attention from "@src/assets/icons/attention.svg";
 
 interface IProps {}
 
@@ -107,6 +108,11 @@ const Header: React.FC<IProps> = () => {
       name: "Faucet",
       link: ROUTES.FAUCET,
       icon: theme.images.icons.coins,
+    },
+    {
+      name: "Tutorial",
+      link: ROUTES.TUTORIAL,
+      icon: attention,
     },
   ];
 

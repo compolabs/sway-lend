@@ -11,6 +11,7 @@ export type TNotifyOptions = ToastOptions & {
   copyTitle?: string;
   copyText?: string;
   title?: string;
+  copyCallback?: () => void;
 };
 
 class NotificationStore {
@@ -26,7 +27,13 @@ class NotificationStore {
       this.rootStore.settingsStore.selectedTheme === THEME_TYPE.DARK_THEME
         ? "dark"
         : "light";
-
+    options.copyCallback = () => {
+      toast(getAlert("Successfully copied!", { type: "info" }), {
+        theme,
+        position: "bottom-left",
+        autoClose: 1000,
+      });
+    };
     toast(getAlert(content, options) ?? content, {
       autoClose: 5000,
       ...options,
