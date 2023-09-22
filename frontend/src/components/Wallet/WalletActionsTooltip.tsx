@@ -30,8 +30,9 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
   const handleCopyAddress = () => {
     accountStore.address && copy(accountStore.address);
     notificationStore.toast("Your address was copied", {
-      type: "success",
+      type: "info",
       title: "Congratulations!",
+      position: "bottom-left",
     });
   };
   const handleLogout = () => accountStore.disconnect();

@@ -28,11 +28,17 @@ class NotificationStore {
         ? "dark"
         : "light";
     options.copyCallback = () => {
-      toast(getAlert("Successfully copied!", { type: "info" }), {
-        theme,
-        position: "bottom-left",
-        autoClose: 1000,
-      });
+      toast(
+        getAlert("Successfully copied!", {
+          title: "Congratulations!",
+          type: "info",
+        }),
+        {
+          theme,
+          position: "bottom-left",
+          autoClose: 1000,
+        }
+      );
     };
     toast(getAlert(content, options) ?? content, {
       autoClose: 5000,
