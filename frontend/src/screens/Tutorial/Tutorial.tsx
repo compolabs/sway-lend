@@ -21,7 +21,7 @@ const Tutorial: React.FC<IProps> = () => {
           marginHeight={0}
           marginWidth={0}
         >
-          Loading …
+          Loading...
         </iframe>
       </Root>
     </Layout>

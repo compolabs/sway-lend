@@ -128,7 +128,7 @@ class FaucetVM {
             link: `${EXPLORER_URL}/transaction/${txId}`,
             linkTitle: "View on Explorer",
             type: "success",
-            copyTitle: `Copy tx id: ${centerEllipsis(txId)}`,
+            copyTitle: `Copy tx id: ${centerEllipsis(txId, 8)}`,
             copyText: transactionResult.id,
             title: "Transaction is completed!",
           }
