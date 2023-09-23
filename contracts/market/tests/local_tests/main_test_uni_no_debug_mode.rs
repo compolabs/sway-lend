@@ -254,6 +254,10 @@ async fn main_test_no_debug() {
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
+    //Available to borrow should be 0
+    let value = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
+    assert!(value == 0);
+
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
 
@@ -314,7 +318,6 @@ async fn main_test_no_debug() {
     assert!(!reservs.negative);
 
     let reservs = reservs.value;
-    println!("reserves = {:?}", reservs);
     let amount =
         market_abi_calls::collateral_value_to_sell(&market, &[&oracle], uni.bits256, reservs).await;
 

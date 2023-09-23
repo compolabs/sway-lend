@@ -1,18 +1,14 @@
 contract;
 
-use std::{
-    address::Address,
-    auth::{
-        AuthError,
-        msg_sender,
-    },
-    block::timestamp,
-    constants::ZERO_B256,
-    identity::Identity,
-    logging::log,
-    result::Result,
-    revert::require,
-};
+use std::address::Address;
+use std::auth::{AuthError,msg_sender};
+use std::block::timestamp;
+use std::constants::ZERO_B256;
+use std::identity::Identity;
+use std::logging::log;
+use std::result::Result;
+use std::revert::require;
+use std::hash::Hash;
 
 abi Oracle {
     #[storage(read)]

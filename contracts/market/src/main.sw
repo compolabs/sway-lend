@@ -374,20 +374,12 @@ impl Market for Contract {
 
     #[storage(read)]
     fn get_user_supply_borrow(account: Address) -> (u64, u64) {
-        let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal;
-        let last_accrual_time = storage.market_basic.last_accrual_time.read();
-        let (supply_index, borrow_index) = accrued_interest_indices(timestamp(), last_accrual_time);   // decimals (18, 18)
-        if !principal.negative {
-            let supply = present_value_supply(supply_index, principal.into());
-            (supply, 0)
-        } else {
-            let borrow = present_value_borrow(borrow_index, principal.flip().into());
-            (0, borrow)
-        }
+        get_user_supply_borrow_internal(account)
     }
 
     #[storage(read)]
     fn available_to_borrow(account: Address) -> u64 {
+        let (_, borrow) = get_user_supply_borrow_internal(account);
         let mut borrow_limit = U128::new();
         let mut index = 0;
         let config = MARKET_CONFIGURATION.unwrap();
@@ -405,7 +397,12 @@ impl Market for Contract {
             borrow_limit += balance * price * collateral_factor / scale; //base_token_decimals
             index += 1;
         };
-        borrow_limit.as_u64().unwrap()
+        let borrow_limit = borrow_limit.as_u64().unwrap();
+        if borrow_limit < borrow {
+            0
+        }else {
+            borrow_limit - borrow
+        }
     }
 
 
@@ -707,6 +704,20 @@ fn get_borrow_rate_internal(utilization: u64) -> U128 { // -> decimals 18
         interest_rate_base + interest_rate_slope_low * utilization / scale
     } else {
         interest_rate_base + (interest_rate_slope_low * kink + interest_rate_slope_high * (utilization - kink)) / scale
+    }
+}
+
+#[storage(read)]
+fn get_user_supply_borrow_internal(account: Address) -> (u64, u64) {
+    let principal = storage.user_basic.get(account).try_read().unwrap_or(UserBasic::default()).principal;
+    let last_accrual_time = storage.market_basic.last_accrual_time.read();
+    let (supply_index, borrow_index) = accrued_interest_indices(timestamp(), last_accrual_time);   // decimals (18, 18)
+    if !principal.negative {
+        let supply = present_value_supply(supply_index, principal.into());
+        (supply, 0)
+    } else {
+        let borrow = present_value_borrow(borrow_index, principal.flip().into());
+        (0, borrow)
     }
 }
 
