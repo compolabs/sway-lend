@@ -12,12 +12,12 @@
       "components": [
         {
           "name": "__tuple_element",
-          "type": 2,
+          "type": 8,
           "typeArguments": null
         },
         {
           "name": "__tuple_element",
-          "type": 12,
+          "type": 13,
           "typeArguments": null
         }
       ],
@@ -40,7 +40,7 @@
         },
         {
           "name": "ContractId",
-          "type": 8,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -60,7 +60,7 @@
     },
     {
       "typeId": 6,
-      "type": "str[13]",
+      "type": "str",
       "components": null,
       "typeParameters": null
     },
@@ -78,7 +78,7 @@
     },
     {
       "typeId": 8,
-      "type": "struct ContractId",
+      "type": "struct AssetId",
       "components": [
         {
           "name": "value",
@@ -90,21 +90,11 @@
     },
     {
       "typeId": 9,
-      "type": "struct Price",
+      "type": "struct ContractId",
       "components": [
         {
-          "name": "asset_id",
+          "name": "value",
           "type": 2,
-          "typeArguments": null
-        },
-        {
-          "name": "price",
-          "type": 12,
-          "typeArguments": null
-        },
-        {
-          "name": "last_update",
-          "type": 12,
           "typeArguments": null
         }
       ],
@@ -112,6 +102,28 @@
     },
     {
       "typeId": 10,
+      "type": "struct Price",
+      "components": [
+        {
+          "name": "asset_id",
+          "type": 8,
+          "typeArguments": null
+        },
+        {
+          "name": "price",
+          "type": 13,
+          "typeArguments": null
+        },
+        {
+          "name": "last_update",
+          "type": 13,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 11,
       "type": "struct RawVec",
       "components": [
         {
@@ -121,7 +133,7 @@
         },
         {
           "name": "cap",
-          "type": 12,
+          "type": 13,
           "typeArguments": null
         }
       ],
@@ -130,12 +142,12 @@
       ]
     },
     {
-      "typeId": 11,
+      "typeId": 12,
       "type": "struct Vec",
       "components": [
         {
           "name": "buf",
-          "type": 10,
+          "type": 11,
           "typeArguments": [
             {
               "name": "",
@@ -146,7 +158,7 @@
         },
         {
           "name": "len",
-          "type": 12,
+          "type": 13,
           "typeArguments": null
         }
       ],
@@ -155,7 +167,7 @@
       ]
     },
     {
-      "typeId": 12,
+      "typeId": 13,
       "type": "u64",
       "components": null,
       "typeParameters": null
@@ -166,14 +178,14 @@
       "inputs": [
         {
           "name": "asset_id",
-          "type": 2,
+          "type": 8,
           "typeArguments": null
         }
       ],
       "name": "get_price",
       "output": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": null
       },
       "attributes": [
@@ -206,12 +218,12 @@
       "inputs": [
         {
           "name": "asset_id",
-          "type": 2,
+          "type": 8,
           "typeArguments": null
         },
         {
           "name": "price",
-          "type": 12,
+          "type": 13,
           "typeArguments": null
         }
       ],
@@ -235,7 +247,7 @@
       "inputs": [
         {
           "name": "prices",
-          "type": 11,
+          "type": 12,
           "typeArguments": [
             {
               "name": "",
@@ -289,7 +301,7 @@
         "type": 7,
         "typeArguments": []
       },
-      "offset": 4212
+      "offset": 10580
     }
   ]
 }
