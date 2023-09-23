@@ -29,6 +29,7 @@ use std::u128::U128;
 use std::storage::storage_vec::*;
 use std::vec::Vec;
 use std::token::mint_to_address;
+use std::hash::Hash;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 
@@ -479,7 +480,7 @@ impl Market for Contract {
     // ## 6. Reward stuff
 
     fn get_reward_token_asset_id() -> AssetId {
-        sha256((contract_id(), ZERO_B256))
+        AssetId::from(sha256((contract_id(), ZERO_B256)))
     }
 
     fn withdraw_reward_token(recipient: Address, amount: u64) {
