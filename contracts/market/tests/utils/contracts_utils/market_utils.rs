@@ -1,6 +1,7 @@
 use fuels::programs::call_utils::TxDependencyExtension;
 use serde::Deserialize;
 
+use crate::utils::contracts_utils::market_utils::abigen_bindings::market_contract_mod;
 use fuels::prelude::{abigen, Contract, LoadConfiguration, TxParameters, WalletUnlocked};
 use fuels::programs::call_response::FuelCallResponse;
 use fuels::types::{Address, Bits256, ContractId};
@@ -13,7 +14,6 @@ abigen!(Contract(
 
 // TODO: Make it a class not to pass a contract instance in the arguments
 pub mod market_abi_calls {
-
     use fuels::{
         prelude::{CallParameters, SettableContract},
         types::{AssetId, Bits256},
@@ -89,6 +89,7 @@ pub mod market_abi_calls {
         amount: u64,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
         let tx_params = TxParameters::default().with_gas_price(1);
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         market
             .methods()
             .withdraw_collateral(asset_id, amount)
@@ -123,6 +124,7 @@ pub mod market_abi_calls {
         address: Address,
         asset_id: Bits256,
     ) -> u64 {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         let res = market
             .methods()
             .get_user_collateral(address, asset_id)
@@ -132,13 +134,14 @@ pub mod market_abi_calls {
     }
 
     pub async fn get_reward_token_asset_id(market: &MarketContract<WalletUnlocked>) -> Bits256 {
-        market
+        let asset_id = market
             .methods()
             .get_reward_token_asset_id()
             .simulate()
             .await
             .unwrap()
-            .value
+            .value;
+        asset_id.value
     }
 
     pub async fn available_to_borrow(
@@ -182,9 +185,14 @@ pub mod market_abi_calls {
     }
     pub async fn totals_collateral(
         market: &MarketContract<WalletUnlocked>,
-        bits256: Bits256,
+        asset_id: Bits256,
     ) -> u64 {
-        let res = market.methods().totals_collateral(bits256).simulate().await;
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
+        let res = market
+            .methods()
+            .totals_collateral(asset_id)
+            .simulate()
+            .await;
         res.unwrap().value
     }
     pub async fn get_utilization(market: &MarketContract<WalletUnlocked>) -> u64 {
@@ -197,8 +205,9 @@ pub mod market_abi_calls {
             .unwrap()
             .value
     }
-    pub async fn balance_of(market: &MarketContract<WalletUnlocked>, bits256: Bits256) -> u64 {
-        let res = market.methods().balance_of(bits256).simulate().await;
+    pub async fn balance_of(market: &MarketContract<WalletUnlocked>, asset_id: Bits256) -> u64 {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
+        let res = market.methods().balance_of(asset_id).simulate().await;
         res.unwrap().value
     }
 
@@ -215,6 +224,7 @@ pub mod market_abi_calls {
         asset_id: Bits256,
         collateral_amount: u64,
     ) -> u64 {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         market
             .methods()
             .collateral_value_to_sell(asset_id, collateral_amount)
@@ -238,6 +248,7 @@ pub mod market_abi_calls {
         let call_params = CallParameters::default()
             .with_amount(amount)
             .with_asset_id(base_asset_id);
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         market
             .methods()
             .buy_collateral(asset_id, min_amount, recipient)
@@ -282,6 +293,7 @@ pub mod market_abi_calls {
         market: &MarketContract<WalletUnlocked>,
         asset_id: Bits256,
     ) -> I64 {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         market
             .methods()
             .get_collateral_reserves(asset_id)
@@ -342,18 +354,20 @@ struct MarketConfig {
 pub fn get_market_config(
     governor: Address,
     pause_guardian: Address,
-    base_token_bits256: Bits256,
+    base_token_asset_id: Bits256,
     base_token_decimals: u64,
     price_feed: ContractId,
     // reward_token_bits256: Bits256,
 ) -> MarketConfiguration {
     let config_json_str = std::fs::read_to_string("tests/artefacts/config.json").unwrap();
     let config: MarketConfig = serde_json::from_str(&config_json_str).unwrap();
-
+    let base_token_asset_id = market_contract_mod::AssetId {
+        value: base_token_asset_id,
+    };
     MarketConfiguration {
         governor,
         pause_guardian,
-        base_token: base_token_bits256,
+        base_token: base_token_asset_id,
         base_token_decimals,
         base_token_price_feed: price_feed,
         kink: config.kink, // decimals: 18
