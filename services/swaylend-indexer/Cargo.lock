@@ -741,9 +741,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-database-types"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "35738594fc022c4d891c6044f44aec568384ff719978678f147aead8905ba875"
+checksum = "6e8dca70bcc5d7b871936f2d5141f0c25b1c31ad7a5146f47a82b5cacbf43903"
 dependencies = [
  "async-graphql-parser",
  "async-graphql-value",
@@ -756,9 +756,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-lib"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e43350e4413530e849a1334b7e5d791ff708433d87df741708b48f08b39cd4a8"
+checksum = "3fc78eca5f11f14459ea3887deaf14a82ebe2070d62412a85b1b9b5b04e19c54"
 dependencies = [
  "anyhow",
  "async-graphql-parser",
@@ -783,9 +783,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-macros"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2730b9a25278d735fc535787df3f4558ed451a347f3a92d44a81bf33d6d408c1"
+checksum = "826095e67e96e391366026d96971609006c9223005c3594284fc76c9d146514c"
 dependencies = [
  "async-graphql-parser",
  "async-graphql-value",
@@ -807,9 +807,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-plugin"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf0b863bac18ca6c6c5bcc8474355b4bc33a4034c8b4e4e2b4b8e01f8917844e"
+checksum = "7e71f4b7e6495ef05cfb998c90adb41c75e6610057c1118c0adbbae8c9b3d269"
 dependencies = [
  "bincode",
  "fuel-indexer-lib",
@@ -824,9 +824,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-schema"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bdf9291b54fd2bb0a32ccb809a9654f1e35dc99fda6dec9b5036440251a380d3"
+checksum = "0019ada8e75f129cc226b76561006ef6f30ad7164668e915a34cf204502496f9"
 dependencies = [
  "async-graphql-parser",
  "fuel-indexer-lib",
@@ -839,9 +839,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-types"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "184a47c7f1049565abde6f4105c9ae1ae1fc3115af34b45d72502dd5d10db3ad"
+checksum = "2e51f01c6c640bd81a81a6d50184db95b2f471455cf9b5f32127566d573cc364"
 dependencies = [
  "bincode",
  "bytes",
@@ -856,9 +856,9 @@ dependencies = [
 
 [[package]]
 name = "fuel-indexer-utils"
-version = "0.20.9"
+version = "0.20.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e2a4b9b5745dd5a84dc664b26cf49a3b71581914cd4e893d44b523e31707b9f"
+checksum = "45ef19755f57a8adc57b5457e8535ba1ed781bea979958ab1963386116c158be"
 dependencies = [
  "fuel-indexer-macros",
  "fuel-indexer-plugin",

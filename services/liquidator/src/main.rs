@@ -12,10 +12,10 @@ use utils::oracle_utils::OracleContract;
 use utils::print_swaygang_sign::print_swaygang_sign;
 
 const RPC: &str = "beta-4.fuel.network";
-const MARKET_ADDRESS: &str = "0x06e9b35a0d196ca4358757c934a98da1d5874c4d91a8eff41fe940029dba2fa7";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
-const FACTORY_ADDRESS: &str = "0xd8c627b9cd9ee42e2c2bd9793b13bc9f8e9aad32e25a99ea574f23c1dd17685a";
-const USDC_ASSET_ID: &str = "0x8bf7951ea3222fe0bae9b811c2b142a1ff417361dcf7457855ed477d2d9a8550";
+const MARKET_ADDRESS: &str = "0xacf860fcfdfb1cf5ab16d2955143a7875821f6f24087689ae320b22d80d77e06";
+const ORACLE_ADDRESS: &str = "0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e";
+const FACTORY_ADDRESS: &str = "0x8a25657aa845a67fec72a60e59ac01342483e89a5ef9215eb52c4e56270b082f";
+const USDC_ASSET_ID: &str = "0x364ef7f799e95517d9a3f422efdb72b24e7c47eeb1177f12a06a5f778b62f481";
 pub const INDEXER_URL: &str = "https://spark-indexer.spark-defi.com/api/sql/composabilitylabs/swaylend_indexer";
 
 #[tokio::main]
@@ -46,6 +46,7 @@ async fn main() {
 
         let mut prices: HashMap<String, u64> = HashMap::new();
         for config in collateral_configs {
+            println!("asset_id = {:?}", config.asset_id);
             let asset_id = Bits256::from_hex_str(&("0x".to_owned() + &config.asset_id)).unwrap();
             let price = get_price(&oracle, asset_id).await.price;
             prices.insert(config.asset_id.clone(), price);

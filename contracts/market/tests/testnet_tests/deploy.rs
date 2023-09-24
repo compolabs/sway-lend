@@ -7,12 +7,14 @@ use fuels::{
 };
 
 use crate::utils::contracts_utils::{
-    market_utils::{deploy_market, get_market_config, market_abi_calls},
+    market_utils::{
+        abigen_bindings::market_contract_mod, deploy_market, get_market_config, market_abi_calls,
+    },
     token_utils::load_tokens,
 };
 
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
+const ORACLE_ADDRESS: &str = "0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e";
 
 #[tokio::test]
 async fn deploy() {
@@ -46,8 +48,10 @@ async fn deploy() {
     for config in &asset_configs {
         let mut config = config.clone();
         // replace swaylend token into reward token
-        if config.asset_id == assets.get("SWAY").unwrap().bits256 {
-            config.asset_id = sway_bits256
+        if config.asset_id.value == assets.get("SWAY").unwrap().bits256 {
+            config.asset_id = market_contract_mod::AssetId {
+                value: sway_bits256,
+            }
         }
 
         market_abi_calls::add_collateral_asset(&market, &config)

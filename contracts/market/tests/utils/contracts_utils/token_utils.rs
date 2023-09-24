@@ -5,6 +5,7 @@ use fuels::types::{AssetId, Bits256, ContractId};
 use serde::Deserialize;
 use src20_sdk::{deploy_token_factory_contract, token_factory_abi_calls, TokenFactoryContract};
 
+use super::market_utils::abigen_bindings::market_contract_mod;
 use super::market_utils::CollateralConfiguration;
 
 pub struct Asset {
@@ -63,7 +64,7 @@ pub async fn deploy_tokens(
 
         if symbol != "USDC" {
             asset_configs.push(CollateralConfiguration {
-                asset_id: bits256,
+                asset_id: market_contract_mod::AssetId { value: bits256 },
                 decimals: config.decimals,
                 price_feed,
                 borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4
@@ -89,7 +90,10 @@ pub async fn deploy_tokens(
     (assets, asset_configs, factory)
 }
 
-pub async fn load_tokens(tokens_json_path: &str, price_feed: ContractId) -> (HashMap<String, Asset>, Vec<CollateralConfiguration>) {
+pub async fn load_tokens(
+    tokens_json_path: &str,
+    price_feed: ContractId,
+) -> (HashMap<String, Asset>, Vec<CollateralConfiguration>) {
     let tokens_json = std::fs::read_to_string(tokens_json_path).unwrap();
     let token_configs: Vec<TokenConfig> = serde_json::from_str(&tokens_json).unwrap();
 
@@ -113,7 +117,7 @@ pub async fn load_tokens(tokens_json_path: &str, price_feed: ContractId) -> (Has
 
         if symbol != "USDC" {
             asset_configs.push(CollateralConfiguration {
-                asset_id: bits256,
+                asset_id: market_contract_mod::AssetId { value: bits256 },
                 decimals: config.decimals,
                 price_feed,
                 borrow_collateral_factor: config.borrow_collateral_factor.unwrap(), // decimals: 4

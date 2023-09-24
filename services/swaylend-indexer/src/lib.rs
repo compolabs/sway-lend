@@ -10,10 +10,10 @@ pub mod swaylend_indexer_index_mod {
         info!("🧱 Block height: {height} | transacrions: {txs}");
     }
 
-    fn handle_asset_collateral_event(event: AssetCollateralEvent) {
+    fn handle_asset_collateral_event(event: CollateralConfigurationEvent) {
         let entry = CollateralConfigurationEntity {
-            id: uid(&event.configuration.asset_id.0),
-            asset_id: event.configuration.asset_id.0.into(),
+            id: uid(&event.configuration.asset_id.value.0),
+            asset_id: event.configuration.asset_id,
             price_feed: event.configuration.price_feed,
             decimals: event.configuration.decimals,
             borrow_collateral_factor: event.configuration.borrow_collateral_factor,
@@ -42,9 +42,9 @@ pub mod swaylend_indexer_index_mod {
 
     fn handle_user_collateral_event(event: UserCollateralEvent) {
         let entry = UserCollateralEntity {
-            id: uid([event.address.into(), event.asset_id.0].concat()),
+            id: uid([event.address.into(), event.asset_id.value.0].concat()),
             address: event.address,
-            asset_id: event.asset_id.0.into(),
+            asset_id: event.asset_id,
             amount: event.amount,
         };
         entry.save();

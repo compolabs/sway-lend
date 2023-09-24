@@ -6,7 +6,7 @@ use src20_sdk::token_factory_abi_calls;
 use tokio::time::sleep;
 
 use crate::utils::contracts_utils::market_utils::{
-    deploy_market, get_market_config, market_abi_calls,
+    abigen_bindings::market_contract_mod, deploy_market, get_market_config, market_abi_calls,
 };
 use crate::utils::contracts_utils::oracle_utils::{deploy_oracle, oracle_abi_calls};
 use crate::utils::contracts_utils::token_utils::deploy_tokens;
@@ -60,8 +60,10 @@ async fn main_test_no_debug() {
     for config in &asset_configs {
         let mut config = config.clone();
         // replace swaylend token into reward token
-        if config.asset_id == assets.get("SWAY").unwrap().bits256 {
-            config.asset_id = sway_bits256
+        if config.asset_id.value == assets.get("SWAY").unwrap().bits256 {
+            config.asset_id = market_contract_mod::AssetId {
+                value: sway_bits256,
+            }
         }
 
         market_abi_calls::add_collateral_asset(&market, &config)
@@ -252,6 +254,10 @@ async fn main_test_no_debug() {
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
+    //Available to borrow should be 0
+    let value = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
+    assert!(value == 0);
+
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
 
@@ -312,7 +318,6 @@ async fn main_test_no_debug() {
     assert!(!reservs.negative);
 
     let reservs = reservs.value;
-    println!("reserves = {:?}", reservs);
     let amount =
         market_abi_calls::collateral_value_to_sell(&market, &[&oracle], uni.bits256, reservs).await;
 

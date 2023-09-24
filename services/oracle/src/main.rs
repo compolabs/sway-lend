@@ -8,6 +8,7 @@ mod utils;
 use fuels::accounts::ViewOnlyAccount;
 use serde::Deserialize;
 use utils::print_swaygang_sign::print_swaygang_sign;
+use crate::abigen_bindings::oracle_contract_mod;
 
 use crate::utils::oracle_abi_calls::oracle_abi_calls::set_prices;
 
@@ -17,7 +18,7 @@ abigen!(Contract(
 ));
 
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
+const ORACLE_ADDRESS: &str = "0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e";
 
 #[derive(Deserialize)]
 struct TokenConfig {
@@ -55,7 +56,7 @@ async fn main() {
         let req = "https://api.coingecko.com/api/v3/simple/price?ids=compound-governance-token%2Cbinancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
         let body = c.get(req).send().await.unwrap().text().await.unwrap();
         let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
-        let mut prices: Vec<(Bits256, u64)> = vec![];
+        let mut prices: Vec<(oracle_contract_mod::AssetId, u64)> = vec![];
         let mut message = String::from("🪬 Price oracle update\n");
         for config in &token_configs {
             let price = 
@@ -67,7 +68,8 @@ async fn main() {
                     _ => config.default_price,
                 // }
             };
-            prices.push((Bits256::from_hex_str(&config.asset_id).unwrap(), price));
+            let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
+            prices.push((oracle_contract_mod::AssetId{value:bits256}, price));
             let unit_price = price as f64 / 10f64.powf(9f64);
             message += format!("1 {} = ${unit_price}\n", config.symbol).as_str();
         }

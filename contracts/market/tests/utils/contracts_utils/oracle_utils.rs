@@ -1,4 +1,5 @@
 use fuels::prelude::{abigen, Contract, LoadConfiguration, TxParameters, WalletUnlocked};
+use crate::utils::contracts_utils::oracle_utils::abigen_bindings::oracle_contract_mod;
 
 abigen!(Contract(
     name = "OracleContract",
@@ -15,6 +16,7 @@ pub mod oracle_abi_calls {
     use super::*;
 
     pub async fn get_price(contract: &OracleContract<WalletUnlocked>, asset_id: Bits256) -> Price {
+        let asset_id = oracle_contract_mod::AssetId { value: asset_id };
         contract
             .methods()
             .get_price(asset_id)
@@ -47,6 +49,7 @@ pub mod oracle_abi_calls {
         new_price: u64,
     ) -> FuelCallResponse<()> {
         // let bits256 = Bits256::from_hex_str(&asset_id.to_string()).unwrap();
+        let asset_id = oracle_contract_mod::AssetId { value: asset_id };
         contract
             .methods()
             .set_price(asset_id, new_price)
