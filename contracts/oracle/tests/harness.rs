@@ -1,16 +1,16 @@
 use std::str::FromStr;
 
+use crate::abigen_bindings::oracle_contract_mod;
 use dotenv::dotenv;
 use fuels::{prelude::*, types::Bits256};
 use serde::Deserialize;
-
 abigen!(Contract(
     name = "OracleContract",
     abi = "out/debug/oracle-abi.json"
 ));
 
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
+const ORACLE_ADDRESS: &str = "0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e";
 #[derive(Deserialize)]
 struct TokenConfig {
     asset_id: String,
@@ -38,14 +38,14 @@ async fn sync_prices() {
     let req = "https://api.coingecko.com/api/v3/simple/price?ids=usd-coin%2Cethereum%2Cchainlink%2Cbitcoin%2Cuniswap%2Ccompound-governance-token&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
     let body = c.get(req).send().await.unwrap().text().await.unwrap();
     let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
-    let mut prices: Vec<(Bits256, u64)> = vec![];
+    let mut prices: Vec<(oracle_contract_mod::AssetId, u64)> = vec![];
     for config in &token_configs {
         let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
         let price = match responce[config.coingeco_id.clone()]["usd"].as_f64() {
             Some(p) => (p * 10f64.powf(9f64)).round() as u64,
             _ => (config.default_price as f64 * 10f64.powf(9f64)) as u64,
         };
-        prices.push((bits256, price));
+        prices.push((oracle_contract_mod::AssetId { value: bits256 }, price));
     }
 
     instance
@@ -57,7 +57,9 @@ async fn sync_prices() {
         .unwrap();
 
     for config in &token_configs {
-        let bits256 = Bits256::from_hex_str(&config.asset_id).unwrap();
+        let bits256 = oracle_contract_mod::AssetId {
+            value: Bits256::from_hex_str(&config.asset_id).unwrap(),
+        };
         let price = instance
             .methods()
             .get_price(bits256)

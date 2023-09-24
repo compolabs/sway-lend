@@ -1,3 +1,4 @@
+use self::abigen_bindings::market_contract_mod;
 use fuels::programs::call_utils::TxDependencyExtension;
 
 use fuels::prelude::{abigen, TxParameters, WalletUnlocked};
@@ -24,19 +25,16 @@ pub mod market_abi_calls {
         asset_id: Bits256,
         collateral_amount: u64,
     ) -> u64 {
-        let res = market
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
+        market
             .methods()
             .collateral_value_to_sell(asset_id, collateral_amount)
             .tx_params(TxParameters::default().with_gas_price(1))
             .with_contracts(contract_ids)
             .simulate()
-            .await;
-        if res.is_err() {
-            println!("collateral_value_to_sell error",);
-            0
-        } else {
-            res.unwrap().value
-        }
+            .await
+            .unwrap()
+            .value
     }
 
     pub async fn buy_collateral(
@@ -48,6 +46,7 @@ pub mod market_abi_calls {
         min_amount: u64,
         recipient: Address,
     ) -> Result<FuelCallResponse<()>, fuels::types::errors::Error> {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         let call_params = CallParameters::default()
             .with_amount(amount)
             .with_asset_id(base_asset_id);
@@ -95,6 +94,7 @@ pub mod market_abi_calls {
         market: &MarketContract<WalletUnlocked>,
         asset_id: Bits256,
     ) -> I64 {
+        let asset_id = market_contract_mod::AssetId { value: asset_id };
         market
             .methods()
             .get_collateral_reserves(asset_id)
