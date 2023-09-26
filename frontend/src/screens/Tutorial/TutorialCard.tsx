@@ -14,23 +14,20 @@ interface IProps {
 }
 
 const Root = styled.div`
-  //width: 100%;
   display: flex;
   border-radius: 4px;
   flex-direction: column;
   padding: 16px;
   background: ${({ theme }) => theme.colors.neutral5};
 `;
-const Pic = styled.div`
-  height: 124px;
+const Pic = styled.img`
+  width: 100%;
   border-radius: 4px;
-  padding: 16px;
-  background: ${({ theme }) => theme.colors.neutral4};
 `;
 const TutorialCard: React.FC<IProps> = ({ title, complexity, time, pic }) => {
   return (
     <Root>
-      <Pic />
+      <Pic src={pic} alt={pic} />
       <SizedBox height={12} />
       <Text size="medium" weight={700}>
         {title}
@@ -54,7 +51,9 @@ const TutorialCard: React.FC<IProps> = ({ title, complexity, time, pic }) => {
         </Text>
       </Row>
       <SizedBox height={12} />
-      <Button fixed>Start tutorial</Button>
+      <Button style={{ marginTop: "auto" }} fixed>
+        Start tutorial
+      </Button>
     </Root>
   );
 };
