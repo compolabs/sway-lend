@@ -4,7 +4,8 @@ import tokenLogos from "./tokenLogos";
 export const ROUTES = {
   ROOT: "/",
   FAUCET: "/faucet",
-  TUTORIAL: "/tutorial",
+  TUTORIALS: "/tutorials",
+  TUTORIAL: "/tutorials/:tutorialId",
   DASHBOARD: "/dashboard",
   WALLET: "/wallet",
 };

@@ -11,6 +11,7 @@ interface IProps {
   time: string;
   pic: string;
   link?: string;
+  onClick: () => void;
 }
 
 const Root = styled.div`
@@ -18,13 +19,20 @@ const Root = styled.div`
   border-radius: 4px;
   flex-direction: column;
   padding: 16px;
-  background: ${({ theme }) => theme.colors.neutral5};
+  background: ${({ theme }) => theme.colors.tutorial.background};
 `;
 const Pic = styled.img`
   width: 100%;
   border-radius: 4px;
 `;
-const TutorialCard: React.FC<IProps> = ({ title, complexity, time, pic }) => {
+const TutorialCard: React.FC<IProps> = ({
+  title,
+  complexity,
+  time,
+  pic,
+  link,
+  onClick,
+}) => {
   return (
     <Root>
       <Pic src={pic} alt={pic} />
@@ -51,8 +59,13 @@ const TutorialCard: React.FC<IProps> = ({ title, complexity, time, pic }) => {
         </Text>
       </Row>
       <SizedBox height={12} />
-      <Button style={{ marginTop: "auto" }} fixed>
-        Start tutorial
+      <Button
+        style={{ marginTop: "auto" }}
+        fixed
+        disabled={link == null}
+        onClick={onClick}
+      >
+        {link == null ? "Coming soon" : "Start tutorial"}
       </Button>
     </Root>
   );
