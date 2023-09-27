@@ -56,8 +56,8 @@ class AccountStore {
       this.rootStore.notificationStore.toast(
         `Please change network url to Testnet Beta 4`,
         {
-          link: NODE_URL,
-          linkTitle: "Go to Testnet Beta 4",
+          copyTitle: "Copy beta-4 RPC",
+          copyText: NODE_URL,
           type: "error",
           title: "Attention",
         }
@@ -163,8 +163,8 @@ class AccountStore {
       this.rootStore.notificationStore.toast(
         `Please change network url to beta 4`,
         {
-          link: NODE_URL,
-          linkTitle: "Go to Beta 4",
+          copyTitle: "Copy beta-4 RPC",
+          copyText: NODE_URL,
           type: "error",
           title: "Attention",
         }
