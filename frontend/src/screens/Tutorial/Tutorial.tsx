@@ -1,29 +1,28 @@
 import React from "react";
 import Layout from "@components/Layout";
-import styled from "@emotion/styled";
 import SizedBox from "@components/SizedBox";
+import { useNavigate, useParams } from "react-router-dom";
+import tutorials from "@src/constants/tutorials";
 
-interface IProps {}
-
-const Root = styled.div``;
-
-const Tutorial: React.FC<IProps> = () => {
+const Tutorial: React.FC = () => {
+  const { tutorialId } = useParams<{ tutorialId: string }>();
+  const tutorial = tutorials.find(({ id }) => id === tutorialId);
+  const navigate = useNavigate();
+  if (tutorial == null) navigate({ pathname: "/" });
   return (
     <Layout>
       <SizedBox height={24} />
-      <Root>
-        <iframe
-          title="Tutorial form"
-          src="https://docs.google.com/forms/d/e/1FAIpQLScqNaQ-oH-gfSabxW7k5qfMLNttSwNucOdKRVJemL1bvy0Guw/viewform?embedded=true"
-          width="640"
-          height="1779"
-          frameBorder={0}
-          marginHeight={0}
-          marginWidth={0}
-        >
-          Loading...
-        </iframe>
-      </Root>
+      <iframe
+        title="Tutorial form"
+        src={tutorial?.link ?? ""}
+        width="640"
+        height="1779"
+        frameBorder={0}
+        marginHeight={0}
+        marginWidth={0}
+      >
+        Loading...
+      </iframe>
     </Layout>
   );
 };
