@@ -15,7 +15,7 @@ use crate::utils::contracts_utils::{
 
 const RPC: &str = "beta-4.fuel.network";
 const ORACLE_ADDRESS: &str = "0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e";
-
+// 3473521
 #[tokio::test]
 async fn deploy() {
     //--------------- WALLET ---------------

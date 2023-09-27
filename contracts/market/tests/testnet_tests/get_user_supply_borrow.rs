@@ -10,7 +10,7 @@ use fuels::types::{Address, ContractId};
 // Multiplies all values by this number
 // It is necessary in order to test how the protocol works with large amounts
 const RPC: &str = "beta-4.fuel.network";
-const MARKET_ADDRESS: &str = "0xacf860fcfdfb1cf5ab16d2955143a7875821f6f24087689ae320b22d80d77e06";
+const MARKET_ADDRESS: &str = "0xcd8409cb71dda81c1a214cd3f24b624325720c69c7df64049690780924c5ae5b";
 
 #[tokio::test]
 async fn get_user_supply_borrow() {

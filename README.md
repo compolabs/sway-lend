@@ -35,7 +35,7 @@ The Sway Lend alive on [https://swaylend.com](https://swaylend.com)
 ╚══════╝╚═╝  ╚═╝╚═════╝ ╚══════╝                                                              
      
 
-SWAY = 0x12ecaafc4c4096b4eaf0406184b69014774335cb08ec29738071b59df5b81316
+SWAY = 0x1bb61d5224a33bb54c9c6cd1947878d6c90ca16aa5b560f7e5395c096ab473cb
 ETH  = 0x0000000000000000000000000000000000000000000000000000000000000000
 USDC = 0x364ef7f799e95517d9a3f422efdb72b24e7c47eeb1177f12a06a5f778b62f481
 LINK = 0xbdf9b9a052ab39d8f0f73fa1e2e7a296bd8b3dcced3475b2649d613b415f11e8
@@ -43,8 +43,8 @@ BTC = 0x70883f64e356d9ae1f10b15096454fb42fcf481af988d81973f967a9f79e6eee
 UNI = 0xe60ecefce46df811ac4cba1b1c51a47018097880c48042e71807a8f47059f01f
 COMP = 0xf42513ae8ea434d52d5bf409073af94819d5c12271147d410a8e3a7481bbb463
 
-Market contract = 0xacf860fcfdfb1cf5ab16d2955143a7875821f6f24087689ae320b22d80d77e06
-Market contract = fuel14nuxpl8alvw0t2ck6224zsa8savzrahjgzrk3xhryzezmqxh0crq4kgw0v
+Market contract = 0xcd8409cb71dda81c1a214cd3f24b624325720c69c7df64049690780924c5ae5b
+Market contract = fuel1ekzqnjm3mk5pcx3pfnflyjmzgvjhyrrfcl0kgpykjpuqjfx94edsvgc2t0
 
 Oracle contract = 0xb19e156a8a6cc6d7fc2831c31c65f6bc10b8a4a80f42cbdbeb46c23f3851105e
 
