@@ -626,7 +626,7 @@ class DashboardVm {
       if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return this.tokenAmount.lte(this.fixedMaxBorrowedAmount);
+      return true //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
@@ -787,7 +787,7 @@ class DashboardVm {
         return null;
       }
       if (this.tokenAmount.gt(this.fixedMaxBorrowedAmount))
-        return "Insufficient balance";
+        return "You will be immediately liquidated";
     }
     if (this.action === ACTION_TYPE.REPAY) {
       const balance = this.rootStore.accountStore.findBalanceByAssetId(
