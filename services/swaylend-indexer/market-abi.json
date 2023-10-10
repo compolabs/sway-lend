@@ -157,18 +157,6 @@
     },
     {
       "typeId": 9,
-      "type": "struct AssetCollateralEvent",
-      "components": [
-        {
-          "name": "configuration",
-          "type": 10,
-          "typeArguments": null
-        }
-      ],
-      "typeParameters": null
-    },
-    {
-      "typeId": 10,
       "type": "struct CollateralConfiguration",
       "components": [
         {
@@ -209,6 +197,18 @@
         {
           "name": "paused",
           "type": 3,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 10,
+      "type": "struct CollateralConfigurationEvent",
+      "components": [
+        {
+          "name": "configuration",
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -561,7 +561,7 @@
       "inputs": [
         {
           "name": "configuration",
-          "type": 10,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -746,7 +746,7 @@
         "typeArguments": [
           {
             "name": "",
-            "type": 10,
+            "type": 9,
             "typeArguments": null
           }
         ]
@@ -1101,15 +1101,15 @@
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -1123,15 +1123,15 @@
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -1314,7 +1314,7 @@
       "logId": 6,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1418,7 +1418,7 @@
       "logId": 19,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1434,7 +1434,7 @@
       "logId": 21,
       "loggedType": {
         "name": "",
-        "type": 9,
+        "type": 10,
         "typeArguments": []
       }
     },
@@ -1598,7 +1598,7 @@
           }
         ]
       },
-      "offset": 698612
+      "offset": 960380
     },
     {
       "name": "DEBUG_STEP",
@@ -1613,7 +1613,7 @@
           }
         ]
       },
-      "offset": 698860
+      "offset": 960628
     }
   ]
 }

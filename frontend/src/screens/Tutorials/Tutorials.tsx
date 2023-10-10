@@ -35,7 +35,7 @@ const Tutorials: React.FC<IProps> = () => {
       <Root>
         <SizedBox height={40} />
         <Text weight={600} size={width && width >= 880 ? "large" : "big"}>
-          Participate on️ the Swaylend challenge
+          Participate in the Swaylend Challenge
         </Text>
         <SizedBox height={32} />
         <Container>

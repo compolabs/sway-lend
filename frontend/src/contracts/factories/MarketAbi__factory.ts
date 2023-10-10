@@ -661,14 +661,14 @@ const _abi = {
       },
       "attributes": [
         {
+          "name": "payable",
+          "arguments": []
+        },
+        {
           "name": "storage",
           "arguments": [
             "read"
           ]
-        },
-        {
-          "name": "payable",
-          "arguments": []
         }
       ]
     },
@@ -1138,15 +1138,15 @@ const _abi = {
       },
       "attributes": [
         {
-          "name": "payable",
-          "arguments": []
-        },
-        {
           "name": "storage",
           "arguments": [
             "read",
             "write"
           ]
+        },
+        {
+          "name": "payable",
+          "arguments": []
         }
       ]
     },
@@ -1613,7 +1613,7 @@ const _abi = {
           }
         ]
       },
-      "offset": 697092
+      "offset": 960380
     },
     {
       "name": "DEBUG_STEP",
@@ -1628,7 +1628,7 @@ const _abi = {
           }
         ]
       },
-      "offset": 697340
+      "offset": 960628
     }
   ]
 }

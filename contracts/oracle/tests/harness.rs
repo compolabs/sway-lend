@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use dotenv::dotenv;
-use fuels::{prelude::*, types::Bits256};
+use fuels::{prelude::*, types::Bits256, accounts::fuel_crypto::rand::{self, Rng}};
 use serde::Deserialize;
 
 abigen!(Contract(
@@ -10,7 +10,7 @@ abigen!(Contract(
 ));
 
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
+const ORACLE_ADDRESS: &str = "0x8f7a76602f1fce4e4f20135a0ab4d22b3d9a230215ccee16c0980cf286aaa93c";
 #[derive(Deserialize)]
 struct TokenConfig {
     asset_id: String,
@@ -89,8 +89,12 @@ async fn deploy() {
         .with_gas_limit(10_000_000);
     let configurables = OracleContractConfigurables::new().with_ADMIN(wallet.address().into());
     let config = LoadConfiguration::default().with_configurables(configurables);
+    let mut rng = rand::thread_rng();
+    let salt = rng.gen::<[u8; 32]>();
+
     let id = Contract::load_from(bin_path, config)
         .unwrap()
+        .with_salt(salt)
         .deploy(&wallet, tx_params)
         .await
         .unwrap();
