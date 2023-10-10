@@ -236,9 +236,8 @@ async fn main_test_no_debug() {
     // ==================== Step #5 ====================
     // 👛 Wallet: Alice 🦹
     // 🤙 Call: withdraw_base
-    // 💰 Amount: 100.00 USDC
-
-    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.decimals);
+    // 💰 Amount: ~99.96 USDC (available_to_borrow)
+    let amount = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(5, "Alice", "withdraw_base", log_amount.as_str());
 
@@ -247,6 +246,14 @@ async fn main_test_no_debug() {
     market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
         .await
         .unwrap();
+
+    //available_to_borrow should be 0 and we cannout do withdraw_base more
+    let res = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
+    assert!(res == 0);
+    let res = market_abi_calls::withdraw_base(&inst, &[&oracle], 1)
+        .await
+        .is_err();
+    assert!(res);
 
     // USDC balance should be amount + 50 USDC from case #2
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();

@@ -361,10 +361,9 @@ impl Market for Contract {
         storage.market_basic.write(market_basic);
 
         update_base_principal(caller, user_basic, user_principal_new);
-
-        if user_balance < I64::from(0) {
+        if user_balance.negative {
             require(user_balance.flip().into() >= config.base_borrow_min, Error::BorrowTooSmall);
-            require(is_borrow_collateralized(caller), Error::NotCollateralized);
+            require(is_borrow_collateralized(caller), Error::NotCollateralized); 
         }
 
         transfer_to_address(caller, AssetId::from(config.base_token), amount);
@@ -753,7 +752,7 @@ fn is_borrow_collateralized(account: Address) -> bool {
     };
 
     let config = MARKET_CONFIGURATION.unwrap();
-    let present = present_value(principal.flip()); // decimals base_asset_decimals
+    let present = present_value(principal); // decimals base_asset_decimals
     let mut borrow_limit = U128::new();
     let mut index = 0;
     while index < storage.collateral_configurations_keys.len() {
@@ -766,15 +765,15 @@ fn is_borrow_collateralized(account: Address) -> bool {
         let price = U128::from_u64(price);
 
         let collateral_factor = U128::from_u64(collateral_configuration.borrow_collateral_factor); // decimals 4
-        let scale = U128::from_u64(10.pow(collateral_configuration.decimals));
-
-        borrow_limit += balance * price * collateral_factor / U128::from_u64(10000) / scale; //decimals 9
+        
+        let scale = U128::from_u64(10.pow(collateral_configuration.decimals + 9 - config.base_token_decimals + 4));
+        borrow_limit += balance * price * collateral_factor / scale; //decimals of base token
         index += 1;
     }
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(1000000000); // 1e9
-    let borrow_amount = U128::from_u64(present.into()) * U128::from_u64(base_token_price) / scale; // decimals 9
+    let borrow_amount = U128::from_u64(present.value) * U128::from_u64(base_token_price) / scale; // decimals of base token
     borrow_limit >= borrow_amount
 }
 // @Callable is_liquidatable(account: Address) -> bool
