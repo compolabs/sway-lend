@@ -85,9 +85,9 @@ async fn main_test() {
     // ==================== Step #0 ====================
     // 👛 Wallet: Bob 🧛
     // 🤙 Call: supply_base
-    // 💰 Amount: 5000.00 USDC
+    // 💰 Amount: 100.00 USDC
 
-    let amount = parse_units(5000 * AMOUNT_COEFFICIENT, usdc.decimals);
+    let amount = parse_units(100 * AMOUNT_COEFFICIENT, usdc.decimals);
     let log_amount = format!("{} USDC", amount as f64 / scale_6);
     print_case_title(0, "Bob", "supply_base", log_amount.as_str());
     println!("💸 Bob + {log_amount}");
