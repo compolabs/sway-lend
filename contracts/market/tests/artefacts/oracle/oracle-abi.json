@@ -60,7 +60,7 @@
     },
     {
       "typeId": 6,
-      "type": "str[13]",
+      "type": "str",
       "components": null,
       "typeParameters": null
     },
@@ -193,14 +193,7 @@
         "type": 3,
         "typeArguments": null
       },
-      "attributes": [
-        {
-          "name": "storage",
-          "arguments": [
-            "read"
-          ]
-        }
-      ]
+      "attributes": null
     },
     {
       "inputs": [
@@ -289,7 +282,7 @@
         "type": 7,
         "typeArguments": []
       },
-      "offset": 4212
+      "offset": 10524
     }
   ]
 }

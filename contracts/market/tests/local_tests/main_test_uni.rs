@@ -252,6 +252,10 @@ async fn main_test() {
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
     assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
+    //Available to borrow should be 0
+    let value = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
+    assert!(value == 0);
+
     debug_state(&market, &wallets, usdc, uni).await;
     market_abi_calls::debug_increment_timestamp(&market).await;
 

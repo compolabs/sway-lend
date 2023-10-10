@@ -7,10 +7,10 @@ pub mod swaylend_indexer_index_mod {
     fn handle_block(block: BlockData) {
         let height = block.height;
         let txs = block.transactions.len();
-        info!("🧱 Block height: {height} | transacrions: {txs}");
+        info!("Swaylend: 🧱 Block height: {height} | transacrions: {txs}");
     }
 
-    fn handle_asset_collateral_event(event: AssetCollateralEvent) {
+    fn handle_asset_collateral_event(event: CollateralConfigurationEvent) {
         let entry = CollateralConfigurationEntity {
             id: uid(&event.configuration.asset_id.0),
             asset_id: event.configuration.asset_id.0.into(),
@@ -23,7 +23,7 @@ pub mod swaylend_indexer_index_mod {
             paused: event.configuration.paused,
         };
         entry.save();
-        info!("💰 AssetCollateralEvent: {:#?}", event);
+        info!("Swaylend: 💰 AssetCollateralEvent: {:#?}", event);
     }
 
     fn handle_user_basic_event(event: UserBasicEvent) {
@@ -37,7 +37,7 @@ pub mod swaylend_indexer_index_mod {
             reward_claimed: event.user_basic.reward_claimed,
         };
         entry.save();
-        info!("👩🏻‍🚀 UserBasicEvent: {:#?}", event);
+        info!("Swaylend: 👩🏻‍🚀 UserBasicEvent: {:#?}", event);
     }
 
     fn handle_user_collateral_event(event: UserCollateralEvent) {
@@ -48,6 +48,6 @@ pub mod swaylend_indexer_index_mod {
             amount: event.amount,
         };
         entry.save();
-        info!("✨ UserCollateralEvent: {:#?}", event);
+        info!("Swaylend: ✨ UserCollateralEvent: {:#?}", event);
     }
 }

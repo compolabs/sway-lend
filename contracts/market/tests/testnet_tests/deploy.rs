@@ -12,7 +12,7 @@ use crate::utils::contracts_utils::{
 };
 
 const RPC: &str = "beta-4.fuel.network";
-const ORACLE_ADDRESS: &str = "0x633fad7666495c53daa41cc329b78a554f215af4b826671ee576f2a30096999d";
+const ORACLE_ADDRESS: &str = "0x8f7a76602f1fce4e4f20135a0ab4d22b3d9a230215ccee16c0980cf286aaa93c";
 
 #[tokio::test]
 async fn deploy() {
@@ -41,6 +41,7 @@ async fn deploy() {
     let market = deploy_market(&wallet, market_config, Option::None).await;
     let sway_bits256 = market_abi_calls::get_reward_token_asset_id(&market).await;
     println!("SWAY Address = {:?}", AssetId::from(sway_bits256.0));
+    let block = provider.latest_block_height().await.unwrap();
 
     //--------------- SETUP COLLATERALS ---------------
     for config in &asset_configs {
@@ -57,4 +58,5 @@ async fn deploy() {
 
     println!("Market contract = {}", market.contract_id().hash());
     println!("Market contract = {}", market.contract_id().to_string());
+    println!("start_block: {block}",);
 }

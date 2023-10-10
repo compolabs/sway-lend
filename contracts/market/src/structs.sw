@@ -7,7 +7,7 @@ const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
 pub struct MarketConfiguration {
     governor: Address,
     pause_guardian: Address,
-    base_token: AssetId,
+    base_token: b256,
     base_token_decimals: u64,
     base_token_price_feed: ContractId,
     kink: u64, // decimals: 18
@@ -22,11 +22,11 @@ pub struct MarketConfiguration {
     base_min_for_rewards: u64, // decimals base_token_decimals
     base_borrow_min: u64, // decimals: base_token_decimals
     target_reserves: u64, // decimals: base_token_decimals
-    // reward_token: AssetId, 
+    // reward_token: b256, 
 }
 
 pub struct CollateralConfiguration {
-    asset_id: AssetId,
+    asset_id: b256,
     price_feed: ContractId,
     decimals: u64,
     borrow_collateral_factor: u64, // decimals: 4
