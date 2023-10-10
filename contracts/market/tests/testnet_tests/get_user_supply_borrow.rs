@@ -8,7 +8,7 @@ use fuels::prelude::Provider;
 use fuels::types::{Address, ContractId};
 
 const RPC: &str = "beta-4.fuel.network";
-const MARKET_ADDRESS: &str = "0x9d1c482f1ccf2be50e490a0e25c3e441d05358758a010325ea0eb50fcba20fe5";
+const MARKET_ADDRESS: &str = "0x3fffc28bdb0a460263eeda9b56f9c5157c8048c25ed116c3a4e5cee78bb24bb9";
 
 #[tokio::test]
 async fn get_user_supply_borrow() {
