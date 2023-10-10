@@ -18,7 +18,7 @@ pub mod oracle_abi_calls {
         contract
             .methods()
             .get_price(asset_id)
-            .call()
+            .simulate()
             .await
             .unwrap()
             .value
@@ -50,6 +50,7 @@ pub mod oracle_abi_calls {
         contract
             .methods()
             .set_price(asset_id, new_price)
+            .tx_params(TxParameters::default().with_gas_price(1))
             .call()
             .await
             .unwrap()

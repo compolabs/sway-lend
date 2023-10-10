@@ -10,8 +10,6 @@ use crate::utils::contracts_utils::token_utils::deploy_tokens;
 use crate::utils::number_utils::parse_units;
 use crate::utils::{init_wallets, print_title};
 
-// Multiplies all values by this number
-// It is necessary in order to test how the protocol works with large amounts
 
 #[tokio::test]
 async fn pause_test() {
