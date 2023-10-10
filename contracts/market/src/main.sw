@@ -767,13 +767,13 @@ fn is_borrow_collateralized(account: Address) -> bool {
         let collateral_factor = U128::from_u64(collateral_configuration.borrow_collateral_factor); // decimals 4
         
         let scale = U128::from_u64(10.pow(collateral_configuration.decimals + 9 - config.base_token_decimals + 4));
-        borrow_limit += balance * price * collateral_factor / scale; //decimals of base token
+        borrow_limit += balance * price * collateral_factor / scale; //decimals base_asset_decimals
         index += 1;
     }
 
     let base_token_price = get_price(config.base_token, config.base_token_price_feed); //decimals 9
     let scale = U128::from_u64(1000000000); // 1e9
-    let borrow_amount = U128::from_u64(present.value) * U128::from_u64(base_token_price) / scale; // decimals of base token
+    let borrow_amount = U128::from_u64(present.value) * U128::from_u64(base_token_price) / scale; // decimals base_asset_decimals
     borrow_limit >= borrow_amount
 }
 // @Callable is_liquidatable(account: Address) -> bool
