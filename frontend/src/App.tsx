@@ -11,6 +11,11 @@ import Footer from "@components/Footer";
 import Tutorials from "@screens/Tutorials";
 import Tutorial from "@screens/Tutorial";
 
+/*
+ *
+ * Change swaylend website description to -” Lending protocol built on fuel network” - change “ build - built “ + change title of tasks to- “Participate in the Swaylend Challenge”
+ * */
+
 const Root = styled(Column)`
   width: 100%;
   align-items: center;
