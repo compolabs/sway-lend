@@ -52,17 +52,16 @@ async fn main() {
             prices.insert(config.asset_id.clone(), price);
         }
         let user_basics_res = &fetch_user_basics().await.data;
-        if user_basics_res.len() == 0 {
-            continue;
-        }
-        let user_basics = &user_basics_res[0];
+        if user_basics_res.len() != 0 {
+            let user_basics = &user_basics_res[0];
+            // Asorb
+            for user_basic in user_basics {
+                let address = Address::from_str(&user_basic.address).unwrap();
 
-        // Asorb
-        for user_basic in user_basics {
-            let address = Address::from_str(&user_basic.address).unwrap();
-            if is_liquidatable(&market, &[&oracle], address).await {
-                absorb(&market, &[&oracle], vec![address]).await.unwrap();
-                println!("🔥 0x{} has been liquidated.", address.to_string());
+                if is_liquidatable(&market, &[&oracle], address).await {
+                    absorb(&market, &[&oracle], vec![address]).await.unwrap();
+                    println!("🔥 0x{} has been liquidated.", address.to_string());
+                }
             }
         }
 
@@ -72,7 +71,6 @@ async fn main() {
             let reservs = get_collateral_reserves(&market, asset_id).await;
             let amount =
                 collateral_value_to_sell(&market, &[&oracle], asset_id, reservs.value).await;
-
             if !reservs.negative && amount > 0 {
                 let recipient = wallet.address().into();
                 if wallet.get_asset_balance(&usdc).await.unwrap() < amount {
