@@ -243,25 +243,21 @@ async fn main_test() {
 
     //Alice calls withdraw_base
     let inst = market.with_account(alice.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
+    market_abi_calls::withdraw_base(&inst, &[&oracle], amount - 1)
         .await
         .unwrap();
 
     //available_to_borrow should be 0 and we cannout do withdraw_base more
     let res = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
-    assert!(res == 0);
-    let res = market_abi_calls::withdraw_base(&inst, &[&oracle], 1)
+    assert!(res == 1);
+    let res = market_abi_calls::withdraw_base(&inst, &[&oracle], 2)
         .await
         .is_err();
     assert!(res);
 
     // USDC balance should be amount + 50 USDC from case #2
     let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
-
-    //Available to borrow should be 0
-    let value = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
-    assert!(value == 0);
+    assert!(balance == amount - 1 + parse_units(50 * AMOUNT_COEFFICIENT, usdc.decimals));
 
     debug_state(&market, &wallets, usdc, uni).await;
     market_abi_calls::debug_increment_timestamp(&market).await;

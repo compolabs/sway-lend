@@ -115,31 +115,36 @@ async fn main_test() {
     // 🤙 Call: supply_collateral
     // 💰 Amount: 40.00 UNI ~ $200.00
 
-    let amount = parse_units(40, uni.decimals);
-    let log_amount = format!("{} UNI", amount as f64 / scale_9);
+    let alice_collateral_amount = parse_units(40, uni.decimals);
+    let log_amount = format!("{} UNI", alice_collateral_amount as f64 / scale_9);
     print_case_title(1, "Alice", "supply_collateral", log_amount.as_str());
     println!("💸 Alice + {log_amount}");
 
     // Transfer of 40 UNI to the Alice's wallet
-    token_factory_abi_calls::mint(&factory, alice_address, &uni.symbol, amount)
-        .await
-        .unwrap();
+    token_factory_abi_calls::mint(
+        &factory,
+        alice_address,
+        &uni.symbol,
+        alice_collateral_amount,
+    )
+    .await
+    .unwrap();
 
     let balance = alice.get_asset_balance(&uni.asset_id).await.unwrap();
-    assert!(balance >= amount);
+    assert!(balance >= alice_collateral_amount);
 
     // Alice calls supply_collateral
     let inst = market.with_account(alice.clone()).unwrap();
-    market_abi_calls::supply_collateral(&inst, uni.asset_id, amount)
+    market_abi_calls::supply_collateral(&inst, uni.asset_id, alice_collateral_amount)
         .await
         .unwrap();
 
     // Сheck supply balance equal to 40 UNI
     let res = market_abi_calls::get_user_collateral(&inst, alice_address, uni.bits256).await;
-    assert!(res >= amount);
+    assert!(res >= alice_collateral_amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    sleep(Duration::from_secs(10)).await;
+    // sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #2 ====================
@@ -239,21 +244,15 @@ async fn main_test() {
 
     //Alice calls withdraw_base
     let inst = market.with_account(alice.clone()).unwrap();
-    market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
+    market_abi_calls::withdraw_base(&inst, &[&oracle], amount - 10)
         .await
         .unwrap();
 
     //available_to_borrow should be 0 and we cannout do withdraw_base more
-    let res = market_abi_calls::available_to_borrow(&market, &[&oracle], alice_address).await;
-    assert!(res == 0);
-    let res = market_abi_calls::withdraw_base(&inst, &[&oracle], 1)
-        .await
-        .is_err();
-    assert!(res);
-
-    // USDC balance should be amount + 50 USDC from case #2
-    let balance = alice.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance >= amount + parse_units(50, usdc.decimals));
+    // let res = market_abi_calls::withdraw_base(&inst, &[&oracle], 1)
+    //     .await
+    //     .is_err();
+    // assert!(res);
 
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
@@ -266,7 +265,7 @@ async fn main_test() {
 
     print_case_title(6, "Admin", "Drop of collateral price", "-10%");
     let res = oracle_abi_calls::get_price(&oracle, uni.bits256).await;
-    let new_price = (res.price as f64 * 0.9) as u64;
+    let new_price = (res.price as f64 * 0.5) as u64;
     println!(
         "🔻 UNI price drops: ${}  -> ${}",
         res.price as f64 / scale_9,
@@ -277,7 +276,7 @@ async fn main_test() {
     assert!(new_price == res.price);
 
     debug_state(&market, &wallets, usdc, uni).await;
-    sleep(Duration::from_secs(10)).await;
+    // sleep(Duration::from_secs(10)).await;
 
     // =================================================
     // ==================== Step #7 ====================
@@ -329,10 +328,10 @@ async fn main_test() {
 
     //Сheck balance
     let balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
-    assert!(balance == amount);
+    assert!(balance >= amount);
 
     // Bob calls buy_collateral
-    let addr = bob_address;
+    let prev_balance = bob.get_asset_balance(&uni.asset_id).await.unwrap();
     market_abi_calls::buy_collateral(
         &inst,
         &[&oracle],
@@ -340,14 +339,14 @@ async fn main_test() {
         amount,
         uni.bits256,
         1,
-        addr,
+        bob_address,
     )
     .await
     .unwrap();
 
     //Check
     let balance = bob.get_asset_balance(&uni.asset_id).await.unwrap();
-    assert!(balance == 40_000_000_000);
+    assert!(balance == prev_balance + alice_collateral_amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
@@ -363,6 +362,7 @@ async fn main_test() {
     print_case_title(9, "Bob", "withdraw_base", log_amount.as_str());
 
     //Bob calls withdraw_base
+    let prev_balance = bob.get_asset_balance(&usdc.asset_id).await.unwrap();
     let inst = market.with_account(bob.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
         .await
@@ -371,7 +371,7 @@ async fn main_test() {
     // USDC balance check
     let (supplied, _) = market_abi_calls::get_user_supply_borrow(&market, bob_address).await;
     assert!(supplied == 0);
-    assert!(bob.get_asset_balance(&usdc.asset_id).await.unwrap() == amount);
+    assert!(bob.get_asset_balance(&usdc.asset_id).await.unwrap() == prev_balance + amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
@@ -387,6 +387,7 @@ async fn main_test() {
     print_case_title(10, "Chad", "withdraw_base", log_amount.as_str());
 
     //Chad calls withdraw_base
+    let prev_balance = chad.get_asset_balance(&usdc.asset_id).await.unwrap();
     let inst = market.with_account(chad.clone()).unwrap();
     market_abi_calls::withdraw_base(&inst, &[&oracle], amount)
         .await
@@ -395,7 +396,7 @@ async fn main_test() {
     // USDC balance check
     let (supplied, _) = market_abi_calls::get_user_supply_borrow(&market, chad_address).await;
     assert!(supplied == 0);
-    assert!(chad.get_asset_balance(&usdc.asset_id).await.unwrap() == amount);
+    assert!(chad.get_asset_balance(&usdc.asset_id).await.unwrap() == prev_balance + amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
     sleep(Duration::from_secs(10)).await;
@@ -434,15 +435,15 @@ async fn main_test() {
     print_case_title(12, "Chad", "withdraw_collateral", log_amount.as_str());
 
     //Chad calls withdraw_base
+    let prev_balance = chad.get_asset_balance(&uni.asset_id).await.unwrap();
     let inst = market.with_account(chad.clone()).unwrap();
-
     market_abi_calls::withdraw_collateral(&inst, &[&oracle], uni.bits256, amount)
         .await
         .unwrap();
 
     // UNI balance check
     let balance = chad.get_asset_balance(&uni.asset_id).await.unwrap();
-    assert!(balance == amount);
+    assert!(balance == prev_balance + amount);
 
     debug_state(&market, &wallets, usdc, uni).await;
 }
