@@ -85,6 +85,7 @@ class FaucetVM {
   }
 
   mint = async (assetId?: string) => {
+    console.log("mint assetId", assetId);
     if (assetId == null) return;
     if (this.rootStore.accountStore.loginType === LOGIN_TYPE.FUEL_WALLET) {
       const addedAssets: Array<any> = await window?.fuel.assets();
@@ -100,11 +101,15 @@ class FaucetVM {
     const { accountStore, notificationStore } = this.rootStore;
     const { tokenFactory } = this.rootStore.settingsStore.currentVersionConfig;
     const wallet = await accountStore.getWallet();
+    console.log("wallet in mint fn", wallet);
+    console.log("provider ", accountStore.provider);
     if (wallet == null) return;
     const tokenFactoryContract = TokenFactoryAbi__factory.connect(
       tokenFactory,
       wallet
     );
+
+    console.log("tokenFactoryContract", tokenFactoryContract);
 
     try {
       const token = TOKENS_BY_ASSET_ID[assetId];

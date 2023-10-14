@@ -228,14 +228,11 @@ class DashboardVm {
   };
 
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
+    const { addressInput, provider } = this.rootStore.accountStore;
+    if (provider == null) return null;
     if (addressInput == null) return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(
-      priceOracle,
-      OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
-    );
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi, provider);
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
       .addContracts([oracle])
@@ -363,6 +360,7 @@ class DashboardVm {
     )
       return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    if (this.rootStore.accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
@@ -383,6 +381,7 @@ class DashboardVm {
     )
       return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    if (this.rootStore.accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
@@ -626,7 +625,7 @@ class DashboardVm {
       if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return true //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
+      return true; //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
