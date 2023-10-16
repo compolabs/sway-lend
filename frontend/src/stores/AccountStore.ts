@@ -18,7 +18,9 @@ export interface ISerializedAccountStore {
 
 class AccountStore {
   public readonly rootStore: RootStore;
-  public provider = new Provider(NODE_URL);
+  public provider: Provider | null = null;
+  private setProvider = (provider: Provider | null) =>
+    (this.provider = provider);
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     this.rootStore = rootStore;
@@ -30,6 +32,7 @@ class AccountStore {
         document.addEventListener("FuelLoaded", this.onFuelLoaded);
       }
     }
+    this.initProvider();
     this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
@@ -37,6 +40,12 @@ class AccountStore {
       () => Promise.all([this.updateAccountBalances()])
     );
   }
+
+  initProvider = async () => {
+    Provider.create(NODE_URL)
+      .then((provider) => this.setProvider(provider))
+      .catch(console.error);
+  };
 
   onFuelLoaded = () => {
     if (this.walletInstance == null) return;
@@ -83,7 +92,7 @@ class AccountStore {
       return;
     }
     const address = Address.fromString(this.address);
-    const balances = await this.provider.getBalances(address);
+    const balances = (await this.provider?.getBalances(address)) ?? [];
     const assetBalances = TOKENS_LIST.map((asset) => {
       const t = balances.find(({ assetId }) => asset.assetId === assetId);
       const balance = t != null ? new BN(t.amount.toString()) : BN.ZERO;
@@ -195,12 +204,13 @@ class AccountStore {
     return window.fuel.getWallet(this.address);
   };
 
-  get walletToRead(): WalletLocked {
-    //just acc with eth on balance
-    return Wallet.fromAddress(
-      "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
-      this.provider
-    );
+  get walletToRead(): WalletLocked | null {
+    return this.provider == null
+      ? null
+      : Wallet.fromAddress(
+          "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
+          this.provider ?? ""
+        );
   }
 
   get addressInput(): null | { value: string } {

@@ -43,6 +43,7 @@ class PricesStore {
     const { priceOracle } = settingsStore.currentVersionConfig;
     try {
       const wallet = accountStore.walletToRead;
+      if (wallet == null) return;
       const oracleContract = OracleAbi__factory.connect(priceOracle, wallet);
 
       const response = await Promise.all(

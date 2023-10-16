@@ -228,14 +228,10 @@ class DashboardVm {
   };
 
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
+    const { addressInput, provider } = this.rootStore.accountStore;
+    if (addressInput == null || provider == null) return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(
-      priceOracle,
-      OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
-    );
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi, provider);
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
       .addContracts([oracle])
@@ -362,11 +358,13 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
 
     return market.functions
@@ -382,11 +380,13 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
@@ -626,7 +626,7 @@ class DashboardVm {
       if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return true //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
+      return true; //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
