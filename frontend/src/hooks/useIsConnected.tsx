@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useFuel } from "./useFuel"; // Импортируем useFuel
 
-
 export function useIsConnected() {
   const [fuel] = useFuel(); // Используем хук useFuel для получения fuel
 

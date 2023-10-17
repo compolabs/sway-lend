@@ -115,6 +115,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
         })(),
       }))
     );
+    /* eslint-disable */
   }, [
     accountStore.address,
     accountStore.balances,

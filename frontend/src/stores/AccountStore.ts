@@ -1,5 +1,5 @@
 import RootStore from "@stores/RootStore";
-import { makeAutoObservable, reaction } from "mobx";
+import { makeAutoObservable, reaction, when } from "mobx";
 import { Address, Provider, Wallet, WalletLocked, WalletUnlocked } from "fuels";
 import { IToken, NODE_URL, TOKENS_LIST } from "@src/constants";
 import Balance from "@src/entities/Balance";
@@ -23,8 +23,10 @@ class AccountStore {
     (this.provider = provider);
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
-    this.rootStore = rootStore;
     makeAutoObservable(this);
+
+    this.initProvider();
+    this.rootStore = rootStore;
     if (initState) {
       this.setLoginType(initState.loginType);
       this.setAddress(initState.address);
@@ -32,8 +34,7 @@ class AccountStore {
         document.addEventListener("FuelLoaded", this.onFuelLoaded);
       }
     }
-    this.initProvider();
-    this.updateAccountBalances().then();
+    when(() => this.provider != null, this.updateAccountBalances);
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
       () => this.address,
@@ -209,7 +210,7 @@ class AccountStore {
       ? null
       : Wallet.fromAddress(
           "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
-          this.provider ?? ""
+          this.provider
         );
   }
 

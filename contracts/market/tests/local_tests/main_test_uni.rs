@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use fuels::prelude::ViewOnlyAccount;
 use fuels::types::Address;
 use src20_sdk::token_factory_abi_calls;

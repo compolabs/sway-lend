@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.54.0
+  Fuels version: 0.62.0
   Forc version: 0.44.0
-  Fuel-Core version: 0.20.4
+  Fuel-Core version: 0.20.6
 */
 
 import { Interface, Contract, ContractFactory } from "fuels";
@@ -55,7 +55,7 @@ const _abi = {
         },
         {
           "name": "ContractId",
-          "type": 6,
+          "type": 7,
           "typeArguments": null
         }
       ],
@@ -81,7 +81,7 @@ const _abi = {
     },
     {
       "typeId": 6,
-      "type": "struct ContractId",
+      "type": "struct AssetId",
       "components": [
         {
           "name": "value",
@@ -93,12 +93,24 @@ const _abi = {
     },
     {
       "typeId": 7,
+      "type": "struct ContractId",
+      "components": [
+        {
+          "name": "value",
+          "type": 1,
+          "typeArguments": null
+        }
+      ],
+      "typeParameters": null
+    },
+    {
+      "typeId": 8,
       "type": "u64",
       "components": null,
       "typeParameters": null
     },
     {
-      "typeId": 8,
+      "typeId": 9,
       "type": "u8",
       "components": null,
       "typeParameters": null
@@ -139,7 +151,7 @@ const _abi = {
       "name": "asset_id",
       "output": {
         "name": "",
-        "type": 1,
+        "type": 6,
         "typeArguments": null
       },
       "attributes": null
@@ -155,7 +167,7 @@ const _abi = {
       "name": "decimals",
       "output": {
         "name": "",
-        "type": 8,
+        "type": 9,
         "typeArguments": null
       },
       "attributes": [
@@ -181,7 +193,7 @@ const _abi = {
         },
         {
           "name": "decimals",
-          "type": 8,
+          "type": 9,
           "typeArguments": null
         }
       ],
@@ -215,7 +227,7 @@ const _abi = {
         },
         {
           "name": "amount",
-          "type": 7,
+          "type": 8,
           "typeArguments": null
         }
       ],
@@ -269,7 +281,7 @@ const _abi = {
       "name": "total_supply",
       "output": {
         "name": "",
-        "type": 7,
+        "type": 8,
         "typeArguments": null
       },
       "attributes": [

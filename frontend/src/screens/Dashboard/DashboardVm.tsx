@@ -44,7 +44,7 @@ class DashboardVm {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
-    this.updateMarketState().then(() => this.setInitialized(true));
+    this.updateMarketState();
     setInterval(this.updateMarketState, 20 * 1000);
     reaction(
       () => [
@@ -88,18 +88,8 @@ class DashboardVm {
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
 
-  maxBorrowBaseTokenAmount: BN | null = null;
-  setMaxBorrowBaseTokenAmount = (l: BN | null) =>
-    (this.maxBorrowBaseTokenAmount = l);
-
   availableToBorrow: BN | null = null;
   setAvailableToBorrow = (l: BN | null) => (this.availableToBorrow = l);
-
-  get fixedMaxBorrowedAmount() {
-    if (this.availableToBorrow == null) return BN.ZERO;
-    const v = this.availableToBorrow.minus(this.borrowedBalance ?? BN.ZERO);
-    return v;
-  }
 
   collateralBalances: Record<string, BN> | null = null;
   setCollateralBalances = (l: Record<string, BN> | null) =>
@@ -376,7 +366,7 @@ class DashboardVm {
   borrowBase = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.availableToBorrow == null ||
       this.tokenAmount.lte(0)
     )
       return;
@@ -398,7 +388,7 @@ class DashboardVm {
   onMaxBtnClick() {
     if (
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.availableToBorrow == null ||
       this.baseTokenReserve == null
     )
       return null;
@@ -435,17 +425,17 @@ class DashboardVm {
         }
         break;
       case ACTION_TYPE.BORROW:
-        if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+        if (this.availableToBorrow.gt(this.baseTokenReserve)) {
           this.setTokenAmount(this.baseTokenReserve);
           return;
         }
-        this.setTokenAmount(this.fixedMaxBorrowedAmount);
+        this.setTokenAmount(this.availableToBorrow);
         break;
       case ACTION_TYPE.REPAY:
         const balance1 = this.rootStore.accountStore.findBalanceByAssetId(
           this.baseToken.assetId
         );
-        balance1?.balance?.gte(this.fixedMaxBorrowedAmount)
+        balance1?.balance?.gte(this.availableToBorrow)
           ? this.setTokenAmount(this.borrowedBalance)
           : this.setTokenAmount(balance1?.balance ?? BN.ZERO);
         break;
@@ -478,7 +468,7 @@ class DashboardVm {
   get tokenInputBalance(): string {
     if (
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.availableToBorrow == null ||
       this.baseTokenReserve == null
     )
       return "";
@@ -492,14 +482,14 @@ class DashboardVm {
       );
     }
     if (this.action === ACTION_TYPE.BORROW) {
-      if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+      if (this.availableToBorrow.gt(this.baseTokenReserve)) {
         return BN.formatUnits(
           this.baseTokenReserve ?? 0,
           this.baseToken.decimals
         ).toFormat(2);
       }
       return BN.formatUnits(
-        this.fixedMaxBorrowedAmount ?? BN.ZERO,
+        this.availableToBorrow ?? BN.ZERO,
         this.baseToken.decimals
       ).toFormat(2);
     }
@@ -623,10 +613,10 @@ class DashboardVm {
     if (this.action === ACTION_TYPE.BORROW) {
       if (this.baseTokenReserve?.eq(0)) return false;
       //if reserve is let than user collateral
-      if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
+      if (this.baseTokenReserve?.lt(this.availableToBorrow ?? BN.ZERO)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return true; //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
+      return true; //this.tokenAmount.lte(this.availableToBorrow); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
@@ -747,7 +737,7 @@ class DashboardVm {
     if (
       !this.initialized ||
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.availableToBorrow == null ||
       this.borrowedBalance == null ||
       this.baseTokenReserve == null ||
       this.collateralBalances == null
@@ -776,7 +766,7 @@ class DashboardVm {
         return `There is no ${this.baseToken.symbol} to borrow`;
       }
       //if reserve is less than user collateral
-      if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+      if (this.availableToBorrow.gt(this.baseTokenReserve)) {
         if (this.tokenAmount?.gt(this.baseTokenReserve ?? 0)) {
           const max = BN.formatUnits(
             this.baseTokenReserve,
@@ -786,7 +776,7 @@ class DashboardVm {
         }
         return null;
       }
-      if (this.tokenAmount.gt(this.fixedMaxBorrowedAmount))
+      if (this.tokenAmount.gt(this.availableToBorrow))
         return "You will be immediately liquidated";
     }
     if (this.action === ACTION_TYPE.REPAY) {
@@ -870,8 +860,7 @@ class DashboardVm {
     this.setBorrowedBalance(null);
     this.setBorrowRate(null);
     this.setSupplyRate(null);
-    // this.setMarketBasic(null);
-    this.setMaxBorrowBaseTokenAmount(null);
+    this.setAvailableToBorrow(null);
     this.setCollateralBalances(null);
     this.setCollateralData(null);
     this.setBaseTokenReserve(null);
