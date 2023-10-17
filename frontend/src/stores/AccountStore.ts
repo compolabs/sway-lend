@@ -19,7 +19,7 @@ export interface ISerializedAccountStore {
 class AccountStore {
   public readonly rootStore: RootStore;
   public provider: Provider | null = null;
-  private setProvider = (provider: Provider | null | any) =>
+  private setProvider = (provider: Provider | null) =>
     (this.provider = provider);
 
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
@@ -34,7 +34,7 @@ class AccountStore {
       }
     }
     this.initProvider();
-    when(() => this.provider != null, this.updateAccountBalances);
+    this.updateAccountBalances().then();
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
       () => this.address,
