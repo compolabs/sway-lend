@@ -4,9 +4,9 @@
 /* eslint-disable */
 
 /*
-  Fuels version: 0.57.0
+  Fuels version: 0.62.0
   Forc version: 0.44.0
-  Fuel-Core version: 0.20.4
+  Fuel-Core version: 0.20.6
 */
 
 export type { OracleAbi } from "./OracleAbi";

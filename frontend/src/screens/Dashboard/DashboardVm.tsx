@@ -95,12 +95,6 @@ class DashboardVm {
   availableToBorrow: BN | null = null;
   setAvailableToBorrow = (l: BN | null) => (this.availableToBorrow = l);
 
-  get fixedMaxBorrowedAmount() {
-    if (this.availableToBorrow == null) return BN.ZERO;
-    const v = this.availableToBorrow.minus(this.borrowedBalance ?? BN.ZERO);
-    return v;
-  }
-
   collateralBalances: Record<string, BN> | null = null;
   setCollateralBalances = (l: Record<string, BN> | null) =>
     (this.collateralBalances = l);
@@ -376,7 +370,7 @@ class DashboardVm {
   borrowBase = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.maxBorrowBaseTokenAmount == null ||
       this.tokenAmount.lte(0)
     )
       return;
@@ -397,7 +391,7 @@ class DashboardVm {
   onMaxBtnClick() {
     if (
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.maxBorrowBaseTokenAmount == null ||
       this.baseTokenReserve == null
     )
       return null;
@@ -434,17 +428,17 @@ class DashboardVm {
         }
         break;
       case ACTION_TYPE.BORROW:
-        if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+        if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
           this.setTokenAmount(this.baseTokenReserve);
           return;
         }
-        this.setTokenAmount(this.fixedMaxBorrowedAmount);
+        this.setTokenAmount(this.maxBorrowBaseTokenAmount);
         break;
       case ACTION_TYPE.REPAY:
         const balance1 = this.rootStore.accountStore.findBalanceByAssetId(
           this.baseToken.assetId
         );
-        balance1?.balance?.gte(this.fixedMaxBorrowedAmount)
+        balance1?.balance?.gte(this.maxBorrowBaseTokenAmount)
           ? this.setTokenAmount(this.borrowedBalance)
           : this.setTokenAmount(balance1?.balance ?? BN.ZERO);
         break;
@@ -477,7 +471,7 @@ class DashboardVm {
   get tokenInputBalance(): string {
     if (
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.maxBorrowBaseTokenAmount == null ||
       this.baseTokenReserve == null
     )
       return "";
@@ -491,14 +485,14 @@ class DashboardVm {
       );
     }
     if (this.action === ACTION_TYPE.BORROW) {
-      if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
         return BN.formatUnits(
           this.baseTokenReserve ?? 0,
           this.baseToken.decimals
         ).toFormat(2);
       }
       return BN.formatUnits(
-        this.fixedMaxBorrowedAmount ?? BN.ZERO,
+        this.maxBorrowBaseTokenAmount ?? BN.ZERO,
         this.baseToken.decimals
       ).toFormat(2);
     }
@@ -622,10 +616,10 @@ class DashboardVm {
     if (this.action === ACTION_TYPE.BORROW) {
       if (this.baseTokenReserve?.eq(0)) return false;
       //if reserve is let than user collateral
-      if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
+      if (this.baseTokenReserve?.lt(this.maxBorrowBaseTokenAmount ?? BN.ZERO)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return true; //this.tokenAmount.lte(this.fixedMaxBorrowedAmount); // fixme uncomment before mainnet
+      return true; //this.tokenAmount.lte(this.maxBorrowBaseTokenAmount); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
@@ -746,7 +740,7 @@ class DashboardVm {
     if (
       !this.initialized ||
       this.actionTokenAssetId == null ||
-      this.fixedMaxBorrowedAmount == null ||
+      this.maxBorrowBaseTokenAmount == null ||
       this.borrowedBalance == null ||
       this.baseTokenReserve == null ||
       this.collateralBalances == null
@@ -775,7 +769,7 @@ class DashboardVm {
         return `There is no ${this.baseToken.symbol} to borrow`;
       }
       //if reserve is less than user collateral
-      if (this.fixedMaxBorrowedAmount.gt(this.baseTokenReserve)) {
+      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
         if (this.tokenAmount?.gt(this.baseTokenReserve ?? 0)) {
           const max = BN.formatUnits(
             this.baseTokenReserve,
@@ -785,7 +779,7 @@ class DashboardVm {
         }
         return null;
       }
-      if (this.tokenAmount.gt(this.fixedMaxBorrowedAmount))
+      if (this.tokenAmount.gt(this.maxBorrowBaseTokenAmount))
         return "You will be immediately liquidated";
     }
     if (this.action === ACTION_TYPE.REPAY) {
