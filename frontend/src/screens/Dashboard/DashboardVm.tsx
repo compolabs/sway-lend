@@ -44,7 +44,7 @@ class DashboardVm {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
-    this.updateMarketState().then(() => this.setInitialized(true));
+    this.updateMarketState();
     setInterval(this.updateMarketState, 20 * 1000);
     reaction(
       () => [
@@ -88,12 +88,13 @@ class DashboardVm {
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
 
-  maxBorrowBaseTokenAmount: BN | null = null;
-  setMaxBorrowBaseTokenAmount = (l: BN | null) =>
-    (this.maxBorrowBaseTokenAmount = l);
-
   availableToBorrow: BN | null = null;
   setAvailableToBorrow = (l: BN | null) => (this.availableToBorrow = l);
+
+  get maxBorrowBaseTokenAmount() {
+    if (this.availableToBorrow == null) return BN.ZERO;
+    return this.availableToBorrow;
+  }
 
   collateralBalances: Record<string, BN> | null = null;
   setCollateralBalances = (l: Record<string, BN> | null) =>
@@ -863,8 +864,7 @@ class DashboardVm {
     this.setBorrowedBalance(null);
     this.setBorrowRate(null);
     this.setSupplyRate(null);
-    // this.setMarketBasic(null);
-    this.setMaxBorrowBaseTokenAmount(null);
+    this.setAvailableToBorrow(null);
     this.setCollateralBalances(null);
     this.setCollateralData(null);
     this.setBaseTokenReserve(null);

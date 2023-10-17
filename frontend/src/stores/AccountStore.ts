@@ -25,6 +25,7 @@ class AccountStore {
   constructor(rootStore: RootStore, initState?: ISerializedAccountStore) {
     makeAutoObservable(this);
 
+    this.initProvider();
     this.rootStore = rootStore;
     if (initState) {
       this.setLoginType(initState.loginType);
@@ -33,7 +34,6 @@ class AccountStore {
         document.addEventListener("FuelLoaded", this.onFuelLoaded);
       }
     }
-    this.initProvider();
     when(() => this.provider != null, this.updateAccountBalances);
     setInterval(this.updateAccountBalances, 10 * 1000);
     reaction(
@@ -210,7 +210,7 @@ class AccountStore {
       ? null
       : Wallet.fromAddress(
           "fuel1m56y48mej3366h6460y4rvqqt62y9vn8ad3meyfa5wkk5dc6mxmss7rwnr",
-          this.provider ?? ""
+          this.provider
         );
   }
 

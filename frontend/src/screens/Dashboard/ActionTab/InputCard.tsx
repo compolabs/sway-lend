@@ -49,7 +49,7 @@ const InputCard: React.FC<IProps> = () => {
           error={vm.tokenInputError}
         />
         <SizedBox height={8} />
-        {vm.loading ? (
+        {!vm.initialized ? (
           <Button disabled fixed>
             Loading...
           </Button>
