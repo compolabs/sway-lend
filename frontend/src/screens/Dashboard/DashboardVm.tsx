@@ -224,8 +224,7 @@ class DashboardVm {
 
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
     const { addressInput, provider } = this.rootStore.accountStore;
-    if (provider == null) return null;
-    if (addressInput == null) return;
+    if (addressInput == null || provider == null) return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
     const oracle = new Contract(priceOracle, OracleAbi__factory.abi, provider);
     const { value } = await marketContract.functions
@@ -354,12 +353,13 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    if (this.rootStore.accountStore.provider == null) return;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
 
     return market.functions
@@ -375,12 +375,13 @@ class DashboardVm {
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    if (this.rootStore.accountStore.provider == null) return;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
