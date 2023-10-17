@@ -106,8 +106,6 @@ class FaucetVM {
       wallet
     );
 
-    console.log("tokenFactoryContract", tokenFactoryContract);
-
     try {
       const token = TOKENS_BY_ASSET_ID[assetId];
       const amount = BN.parseUnits(faucetAmounts[token.symbol], token.decimals);

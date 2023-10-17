@@ -91,11 +91,6 @@ class DashboardVm {
   availableToBorrow: BN | null = null;
   setAvailableToBorrow = (l: BN | null) => (this.availableToBorrow = l);
 
-  // get availableToBorrow() {
-  //   if (this.availableToBorrow == null) return BN.ZERO;
-  //   return this.availableToBorrow;
-  // }
-
   collateralBalances: Record<string, BN> | null = null;
   setCollateralBalances = (l: Record<string, BN> | null) =>
     (this.collateralBalances = l);
