@@ -63,7 +63,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           </Column>
         ),
         btn: (() => {
-          if (!accountStore.isLoggedIn)
+          if (!accountStore.isLoggedIn && t.symbol !== "ETH")
             return (
               <Button
                 fixed
