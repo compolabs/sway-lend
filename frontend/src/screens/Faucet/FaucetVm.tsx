@@ -150,6 +150,7 @@ class FaucetVM {
     const token = TOKENS_BY_ASSET_ID[assetId];
     const asset = {
       name: token.name,
+      decimals: token.decimals,
       assetId: token.assetId,
       imageUrl: window.location.origin + token.logo,
       symbol: token.symbol,
