@@ -72,7 +72,7 @@ abi Market {
     fn resume_collateral_asset(asset_id: b256); 
 
     #[storage(read)]
-    fn get_collateral_configurations() -> Vec<CollateralConfiguration>;
+    fn get_collateral_configurations() -> Vec<CollateralConfiguration>; //todo add this data to indexer
 
 
     // ## 3. Supply and Withdraw collateral
@@ -85,10 +85,10 @@ abi Market {
     fn withdraw_collateral(asset: b256, amount: u64);
     
     #[storage(read)]
-    fn get_user_collateral(address: Address, asset_id: b256) -> u64;
+    fn get_user_collateral(address: Address, asset_id: b256) -> u64;  //todo add this data to indexer
 
     #[storage(read)]
-    fn totals_collateral(asset_id: b256) -> u64;
+    fn totals_collateral(asset_id: b256) -> u64;  //todo add this data to indexer
 
 
     // ## 4. Supply and Withdraw base
@@ -101,10 +101,10 @@ abi Market {
     fn withdraw_base(amount: u64);
 
     #[storage(read)]
-    fn get_user_supply_borrow(account: Address) -> (u64, u64);
+    fn get_user_supply_borrow(account: Address) -> (u64, u64);  //todo add this data to indexer
 
     #[storage(read)]
-    fn available_to_borrow(account: Address) -> u64;
+    fn available_to_borrow(account: Address) -> u64; //todo add this data to indexer
 
 
     // ## 4. Absorbation
@@ -152,7 +152,7 @@ abi Market {
 
     // Gets the total amount of protocol reserves of the base asset
     #[storage(read)]
-    fn get_reserves() -> I64;
+    fn get_reserves() -> I64; //todo add this data to indexer
 
     // Withdraws base token reserves if called by the governor
     #[storage(read)]
@@ -187,9 +187,9 @@ abi Market {
     // ## 10. Supply and Borrow rates
     // Formulas to help calculate supply and borrow rates
 
-    fn get_supply_rate(utilization: u64) -> u64;
+    fn get_supply_rate(utilization: u64) -> u64;  //todo add this data to indexer
 
-    fn get_borrow_rate(utilization: u64) -> u64;
+    fn get_borrow_rate(utilization: u64) -> u64;  //todo add this data to indexer
 
 }
 

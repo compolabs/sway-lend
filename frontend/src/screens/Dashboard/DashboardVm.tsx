@@ -158,6 +158,18 @@ class DashboardVm {
     }
   };
 
+  /*
+    getAssetsConfig = async () =>
+    fetchCollateralConfigurations().then((result) => {
+      const v = result.reduce((acc, res) => {
+        if (res == null) return acc;
+        const asset_id = `0x${res.asset_id}`;
+        return { ...acc, [asset_id]: { ...res, asset_id } };
+      }, {});
+      this.setAssetsConfigs(v);
+    });
+  * */
+
   updateTotalCollateralInfo = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;

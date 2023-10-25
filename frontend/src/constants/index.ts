@@ -22,6 +22,8 @@ export const TOKENS_BY_ASSET_ID: Record<string, IToken> = TOKENS_LIST.reduce(
   (acc, t) => ({ ...acc, [t.assetId]: t }),
   {}
 );
+export const INDEXER_URL =
+  "https://spark-indexer.spark-defi.com/api/sql/composabilitylabs/spark_indexer";
 
 export const NODE_URL = "https://beta-4.fuel.network/graphql";
 export const EXPLORER_URL =
