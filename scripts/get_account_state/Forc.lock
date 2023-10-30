@@ -3,32 +3,25 @@ name = "core"
 source = "path+from-root-AD80769CAE44474A"
 
 [[package]]
-name = "i64"
-source = "path+from-root-9ED3421BB02FBE52"
-dependencies = ["std"]
-
-[[package]]
-name = "market"
+name = "get_account_state"
 source = "member"
 dependencies = [
-    "i64",
     "market_abi",
-    "oracle_abi",
     "std",
 ]
+
+[[package]]
+name = "i64"
+source = "path+from-root-E7D6EBB33B38526D"
+dependencies = ["std"]
 
 [[package]]
 name = "market_abi"
-source = "path+from-root-9ED3421BB02FBE52"
+source = "path+from-root-E7D6EBB33B38526D"
 dependencies = [
     "i64",
     "std",
 ]
-
-[[package]]
-name = "oracle_abi"
-source = "path+from-root-9ED3421BB02FBE52"
-dependencies = ["std"]
 
 [[package]]
 name = "std"
