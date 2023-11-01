@@ -46,8 +46,6 @@ const LoginModal: React.FC<IProps> = ({ ...rest }) => {
       type: LOGIN_TYPE.FUEL_DEV,
       active: accountStore.listConnectors.includes(LOGIN_TYPE.FUEL_DEV),
     },
-    { title: "Metamask", type: null, active: false },
-    { title: "Ledger", type: null, active: false },
   ];
   return (
     <Dialog style={{ maxWidth: 360 }} {...rest}>
