@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import { useStores } from "@stores";
 import { EXPLORER_URL } from "@src/constants";
 import SizedBox from "@components/SizedBox";
+import { LOGIN_TYPE } from "@stores/AccountStore";
 
 interface IProps {}
 
@@ -27,19 +28,21 @@ const Root = styled(Column)`
 const WalletActionsTooltip: React.FC<IProps> = () => {
   const { notificationStore, accountStore, settingsStore } = useStores();
 
-  const handleCopyAddress = () => {
-    accountStore.address && copy(accountStore.address);
-    notificationStore.toast("Your address was copied", {
-      type: "info",
-      title: "Congratulations!",
-      position: "bottom-left",
-    });
+  const handleCopy = (object: string) => {
+    object === "address"
+      ? accountStore.address && copy(accountStore.address)
+      : accountStore.seed && copy(accountStore.seed);
+    notificationStore.toast(`Your ${object} was copied`, { type: "info" });
   };
   const handleLogout = () => accountStore.disconnect();
 
   return (
     <Root alignItems="center">
-      <Text weight={700} onClick={handleCopyAddress} className="menu-item">
+      <Text
+        weight={700}
+        onClick={() => handleCopy("address")}
+        className="menu-item"
+      >
         Copy address
       </Text>
       <SizedBox height={10} />
@@ -61,6 +64,18 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
         Export log file
       </Text>
       <SizedBox height={10} />
+      {accountStore.loginType === LOGIN_TYPE.GENERATE_SEED && (
+        <>
+          <Text
+            weight={700}
+            onClick={() => handleCopy("seed")}
+            className="menu-item"
+          >
+            Copy seed
+          </Text>
+          <SizedBox height={10} />
+        </>
+      )}
       <Text weight={700} onClick={handleLogout} className="menu-item">
         Disconnect
       </Text>
