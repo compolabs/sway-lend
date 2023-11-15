@@ -1,0 +1,29 @@
+[[package]]
+name = "core"
+source = "path+from-root-AD80769CAE44474A"
+
+[[package]]
+name = "get_account_state"
+source = "member"
+dependencies = [
+    "market_abi",
+    "std",
+]
+
+[[package]]
+name = "i64"
+source = "path+from-root-E7D6EBB33B38526D"
+dependencies = ["std"]
+
+[[package]]
+name = "market_abi"
+source = "path+from-root-E7D6EBB33B38526D"
+dependencies = [
+    "i64",
+    "std",
+]
+
+[[package]]
+name = "std"
+source = "git+https://github.com/fuellabs/sway?tag=v0.46.0#e75f14b03636bc96751a6760304a1a6d3eb5937d"
+dependencies = ["core"]

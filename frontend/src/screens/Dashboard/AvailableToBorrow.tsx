@@ -8,7 +8,7 @@ import { observer } from "mobx-react-lite";
 
 interface IProps {}
 
-const AvailableToBorrow: React.FC<IProps> = () => {
+const AvailableToBorrow: React.FC<IProps> = observer(() => {
   const { accountStore } = useStores();
   if (!accountStore.isLoggedIn) return null;
   return (
@@ -25,5 +25,5 @@ const AvailableToBorrow: React.FC<IProps> = () => {
       <Progressbar percent={60} />
     </Column>
   );
-};
-export default observer(AvailableToBorrow);
+});
+export default AvailableToBorrow;

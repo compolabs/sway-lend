@@ -25,6 +25,10 @@ export default {
   disabledBtnTextColor: "rgba(26, 29, 31, 0.35);",
   disabledBtnColor: "rgba(184, 189, 208, 0.5)",
 
+  tutorial: {
+    background: colors.neutral3,
+  },
+
   switch: {
     background: colors.neutral3,
     circleColor: colors.neutral1,

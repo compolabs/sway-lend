@@ -8,7 +8,10 @@ import getAlert from "@src/utils/alertUtil";
 export type TNotifyOptions = ToastOptions & {
   link?: string;
   linkTitle?: string;
+  copyTitle?: string;
+  copyText?: string;
   title?: string;
+  copyCallback?: () => void;
 };
 
 class NotificationStore {
@@ -24,9 +27,21 @@ class NotificationStore {
       this.rootStore.settingsStore.selectedTheme === THEME_TYPE.DARK_THEME
         ? "dark"
         : "light";
-
+    options.copyCallback = () => {
+      toast(
+        getAlert("Successfully copied!", {
+          title: "Congratulations!",
+          type: "info",
+        }),
+        {
+          theme,
+          position: "bottom-left",
+          autoClose: 1000,
+        }
+      );
+    };
     toast(getAlert(content, options) ?? content, {
-      autoClose: 1500,
+      autoClose: 5000,
       ...options,
       theme,
     });

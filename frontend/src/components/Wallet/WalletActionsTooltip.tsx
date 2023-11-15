@@ -26,38 +26,25 @@ const Root = styled(Column)`
 `;
 
 const WalletActionsTooltip: React.FC<IProps> = () => {
-  const { notificationStore, accountStore } = useStores();
+  const { notificationStore, accountStore, settingsStore } = useStores();
 
-  const handleCopyAddress = () => {
-    accountStore.address && copy(accountStore.address);
-    notificationStore.toast("Your address was copied", {
-      type: "success",
-      title: "Congratulations!",
-    });
-  };
-  const handleCopySeed = () => {
-    if (accountStore.mnemonicPhrase == null) return;
-    copy(accountStore.mnemonicPhrase);
-    notificationStore.toast("Don't share it with anyone", {
-      type: "success",
-      title: "Your seed was copied",
-    });
+  const handleCopy = (object: string) => {
+    object === "address"
+      ? accountStore.address && copy(accountStore.address)
+      : accountStore.seed && copy(accountStore.seed);
+    notificationStore.toast(`Your ${object} was copied`, { type: "info" });
   };
   const handleLogout = () => accountStore.disconnect();
 
   return (
     <Root alignItems="center">
-      <Text weight={700} onClick={handleCopyAddress} className="menu-item">
+      <Text
+        weight={700}
+        onClick={() => handleCopy("address")}
+        className="menu-item"
+      >
         Copy address
       </Text>
-      {accountStore.loginType === LOGIN_TYPE.GENERATE_FROM_SEED && (
-        <>
-          <SizedBox height={10} />
-          <Text weight={700} onClick={handleCopySeed} className="menu-item">
-            Copy seed
-          </Text>
-        </>
-      )}
       <SizedBox height={10} />
       <Text
         className="menu-item"
@@ -69,6 +56,26 @@ const WalletActionsTooltip: React.FC<IProps> = () => {
         View in Explorer
       </Text>
       <SizedBox height={10} />
+      <Text
+        weight={700}
+        onClick={settingsStore.exportLogData}
+        className="menu-item"
+      >
+        Export log file
+      </Text>
+      <SizedBox height={10} />
+      {accountStore.loginType === LOGIN_TYPE.GENERATE_SEED && (
+        <>
+          <Text
+            weight={700}
+            onClick={() => handleCopy("seed")}
+            className="menu-item"
+          >
+            Copy seed
+          </Text>
+          <SizedBox height={10} />
+        </>
+      )}
       <Text weight={700} onClick={handleLogout} className="menu-item">
         Disconnect
       </Text>

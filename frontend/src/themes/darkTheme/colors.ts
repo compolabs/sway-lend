@@ -23,6 +23,10 @@ export default {
   disabledBtnTextColor: "rgba(255, 255, 255, 0.35)",
   disabledBtnColor: colors.neutral5,
 
+  tutorial: {
+    background: "#262F33",
+  },
+
   button: {
     backgroundDisabled: colors.neutral5,
 

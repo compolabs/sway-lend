@@ -1,7 +1,7 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState } from "react";
 
-import useEventListener from './useEventListener';
-import useIsomorphicLayoutEffect from './useIsomorphicLayoutEffect';
+import useEventListener from "./useEventListener";
+import useIsomorphicLayoutEffect from "./useIsomorphicLayoutEffect";
 
 type Size = {
   width: number;
@@ -10,7 +10,7 @@ type Size = {
 
 function useElementSize<T extends HTMLElement = HTMLDivElement>(): [
   (node: T | null) => void,
-  Size,
+  Size
 ] {
   // Mutable values like 'ref.current' aren't valid dependencies
   // because mutating them doesn't re-render the component.
@@ -31,7 +31,7 @@ function useElementSize<T extends HTMLElement = HTMLDivElement>(): [
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ref?.offsetHeight, ref?.offsetWidth]);
 
-  useEventListener('resize', handleSize);
+  useEventListener("resize", handleSize);
 
   useIsomorphicLayoutEffect(() => {
     handleSize();

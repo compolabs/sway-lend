@@ -19,6 +19,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
   const vm = useFaucetVM();
   const [tokens, setTokens] = useState<any>([]);
   const ethBalance = accountStore.getBalance(TOKENS_BY_SYMBOL.ETH);
+  const mintedTokens = settingsStore.mintedTokensForCurrentAccount?.split(",");
   useMemo(() => {
     setTokens(
       vm.faucetTokens.map((t) => ({
@@ -62,7 +63,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
           </Column>
         ),
         btn: (() => {
-          if (!accountStore.isLoggedIn)
+          if (!accountStore.isLoggedIn && t.symbol !== "ETH")
             return (
               <Button
                 fixed
@@ -77,8 +78,7 @@ const TokensFaucetTable: React.FC<IProps> = () => {
                 <Loading />
               </Button>
             );
-
-          if (vm.alreadyMintedTokens.includes(t.assetId))
+          if (mintedTokens?.includes(t.assetId))
             return (
               <Button fixed disabled>
                 Minted
@@ -115,13 +115,13 @@ const TokensFaucetTable: React.FC<IProps> = () => {
         })(),
       }))
     );
+    /* eslint-disable */
   }, [
     accountStore.address,
     accountStore.balances,
     accountStore.isLoggedIn,
     settingsStore,
     vm.loading,
-    vm.alreadyMintedTokens,
     pricesStore.tokensPrices,
   ]);
   const columns = React.useMemo(
