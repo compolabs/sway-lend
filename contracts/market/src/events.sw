@@ -1,6 +1,6 @@
 library;
 
-use ::structs::*;
+use market_abi::{structs::*};
 
 pub struct CollateralConfigurationEvent{configuration: CollateralConfiguration}
 
