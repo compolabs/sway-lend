@@ -4,8 +4,8 @@ import DarkMode from "@components/Header/DarkMode";
 import Divider from "./Divider";
 import { Anchor } from "@components/Anchor";
 import SizedBox from "@components/SizedBox";
-import { CONTRACT_ADDRESSES } from "@src/constants";
-import { useStores } from "@stores";
+// import { CONTRACT_ADDRESSES } from "@src/constants";
+// import { useStores } from "@stores";
 // import Select from "@components/Select";
 // import Text from "@components/Text";
 import { Row } from "./Flex";
@@ -44,12 +44,12 @@ const Container = styled.div`
     color: ${({ theme }) => theme.colors?.neutral4};
   }
 `;
-const versionOptions = Object.keys(CONTRACT_ADDRESSES).map((v) => ({
-  title: v,
-  key: v,
-}));
+// const versionOptions = Object.keys(CONTRACT_ADDRESSES).map((v) => ({
+//   title: v,
+//   key: v,
+// }));
 const Footer: React.FC<IProps> = () => {
-  const { settingsStore } = useStores();
+  // const { settingsStore } = useStores();
   return (
     <Root>
       <Divider />

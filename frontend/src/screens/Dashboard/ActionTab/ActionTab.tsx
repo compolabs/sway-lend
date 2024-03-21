@@ -71,7 +71,7 @@ const ActionTab: React.FC<IProps> = () => {
               disabled={
                 !vm.initialized ||
                 !accountStore.isLoggedIn ||
-                vm.maxBorrowBaseTokenAmount?.eq(0)
+                vm.availableToBorrow?.eq(0)
               }
             >
               Borrow {vm.baseToken.symbol}

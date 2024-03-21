@@ -1,10 +1,10 @@
 import RootStore from "@stores/RootStore";
 import { makeAutoObservable, reaction } from "mobx";
 import BN from "@src/utils/BN";
-import { Provider, Wallet } from "fuels";
-import { IToken, NODE_URL, SEED, TOKENS_LIST } from "@src/constants";
+import { IToken, TOKENS_LIST } from "@src/constants";
 import { OracleAbi__factory } from "@src/contracts";
 
+//fixme fix of getting price of tokens
 class PricesStore {
   public readonly rootStore: RootStore;
 
@@ -12,7 +12,8 @@ class PricesStore {
     this.rootStore = rootStore;
     makeAutoObservable(this);
     this.updateTokenPrices().then();
-    setInterval(this.updateTokenPrices, 60 * 1000);
+    //todo make it back 60 when ret error is fixed
+    setInterval(this.updateTokenPrices, 10 * 1000);
     reaction(
       () => [
         this.rootStore.settingsStore.version,
@@ -38,35 +39,33 @@ class PricesStore {
   };
 
   updateTokenPrices = async () => {
-    //todo fix to one type of call and new  oracleContracts.get_prices
-    //todo fix without seed
-    const checkWallet = Wallet.fromSeed(SEED, "", new Provider(NODE_URL));
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
     try {
-      const oracleContract = OracleAbi__factory.connect(
-        priceOracle,
-        checkWallet
+      const wallet = accountStore.walletToRead;
+      if (wallet == null) return;
+      const oracleContract = OracleAbi__factory.connect(priceOracle, wallet);
+
+      const response = await Promise.all(
+        TOKENS_LIST.map((token) =>
+          oracleContract.functions.get_price(token.assetId).simulate()
+        )
       );
 
       //todo change to locked wallet
-      const response = await Promise.all(
-        TOKENS_LIST.map((token) =>
-          oracleContract.functions
-            .get_price({ value: token.assetId })
-            .simulate()
-        )
-      );
+      // console.log("response", response);
       if (response.length > 0) {
         const v = response.reduce(
           (acc, { value }) => ({
             ...acc,
-            [value.asset_id.value]: BN.formatUnits(value.price.toString(), 9),
+            [value.asset_id]: BN.formatUnits(value.price.toString(), 9),
           }),
           {}
         );
         this.setTokensPrices(v);
       }
     } catch (e) {
+      console.log("updateTokenPrices error");
       console.log(e);
     }
   };

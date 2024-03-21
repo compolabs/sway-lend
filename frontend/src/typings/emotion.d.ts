@@ -1,6 +1,6 @@
-import { themes } from '@src/themes/ThemeProvider';
+import { themes } from "@src/themes/ThemeProvider";
 
-import '@emotion/react';
+import "@emotion/react";
 
 export type TColorType =
   | typeof themes.darkTheme.colors
@@ -12,7 +12,7 @@ export type TSvgType =
   | typeof themes.darkTheme.svg
   | typeof themes.lightTheme.svg;
 
-declare module '@emotion/react' {
+declare module "@emotion/react" {
   // eslint-disable-next-line @typescript-eslint/naming-convention
   export interface Theme {
     colors: TColorType;

@@ -14,19 +14,17 @@ import {
   MarketAbi__factory,
   OracleAbi__factory,
 } from "@src/contracts";
-import {
-  AssetConfigOutput,
-  MarketBasicsOutput,
-} from "@src/contracts/MarketAbi";
+import { CollateralConfigurationOutput } from "@src/contracts/MarketAbi";
 import { Contract } from "fuels";
+import centerEllipsis from "@src/utils/centerEllipsis";
 
 const ctx = React.createContext<DashboardVm | null>(null);
 
 export enum ACTION_TYPE {
-  SUPPLY,
-  BORROW,
-  REPAY,
-  WITHDRAW,
+  SUPPLY = "SUPPLY",
+  BORROW = "BORROW",
+  REPAY = "REPAY",
+  WITHDRAW = "WITHDRAW",
 }
 
 export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
@@ -36,6 +34,7 @@ export const DashboardVMProvider: React.FC<PropsWithChildren> = ({
   const store = useMemo(() => new DashboardVm(rootStore), [rootStore]);
   return <ctx.Provider value={store}>{children}</ctx.Provider>;
 };
+//todo fix maxbtn
 
 export const useDashboardVM = () => useVM(ctx);
 
@@ -45,7 +44,7 @@ class DashboardVm {
   constructor(rootStore: RootStore) {
     this.rootStore = rootStore;
     makeAutoObservable(this);
-    this.updateMarketState().then(() => this.setInitialized(true));
+    this.updateMarketState();
     setInterval(this.updateMarketState, 20 * 1000);
     reaction(
       () => [
@@ -68,9 +67,6 @@ class DashboardVm {
   suppliedBalance: BN | null = null;
   setSuppliedBalance = (l: BN | null) => (this.suppliedBalance = l);
 
-  utilization: BN | null = null;
-  setUtilization = (l: BN | null) => (this.supplyRate = l);
-
   supplyRate: BN | null = null;
   setSupplyRate = (l: BN | null) => (this.supplyRate = l);
 
@@ -89,20 +85,11 @@ class DashboardVm {
   totalLiquidity: BN | null = null;
   setTotalLiquidity = (l: BN | null) => (this.totalLiquidity = l);
 
-  marketBasic: MarketBasicsOutput | null = null;
-  setMarketBasic = (l: MarketBasicsOutput | null) => (this.marketBasic = l);
-
   borrowedBalance: BN | null = null;
   setBorrowedBalance = (l: BN | null) => (this.borrowedBalance = l);
 
-  maxBorrowBaseTokenAmount: BN | null = null;
-  setMaxBorrowBaseTokenAmount = (l: BN | null) =>
-    (this.maxBorrowBaseTokenAmount = l);
-
-  get fixedMaxBorrowedAmount() {
-    if (this.maxBorrowBaseTokenAmount == null) return BN.ZERO;
-    return this.maxBorrowBaseTokenAmount;
-  }
+  availableToBorrow: BN | null = null;
+  setAvailableToBorrow = (l: BN | null) => (this.availableToBorrow = l);
 
   collateralBalances: Record<string, BN> | null = null;
   setCollateralBalances = (l: Record<string, BN> | null) =>
@@ -112,24 +99,15 @@ class DashboardVm {
   setCollateralReserves = (l: Record<string, BN> | null) =>
     (this.collateralReserves = l);
 
-  assetsConfigs: Record<string, AssetConfigOutput> | null = null;
-  setAssetsConfigs = (l: Record<string, AssetConfigOutput> | null) =>
-    (this.assetsConfigs = l);
+  assetsConfigs: Record<string, CollateralConfigurationOutput> | null = null;
+  setAssetsConfigs = (
+    l: Record<string, CollateralConfigurationOutput> | null
+  ) => (this.assetsConfigs = l);
 
-  collateralsData: Record<string, AssetConfigOutput> | null = null;
-  setCollateralData = (l: Record<string, AssetConfigOutput> | null) =>
-    (this.collateralsData = l);
-
-  initMarketSignedContract = async () => {
-    const { accountStore } = this.rootStore;
-    if (accountStore.address == null) return;
-    const wallet = await accountStore.getWallet();
-    const { market } = this.rootStore.settingsStore.currentVersionConfig;
-    if (wallet != null) {
-      const marketContract = MarketAbi__factory.connect(market, wallet);
-      this.setMarketContractSigned(marketContract);
-    }
-  };
+  collateralsData: Record<string, CollateralConfigurationOutput> | null = null;
+  setCollateralData = (
+    l: Record<string, CollateralConfigurationOutput> | null
+  ) => (this.collateralsData = l);
 
   updateMarketState = async () => {
     const { accountStore } = this.rootStore;
@@ -148,19 +126,16 @@ class DashboardVm {
           this.updateTotalCollateralInfo(marketContract),
           this.updateAccountBalances(marketContract),
           this.updateSupplyAndBorrowRates(marketContract),
-          this.updateMarketBasic(marketContract),
           this.updateMaxBorrowAmount(marketContract),
           this.updateUserCollateralBalances(marketContract),
-          this.updateCollateralsData(marketContract),
           this.updateTotalBaseTokenReserve(marketContract),
           this.updateTotalLiquidity(marketContract),
         ])
       );
     });
+
     promise
-      .catch((v) => {
-        console.log("update data error", v);
-      })
+      .catch((v) => console.error(v))
       .finally(() => {
         this.setInitialized(true);
         this.setRejectUpdateStatePromise(undefined);
@@ -170,30 +145,38 @@ class DashboardVm {
   getAssetsConfig = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const collaterals = this.collaterals;
+    const result = await marketContract.functions
+      .get_collateral_configurations()
+      .simulate();
 
-    const functions = collaterals.map((b) =>
-      marketContract.functions
-        .get_asset_config_by_asset_id({ value: b.assetId })
-        .get()
-    );
-    const data = await Promise.all(functions);
-    if (data.length > 0) {
-      const v = data.reduce((acc, res, index) => {
+    if (result.value != null) {
+      const v = result.value.reduce((acc, res, index) => {
         if (res == null) return acc;
-        const assetId = collaterals[index].assetId;
-        return { ...acc, [assetId]: res.value };
+        return { ...acc, [res.asset_id]: res };
       }, {});
       this.setAssetsConfigs(v);
     }
   };
+
+  /*
+    getAssetsConfig = async () =>
+    fetchCollateralConfigurations().then((result) => {
+      const v = result.reduce((acc, res) => {
+        if (res == null) return acc;
+        const asset_id = `0x${res.asset_id}`;
+        return { ...acc, [asset_id]: { ...res, asset_id } };
+      }, {});
+      this.setAssetsConfigs(v);
+    });
+  * */
+
   updateTotalCollateralInfo = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
     const collaterals = this.collaterals;
 
     const functions = collaterals.map((b) =>
-      marketContract.functions.totals_collateral({ value: b.assetId }).get()
+      marketContract.functions.totals_collateral(b.assetId).simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -223,53 +206,40 @@ class DashboardVm {
     if (addressInput == null) return;
     const { value } = await marketContract.functions
       .get_user_supply_borrow(addressInput)
-      .get();
+      .simulate();
     if (value == null) return;
     this.setSuppliedBalance(new BN(value[0].toString()));
     this.setBorrowedBalance(new BN(value[1].toString()));
   };
 
-  updateMarketBasic = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
-    const { value } = await marketContract.functions.get_market_basics().get();
-    this.setMarketBasic(value);
-  };
   updateTotalBaseTokenReserve = async (marketContract: MarketAbi) => {
     const { value } = await marketContract.functions
-      .balance_of({ value: this.baseToken.assetId })
-      .get();
+      .balance_of(this.baseToken.assetId)
+      .simulate();
     this.setBaseTokenReserve(new BN(value.toString()));
   };
+
   updateTotalLiquidity = async (marketContract: MarketAbi) => {
     const result = await marketContract.functions
-      .balance_of({ value: this.baseToken.assetId })
-      .get();
-    const result2 = await marketContract.functions.get_reserves().get();
-    // const liq = BN.formatUnits(
-    //     new BN(result.value.toString()).minus(result2.value.value.toString()),
-    //     this.baseToken.decimals
-    // );
+      .balance_of(this.baseToken.assetId)
+      .simulate();
+    const result2 = await marketContract.functions.get_reserves().simulate();
     this.setTotalLiquidity(
       new BN(result.value.toString()).minus(result2.value.value.toString())
     );
   };
 
   updateMaxBorrowAmount = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
+    const { addressInput, provider } = this.rootStore.accountStore;
+    if (addressInput == null || provider == null) return;
     const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
-    const oracle = new Contract(
-      priceOracle,
-      OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
-    );
+    const oracle = new Contract(priceOracle, OracleAbi__factory.abi, provider);
     const { value } = await marketContract.functions
       .available_to_borrow(addressInput)
-      .txParams({ gasLimit: (1e8).toString() })
       .addContracts([oracle])
-      .get();
-    this.setMaxBorrowBaseTokenAmount(new BN(value.toString()));
+      .simulate();
+    //fixme
+    this.setAvailableToBorrow(new BN(value.toString()));
   };
 
   updateUserCollateralBalances = async (marketContract: MarketAbi) => {
@@ -279,10 +249,8 @@ class DashboardVm {
 
     const functions = collaterals.map((b) =>
       marketContract.functions
-        .get_user_collateral(addressInput, {
-          value: b.assetId,
-        })
-        .get()
+        .get_user_collateral(addressInput, b.assetId)
+        .simulate()
     );
     const data = await Promise.all(functions);
     if (data.length > 0) {
@@ -294,35 +262,17 @@ class DashboardVm {
       this.setCollateralBalances(v);
     }
   };
-  updateCollateralsData = async (marketContract: MarketAbi) => {
-    const { addressInput } = this.rootStore.accountStore;
-    if (addressInput == null) return;
-    const collaterals = this.collaterals;
-
-    const functions = collaterals.map((b) =>
-      marketContract.functions
-        .get_asset_config_by_asset_id({ value: b.assetId })
-        .get()
-    );
-    const data = await Promise.all(functions);
-    if (data.length > 0) {
-      const v = data.reduce((acc, res, index) => {
-        if (res == null) return acc;
-        const assetId = collaterals[index].assetId;
-        return { ...acc, [assetId]: res.value };
-      }, {});
-      this.setCollateralData(v);
-    }
-  };
 
   updateSupplyAndBorrowRates = async (marketContract: MarketAbi) => {
     const { addressInput } = this.rootStore.accountStore;
     if (addressInput == null) return;
-    const { value } = await marketContract.functions.get_utilization().get();
-    this.setUtilization(new BN(value.toString()));
+    const { value } = await marketContract.functions
+      .get_utilization()
+      .simulate();
+    // this.setUtilization(new BN(value.toString()));
     const [borrow, supply] = await Promise.all([
-      marketContract.functions.get_borrow_rate(value).get(),
-      marketContract.functions.get_supply_rate(value).get(),
+      marketContract.functions.get_borrow_rate(value).simulate(),
+      marketContract.functions.get_supply_rate(value).simulate(),
     ]);
     this.setBorrowRate(new BN(borrow.value.toString()));
     this.setSupplyRate(new BN(supply.value.toString()));
@@ -337,9 +287,9 @@ class DashboardVm {
     TOKENS_BY_SYMBOL.UNI,
   ];
 
-  marketContractSigned: MarketAbi | null = null;
-  setMarketContractSigned = (v: MarketAbi | null) =>
-    (this.marketContractSigned = v);
+  // marketContractSigned: MarketAbi | null = null;
+  // setMarketContractSigned = (v: MarketAbi | null) =>
+  //   (this.marketContractSigned = v);
 
   mode: 0 | 1 = 0;
   setMode = (v: 0 | 1) => (this.mode = v);
@@ -362,7 +312,7 @@ class DashboardVm {
     return TOKENS_BY_SYMBOL.USDC;
   }
 
-  supplyBase = async (market: any) => {
+  supplyBase = async (market: MarketAbi) => {
     if (this.tokenAmount == null || this.tokenAmount.lte(0)) return;
 
     return market.functions
@@ -373,7 +323,6 @@ class DashboardVm {
           assetId: this.baseToken.assetId,
         },
       })
-      .txParams({ gasPrice: 1 })
       .call();
   };
   withdrawBase = async (market: any) => {
@@ -385,7 +334,7 @@ class DashboardVm {
       .call();
   };
 
-  supplyCollateral = async (market: any) => {
+  supplyCollateral = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
@@ -401,49 +350,49 @@ class DashboardVm {
           amount: this.tokenAmount.toString(),
         },
       })
-      .txParams({ gasPrice: 1 })
       .call();
   };
 
-  withdrawCollateral = async (market: any) => {
+  withdrawCollateral = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
       this.actionTokenAssetId == null ||
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
+
     return market.functions
-      .withdraw_collateral(
-        { value: this.actionTokenAssetId },
-        this.tokenAmount.toString()
-      )
-      .txParams({ gasPrice: 1 })
+      .withdraw_collateral(this.actionTokenAssetId, this.tokenAmount.toString())
       .addContracts([oracle])
       .call();
   };
 
-  borrowBase = async (market: any) => {
+  borrowBase = async (market: MarketAbi) => {
     if (
       this.tokenAmount == null ||
-      this.maxBorrowBaseTokenAmount == null ||
+      this.availableToBorrow == null ||
       this.tokenAmount.lte(0)
     )
       return;
-    const { priceOracle } = this.rootStore.settingsStore.currentVersionConfig;
+    const { settingsStore, accountStore } = this.rootStore;
+    const { priceOracle } = settingsStore.currentVersionConfig;
+    if (accountStore.provider == null) return;
     const oracle = new Contract(
       priceOracle,
       OracleAbi__factory.abi,
-      this.rootStore.accountStore.provider
+      accountStore.provider
     );
     return market.functions
       .withdraw_base(this.tokenAmount.toFixed(0))
-      .txParams({ gasPrice: 1, gasLimit: (1e8).toString() })
+      .txParams({ gasPrice: 1 })
       .addContracts([oracle])
       .call();
   };
@@ -451,55 +400,57 @@ class DashboardVm {
   onMaxBtnClick() {
     if (
       this.actionTokenAssetId == null ||
-      this.maxBorrowBaseTokenAmount == null ||
+      this.availableToBorrow == null ||
       this.baseTokenReserve == null
     )
       return null;
 
-    if (this.action === ACTION_TYPE.SUPPLY) {
-      const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
-        this.actionTokenAssetId
-      );
-      let balance = tokenBalance?.balance ?? BN.ZERO;
-      if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
-        balance = balance.minus(500);
-      }
+    switch (this.action) {
+      case ACTION_TYPE.SUPPLY:
+        const tokenBalance = this.rootStore.accountStore.findBalanceByAssetId(
+          this.actionTokenAssetId
+        );
+        let balance = tokenBalance?.balance ?? BN.ZERO;
+        if (this.actionTokenAssetId === TOKENS_BY_SYMBOL.ETH.assetId) {
+          balance = balance.minus(500);
+        }
 
-      if (
-        this.actionTokenAssetId !== this.baseToken.assetId &&
-        tokenBalance?.balance?.gt(
-          this.currentAssetCollateralCapacityLeft ?? BN.ZERO
-        )
-      ) {
-        balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
-      }
-      this.setTokenAmount(balance);
-    }
-    if (this.action === ACTION_TYPE.WITHDRAW) {
-      if (this.actionTokenAssetId === this.baseToken.assetId) {
-        this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
-      } else {
-        const balance =
-          this.collateralBalances == null
-            ? BN.ZERO
-            : this.collateralBalances[this.actionTokenAssetId];
+        if (
+          this.actionTokenAssetId !== this.baseToken.assetId &&
+          tokenBalance?.balance?.gt(
+            this.currentAssetCollateralCapacityLeft ?? BN.ZERO
+          )
+        ) {
+          balance = this.currentAssetCollateralCapacityLeft ?? BN.ZERO;
+        }
         this.setTokenAmount(balance);
-      }
-    }
-    if (this.action === ACTION_TYPE.BORROW) {
-      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
-        this.setTokenAmount(this.baseTokenReserve);
-        return;
-      }
-      this.setTokenAmount(this.fixedMaxBorrowedAmount);
-    }
-    if (this.action === ACTION_TYPE.REPAY) {
-      const balance = this.rootStore.accountStore.findBalanceByAssetId(
-        this.baseToken.assetId
-      );
-      balance?.balance?.gte(this.fixedMaxBorrowedAmount)
-        ? this.setTokenAmount(this.borrowedBalance)
-        : this.setTokenAmount(balance?.balance ?? BN.ZERO);
+        break;
+      case ACTION_TYPE.WITHDRAW:
+        if (this.actionTokenAssetId === this.baseToken.assetId) {
+          this.setTokenAmount(this.suppliedBalance ?? BN.ZERO);
+        } else {
+          const balance =
+            this.collateralBalances == null
+              ? BN.ZERO
+              : this.collateralBalances[this.actionTokenAssetId];
+          this.setTokenAmount(balance);
+        }
+        break;
+      case ACTION_TYPE.BORROW:
+        if (this.availableToBorrow.gt(this.baseTokenReserve)) {
+          this.setTokenAmount(this.baseTokenReserve);
+          return;
+        }
+        this.setTokenAmount(this.availableToBorrow);
+        break;
+      case ACTION_TYPE.REPAY:
+        const balance1 = this.rootStore.accountStore.findBalanceByAssetId(
+          this.baseToken.assetId
+        );
+        balance1?.balance?.gte(this.availableToBorrow)
+          ? this.setTokenAmount(this.borrowedBalance)
+          : this.setTokenAmount(balance1?.balance ?? BN.ZERO);
+        break;
     }
   }
 
@@ -529,7 +480,7 @@ class DashboardVm {
   get tokenInputBalance(): string {
     if (
       this.actionTokenAssetId == null ||
-      this.maxBorrowBaseTokenAmount == null ||
+      this.availableToBorrow == null ||
       this.baseTokenReserve == null
     )
       return "";
@@ -543,14 +494,14 @@ class DashboardVm {
       );
     }
     if (this.action === ACTION_TYPE.BORROW) {
-      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
+      if (this.availableToBorrow.gt(this.baseTokenReserve)) {
         return BN.formatUnits(
           this.baseTokenReserve ?? 0,
           this.baseToken.decimals
         ).toFormat(2);
       }
       return BN.formatUnits(
-        this.maxBorrowBaseTokenAmount ?? BN.ZERO,
+        this.availableToBorrow ?? BN.ZERO,
         this.baseToken.decimals
       ).toFormat(2);
     }
@@ -575,14 +526,11 @@ class DashboardVm {
     const { accountStore } = this.rootStore;
     this._setLoading(true);
     let marketContract = null;
-    if (this.marketContractSigned == null) {
-      const { accountStore } = this.rootStore;
-      if (accountStore.address == null) return;
-      const wallet = await accountStore.getWallet();
-      const { market } = this.rootStore.settingsStore.currentVersionConfig;
-      if (wallet != null) {
-        marketContract = MarketAbi__factory.connect(market, wallet);
-      }
+    if (accountStore.address == null) return;
+    const wallet = await accountStore.getWallet();
+    const { market } = this.rootStore.settingsStore.currentVersionConfig;
+    if (wallet != null) {
+      marketContract = MarketAbi__factory.connect(market, wallet);
     }
     if (marketContract == null) return;
     let tx = null;
@@ -607,20 +555,26 @@ class DashboardVm {
       if (this.action === ACTION_TYPE.REPAY) {
         tx = await this.supplyBase(marketContract);
       }
-      this.notifyThatActionIsSuccessful(
-        tx?.transactionResult.transactionId ?? ""
-      );
+      this.notifyThatActionIsSuccessful(tx?.transactionResult.id ?? "");
       this.hideAll();
       await accountStore.updateAccountBalances();
       await this.updateMarketState();
     } catch (e) {
+      const { addErrorToLog } = this.rootStore.settingsStore;
+      const err = {
+        fuelAddress: this.rootStore.accountStore.address,
+        address: this.rootStore.accountStore.addressB256,
+        timestamp: new Date().getTime().toString(),
+        action: this.action,
+        errorMessage: e?.toString() ?? "",
+      };
+      console.log(e);
+      addErrorToLog(err);
       const error = JSON.parse(JSON.stringify(e)).toString();
-      // const messageText = Object.keys(error?.logs[0])[0] ?? "Error message";
       this.rootStore.notificationStore.toast(error.error, {
         type: "error",
         title: "Oops..",
       });
-      console.error(e);
     } finally {
       this._setLoading(false);
     }
@@ -671,10 +625,10 @@ class DashboardVm {
     if (this.action === ACTION_TYPE.BORROW) {
       if (this.baseTokenReserve?.eq(0)) return false;
       //if reserve is let than user collateral
-      if (this.baseTokenReserve?.lt(this.fixedMaxBorrowedAmount)) {
+      if (this.baseTokenReserve?.lt(this.availableToBorrow ?? BN.ZERO)) {
         return this.tokenAmount?.lte(this.baseTokenReserve);
       }
-      return this.tokenAmount.lte(this.fixedMaxBorrowedAmount);
+      return true; //this.tokenAmount.lte(this.availableToBorrow); // fixme uncomment before mainnet
     }
     //if repay
     if (this.action === ACTION_TYPE.REPAY) {
@@ -795,7 +749,7 @@ class DashboardVm {
     if (
       !this.initialized ||
       this.actionTokenAssetId == null ||
-      this.maxBorrowBaseTokenAmount == null ||
+      this.availableToBorrow == null ||
       this.borrowedBalance == null ||
       this.baseTokenReserve == null ||
       this.collateralBalances == null
@@ -824,7 +778,7 @@ class DashboardVm {
         return `There is no ${this.baseToken.symbol} to borrow`;
       }
       //if reserve is less than user collateral
-      if (this.maxBorrowBaseTokenAmount.gt(this.baseTokenReserve)) {
+      if (this.availableToBorrow.gt(this.baseTokenReserve)) {
         if (this.tokenAmount?.gt(this.baseTokenReserve ?? 0)) {
           const max = BN.formatUnits(
             this.baseTokenReserve,
@@ -834,8 +788,8 @@ class DashboardVm {
         }
         return null;
       }
-      if (this.tokenAmount.gt(this.fixedMaxBorrowedAmount))
-        return "Insufficient balance";
+      if (this.tokenAmount.gt(this.availableToBorrow))
+        return "You will be immediately liquidated";
     }
     if (this.action === ACTION_TYPE.REPAY) {
       const balance = this.rootStore.accountStore.findBalanceByAssetId(
@@ -866,6 +820,8 @@ class DashboardVm {
       {
         link: `${EXPLORER_URL}/transaction/${link}`,
         linkTitle: "View on Explorer",
+        copyTitle: `Copy tx id: ${centerEllipsis(link, 8)}`,
+        copyText: link,
         type: "success",
         title: "Transaction is completed!",
       }
@@ -916,8 +872,7 @@ class DashboardVm {
     this.setBorrowedBalance(null);
     this.setBorrowRate(null);
     this.setSupplyRate(null);
-    this.setMarketBasic(null);
-    this.setMaxBorrowBaseTokenAmount(null);
+    this.setAvailableToBorrow(null);
     this.setCollateralBalances(null);
     this.setCollateralData(null);
     this.setBaseTokenReserve(null);

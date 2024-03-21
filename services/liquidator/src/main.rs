@@ -1,123 +1,92 @@
 use dotenv::dotenv;
-use fuels::prelude::{
-    abigen, Address, Bech32ContractId, ContractId, Provider, SettableContract, WalletUnlocked,
-};
-use serenity::model::prelude::ChannelId;
-use serenity::prelude::*;
-use std::{env, str::FromStr, thread::sleep, time::Duration};
+use fuels::prelude::{Address, ContractId, Provider, ViewOnlyAccount, WalletUnlocked};
+use fuels::types::{AssetId, Bits256};
+use src20_sdk::{token_factory_abi_calls, TokenFactoryContract};
+use std::{collections::HashMap, env, str::FromStr};
 
 mod utils;
-use utils::{market_abi_calls::market_abi_calls, print_swaygang_sign::print_swaygang_sign};
+use utils::indexer_utils::{fetch_collateral_configurations, fetch_user_basics};
+use utils::market_utils::{market_abi_calls::*, MarketContract};
+use utils::oracle_utils::oracle_abi_calls::get_price;
+use utils::oracle_utils::OracleContract;
+use utils::print_swaygang_sign::print_swaygang_sign;
 
-abigen!(
-    Contract(
-        name = "MarketContract",
-        abi = "src/artefacts/market-abi.json"
-    ),
-    Contract(
-        name = "OracleContract",
-        abi = "src/artefacts/oracle-abi.json"
-    )
-);
-
-const RPC: &str = "beta-3.fuel.network";
-const MARKET_ADDRESS: &str = "0xfda921f2ca26c0515aba2a00e5bc7d4de7a7243711ec5ac325558b0e25826576";
-const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
+const RPC: &str = "beta-4.fuel.network";
+const MARKET_ADDRESS: &str = "0x3fffc28bdb0a460263eeda9b56f9c5157c8048c25ed116c3a4e5cee78bb24bb9";
+const ORACLE_ADDRESS: &str = "0x8f7a76602f1fce4e4f20135a0ab4d22b3d9a230215ccee16c0980cf286aaa93c";
+const FACTORY_ADDRESS: &str = "0xd8c627b9cd9ee42e2c2bd9793b13bc9f8e9aad32e25a99ea574f23c1dd17685a";
+const USDC_ASSET_ID: &str = "0x8bf7951ea3222fe0bae9b811c2b142a1ff417361dcf7457855ed477d2d9a8550";
+pub const INDEXER_URL: &str =
+    "https://spark-indexer.spark-defi.com/api/sql/composabilitylabs/swaylend_indexer";
 
 #[tokio::main]
 async fn main() {
-    // contract
-    let provider = match Provider::connect(RPC).await {
-        Ok(p) => p,
-        Err(error) => panic!("❌ Problem creating provider: {:#?}", error),
-    };
+    // Wallet
     dotenv().ok();
-    let secret = env::var("SECRET").expect("❌ Expected a account secret in the environment");
+    let provider = Provider::connect(RPC).await.unwrap();
+    let secret = env::var("SECRET").unwrap();
     let wallet = WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider));
 
-    let bech32_id = Bech32ContractId::from(ContractId::from_str(MARKET_ADDRESS).unwrap());
-    let market = MarketContract::new(bech32_id.clone(), wallet.clone());
+    // Swaylend Market Contract
+    let id = ContractId::from_str(MARKET_ADDRESS).unwrap();
+    let market = MarketContract::new(id.clone(), wallet.clone());
 
-    let mut users = Users::new(MarketContract::new(bech32_id, wallet.clone()));
-    users.fetch().await;
+    // Oracle Contract
+    let id = ContractId::from_str(ORACLE_ADDRESS).unwrap();
+    let oracle = OracleContract::new(id, wallet.clone());
 
-    let bech32_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
-    let oracle = OracleContract::new(bech32_id, wallet.clone());
-    let contracts: [&dyn SettableContract; 1] = [&oracle];
-    //discord
-    let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
-    let client = Client::builder(&token, GatewayIntents::default())
-        .await
-        .expect("Err creating client");
-    let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
-
-    let channel = ChannelId(channel_id.parse::<u64>().unwrap());
-
+    // Token Factory Contract
+    let id = ContractId::from_str(FACTORY_ADDRESS).unwrap();
+    let factory = TokenFactoryContract::new(id, wallet.clone());
+    let usdc = AssetId::from_str(USDC_ASSET_ID).unwrap();
     print_swaygang_sign("✅ SwayLend liquidator is alive");
+
     loop {
-        users.fetch().await;
-        let list = users.list.clone();
-        // println!("Total users {}", list.len());
-        let mut index = 0;
-        while index < list.len() {
-            let user = list[index];
-            let res = market_abi_calls::is_liquidatable(&market, &contracts, user).await;
-            if res.is_err() {
-                println!("error = {:?}", res.err());
-                continue;
-            }
-            let is_liquidatable = res.unwrap().value;
-            if is_liquidatable {
-                let res = market_abi_calls::absorb(&market, &contracts, vec![user]).await;
-                if res.is_err() {
-                    println!("error = {:?}", res.err());
-                    continue;
+        // Collateral configurations and prices update
+        let collateral_configs = &fetch_collateral_configurations().await.data[0];
+
+        let mut prices: HashMap<String, u64> = HashMap::new();
+        for config in collateral_configs {
+            let asset_id = Bits256::from_hex_str(&("0x".to_owned() + &config.asset_id)).unwrap();
+            let price = get_price(&oracle, asset_id).await.price;
+            prices.insert(config.asset_id.clone(), price);
+        }
+        let user_basics_res = &fetch_user_basics().await.data;
+        if user_basics_res.len() != 0 {
+            let user_basics = &user_basics_res[0];
+            // Asorb
+            for user_basic in user_basics {
+                let address = Address::from_str(&user_basic.address).unwrap();
+
+                if is_liquidatable(&market, &[&oracle], address).await {
+                    absorb(&market, &[&oracle], vec![address]).await.unwrap();
+                    println!("🔥 0x{} has been liquidated.", address.to_string());
                 }
-
-                // let tx_link =
-                // format!("https://fuellabs.github.io/block-explorer-v2/transaction/{}");
-                channel
-                    .say(
-                        client.cache_and_http.http.clone(),
-                        format!("🔥 0x{user} has been liquidated."),
-                    )
-                    .await
-                    .unwrap();
             }
-            index += 1;
         }
-        sleep(Duration::from_secs(10));
-    }
-}
 
-struct Users {
-    pub list: Vec<Address>,
-    market: MarketContract,
-    last_check_borrowers_amount: u64,
-}
-
-impl Users {
-    fn new(market: MarketContract) -> Users {
-        Users {
-            list: vec![],
-            market,
-            last_check_borrowers_amount: 0,
+        // Buy collateral
+        for config in collateral_configs {
+            let asset_id = Bits256::from_hex_str(&("0x".to_owned() + &config.asset_id)).unwrap();
+            let reservs = get_collateral_reserves(&market, asset_id).await;
+            let amount =
+                collateral_value_to_sell(&market, &[&oracle], asset_id, reservs.value).await;
+            if !reservs.negative && amount > 0 {
+                let recipient = wallet.address().into();
+                if wallet.get_asset_balance(&usdc).await.unwrap() < amount {
+                    token_factory_abi_calls::mint(&factory, recipient, "USDC", amount)
+                        .await
+                        .unwrap();
+                }
+                let res =
+                    buy_collateral(&market, &[&oracle], usdc, amount, asset_id, 0, recipient).await;
+                if res.is_ok() {
+                    let unit_amount = amount as f64 / 10f64.powf(6.0);
+                    println!("🤑 Bought the equivalent of ${unit_amount} worth of collateral");
+                } else {
+                    println!("⛔️ Cannot buy collateral = {:?}", res.err().unwrap());
+                }
+            }
         }
-    }
-    async fn fetch(&mut self) {
-        let methods = self.market.methods();
-        let amount = methods
-            .get_borrowers_amount()
-            .simulate()
-            .await
-            .unwrap()
-            .value;
-        let mut index = self.last_check_borrowers_amount;
-        while index < amount {
-            let borrower = methods.get_borrower(index).simulate().await.unwrap().value;
-            self.list.push(borrower);
-            index += 1;
-        }
-        self.last_check_borrowers_amount = amount;
     }
 }

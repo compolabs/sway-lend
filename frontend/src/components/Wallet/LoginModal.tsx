@@ -1,23 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import Dialog from "@components/Dialog";
-import { LOGIN_TYPE } from "@stores/AccountStore";
 import LoginType from "./LoginType";
-// import fuel from "@src/assets/icons/fuelLogo.svg";
-// import key from "@src/assets/icons/key-dark.svg";
 import Text from "@components/Text";
 import { observer } from "mobx-react-lite";
 import Img from "@components/Img";
 import sway from "@src/assets/tokens/sway.svg";
 import styled from "@emotion/styled";
 import SizedBox from "@components/SizedBox";
-import { Column, Row } from "../Flex";
-import Button from "@components/Button";
-import TextArea from "@components/TextArea";
-import { isValidMnemonic } from "@src/utils/mnemonic";
+import { useStores } from "@stores";
+import { LOGIN_TYPE } from "@stores/AccountStore";
 
 interface IProps {
   onClose: () => void;
-  onLogin: (loginType: LOGIN_TYPE, mn?: string) => void;
   visible: boolean;
 }
 
@@ -27,51 +21,30 @@ const Root = styled.div`
   align-items: center;
   justify-content: center;
 `;
-const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
-  const [isImportInputOpened, setImportInputOpened] = useState(false);
-  const [err, setErr] = useState(false);
-  const [seed, setSeed] = useState("");
-  const handleLogin = (type: LOGIN_TYPE) => () => {
-    onLogin(type);
+const LoginModal: React.FC<IProps> = ({ ...rest }) => {
+  const { accountStore } = useStores();
+  const handleLogin = (type: LOGIN_TYPE | null, active: boolean) => () => {
+    if (!active || type == null) return;
+    accountStore.login(type);
     rest.onClose();
   };
 
-  const handlePastInput = async () => {
-    const value = await navigator.clipboard.readText();
-    setSeed(value);
-    setErr(false);
-  };
-  const handleLoginWithSeed = () => {
-    const valid = isValidMnemonic(seed);
-    if (!valid) {
-      setErr(true);
-      return;
-    }
-    onLogin(LOGIN_TYPE.PASTE_SEED, seed);
-    setImportInputOpened(false);
-    setSeed("");
-    setErr(false);
-    rest.onClose();
-  };
-
-  const loginTypes = [
+  const wallets = [
     {
-      title: "Generate account",
-      type: LOGIN_TYPE.GENERATE_FROM_SEED,
-      isActive: true,
-      onClick: handleLogin(LOGIN_TYPE.GENERATE_FROM_SEED),
-    },
-    {
-      title: "Paste seed",
-      type: LOGIN_TYPE.PASTE_SEED,
-      isActive: true,
-      onClick: () => setImportInputOpened(true),
-    },
-    {
-      title: "Fuel wallet",
+      title: "Fuel Wallet",
       type: LOGIN_TYPE.FUEL_WALLET,
-      isActive: window.fuel != null,
-      onClick: handleLogin(LOGIN_TYPE.FUEL_WALLET),
+      active: accountStore.listConnectors.includes(LOGIN_TYPE.FUEL_WALLET),
+    },
+    {
+      title: "Fuelet",
+      type: LOGIN_TYPE.FUELET,
+      active: accountStore.listConnectors.includes(LOGIN_TYPE.FUELET),
+    },
+    { title: "Create account", type: LOGIN_TYPE.GENERATE_SEED, active: true },
+    {
+      title: "Fuel Wallet Dev",
+      type: LOGIN_TYPE.FUEL_DEV,
+      active: accountStore.listConnectors.includes(LOGIN_TYPE.FUEL_DEV),
     },
   ];
   return (
@@ -87,35 +60,14 @@ const LoginModal: React.FC<IProps> = ({ onLogin, ...rest }) => {
           To start using SwayLend
         </Text>
         <SizedBox height={34} />
-        {!isImportInputOpened ? (
-          loginTypes.map(
-            (t) =>
-              t.isActive && (
-                <LoginType {...t} key={t.type} onClick={t.onClick} />
-              )
-          )
-        ) : (
-          <Column crossAxisSize="max">
-            <TextArea
-              value={seed}
-              error={err}
-              onChange={(e) => {
-                setSeed(e);
-                setErr(false);
-              }}
-            />
-            <SizedBox height={10} />
-            <Row>
-              <Button fixed onClick={handlePastInput}>
-                Paste Seed
-              </Button>
-              <SizedBox width={10} />
-              <Button onClick={handleLoginWithSeed} fixed>
-                Connect wallet
-              </Button>
-            </Row>
-          </Column>
-        )}
+        {wallets.map(({ active, title, type }) => (
+          <LoginType
+            key={title}
+            active={active}
+            title={title}
+            onClick={handleLogin(type, active)}
+          />
+        ))}
         <SizedBox height={36} />
       </Root>
     </Dialog>

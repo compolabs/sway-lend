@@ -12,5 +12,6 @@ export default {
     plus: require("@src/assets/icons/plus.svg").default,
     minus: require("@src/assets/icons/minus.svg").default,
     rightArrow: require("@src/assets/icons/rightArrow.svg").default,
+    key: require("@src/assets/icons/key-dark.svg").default,
   },
 };

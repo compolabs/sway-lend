@@ -1,0 +1,13 @@
+---
+namespace: composabilitylabs
+identifier: swaylend_indexer
+abi: "./market-abi.json"
+fuel_client: ~
+graphql_schema: schema/swaylend_indexer.schema.graphql
+module:
+  wasm: target/wasm32-unknown-unknown/release/swaylend_indexer.wasm
+metrics: ~
+contract_id: fuel18llu9z7mpfrqyclwm2d4d7w9z47gqjxztmg3dsayuh8w0zajfwus34ml3a
+start_block: 4593788
+end_block: ~
+resumable: true

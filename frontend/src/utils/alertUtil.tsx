@@ -8,6 +8,7 @@ import { Column, Row } from "@components/Flex";
 import Text from "@components/Text";
 import { TNotifyOptions } from "@stores/NotificationStore";
 import { TypeOptions } from "react-toastify";
+import copy from "copy-to-clipboard";
 
 const Root = styled.div`
   display: flex;
@@ -34,8 +35,21 @@ const Link = styled.a`
 
 const getAlert = (
   content: string,
-  { type, title, link, linkTitle }: TNotifyOptions
+  {
+    type,
+    title,
+    link,
+    linkTitle,
+    copyText,
+    copyTitle,
+    copyCallback,
+  }: TNotifyOptions
 ) => {
+  const copyHandler = () => {
+    copyText && copy(copyText);
+    copyCallback && copyCallback();
+  };
+
   if (!type) return null;
   return (
     <Root>
@@ -56,13 +70,22 @@ const getAlert = (
           >
             {content}
           </Text>
-          {link && (
-            <Link target="_blank" href={link}>
-              <Text weight={600} type="secondary">
-                {linkTitle || link}
-              </Text>
-            </Link>
-          )}
+          <Column onClick={copyHandler}>
+            {link && (
+              <Link target="_blank" href={link}>
+                <Text weight={600} type="secondary">
+                  {linkTitle || link}
+                </Text>
+              </Link>
+            )}
+            {copyText && copyTitle && (
+              <Link>
+                <Text weight={600} type="secondary">
+                  {copyTitle || copyText}
+                </Text>
+              </Link>
+            )}
+          </Column>
         </Column>
       </Body>
     </Root>

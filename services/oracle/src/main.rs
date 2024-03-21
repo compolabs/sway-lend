@@ -1,10 +1,12 @@
 use dotenv::dotenv;
-use fuels::prelude::{
-    abigen, Bech32ContractId, ContractId, Provider, WalletUnlocked, BASE_ASSET_ID,
+use fuels::{
+    prelude::{abigen, ContractId, Provider, WalletUnlocked, BASE_ASSET_ID},
+    types::Bits256,
 };
-use serenity::{model::prelude::ChannelId, prelude::GatewayIntents};
-use std::{env, fs::read_to_string, str::FromStr, thread::sleep, time::Duration};
+use std::{str::FromStr, thread::sleep, time::Duration};
 mod utils;
+use fuels::accounts::ViewOnlyAccount;
+use serde::Deserialize;
 use utils::print_swaygang_sign::print_swaygang_sign;
 
 use crate::utils::oracle_abi_calls::oracle_abi_calls::set_prices;
@@ -14,34 +16,38 @@ abigen!(Contract(
     abi = "src/artefacts/oracle/oracle-abi.json"
 ));
 
-const RPC: &str = "beta-3.fuel.network";
-const ORACLE_ADDRESS: &str = "0xcff9283e360854a2f4523c6e5a569a9032a222b8ea6d91cdd1506f0375e5afb5";
+const RPC: &str = "beta-4.fuel.network";
+const ORACLE_ADDRESS: &str = "0x8f7a76602f1fce4e4f20135a0ab4d22b3d9a230215ccee16c0980cf286aaa93c";
+
+#[derive(Deserialize)]
+struct TokenConfig {
+    asset_id: String,
+    symbol: String,
+    coingeco_id: String,
+    default_price: u64,
+}
 
 #[tokio::main]
 async fn main() {
-    let deploy_config_json_str = read_to_string("src/artefacts/tokens.json")
-        .expect("Should have been able to read the file");
-    let assets: serde_json::Value = serde_json::from_str(deploy_config_json_str.as_str()).unwrap();
-    let assets = assets.as_array().unwrap();
-    // contract
-    let provider = match Provider::connect(RPC).await {
-        Ok(p) => p,
-        Err(error) => panic!("❌ Problem creating provider: {:#?}", error),
-    };
     dotenv().ok();
-    let secret = env::var("SECRET").expect("❌ Expected a account secret in the environment");
-    let wallet = WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider));
+    let provider = Provider::connect(RPC).await.unwrap();
+    let secret = std::env::var("SECRET").unwrap();
+    let wallet =
+        WalletUnlocked::new_from_private_key(secret.parse().unwrap(), Some(provider.clone()));
+    let token_configs: Vec<TokenConfig> =
+        serde_json::from_str(&std::fs::read_to_string("src/tokens.json").unwrap()).unwrap();
 
-    let bech32_id = Bech32ContractId::from(ContractId::from_str(ORACLE_ADDRESS).unwrap());
-    let oracle = OracleContract::new(bech32_id, wallet.clone());
+    let id = ContractId::from_str(ORACLE_ADDRESS).unwrap();
+    let oracle = OracleContract::new(id, wallet.clone());
+
     //discord
-    let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
-    let serenity_client = serenity::prelude::Client::builder(&token, GatewayIntents::default())
-        .await
-        .expect("Err creating client");
-    let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
+    // let token = env::var("DISCORD_TOKEN").expect("❌ Expected a token in the environment");
+    // let serenity_client = serenity::prelude::Client::builder(&token, GatewayIntents::default())
+    //     .await
+    //     .expect("❌ Err creating client");
+    // let channel_id = env::var("CHANNEL_ID").expect("❌ Expected a channel id in the environment");
 
-    let channel = ChannelId(channel_id.parse::<u64>().unwrap());
+    // let channel = ChannelId(channel_id.parse::<u64>().unwrap());
 
     print_swaygang_sign("✅ Oracle is alive");
     loop {
@@ -49,23 +55,21 @@ async fn main() {
         let req = "https://api.coingecko.com/api/v3/simple/price?ids=compound-governance-token%2Cbinancecoin%2Cbitcoin%2Cbinance-usd%2Cusd-coin%2Ctether%2Cuniswap%2Cethereum%2Cchainlink&vs_currencies=usd&include_market_cap=false&include_24hr_vol=false&include_24hr_change=false&include_last_updated_at=false&precision=9";
         let body = c.get(req).send().await.unwrap().text().await.unwrap();
         let responce: serde_json::Value = serde_json::from_str(body.as_str()).unwrap();
-        let mut prices: Vec<(ContractId, u64)> = vec![];
+        let mut prices: Vec<(Bits256, u64)> = vec![];
         let mut message = String::from("🪬 Price oracle update\n");
-        for asset in assets {
-            let contract_id = ContractId::from_str(asset["asset_id"].as_str().unwrap())
-                .expect("failed to create ContractId address from string");
-            let bech32_address = Bech32ContractId::from(contract_id);
-
-            let asset_id = ContractId::from(bech32_address);
-            let symbol = asset["symbol"].as_str().unwrap();
-
-            let price = match responce[asset["coingeco_id"].as_str().unwrap()]["usd"].as_f64() {
-                Some(p) => (p * 10f64.powf(9f64)).round() as u64,
-                _ => (asset["default_price"].as_f64().unwrap() * 10f64.powf(9f64)) as u64,
+        for config in &token_configs {
+            let price = 
+            // if config.symbol == "UNI" {
+            //     (4.5 * 10f64.powf(9f64)) as u64
+            // } else {
+                match responce[config.coingeco_id.clone()]["usd"].as_f64() {
+                    Some(p) => (p * 10f64.powf(9f64)).round() as u64,
+                    _ => config.default_price,
+                // }
             };
-            prices.push((asset_id, price));
-
-            message += format!("1 {symbol} = ${}\n", price as f64 / 10f64.powf(9f64)).as_str();
+            prices.push((Bits256::from_hex_str(&config.asset_id).unwrap(), price));
+            let unit_price = price as f64 / 10f64.powf(9f64);
+            message += format!("1 {} = ${unit_price}\n", config.symbol).as_str();
         }
         let res = set_prices(&oracle, prices).await;
         if res.is_ok() {
@@ -74,20 +78,20 @@ async fn main() {
             message += format!("\n⚖️ Balance: {} ETH", balance as f64 / 10f64.powf(9f64)).as_str();
             message += format!("\n👁 Oracle address: {ORACLE_ADDRESS}").as_str();
             message += format!("\n-----------------------------------").as_str();
-            channel
-                .say(serenity_client.cache_and_http.http.clone(), message)
-                .await
-                .unwrap();
+            println!("{message}");
+            // channel
+            //     .say(serenity_client.cache_and_http.http.clone(), message)
+            //     .await
+            //     .unwrap();
         } else {
-            channel
-                .say(
-                    serenity_client.cache_and_http.http.clone(),
-                    "❌ Cannot update prices",
-                )
-                .await
-                .unwrap();
+            let message = "❌ Cannot update prices";
+            println!("{message}");
+            // channel
+            //     .say(serenity_client.cache_and_http.http.clone(), message)
+            //     .await
+            //     .unwrap();
         }
 
-        sleep(Duration::from_secs(60));
+        sleep(Duration::from_secs(5 * 60));
     }
 }

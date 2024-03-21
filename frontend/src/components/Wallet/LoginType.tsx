@@ -7,7 +7,7 @@ import Img from "@components/Img";
 
 interface IProps extends HTMLAttributes<HTMLDivElement> {
   title: string;
-  icon?: string;
+  active: boolean;
 }
 
 const Root = styled.div<{ disable?: boolean }>`
@@ -20,19 +20,11 @@ const Root = styled.div<{ disable?: boolean }>`
   box-sizing: border-box;
   cursor: ${({ disable }) => (disable ? "not-allowed" : "pointer")};
 `;
-// const Icon = styled.img`
-//   width: 24px;
-//   height: 24px;
-//   display: flex;
-//   flex-direction: column;
-// `;
 
-const LoginType: React.FC<IProps> = ({ title, icon, onClick, ...rest }) => {
+const LoginType: React.FC<IProps> = ({ title, onClick, active, ...rest }) => {
   const theme = useTheme();
   return (
-    <Root {...rest} disable={onClick == null} onClick={onClick}>
-      {/*<Icon src={icon} alt={type} />*/}
-      {/*<SizedBox width={4} />*/}
+    <Root {...rest} onClick={onClick} disable={!active}>
       <Text weight={700}>{title}</Text>
       <Img src={theme.images.icons.rightArrow} alt="rightArrow" />
     </Root>
