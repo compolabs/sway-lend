@@ -1,4 +1,4 @@
-use fuels::prelude::{TxParameters, ViewOnlyAccount};
+use fuels::prelude::{TxPolicies, ViewOnlyAccount};
 use fuels::types::Address;
 use src20_sdk::token_factory_abi_calls;
 
@@ -49,7 +49,7 @@ async fn pause_test() {
         market
             .methods()
             .add_collateral_asset(config.clone())
-            .tx_params(TxParameters::default().with_gas_price(1))
+            .with_tx_policies(TxPolicies::default().with_gas_price(1))
             .call()
             .await
             .unwrap();

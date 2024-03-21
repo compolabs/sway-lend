@@ -7,5 +7,5 @@ name = "market"
 [dependencies]
 oracle_abi = { path = "../../abi/oracle_abi" }
 market_abi = { path = "../../abi/market_abi" }
-i64 = { path = "../../libraries/i64" }
+i64 = { git = "https://github.com/compolabs/i64" }
 # signed_integers = { git = "https://github.com/FuelLabs/sway-libs" }

@@ -25,11 +25,11 @@ use std::context::{msg_amount,this_balance};
 use std::hash::sha256;
 use std::logging::log;
 use std::revert::require;
-use std::token::transfer_to_address;
+use std::asset::transfer_to_address;
 use std::u128::U128;
 use std::storage::storage_vec::*;
 use std::vec::Vec;
-use std::token::mint_to_address;
+use std::asset::mint_to_address;
 use std::hash::Hash;
 
 const SCALE_18: u64 = 1_000_000_000_000_000_000; // 1e18
