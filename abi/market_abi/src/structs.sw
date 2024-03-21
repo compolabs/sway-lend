@@ -8,7 +8,7 @@ pub struct MarketConfiguration {
     governor: Address,
     pause_guardian: Address,
     base_token: b256,
-    base_token_decimals: u64,
+    base_token_decimals: u32,
     base_token_price_feed: ContractId,
     kink: u64, // decimals: 18
     supply_per_second_interest_rate_slope_low: u64, // decimals: 18
@@ -28,7 +28,7 @@ pub struct MarketConfiguration {
 pub struct CollateralConfiguration {
     asset_id: b256,
     price_feed: ContractId,
-    decimals: u64,
+    decimals: u32,
     borrow_collateral_factor: u64, // decimals: 4
     liquidate_collateral_factor: u64, // decimals: 4
     liquidation_penalty: u64, // decimals: 4

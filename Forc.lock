@@ -1,0 +1,41 @@
+[[package]]
+name = "core"
+source = "path+from-root-566CA1D5F8BEAFBF"
+
+[[package]]
+name = "i64"
+source = "git+https://github.com/compolabs/i64?default-branch#b983e37ec72b60a3544bde52babebec61b15c710"
+dependencies = ["std"]
+
+[[package]]
+name = "market"
+source = "member"
+dependencies = [
+    "i64",
+    "market_abi",
+    "oracle_abi",
+    "std",
+]
+
+[[package]]
+name = "market_abi"
+source = "path+from-root-9ED3421BB02FBE52"
+dependencies = [
+    "i64",
+    "std",
+]
+
+[[package]]
+name = "oracle"
+source = "member"
+dependencies = ["std"]
+
+[[package]]
+name = "oracle_abi"
+source = "path+from-root-9ED3421BB02FBE52"
+dependencies = ["std"]
+
+[[package]]
+name = "std"
+source = "git+https://github.com/fuellabs/sway?tag=v0.49.3#0dc6570377ee9c4a6359ade597fa27351e02a728"
+dependencies = ["core"]
