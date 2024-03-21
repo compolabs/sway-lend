@@ -6,3 +6,4 @@ name = "market_abi"
 
 [dependencies]
 i64 = { git = "https://github.com/compolabs/i64" }
+
