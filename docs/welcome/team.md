@@ -1,5 +1,6 @@
 ---
 description: The Core Contributors Behind The Protocol
+hidden: true
 ---
 
 # Team
